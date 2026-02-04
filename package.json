@@ -1,0 +1,19 @@
+{
+  "name": "wicket-lib-org-roster",
+  "version": "0.1.0",
+  "description": "Standalone Tailwind CSS compiler for org-management module",
+  "main": "index.js",
+  "scripts": {
+    "build": "npx @tailwindcss/cli -i ./public/css/modern-orgman.css -o ./public/css/modern-orgman-compiled.css --minify",
+    "watch": "npx @tailwindcss/cli -i ./public/css/modern-orgman.css -o ./public/css/modern-orgman-compiled.css --watch",
+    "dev": "npx @tailwindcss/cli -i ./public/css/modern-orgman.css -o ./public/css/modern-orgman-compiled.css"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.1.14",
+    "tailwindcss": "^4.1.14"
+  },
+  "volta": {
+    "node": "22.17.1",
+    "yarn": "4.9.2"
+  }
+}

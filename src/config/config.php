@@ -1,0 +1,276 @@
+<?php
+/**
+ * General configuration for the Organization Management feature.
+ *
+ * @package OrgManagement
+ */
+
+namespace OrgManagement\Config;
+
+// Exit if accessed directly.
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
+ * Returns the general configuration array.
+ *
+ * @return array
+ */
+function get_config() {
+    $orgmanConfig = [
+        'roster' => [
+            'strategy' => 'direct', // Roster management strategy: 'cascade', 'direct', 'groups'
+        ],
+        'roles' => [
+            'owner' => 'membership_owner',
+            'manager' => 'membership_manager',
+            'editor' => 'org_editor',
+        ],
+        'role_labels' => [
+            'membership_manager' => __('Membership Manager', 'wicket-acc'),
+            'org_editor'         => __('Org Editor', 'wicket-acc'),
+            'membership_owner'   => __('Membership Owner', 'wicket-acc'),
+            'Cchlmembercommunity' => __('CCHL Member Community', 'wicket-acc'),
+            'cchlmembercommunity' => __('CCHL Member Community', 'wicket-acc'),
+        ],
+        'permissions' => [
+            'edit_organization' => [
+                'org_editor'
+            ], // Roles that can edit organization
+            'manage_members' => [
+                'membership_manager',
+                'membership_owner'
+            ], // Roles that can manage members
+            'add_members' => [
+                'membership_manager',
+                'membership_owner'
+            ], // Roles that can add members to organization
+            'remove_members' => [
+                'membership_manager',
+                'membership_owner'
+            ], // Roles that can remove members from organization
+            'purchase_seats' => [
+                'membership_owner',
+                'membership_manager',
+                'org_editor'
+            ], // Roles that can purchase additional seats
+            'any_management' => [
+                'org_editor',
+                'membership_manager',
+                'membership_owner'
+            ], // Roles with any management access
+            'prevent_owner_removal' => false, // Whether membership_owner removal should be prevented
+            'relationship_based_permissions' => false, // Enable/disable role assignment based on relationship type
+            'relationship_roles_map' => [ // Mapping of relationship types to roles
+                'ceo' => [
+                    'org_editor',
+                    'membership_manager'
+                ],
+                'primary_hr_contact' => [
+                    'org_editor',
+                    'membership_manager'
+                ],
+                'member_contact' => [
+                    'org_editor',
+                    'membership_manager'
+                ],
+                'employee_staff' => [],
+                'advertising_sponsor_contact' => [],
+                'advertising_sponsor_billing' => [],
+            ],
+            'prevent_owner_assignment' => true, // Whether membership_owner assignment should be prevented
+        ],
+        'member_addition' => [
+            'auto_assign_roles' => [ // Roles automatically assigned to all new members
+                'supplemental_member',
+                'CCHL Member Community',
+            ],
+            'base_member_role' => 'member', // Base role assigned to all members
+            'auto_opt_in_communications' => [
+                'enabled' => true, // Whether to automatically opt-in to communications
+                'email' => true, // Main email opt-in
+                'sublists' => [
+                    'one',
+                    'two',
+                    'three',
+                    'four',
+                    'five'
+                ], // Sublists to opt-in to
+            ],
+        ],
+        'cache' => [
+            'enabled' => false, // Enable/disable transients cache for testing
+            'duration' => 5 * 60, // 5 minutes default cache duration (5 * 60 seconds)
+        ],
+        'relationships' => [
+            'default_type' => 'Position', // Default person-organization relationship type for ORM member additions
+            'member_addition_type' => 'position', // Relationship type used when adding members via roster (lowercase)
+            'allowed_relationship_types' => [], // Array of relationship type slugs to include. Empty = all.
+            'exclude_relationship_types' => [], // Array of relationship type slugs to exclude. Empty = none.
+        ],
+        'groups' => [
+            'tag_name' => 'Roster Management', // MDP tag name used to identify roster management groups
+            'tag_case_sensitive' => false,
+            'manage_roles' => [ // Group role slugs allowed to manage rosters
+                'president',
+                'council_delegate',
+                'council_alternate_delegate',
+                'correspondent',
+            ],
+            'roster_roles' => [ // Group role slugs used for roster entries
+                'member',
+                'observer',
+            ],
+            'member_role' => 'member',
+            'observer_role' => 'observer',
+            'seat_limited_roles' => [ 'member' ], // One per org per group
+            'list' => [
+                'page_size' => 20,
+                'member_page_size' => 15,
+            ],
+            'additional_info' => [
+                'key' => 'association',
+                'value_field' => 'name', // Extract from custom_data_field.value[name] when present
+                'fallback_to_org_uuid' => true,
+            ],
+            'removal' => [
+                'mode' => 'end_date', // end_date or delete
+                'end_date_format' => 'Y-m-d\\T00:00:00P',
+            ],
+            'ui' => [
+                'enable_group_profile_edit' => true,
+                'use_unified_member_list' => true,
+                'use_unified_member_view' => true,
+                'show_edit_permissions' => false,
+                'search_clear_requires_submit' => true,
+                'editable_fields' => [
+                    'name',
+                    'description',
+                ],
+            ],
+        ],
+        'additional_seats' => [
+            'enabled' => true, // Enable/disable additional seats functionality
+            'sku' => 'additional-seats', // Product SKU for additional seats (production SKU)
+            'form_id' => 0, // Gravity Form ID for additional seats purchase (0 = auto-detect by slug)
+            'form_slug' => 'additional-seats',
+            'min_quantity' => 1, // Minimum quantity for additional seats purchase
+            'max_quantity' => 900, // Maximum quantity for additional seats purchase
+        ],
+        'documents' => [
+            'allowed_types' => [ // Allowed document file types
+                'pdf', 'doc', 'docx', 'xls', 'xlsx', 'jpg', 'jpeg', 'png', 'gif'
+            ],
+            'max_size' => 10 * 1024 * 1024, // Maximum document size (10MB in bytes)
+        ],
+        'business_info' => [
+            'seat_limit_info' => null, // Custom seat limit information (null = no info displayed)
+        ],
+        'ui' => [
+            'hide_relationship_type' => true, // Hide person<>org relationship type from card view
+            'show_special_relationships' => false, // Show Shuffle Exchange relationship types on member cards
+            'member_list' => [
+                'use_unified' => true,
+                'show_edit_permissions' => true,
+            ],
+            'member_view' => [
+                'use_unified' => true,
+                'search_clear_requires_submit' => false,
+            ],
+            'member_card_fields' => [ // Configurable fields to display on member cards
+                'name' => [
+                    'enabled' => true,
+                    'label' => __('Name', 'wicket-acc')
+                ],
+                'job_title' => [
+                    'enabled' => true,
+                    'label' => __('Job Title', 'wicket-acc')
+                ],
+                'description' => [
+                    'enabled' => true,
+                    'label' => __('Description', 'wicket-acc'),
+                    'input_type' => 'textarea',
+                ],
+                'email' => [
+                    'enabled' => true,
+                    'label' => __('Email', 'wicket-acc')
+                ],
+                'roles' => [
+                    'enabled' => true,
+                    'label' => __('Roles', 'wicket-acc')
+                ],
+                'relationship_type' => [
+                    'enabled' => false,
+                    'label' => __('Relationship', 'wicket-acc')
+                ],
+            ],
+        ],
+        'member_addition_form' => [
+            'layout' => 'full', // 'full' (current) vs 'simplified' (new form)
+            'fields' => [
+                'first_name' => [
+                    'enabled' => true,
+                    'required' => true,
+                    'label' => __('First Name', 'wicket-acc')
+                ],
+                'last_name' => [
+                    'enabled' => true,
+                    'required' => true,
+                    'label' => __('Last Name', 'wicket-acc')
+                ],
+                'email' => [
+                    'enabled' => true,
+                    'required' => true,
+                    'label' => __('Email Address', 'wicket-acc')
+                ],
+                'relationship_type' => [
+                    'enabled' => false,
+                    'required' => false,
+                    'label' => __('Relationship Type', 'wicket-acc')
+                ],
+                'description' => [
+                    'enabled' => true,
+                    'required' => false,
+                    'label' => __('Description', 'wicket-acc'),
+                    'input_type' => 'textarea',
+                ],
+                'permissions' => [
+                    'enabled' => true,
+                    'required' => true,
+                    'label' => __('Permissions', 'wicket-acc'),
+                    'allowed_roles' => [], // Empty array = all roles allowed (default)
+                    'excluded_roles' => [
+                        'Cchlmembercommunity',
+                        'cchlmembercommunity'
+                    ], // Roles hidden from Add Member modal
+                ],
+            ],
+            'allow_relationship_type_editing' => false, // Allow editing relationship type after member creation
+        ],
+        'edit_permissions_modal' => [
+            'allowed_roles' => [], // Empty array = all roles allowed (default)
+            'excluded_roles' => [
+                'Cchlmembercommunity',
+                'cchlmembercommunity'
+            ], // Roles hidden from Edit Permissions modal
+        ],
+        'notifications' => [
+            'confirmation_email_from' => 'cchl@wicketcloud.com', // Email address mentioned in account confirmation instructions
+        ],
+        'relationship_types' => [
+            'custom_types' => [
+                'ceo' => __('CEO', 'wicket-acc'),
+                'primary_hr_contact' => __('Primary HR Contact', 'wicket-acc'),
+                'employee_staff' => __('Employee', 'wicket-acc'),
+                'member_contact' => __('Member Contact', 'wicket-acc'),
+            ],
+            'special_types' => [ // From Shuffle Exchange - display only
+                'advertising_sponsor_contact' => __('Advertising/Sponsor Contact', 'wicket-acc'),
+                'advertising_sponsor_billing' => __('Advertising/Sponsor Billing Contact', 'wicket-acc'),
+            ],
+        ],
+    ];
+
+    return apply_filters( 'wicket/acc/orgman/config', $orgmanConfig );
+}

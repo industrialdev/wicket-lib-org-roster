@@ -1,0 +1,35 @@
+{
+  "name": "industrialdev/wicket-lib-org-roster",
+  "version": "0.1.0",
+  "description": "Organization management library for Wicket WordPress.",
+  "type": "library",
+  "license": "GPL-2.0-or-later",
+  "require": {
+    "php": ">=8.2",
+    "ext-json": "*",
+    "starfederation/datastar-php": "^1.0.0-RC.5"
+  },
+  "require-dev": {
+    "pestphp/pest": "^4.0",
+    "brain/monkey": "^2.6",
+    "mockery/mockery": "^1.6"
+  },
+  "autoload": {
+    "psr-4": {
+      "OrgManagement\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "OrgManagement\\Tests\\": "tests/"
+    }
+  },
+  "scripts": {
+    "test": "vendor/bin/pest"
+  },
+  "config": {
+    "allow-plugins": {
+      "pestphp/pest-plugin": true
+    }
+  }
+}
