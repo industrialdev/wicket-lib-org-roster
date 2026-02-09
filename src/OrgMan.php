@@ -773,9 +773,9 @@ final class OrgMan
         $base_uri = $this->get_base_uri();
         $base_path = $this->get_base_path();
 
-        $css_file_path = $base_path . '/public/css/modern-orgman-compiled.css';
+        $css_file_path = $base_path . '/public/css/modern-orgman-static.css';
         $css_version = file_exists($css_file_path) ? filemtime($css_file_path) : '1.0.0';
-        wp_enqueue_style('orgman-modern', $base_uri . 'public/css/modern-orgman-compiled.css', [], $css_version);
+        wp_enqueue_style('orgman-modern', $base_uri . 'public/css/modern-orgman-static.css', [], $css_version);
 
         $datastar_error_path = $base_path . '/public/js/datastar-error-handler.js';
         $datastar_error_version = file_exists($datastar_error_path) ? filemtime($datastar_error_path) : '1.0.0';
