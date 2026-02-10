@@ -16,8 +16,8 @@ $notice   = $notice ?? null;
 ?>
 <div class="business-info">
 	<?php if ( $notice ) : ?>
-		<div class="notifications-wt:inline-container">
-			<div class="notification notification-<?php echo esc_attr( $notice['type'] ); ?> notification-wt:inline">
+		<div class="notifications-wt_inline-container">
+			<div class="notification notification-<?php echo esc_attr( $notice['type'] ); ?> notification-wt_inline">
 				<div class="notification-icon">
 					<?php
 					$icon = match( $notice['type'] ) {
@@ -38,15 +38,15 @@ $notice   = $notice ?? null;
 
 	<?php if ( ! empty( $header['name'] ) ) : ?>
 		<section class="business-info__header">
-			<h2 class="wt:text-xl wt:font-bold wt:mb-2"><?php echo esc_html( $header['name'] ); ?></h2>
+			<h2 class="wt_text-xl wt_font-bold wt_mb-2"><?php echo esc_html( $header['name'] ); ?></h2>
 			<?php if ( ! empty( $header['address'] ) ) : ?>
-				<p class="wt:text-sm wt:text-gray-600"><?php echo esc_html( $header['address'] ); ?></p>
+				<p class="wt_text-sm wt_text-gray-600"><?php echo esc_html( $header['address'] ); ?></p>
 			<?php endif; ?>
 			<?php if ( ! empty( $header['email'] ) ) : ?>
-				<p class="wt:text-sm wt:text-gray-600"><?php echo esc_html( $header['email'] ); ?></p>
+				<p class="wt_text-sm wt_text-gray-600"><?php echo esc_html( $header['email'] ); ?></p>
 			<?php endif; ?>
 			<?php if ( ! empty( $header['phone'] ) ) : ?>
-				<p class="wt:text-sm wt:text-gray-600"><?php echo esc_html( $header['phone'] ); ?></p>
+				<p class="wt_text-sm wt_text-gray-600"><?php echo esc_html( $header['phone'] ); ?></p>
 			<?php endif; ?>
 		</section>
 	<?php endif; ?>
@@ -76,14 +76,14 @@ $notice   = $notice ?? null;
 			$selected      = $section_state['values'] ?? [];
 			$other_value   = $section_state['other'] ?? '';
 			?>
-			<fieldset class="business-info__section wt:mb-6">
-				<legend class="wt:text-lg wt:font-semibold wt:mb-3"><?php echo esc_html( $section['label'] ); ?></legend>
-				<div class="wt:flex wt:flex-col wt:gap-3">
+			<fieldset class="business-info__section wt_mb-6">
+				<legend class="wt_text-lg wt_font-semibold wt_mb-3"><?php echo esc_html( $section['label'] ); ?></legend>
+				<div class="wt_flex wt_flex-col wt_gap-3">
 					<?php foreach ( $section['options'] as $option ) :
 						$input_id   = sprintf( '%s_%s', $section_key, $option['slug'] );
 						$is_checked = in_array( $option['value'], $selected, true );
 						?>
-						<div class="business-info__option wt:flex wt:items-center wt:gap-2">
+						<div class="business-info__option wt_flex wt_items-center wt_gap-2">
 							<input
 								id="<?php echo esc_attr( $input_id ); ?>"
 								type="checkbox"
@@ -91,13 +91,13 @@ $notice   = $notice ?? null;
 								value="<?php echo esc_attr( $option['value'] ); ?>"
 								<?php checked( $is_checked ); ?>
 							>
-							<label for="<?php echo esc_attr( $input_id ); ?>" class="wt:cursor-pointer">
+							<label for="<?php echo esc_attr( $input_id ); ?>" class="wt_cursor-pointer">
 								<?php echo esc_html( $option['label'] ); ?>
 							</label>
 						</div>
 						<?php if ( $option['is_other'] ) : ?>
-							<div class="wt:ml-6">
-								<label class="wt:block wt:text-sm wt:text-gray-600" for="<?php echo esc_attr( $input_id . '_other' ); ?>">
+							<div class="wt_ml-6">
+								<label class="wt_block wt_text-sm wt_text-gray-600" for="<?php echo esc_attr( $input_id . '_other' ); ?>">
 									<?php esc_html_e( 'Please specify', 'wicket-acc' ); ?>
 								</label>
 								<input
@@ -105,7 +105,7 @@ $notice   = $notice ?? null;
 									type="text"
 									name="<?php echo esc_attr( $section_key . '_other' ); ?>"
 									value="<?php echo esc_attr( $other_value ); ?>"
-									class="wt:border wt:border-gray-300 wt:p-2 wt:rounded-sm wt:w-full"
+									class="wt_border wt_border-gray-300 wt_p-2 wt_rounded-sm wt_w-full"
 								>
 							</div>
 						<?php endif; ?>
@@ -114,7 +114,7 @@ $notice   = $notice ?? null;
 			</fieldset>
 		<?php endforeach; ?>
 
-		<div class="wt:flex wt:justify-end">
+		<div class="wt_flex wt_justify-end">
 			<button type="submit" class="button button--primary">
 				<?php esc_html_e( 'Save Changes', 'wicket-acc' ); ?>
 			</button>

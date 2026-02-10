@@ -43,11 +43,11 @@ $status = isset($_REQUEST['status']) ? sanitize_text_field(wp_unslash($_REQUEST[
 
 ?>
 
-<div id="org-management-index-app" class="org-management-app wicket-orgman wt:w-full wt:mt-6">
-    <h1 class="wt:text-2xl wt:font-bold wt:mb-4"><?php esc_html_e('Manage Organizations', 'wicket-acc'); ?></h1>
+<div id="org-management-index-app" class="org-management-app wicket-orgman wt_w-full wt_mt-6">
+    <h1 class="wt_text-2xl wt_font-bold wt_mb-4"><?php esc_html_e('Manage Organizations', 'wicket-acc'); ?></h1>
 
     <?php if ($status === 'success') : ?>
-        <div class="alert alert-success wt:my-3 wt:p-3" role="alert">
+        <div class="alert alert-success wt_my-3 wt_p-3" role="alert">
             <?php esc_html_e('Organization updated successfully!', 'wicket-acc'); ?>
         </div>
     <?php endif; ?>
@@ -69,7 +69,7 @@ $status = isset($_REQUEST['status']) ? sanitize_text_field(wp_unslash($_REQUEST[
             <?php include dirname(__DIR__) . '/templates-partials/organization-details.php'; ?>
         </div>
 
-        <div class="org-management-profile-content wt:mt-6">
+        <div class="org-management-profile-content wt_mt-6">
             <?php include dirname(__DIR__) . '/templates-partials/organization-profile.php'; ?>
         </div>
     <?php else : ?>

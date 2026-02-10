@@ -81,28 +81,28 @@ $search_submit_action = '$membersLoading = true; $searchSubmitted = true; ' . $s
 $clear_action = '(' . '$membersLoading' . " = true, " . '$searchQuery' . " = '', " . '$searchSubmitted' . " = false, {$search_action})";
 
 ?>
-<div class="members-list wt:relative" data-member-view="unified"
+<div class="members-list wt_relative" data-member-view="unified"
     data-signals:='{"membersLoading": false, "addMemberModalOpen": false, "addMemberSubmitting": false, "addMemberSuccess": false, "removeMemberModalOpen": false, "removeMemberSubmitting": false, "removeMemberSuccess": false, "currentRemoveMemberUuid": "", "currentRemoveMemberName": "", "currentRemoveMemberEmail": "", "currentRemoveMemberConnectionId": "", "currentRemoveMemberPersonMembershipId": "", "currentRemoveMemberGroupMemberId": "", "currentRemoveMemberRole": "", "editPermissionsModalOpen": false, "editPermissionsSubmitting": false, "editPermissionsSuccess": false, "currentMemberUuid": "", "currentMemberName": "", "currentMemberRoles": [], "currentMemberRelationshipType": "", "currentMemberDescription": ""}'
     data-on:datastar-fetch="evt.detail.type === 'started' && ($membersLoading = true); (evt.detail.type === 'finished' || evt.detail.type === 'error') && ($membersLoading = false)">
 
-    <div class="members-loading-overlay wt:hidden wt:absolute wt:inset-0 wt:z-10 wt:bg-[var(--om-bg-light-neutral)]/85 wt:backdrop-blur-xs"
+    <div class="members-loading-overlay wt_hidden wt_absolute wt_inset-0 wt_z-10 wt_bg-light-neutral-85 wt_backdrop-blur-xs"
         data-class:hidden="!$membersLoading" data-class:is-active="$membersLoading">
-        <div class="wt:flex wt:h-full wt:w-full wt:flex-col wt:items-center wt:justify-center wt:gap-3">
-            <div class="members-loading-spinner wt:h-10 wt:w-10 wt:rounded-full wt:border-4 wt:border-[var(--om-bg-interactive)] wt:border-t-transparent wt:animate-spin"
+        <div class="wt_flex wt_h-full wt_w-full wt_flex-col wt_items-center wt_justify-center wt_gap-3">
+            <div class="members-loading-spinner wt_h-10 wt_w-10 wt_rounded-full wt_border-4 wt_border-bg-interactive wt_border-t-transparent wt_animate-spin"
                 aria-hidden="true"></div>
-            <p class="wt:text-sm wt:font-medium wt:text-[var(--om-text-content)]" role="status" aria-live="polite">
+            <p class="wt_text-sm wt_font-medium wt_text-content" role="status" aria-live="polite">
                 <?php esc_html_e('Loading...', 'wicket-acc'); ?>
             </p>
         </div>
     </div>
 
-    <form class="members-search wt:flex wt:items-center wt:gap-2 wt:mb-6"
+    <form class="members-search wt_flex wt_items-center wt_gap-2 wt_mb-6"
         data-signals:='<?php echo wp_json_encode($signals, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT); ?>'
         data-on:submit="<?php echo esc_attr($search_submit_action); ?>"
         data-on:submit__prevent-default="true">
-        <div class="members-search__field wt:relative wt:w-full">
-            <div class="members-search__icon wt:absolute wt:inset-y-0 wt:left-0 wt:flex wt:items-center wt:pl-3 wt:pointer-events-none">
-                <svg class="wt:w-5 wt:h-5 wt:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+        <div class="members-search__field wt_relative wt_w-full">
+            <div class="members-search__icon wt_absolute wt_inset-y-0 wt_left-0 wt_flex wt_items-center wt_pl-3 wt_pointer-events-none">
+                <svg class="wt_w-5 wt_h-5 wt_text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                     xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -112,14 +112,14 @@ $clear_action = '(' . '$membersLoading' . " = true, " . '$searchQuery' . " = '',
                 type="text"
                 id="<?php echo esc_attr(($mode === 'groups' ? 'group' : 'org') . '-members-search-' . sanitize_html_class($mode === 'groups' ? $group_uuid : $org_uuid)); ?>"
                 data-bind="searchQuery"
-                class="members-search__input bg-[var(--om-bg-light-neutral)] wt:border wt:border-[var(--om-border-color)] wt:text-[var(--om-text-content)] wt:text-sm wt:rounded-md focus:wt:ring-2 focus:wt:ring-[var(--om-bg-interactive)] wt:focus:wt:border-[var(--om-bg-interactive)] wt:block wt:w-full wt:pl-10 wt:p-2.5"
+                class="members-search__input wt_border wt_border-color wt_text-content wt_text-sm wt_rounded-md wt_focus_ring-2 wt_focus_ring-bg-interactive wt_focus_border-bg-interactive wt_block wt_w-full wt_pl-10 wt_p-2.5"
                 placeholder="<?php esc_attr_e('Start typing to search for members...', 'wicket-acc'); ?>"
                 data-on:success="<?php echo esc_attr($search_success); ?>"
                 data-indicator:members-loading
                 data-attr:disabled="$membersLoading">
         </div>
-        <div class="members-search__actions wt:flex wt:items-center wt:gap-2">
-            <button type="submit" class="members-search__submit button button--primary wt:whitespace-nowrap"
+        <div class="members-search__actions wt_flex wt_items-center wt_gap-2">
+            <button type="submit" class="members-search__submit button button--primary wt_whitespace-nowrap"
                 data-on:click="<?php echo esc_attr($search_submit_action); ?>"
                 data-on:success="<?php echo esc_attr($search_success); ?>"
                 data-on:error="$membersLoading = false"
@@ -128,7 +128,7 @@ $clear_action = '(' . '$membersLoading' . " = true, " . '$searchQuery' . " = '',
                 data-attr:disabled="$membersLoading">
                 <?php esc_html_e('Search', 'wicket-acc'); ?>
             </button>
-            <button type="button" class="members-search__clear button button--secondary wt:whitespace-nowrap"
+            <button type="button" class="members-search__clear button button--secondary wt_whitespace-nowrap"
                 data-on:click="<?php echo esc_attr($clear_action); ?>"
                 data-on:success="<?php echo esc_attr($search_success); ?>"
                 data-on:error="$membersLoading = false"
@@ -141,7 +141,7 @@ $clear_action = '(' . '$membersLoading' . " = true, " . '$searchQuery' . " = '',
     </form>
 
     <?php if ($mode === 'groups') : ?>
-        <div id="group-member-messages" class="wt:mb-3"></div>
+        <div id="group-member-messages" class="wt_mb-3"></div>
     <?php endif; ?>
 
     <?php
@@ -226,23 +226,23 @@ $clear_action = '(' . '$membersLoading' . " = true, " . '$searchQuery' . " = '',
         $update_permissions_success_actions = "console.log('Permissions updated successfully'); $editPermissionsSubmitting = false; $editPermissionsSuccess = true; $membersLoading = false; $editPermissionsModalOpen = false; @get('{$members_list_endpoint}{$members_list_separator}org_uuid={$encoded_org_uuid}&page=1') >> select('#{$members_list_target}') | set(html); setTimeout(() => $editPermissionsSuccess = false, 3000);";
         $update_permissions_error_actions = "console.error('Failed to update permissions'); $editPermissionsSubmitting = false; $membersLoading = false; $editPermissionsModalOpen = false;";
         ?>
-        <div class="wt:mt-6" data-signals='{"editPermissionsModalOpen": false, "editPermissionsSubmitting": false, "editPermissionsSuccess": false, "currentMemberUuid": "", "currentMemberName": "", "currentMemberRoles": [], "currentMemberRelationshipType": "", "currentMemberDescription": "", "removeMemberModalOpen": false, "removeMemberSubmitting": false, "removeMemberSuccess": false, "currentRemoveMemberUuid": "", "currentRemoveMemberName": "", "currentRemoveMemberEmail": "", "currentRemoveMemberConnectionId": "", "currentRemoveMemberPersonMembershipId": ""}'>
-            <dialog id="editPermissionsModal" class="modal wt:m-auto max-wt:3xl wt:rounded-md wt:shadow-md backdrop:wt:bg-black/50"
+        <div class="wt_mt-6" data-signals='{"editPermissionsModalOpen": false, "editPermissionsSubmitting": false, "editPermissionsSuccess": false, "currentMemberUuid": "", "currentMemberName": "", "currentMemberRoles": [], "currentMemberRelationshipType": "", "currentMemberDescription": "", "removeMemberModalOpen": false, "removeMemberSubmitting": false, "removeMemberSuccess": false, "currentRemoveMemberUuid": "", "currentRemoveMemberName": "", "currentRemoveMemberEmail": "", "currentRemoveMemberConnectionId": "", "currentRemoveMemberPersonMembershipId": ""}'>
+            <dialog id="editPermissionsModal" class="modal wt_m-auto max_wt_3xl wt_rounded-md wt_shadow-md backdrop_wt_bg-black-50"
                 data-show="$editPermissionsModalOpen"
                 data-effect="if ($editPermissionsModalOpen) el.showModal(); else el.close();"
                 data-on:close="($membersLoading = false); $editPermissionsModalOpen = false">
-                <div class="wt:bg-white wt:p-6 wt:relative">
-                    <button type="button" class="wt:absolute wt:right-4 wt:top-4 wt:text-lg wt:font-semibold"
-                        data-on:click="$editPermissionsModalOpen = false" data-class:wt:hidden="$editPermissionsSuccess">
+                <div class="wt_bg-white wt_p-6 wt_relative">
+                    <button type="button" class="wt_absolute wt_right-4 wt_top-4 wt_text-lg wt_font-semibold"
+                        data-on:click="$editPermissionsModalOpen = false" data-class_wt_hidden="$editPermissionsSuccess">
                         ×
                     </button>
 
-                    <h2 class="wt:text-2xl wt:font-semibold wt:mb-4">
-                        <span data-class:wt:hidden="$currentMemberName === ''">
+                    <h2 class="wt_text-2xl wt_font-semibold wt_mb-4">
+                        <span data-class_wt_hidden="$currentMemberName === ''">
                             <?php echo esc_html(__('Edit Permissions for', 'wicket-acc')); ?>
                             <span data-text="$currentMemberName"></span>
                         </span>
-                        <span data-class:wt:hidden="$currentMemberName !== ''">
+                        <span data-class_wt_hidden="$currentMemberName !== ''">
                             <?php echo esc_html__('Edit Permissions', 'wicket-acc'); ?>
                         </span>
                     </h2>
@@ -262,14 +262,14 @@ $clear_action = '(' . '$membersLoading' . " = true, " . '$searchQuery' . " = '',
                         <input type="hidden" name="nonce" value="<?php echo esc_attr(wp_create_nonce('wicket-orgman-update-permissions')); ?>">
 
                         <?php if ($allow_relationship_editing && !empty($relationship_types)) : ?>
-                            <div class="wt:mb-6">
-                                <label class="wt:block wt:text-sm wt:font-medium wt:mb-2" for="edit-member-relationship-type">
+                            <div class="wt_mb-6">
+                                <label class="wt_block wt_text-sm wt_font-medium wt_mb-2" for="edit-member-relationship-type">
                                     <?php esc_html_e('Relationship Type', 'wicket-acc'); ?>
                                 </label>
                                 <select id="edit-member-relationship-type" name="relationship_type"
                                     data-attr:value="$currentMemberRelationshipType"
                                     data-effect="el.value = $currentMemberRelationshipType || ''"
-                                    class="wt:w-full wt:border wt:border-[var(--om-border-color)] wt:rounded-md wt:p-2">
+                                    class="wt_w-full wt_border wt_border-color wt_rounded-md wt_p-2">
                                     <option value=""><?php esc_html_e('Select a relationship type', 'wicket-acc'); ?></option>
                                     <?php foreach ($relationship_types as $type_key => $type_label) : ?>
                                         <option value="<?php echo esc_attr($type_key); ?>">
@@ -281,71 +281,71 @@ $clear_action = '(' . '$membersLoading' . " = true, " . '$searchQuery' . " = '',
                         <?php endif; ?>
 
                         <?php if ($form_config['description']['enabled'] ?? false): ?>
-                            <div class="wt:mb-6">
-                                <label class="wt:block wt:text-sm wt:font-medium wt:mb-2" for="edit-member-description">
+                            <div class="wt_mb-6">
+                                <label class="wt_block wt_text-sm wt_font-medium wt_mb-2" for="edit-member-description">
                                     <?php echo esc_html($form_config['description']['label'] ?? __('Description', 'wicket-acc')); ?>
                                 </label>
                                 <?php if (($form_config['description']['input_type'] ?? 'textarea') === 'text'): ?>
                                     <input type="text" id="edit-member-description" name="description"
                                         data-effect="el.value = $currentMemberDescription || ''"
-                                        class="wt:w-full wt:border wt:border-[var(--om-border-color)] wt:rounded-md wt:p-2">
+                                        class="wt_w-full wt_border wt_border-color wt_rounded-md wt_p-2">
                                 <?php else: ?>
                                     <textarea id="edit-member-description" name="description"
                                         data-effect="el.value = $currentMemberDescription || ''"
-                                        class="wt:w-full wt:border wt:border-[var(--om-border-color)] wt:rounded-md wt:p-2"
+                                        class="wt_w-full wt_border wt_border-color wt_rounded-md wt_p-2"
                                         rows="3"></textarea>
                                 <?php endif; ?>
                             </div>
                         <?php endif; ?>
 
-                        <div class="wt:mb-6">
-                            <p class="wt:font-bold wt:mb-3"><?php esc_html_e('Roles', 'wicket-acc'); ?></p>
+                        <div class="wt_mb-6">
+                            <p class="wt_font-bold wt_mb-3"><?php esc_html_e('Roles', 'wicket-acc'); ?></p>
                             <?php if (! empty($available_roles)) : ?>
-                                <div class="wt:space-y-2">
+                                <div class="wt_space-y-2">
                                     <?php foreach ($available_roles as $slug => $role) : ?>
-                                        <div class="wt:flex wt:items-center wt:gap-2">
-                                            <label class="wt:flex wt:items-center wt:gap-2 wt:cursor-pointer">
+                                        <div class="wt_flex wt_items-center wt_gap-2">
+                                            <label class="wt_flex wt_items-center wt_gap-2 wt_cursor-pointer">
                                                 <input
                                                     type="checkbox"
                                                     name="roles[]"
                                                     value="<?php echo esc_attr($slug); ?>"
-                                                    class="form-checkbox wt:h-4 wt:w-4 wt:text-[var(--om-bg-interactive)] wt:rounded wt:focus:wt:ring-[var(--om-bg-interactive)]"
+                                                    class="form-checkbox wt_h-4 wt_w-4 wt_text-bg-interactive wt_rounded wt_focus_ring-bg-interactive"
                                                     data-attr:checked="$currentMemberRoles.includes('<?php echo esc_js($slug); ?>')">
-                                                <span class="wt:text-sm wt:text-[var(--om-text-content)]"><?php echo esc_html($role); ?></span>
+                                                <span class="wt_text-sm wt_text-content"><?php echo esc_html($role); ?></span>
                                             </label>
                                         </div>
                                     <?php endforeach; ?>
                                 </div>
                             <?php else : ?>
-                                <p class="wt:text-sm wt:text-[var(--om-text-content)]"><?php esc_html_e('No roles available.', 'wicket-acc'); ?></p>
+                                <p class="wt_text-sm wt_text-content"><?php esc_html_e('No roles available.', 'wicket-acc'); ?></p>
                             <?php endif; ?>
                         </div>
 
-                        <div class="wt:flex wt:justify-end wt:gap-3" data-class:wt:hidden="$editPermissionsSuccess">
+                        <div class="wt_flex wt_justify-end wt_gap-3" data-class_wt_hidden="$editPermissionsSuccess">
                             <button
                                 type="button"
                                 data-on:click="$editPermissionsModalOpen = false"
-                                class="button button--secondary wt:px-4 wt:py-2 wt:text-sm"
+                                class="button button--secondary wt_px-4 wt_py-2 wt_text-sm"
                                 data-class:disabled="$editPermissionsSubmitting"
                                 data-attr:disabled="$editPermissionsSubmitting">
                                 <?php esc_html_e('Cancel', 'wicket-acc'); ?>
                             </button>
                             <button
                                 type="submit"
-                                class="button button--primary wt:inline-flex wt:items-center wt:gap-2 wt:px-4 wt:py-2 wt:text-sm"
+                                class="button button--primary wt_inline-flex wt_items-center wt_gap-2 wt_px-4 wt_py-2 wt_text-sm"
                                 data-class:disabled="$editPermissionsSubmitting"
                                 data-attr:disabled="$editPermissionsSubmitting">
-                                <span data-class:wt:hidden="$editPermissionsSubmitting">
+                                <span data-class_wt_hidden="$editPermissionsSubmitting">
                                     <?php esc_html_e('Save Permissions', 'wicket-acc'); ?>
                                 </span>
                                 <svg
-                                    class="wt:h-4 wt:w-4 wt:text-[var(--om-text-button-label-reversed)] wt:hidden"
-                                    data-class:wt:hidden="!$editPermissionsSubmitting"
+                                    class="wt_h-4 wt_w-4 wt_text-button-label-reversed wt_hidden"
+                                    data-class_wt_hidden="!$editPermissionsSubmitting"
                                     viewBox="0 0 24 24"
                                     fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
-                                    <circle class="wt:opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="wt:opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    <circle class="wt_opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="wt_opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                 </svg>
                             </button>
                         </div>
@@ -361,24 +361,24 @@ $clear_action = '(' . '$membersLoading' . " = true, " . '$searchQuery' . " = '',
         : OrgHelpers\template_url() . 'process/add-member';
     ?>
 
-    <dialog id="membersAddModal" class="modal wt:m-auto max-wt:3xl wt:rounded-md wt:shadow-md backdrop:wt:bg-black/50"
+    <dialog id="membersAddModal" class="modal wt_m-auto max_wt_3xl wt_rounded-md wt_shadow-md backdrop_wt_bg-black-50"
         data-show="$addMemberModalOpen"
         data-effect="if ($addMemberModalOpen) el.showModal(); else el.close();"
         data-on:close="($membersLoading = false); $addMemberModalOpen = false">
-        <div class="wt:bg-white wt:p-6 wt:relative" data-on:click__outside__capture="$addMemberModalOpen = false">
-            <button type="button" class="wt:absolute wt:right-4 wt:top-4 wt:text-lg wt:font-semibold"
+        <div class="wt_bg-white wt_p-6 wt_relative" data-on:click__outside__capture="$addMemberModalOpen = false">
+            <button type="button" class="wt_absolute wt_right-4 wt_top-4 wt_text-lg wt_font-semibold"
                 data-on:click="$addMemberModalOpen = false" data-class:hidden="$addMemberSuccess">
                 ×
             </button>
 
-            <h2 class="wt:text-2xl wt:font-semibold wt:mb-4">
+            <h2 class="wt_text-2xl wt_font-semibold wt_mb-4">
                 <?php esc_html_e('Add Member', 'wicket-acc'); ?>
             </h2>
 
             <?php if ($mode === 'groups') : ?>
                 <form
                     method="post"
-                    class="wt:flex wt:flex-col wt:gap-4"
+                    class="wt_flex wt_flex-col wt_gap-4"
                     data-on:submit="if(!$addMemberSubmitting){ $addMemberSubmitting = true; $membersLoading = true; @post('<?php echo esc_js($add_member_endpoint); ?>', { contentType: 'form' }); }"
                     data-on:submit__prevent-default="true"
                     data-on:success="<?php echo esc_attr($add_member_success_actions); ?>"
@@ -389,33 +389,33 @@ $clear_action = '(' . '$membersLoading' . " = true, " . '$searchQuery' . " = '',
                     <input type="hidden" name="nonce" value="<?php echo esc_attr(wp_create_nonce('wicket-orgman-add-group-member')); ?>">
 
                     <div>
-                        <label class="wt:block wt:text-sm wt:font-medium wt:mb-1" for="group-member-first-name">
+                        <label class="wt_block wt_text-sm wt_font-medium wt_mb-1" for="group-member-first-name">
                             <?php esc_html_e('First Name', 'wicket-acc'); ?>
                         </label>
                         <input id="group-member-first-name" name="first_name" type="text"
-                            class="wt:w-full wt:border wt:border-[var(--om-border-color)] wt:rounded-md wt:p-2" required>
+                            class="wt_w-full wt_border wt_border-color wt_rounded-md wt_p-2" required>
                     </div>
                     <div>
-                        <label class="wt:block wt:text-sm wt:font-medium wt:mb-1" for="group-member-last-name">
+                        <label class="wt_block wt_text-sm wt_font-medium wt_mb-1" for="group-member-last-name">
                             <?php esc_html_e('Last Name', 'wicket-acc'); ?>
                         </label>
                         <input id="group-member-last-name" name="last_name" type="text"
-                            class="wt:w-full wt:border wt:border-[var(--om-border-color)] wt:rounded-md wt:p-2" required>
+                            class="wt_w-full wt_border wt_border-color wt_rounded-md wt_p-2" required>
                     </div>
                     <div>
-                        <label class="wt:block wt:text-sm wt:font-medium wt:mb-1" for="group-member-email">
+                        <label class="wt_block wt_text-sm wt_font-medium wt_mb-1" for="group-member-email">
                             <?php esc_html_e('Email Address', 'wicket-acc'); ?>
                         </label>
                         <input id="group-member-email" name="email" type="email"
-                            class="wt:w-full wt:border wt:border-[var(--om-border-color)] wt:rounded-md wt:p-2"
+                            class="wt_w-full wt_border wt_border-color wt_rounded-md wt_p-2"
                             placeholder="<?php echo esc_attr(__('user@mail.com', 'wicket-acc')); ?>" required>
                     </div>
                     <div>
-                        <label class="wt:block wt:text-sm wt:font-medium wt:mb-1" for="group-member-role">
+                        <label class="wt_block wt_text-sm wt_font-medium wt_mb-1" for="group-member-role">
                             <?php esc_html_e('Role', 'wicket-acc'); ?>
                         </label>
                         <select id="group-member-role" name="role"
-                            class="wt:w-full wt:border wt:border-[var(--om-border-color)] wt:rounded-md wt:p-2">
+                            class="wt_w-full wt_border wt_border-color wt_rounded-md wt_p-2">
                             <?php
                             $groups_config = is_array($orgman_config['groups'] ?? null) ? $orgman_config['groups'] : [];
                             $member_role = $groups_config['member_role'] ?? 'member';
@@ -426,24 +426,24 @@ $clear_action = '(' . '$membersLoading' . " = true, " . '$searchQuery' . " = '',
                         </select>
                     </div>
 
-                    <div class="wt:flex wt:justify-end wt:gap-3 wt:pt-4" data-class:hidden="$addMemberSuccess">
+                    <div class="wt_flex wt_justify-end wt_gap-3 wt_pt-4" data-class:hidden="$addMemberSuccess">
                         <button type="button" class="button button--secondary"
                             data-on:click="$addMemberModalOpen = false"
-                            data-class="{ 'wt:pointer-events-none': $addMemberSubmitting, 'wt:opacity-50': $addMemberSubmitting }"
+                            data-class="{ 'wt_pointer-events-none': $addMemberSubmitting, 'wt_opacity-50': $addMemberSubmitting }"
                             data-attr:aria-disabled="$addMemberSubmitting ? 'true' : 'false'">
                             <?php esc_html_e('Cancel', 'wicket-acc'); ?>
                         </button>
-                        <button type="submit" class="button button--primary wt:inline-flex wt:items-center wt:gap-2"
-                            data-class="{ 'wt:pointer-events-none': $addMemberSubmitting, 'wt:opacity-50': $addMemberSubmitting }"
+                        <button type="submit" class="button button--primary wt_inline-flex wt_items-center wt_gap-2"
+                            data-class="{ 'wt_pointer-events-none': $addMemberSubmitting, 'wt_opacity-50': $addMemberSubmitting }"
                             data-attr:aria-disabled="$addMemberSubmitting ? 'true' : 'false'">
                             <span data-class:hidden="$addMemberSubmitting">
                                 <?php esc_html_e('Add Member', 'wicket-acc'); ?>
                             </span>
-                            <svg class="wt:h-5 wt:w-5 wt:text-[var(--om-text-button-label-reversed)] wt:hidden"
+                            <svg class="wt_h-5 wt_w-5 wt_text-button-label-reversed wt_hidden"
                                 data-class:hidden="!$addMemberSubmitting" viewBox="0 0 24 24" fill="none"
                                 xmlns="http://www.w3.org/2000/svg">
-                                <circle class="wt:opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="wt:opacity-75" fill="currentColor"
+                                <circle class="wt_opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="wt_opacity-75" fill="currentColor"
                                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
                         </button>
@@ -452,7 +452,7 @@ $clear_action = '(' . '$membersLoading' . " = true, " . '$searchQuery' . " = '',
             <?php else : ?>
                 <div id="add-member-messages-<?php echo esc_attr(sanitize_html_class($org_uuid ?: 'default')); ?>"></div>
                 <form name="add_new_person_membership_form" id="add_new_person_membership_form"
-                    class="wt:flex wt:flex-col wt:gap-4" method="POST"
+                    class="wt_flex wt_flex-col wt_gap-4" method="POST"
                     data-on:submit="if(!$addMemberSubmitting){ $addMemberSubmitting = true; $membersLoading = true; @post('<?php echo esc_js($add_member_endpoint); ?>', { contentType: 'form' }); }"
                     data-on:submit__prevent-default="true"
                     data-on:success="<?php echo esc_attr($add_member_success_actions); ?>"
@@ -471,50 +471,50 @@ $clear_action = '(' . '$membersLoading' . " = true, " . '$searchQuery' . " = '',
 
                     <?php if ($form_config['first_name']['enabled'] ?? false) : ?>
                         <div>
-                            <label class="wt:block wt:text-sm wt:font-medium wt:mb-1" for="new-member-first-name">
+                            <label class="wt_block wt_text-sm wt_font-medium wt_mb-1" for="new-member-first-name">
                                 <?php echo esc_html($form_config['first_name']['label'] ?? __('First Name', 'wicket-acc')); ?>
                                 <?php echo ($form_config['first_name']['required'] ?? false) ? '*' : ''; ?>
                             </label>
                             <input type="text" id="new-member-first-name" name="first_name"
                                 <?php echo ($form_config['first_name']['required'] ?? false) ? 'required' : ''; ?>
-                                class="wt:w-full wt:border wt:border-[var(--om-border-color)] wt:rounded-md wt:p-2">
+                                class="wt_w-full wt_border wt_border-color wt_rounded-md wt_p-2">
                         </div>
                     <?php endif; ?>
 
                     <?php if ($form_config['last_name']['enabled'] ?? false) : ?>
                         <div>
-                            <label class="wt:block wt:text-sm wt:font-medium wt:mb-1" for="new-member-last-name">
+                            <label class="wt_block wt_text-sm wt_font-medium wt_mb-1" for="new-member-last-name">
                                 <?php echo esc_html($form_config['last_name']['label'] ?? __('Last Name', 'wicket-acc')); ?>
                                 <?php echo ($form_config['last_name']['required'] ?? false) ? '*' : ''; ?>
                             </label>
                             <input type="text" id="new-member-last-name" name="last_name"
                                 <?php echo ($form_config['last_name']['required'] ?? false) ? 'required' : ''; ?>
-                                class="wt:w-full wt:border wt:border-[var(--om-border-color)] wt:rounded-md wt:p-2">
+                                class="wt_w-full wt_border wt_border-color wt_rounded-md wt_p-2">
                         </div>
                     <?php endif; ?>
 
                     <?php if ($form_config['email']['enabled'] ?? false) : ?>
                         <div>
-                            <label class="wt:block wt:text-sm wt:font-medium wt:mb-1" for="new-member-email">
+                            <label class="wt_block wt_text-sm wt_font-medium wt_mb-1" for="new-member-email">
                                 <?php echo esc_html($form_config['email']['label'] ?? __('Email Address', 'wicket-acc')); ?>
                                 <?php echo ($form_config['email']['required'] ?? false) ? '*' : ''; ?>
                             </label>
                             <input type="email" id="new-member-email" name="email"
                                 <?php echo ($form_config['email']['required'] ?? false) ? 'required' : ''; ?>
-                                class="wt:w-full wt:border wt:border-[var(--om-border-color)] wt:rounded-md wt:p-2"
+                                class="wt_w-full wt_border wt_border-color wt_rounded-md wt_p-2"
                                 placeholder="<?php echo esc_attr(__('user@mail.com', 'wicket-acc')); ?>">
                         </div>
                     <?php endif; ?>
 
                     <?php if (($form_config['relationship_type']['enabled'] ?? false) && ! empty($relationship_types)) : ?>
                         <div>
-                            <label class="wt:block wt:text-sm wt:font-medium wt:mb-1" for="new-member-relationship-type">
+                            <label class="wt_block wt_text-sm wt_font-medium wt_mb-1" for="new-member-relationship-type">
                                 <?php echo esc_html($form_config['relationship_type']['label'] ?? __('Relationship Type', 'wicket-acc')); ?>
                                 <?php echo ($form_config['relationship_type']['required'] ?? false) ? '*' : ''; ?>
                             </label>
                             <select id="new-member-relationship-type" name="relationship_type"
                                 <?php echo ($form_config['relationship_type']['required'] ?? false) ? 'required' : ''; ?>
-                                class="wt:w-full wt:border wt:border-[var(--om-border-color)] wt:rounded-md wt:p-2">
+                                class="wt_w-full wt_border wt_border-color wt_rounded-md wt_p-2">
                                 <option value=""><?php esc_html_e('Select a relationship type', 'wicket-acc'); ?></option>
                                 <?php foreach ($relationship_types as $type_key => $type_label) : ?>
                                     <option value="<?php echo esc_attr($type_key); ?>">
@@ -527,18 +527,18 @@ $clear_action = '(' . '$membersLoading' . " = true, " . '$searchQuery' . " = '',
 
                     <?php if ($form_config['description']['enabled'] ?? false): ?>
                         <div>
-                            <label class="wt:block wt:text-sm wt:font-medium wt:mb-1" for="new-member-description">
+                            <label class="wt_block wt_text-sm wt_font-medium wt_mb-1" for="new-member-description">
                                 <?php echo esc_html($form_config['description']['label'] ?? __('Description', 'wicket-acc')); ?>
                                 <?php echo ($form_config['description']['required'] ?? false) ? '*' : ''; ?>
                             </label>
                             <?php if (($form_config['description']['input_type'] ?? 'textarea') === 'text'): ?>
                                 <input type="text" id="new-member-description" name="description"
                                     <?php echo ($form_config['description']['required'] ?? false) ? 'required' : ''; ?>
-                                    class="wt:w-full wt:border wt:border-[var(--om-border-color)] wt:rounded-md wt:p-2">
+                                    class="wt_w-full wt_border wt_border-color wt_rounded-md wt_p-2">
                             <?php else: ?>
                                 <textarea id="new-member-description" name="description"
                                     <?php echo ($form_config['description']['required'] ?? false) ? 'required' : ''; ?>
-                                    class="wt:w-full wt:border wt:border-[var(--om-border-color)] wt:rounded-md wt:p-2"
+                                    class="wt_w-full wt_border wt_border-color wt_rounded-md wt_p-2"
                                     rows="3"></textarea>
                             <?php endif; ?>
                         </div>
@@ -561,10 +561,10 @@ $clear_action = '(' . '$membersLoading' . " = true, " . '$searchQuery' . " = '',
                     ?>
 
                     <?php if (! empty($available_roles)) : ?>
-                        <fieldset class="wt:flex wt:flex-col wt:gap-2">
-                            <legend class="wt:text-sm wt:font-medium"><?php esc_html_e('Security Roles', 'wicket-acc'); ?></legend>
+                        <fieldset class="wt_flex wt_flex-col wt_gap-2">
+                            <legend class="wt_text-sm wt_font-medium"><?php esc_html_e('Security Roles', 'wicket-acc'); ?></legend>
                             <?php foreach ($available_roles as $role_slug => $role_name) : ?>
-                                <label class="wt:flex wt:items-center wt:gap-2">
+                                <label class="wt_flex wt_items-center wt_gap-2">
                                     <input type="checkbox" name="roles[]" value="<?php echo esc_attr($role_slug); ?>" class="form-checkbox">
                                     <span><?php echo esc_html($role_name); ?></span>
                                 </label>
@@ -572,22 +572,22 @@ $clear_action = '(' . '$membersLoading' . " = true, " . '$searchQuery' . " = '',
                         </fieldset>
                     <?php endif; ?>
 
-                    <div class="wt:flex wt:justify-end wt:gap-3 wt:pt-4" data-class:hidden="$addMemberSuccess">
+                    <div class="wt_flex wt_justify-end wt_gap-3 wt_pt-4" data-class:hidden="$addMemberSuccess">
                         <button type="button" class="button button--secondary"
                             data-on:click="$addMemberModalOpen = false"
-                            data-class="{ 'wt:pointer-events-none': $addMemberSubmitting, 'wt:opacity-50': $addMemberSubmitting }"
+                            data-class="{ 'wt_pointer-events-none': $addMemberSubmitting, 'wt_opacity-50': $addMemberSubmitting }"
                             data-attr:aria-disabled="$addMemberSubmitting ? 'true' : 'false'">
                             <?php esc_html_e('Cancel', 'wicket-acc'); ?>
                         </button>
-                        <button type="submit" class="button button--primary wt:inline-flex wt:items-center wt:gap-2"
-                            data-class="{ 'wt:pointer-events-none': $addMemberSubmitting, 'wt:opacity-50': $addMemberSubmitting }"
+                        <button type="submit" class="button button--primary wt_inline-flex wt_items-center wt_gap-2"
+                            data-class="{ 'wt_pointer-events-none': $addMemberSubmitting, 'wt_opacity-50': $addMemberSubmitting }"
                             data-attr:aria-disabled="$addMemberSubmitting ? 'true' : 'false'">
                             <span data-class:hidden="$addMemberSubmitting"><?php esc_html_e('Add Member', 'wicket-acc'); ?></span>
-                            <svg class="wt:h-5 wt:w-5 wt:text-[var(--om-text-button-label-reversed)] wt:hidden"
+                            <svg class="wt_h-5 wt_w-5 wt_text-button-label-reversed wt_hidden"
                                 data-class:hidden="!$addMemberSubmitting" viewBox="0 0 24 24" fill="none"
                                 xmlns="http://www.w3.org/2000/svg">
-                                <circle class="wt:opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="wt:opacity-75" fill="currentColor"
+                                <circle class="wt_opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="wt_opacity-75" fill="currentColor"
                                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
                         </button>
@@ -597,22 +597,22 @@ $clear_action = '(' . '$membersLoading' . " = true, " . '$searchQuery' . " = '',
         </div>
     </dialog>
 
-    <dialog id="membersRemoveModal" class="modal wt:m-auto max-wt-md wt:rounded-md wt:shadow-md backdrop:wt:bg-black/50"
+    <dialog id="membersRemoveModal" class="modal wt_m-auto max_wt_md wt_rounded-md wt_shadow-md backdrop_wt_bg-black-50"
         data-show="$removeMemberModalOpen"
         data-effect="if ($removeMemberModalOpen) el.showModal(); else el.close();"
         data-on:close="($membersLoading = false); $removeMemberModalOpen = false">
-        <div class="wt:bg-white wt:p-6 wt:relative">
-            <button type="button" class="wt:absolute wt:right-4 wt:top-4 wt:text-lg wt:font-semibold"
-                data-on:click="$removeMemberModalOpen = false" data-class:wt:hidden="$removeMemberSuccess">×</button>
-            <h2 class="wt:text-2xl wt:font-semibold wt:mb-4"><?php esc_html_e('Remove Member', 'wicket-acc'); ?></h2>
+        <div class="wt_bg-white wt_p-6 wt_relative">
+            <button type="button" class="wt_absolute wt_right-4 wt_top-4 wt_text-lg wt_font-semibold"
+                data-on:click="$removeMemberModalOpen = false" data-class_wt_hidden="$removeMemberSuccess">×</button>
+            <h2 class="wt_text-2xl wt_font-semibold wt_mb-4"><?php esc_html_e('Remove Member', 'wicket-acc'); ?></h2>
             <div id="remove-member-messages"></div>
 
-            <div data-class:wt:hidden="$removeMemberSuccess">
-                <p class="wt:mb-6">
-                    <span data-class:wt:hidden="$currentRemoveMemberName === ''">
+            <div data-class_wt_hidden="$removeMemberSuccess">
+                <p class="wt_mb-6">
+                    <span data-class_wt_hidden="$currentRemoveMemberName === ''">
                         <?php echo esc_html__('Are you sure you want to remove this member?', 'wicket-acc'); ?>
                     </span>
-                    <span data-class:wt:hidden="$currentRemoveMemberName !== ''">
+                    <span data-class_wt_hidden="$currentRemoveMemberName !== ''">
                         <?php echo esc_html__('Are you sure you want to remove', 'wicket-acc'); ?>
                         <span data-text="$currentRemoveMemberName"></span>
                         <?php echo esc_html__('from this organization?', 'wicket-acc'); ?>
@@ -652,22 +652,22 @@ $clear_action = '(' . '$membersLoading' . " = true, " . '$searchQuery' . " = '',
                         <input type="hidden" name="nonce" value="<?php echo esc_attr(wp_create_nonce('wicket-orgman-remove-member')); ?>">
                     <?php endif; ?>
 
-                    <div class="wt:flex wt:justify-end wt:gap-3">
+                    <div class="wt_flex wt_justify-end wt_gap-3">
                         <button type="button" data-on:click="$removeMemberModalOpen = false"
-                            class="button button--secondary wt:px-4 wt:py-2 wt:text-sm"
+                            class="button button--secondary wt_px-4 wt_py-2 wt_text-sm"
                             data-class:disabled="$removeMemberSubmitting"
                             data-attr:disabled="$removeMemberSubmitting">
                             <?php esc_html_e('Cancel', 'wicket-acc'); ?>
                         </button>
-                        <button type="submit" class="button button--danger wt:inline-flex wt:items-center wt:gap-2 wt:px-4 wt:py-2 wt:text-sm"
+                        <button type="submit" class="button button--danger wt_inline-flex wt_items-center wt_gap-2 wt_px-4 wt_py-2 wt_text-sm"
                             data-class:disabled="$removeMemberSubmitting"
                             data-attr:disabled="$removeMemberSubmitting">
-                            <span data-class:wt:hidden="$removeMemberSubmitting"><?php esc_html_e('Remove Member', 'wicket-acc'); ?></span>
-                            <svg class="wt:h-4 wt:w-4 wt:text-white wt:hidden"
-                                data-class:wt:hidden="!$removeMemberSubmitting" viewBox="0 0 24 24" fill="none"
+                            <span data-class_wt_hidden="$removeMemberSubmitting"><?php esc_html_e('Remove Member', 'wicket-acc'); ?></span>
+                            <svg class="wt_h-4 wt_w-4 wt_text-white wt_hidden"
+                                data-class_wt_hidden="!$removeMemberSubmitting" viewBox="0 0 24 24" fill="none"
                                 xmlns="http://www.w3.org/2000/svg">
-                                <circle class="wt:opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="wt:opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                <circle class="wt_opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="wt_opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
                         </button>
                     </div>

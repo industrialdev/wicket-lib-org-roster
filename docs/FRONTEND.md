@@ -21,16 +21,16 @@ Instead of returning JSON, our REST API returns SSE streams that patch the DOM d
 ### 1.3 Fragments
 Fragments are small pieces of PHP templates. When an action occurs (e.g., adding a member), the server renders the "Success" fragment and the "Updated List" fragment, sending them both in a single SSE stream.
 
-## 2. Styling (Tailwind CSS)
+## 2. Styling (Scoped Vanilla CSS + BEM)
 
 ### 2.1 Prefixing
-To avoid conflicts with WordPress themes and other plugins, all Tailwind classes **MUST** use the `wt:` prefix.
-- **Example**: `wt:bg-blue-500 wt:text-white wt:p-4`
+To avoid conflicts with WordPress themes and other plugins, all scoped utility-style classes **MUST** use the `wt_` prefix and component classes should follow BEM naming.
+- **Example (scoped utilities)**: `wt_bg-blue-600 wt_text-white wt_p-4`
+- **Example (BEM)**: `members-search__input members-search__actions`
 
-### 2.2 Compilation
-- **Source**: `public/css/modern-orgman.css`
-- **Build**: `npm run build`
-- **Development**: `npm run watch`
+### 2.2 Source of Truth
+- **Primary stylesheet**: `public/css/modern-orgman-static.css`
+- **Build tooling**: None required at runtime (no Tailwind/NPM pipeline)
 
 ## 3. The "Unified View"
 The Unified View is a search-centric interface for managing rosters.

@@ -179,11 +179,11 @@ $no_members_message = __('No members found.', 'wicket-acc');
 ?>
 <div
     id="<?php echo esc_attr($members_list_target); ?>"
-    class="wt:mt-6 wt:flex wt:flex-col wt:gap-4 wt:relative"
+    class="wt_mt-6 wt_flex wt_flex-col wt_gap-4 wt_relative"
     data-page="<?php echo esc_attr((string) $page); ?>"
     data-attr:aria-busy="$membersLoading">
 
-    <div class="wt:text-xl wt:font-semibold wt:mb-3">
+    <div class="wt_text-xl wt_font-semibold wt_mb-3">
         <?php if ($max_seats !== null): ?>
             <?php printf(esc_html__('Seats assigned: %1$d / %2$d', 'wicket-acc'), (int) $active_seats, (int) $max_seats); ?>
         <?php else: ?>
@@ -193,7 +193,7 @@ $no_members_message = __('No members found.', 'wicket-acc');
     </div>
 
     <?php if (empty($members)) : ?>
-        <p class="wt:text-gray-500 wt:p-4"><?php echo esc_html($no_members_message); ?></p>
+        <p class="wt_text-gray-500 wt_p-4"><?php echo esc_html($no_members_message); ?></p>
     <?php else : ?>
         <?php foreach ($members as $member) :
             $member_uuid = $member['person_uuid'] ?? null;
@@ -211,12 +211,12 @@ $no_members_message = __('No members found.', 'wicket-acc');
             // Create person UUID without dashes for unique IDs
             $person_uuid_no_dashes = $member_uuid ? str_replace('-', '', $member_uuid) : uniqid('member', true);
             ?>
-            <div class="member-card wt:bg-[var(--om-bg-light-neutral)] wt:rounded-[var(--om-card-corner-radius)] wt:p-6 wt:transition:opacity wt:duration-300" id="member-<?php echo esc_attr($person_uuid_no_dashes); ?>">
-                <div class="wt:flex wt:w-full md:wt:flex-row wt:items-start wt:justify-between wt:gap-4">
-                    <div class="wt:flex wt:flex-col wt:gap-2 wt:w-full md:wt:w-4/5">
-                        <div class="wt:flex wt:flex-col sm:wt:flex-row wt:items-start sm:wt:items-center wt:gap-2">
-                            <div class="wt:flex wt:items-center wt:gap-2">
-                                <h3 class="wt:text-xl wt:font-medium wt:text-[var(--om-text-content)] wt:mb-0">
+            <div class="member-card wt_bg-light-neutral wt_rounded-card wt_p-6 wt_transition-opacity wt_duration-300" id="member-<?php echo esc_attr($person_uuid_no_dashes); ?>">
+                <div class="wt_flex wt_w-full md_wt_flex-row wt_items-start wt_justify-between wt_gap-4">
+                    <div class="wt_flex wt_flex-col wt_gap-2 wt_w-full md_wt_w-4-5">
+                        <div class="wt_flex wt_flex-col sm_wt_flex-row wt_items-start sm_wt_items-center wt_gap-2">
+                            <div class="wt_flex wt_items-center wt_gap-2">
+                                <h3 class="wt_text-xl wt_font-medium wt_text-content wt_mb-0">
                                     <?php echo esc_html($member['full_name'] ?? ''); ?>
                                 </h3>
                                 <?php
@@ -226,26 +226,26 @@ $no_members_message = __('No members found.', 'wicket-acc');
                             $is_confirmed = $member_service->isUserConfirmed($member_uuid);
                             ?>
                             <?php if ($is_confirmed) : ?>
-                                <span class="wt:text-[var(--om-text-content)]" title="<?php esc_attr_e('Account confirmed', 'wicket-acc'); ?>">
-                                    <span class="wt:inline-block wt:w-2 wt:h-2 wt:rounded-full wt:bg-green-500" aria-hidden="true"></span>
+                                <span class="wt_text-content" title="<?php esc_attr_e('Account confirmed', 'wicket-acc'); ?>">
+                                    <span class="wt_inline-block wt_w-2 wt_h-2 wt_rounded-full wt_bg-green-500" aria-hidden="true"></span>
                                 </span>
                             <?php else : ?>
-                                <span class="wt:text-[var(--om-text-content)]" title="<?php esc_attr_e('Account not confirmed', 'wicket-acc'); ?>">
-                                    <span class="wt:inline-block wt:w-2 wt:h-2 wt:rounded-full wt:bg-gray-400" aria-hidden="true"></span>
+                                <span class="wt_text-content" title="<?php esc_attr_e('Account not confirmed', 'wicket-acc'); ?>">
+                                    <span class="wt_inline-block wt_w-2 wt_h-2 wt_rounded-full wt_bg-gray-400" aria-hidden="true"></span>
                                 </span>
-                                <span class="wt:text-[var(--om-text-warning)] wt:whitespace-nowrap" title="<?php esc_attr_e('Account not confirmed', 'wicket-acc'); ?>">
+                                <span class="wt_text-warning wt_whitespace-nowrap" title="<?php esc_attr_e('Account not confirmed', 'wicket-acc'); ?>">
                                     <?php esc_html_e('Account not confirmed', 'wicket-acc'); ?>
                                 </span>
                             <?php endif; ?>
                             </div>
                         </div>
                         <?php if (! empty($member['is_owner'])) : ?>
-                            <div class="wt:flex wt:items-center wt:gap-2">
+                            <div class="wt_flex wt_items-center wt_gap-2">
                                 <strong><?php esc_html_e('Organization Owner', 'wicket-acc'); ?></strong>
                             </div>
                         <?php endif; ?>
                         <?php if (! empty($member['title']) && \OrgManagement\Helpers\Helper::should_show_member_job_title()) : ?>
-                            <p class="member-job-title wt:text-sm wt:text-[var(--om-text-content)]">
+                            <p class="member-job-title wt_text-sm wt_text-content">
                                 <?php echo esc_html($member['title']); ?>
                             </p>
                         <?php endif; ?>
@@ -253,24 +253,24 @@ $no_members_message = __('No members found.', 'wicket-acc');
                         // Check if relationship type should be hidden
                         if (! empty($member['relationship_names']) && ! \OrgManagement\Helpers\Helper::should_hide_relationship_type()) :
                         ?>
-                            <div class="wt:flex wt:items-center wt:gap-2">
-                                <span class="wt:text-[var(--om-text-content)]"><?php echo esc_html($member['relationship_names']); ?></span>
+                            <div class="wt_flex wt_items-center wt_gap-2">
+                                <span class="wt_text-content"><?php echo esc_html($member['relationship_names']); ?></span>
                             </div>
                         <?php endif; ?>
                         <?php if (! empty($member_email)) : ?>
-                            <div class="wt:flex wt:items-center wt:gap-2">
-                                <a href="mailto:<?php echo esc_attr($member_email); ?>" class="wt:text-sm wt:text-[var(--om-text-interactive)] wt:hover:underline">
+                            <div class="wt_flex wt_items-center wt_gap-2">
+                                <a href="mailto:<?php echo esc_attr($member_email); ?>" class="wt_text-sm wt_text-interactive wt_hover_underline">
                                     <?php echo esc_html($member_email); ?>
                                 </a>
                             </div>
                         <?php endif; ?>
-                        <div class="wt:flex wt:items-baseline wt:gap-2 wt:text-sm">
+                        <div class="wt_flex wt_items-baseline wt_gap-2 wt_text-sm">
                             <strong><?php esc_html_e('Roles:', 'wicket-acc'); ?></strong>
-                            <span class="wt:text-[var(--om-text-content)]"><?php echo esc_html($roles_text); ?></span>
+                            <span class="wt_text-content"><?php echo esc_html($roles_text); ?></span>
                         </div>
                     </div>
-                    <div class="wt:flex wt:flex-col sm:wt:flex-row wt:items-stretch sm:wt:items-start wt:gap-2 wt:justify-between md:wt:auto wt:shrink-0">
-                        <button type="button" class="acc-edit-button edit-permissions-button button button--primary wt:inline-flex wt:items-center wt:justify-between wt:gap-2 wt:px-4 wt:py-2 wt:text-sm wt:border wt:border-[var(--om-bg-interactive)] wt:transition-colors wt:whitespace-nowrap"
+                    <div class="wt_flex wt_flex-col sm_wt_flex-row wt_items-stretch sm_wt_items-start wt_gap-2 wt_justify-between md_wt_auto wt_shrink-0">
+                        <button type="button" class="acc-edit-button edit-permissions-button button button--primary wt_inline-flex wt_items-center wt_justify-between wt_gap-2 wt_px-4 wt_py-2 wt_text-sm wt_border wt_border-bg-interactive wt_transition-colors wt_whitespace-nowrap"
                             data-on:click="
                                 $currentMemberUuid = '<?php echo esc_js($member_uuid ?? ''); ?>';
                                 $currentMemberName = '<?php echo esc_js($member['full_name'] ?? ''); ?>';
@@ -279,7 +279,7 @@ $no_members_message = __('No members found.', 'wicket-acc');
                                 $editPermissionsModalOpen = true
                             ">
                             <?php esc_html_e('Edit Permissions', 'wicket-acc'); ?>
-                            <svg class="wt:w-4 wt:h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <svg class="wt_w-4 wt_h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M12 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6M18.414 8.414 19.5 7.328a2 2 0 0 0 0-2.828 2 2 0 0 0-2.828 0L15.586 5.586M18.414 8.414l-6.036 6.036a2 2 0 0 1-1.388.584L8.414 15.586l.586-2.95A2 2 0 0 1 10 11.248l5.586-5.662M18.414 8.414 15.586 5.586" />
                             </svg>
                         </button>
@@ -290,7 +290,7 @@ $no_members_message = __('No members found.', 'wicket-acc');
                             $member_uuid === $current_user_uuid;
                         ?>
                         <?php if (!$is_current_user_owner): ?>
-                            <button type="button" class="acc-remove-button remove-member-button button button--secondary wt:inline-flex wt:items-center wt:justify-between wt:gap-2 wt:px-4 wt:py-2 wt:bg-[var(--om-bg-light-neutral)] wt:text-sm wt:border wt:border-[var(--om-bg-interactive)] wt:transition-colors wt:whitespace-nowrap"
+                            <button type="button" class="acc-remove-button remove-member-button button button--secondary wt_inline-flex wt_items-center wt_justify-between wt_gap-2 wt_px-4 wt_py-2 wt_bg-light-neutral wt_text-sm wt_border wt_border-bg-interactive wt_transition-colors wt_whitespace-nowrap"
                                 data-on:click="
                                     $currentRemoveMemberUuid = '<?php echo esc_js($member_uuid ?? ''); ?>';
                                     $currentRemoveMemberName = '<?php echo esc_js($member['full_name'] ?? ''); ?>';
@@ -300,7 +300,7 @@ $no_members_message = __('No members found.', 'wicket-acc');
                                     $removeMemberModalOpen = true
                                 ">
                                 <?php esc_html_e('Remove', 'wicket-acc'); ?>
-                                <svg class="wt:w-4 wt:h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <svg class="wt_w-4 wt_h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M19 7l-.867 12.142A2 2 0 0 1 16.138 21H7.862a2 2 0 0 1-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v3M4 7h16" />
                                 </svg>
                             </button>
@@ -311,8 +311,8 @@ $no_members_message = __('No members found.', 'wicket-acc');
         <?php endforeach; ?>
     <?php endif; ?>
 
-    <nav class="members-pagination wt:mt-6 wt:flex wt:flex-col wt:gap-4" aria-label="<?php esc_attr_e('Members pagination', 'wicket-acc'); ?>">
-        <div class="members-pagination__info wt:w-full wt:text-left wt:text-sm wt:text-[var(--om-text-content)]">
+    <nav class="members-pagination wt_mt-6 wt_flex wt_flex-col wt_gap-4" aria-label="<?php esc_attr_e('Members pagination', 'wicket-acc'); ?>">
+        <div class="members-pagination__info wt_w-full wt_text-left wt_text-sm wt_text-content">
             <?php
             if ($total_items > 0) {
                 $first = (($page - 1) * $page_size) + 1;
@@ -323,10 +323,10 @@ $no_members_message = __('No members found.', 'wicket-acc');
             }
             ?>
         </div>
-        <div class="members-pagination__controls wt:w-full wt:flex wt:items-center wt:gap-2 wt:justify-end wt:self-end">
+        <div class="members-pagination__controls wt_w-full wt_flex wt_items-center wt_gap-2 wt_justify-end wt_self-end">
             <?php $prev_disabled = $page <= 1; ?>
             <button type="button"
-                class="members-pagination__btn members-pagination__btn--prev button button--secondary wt:px-3 wt:py-2 wt:text-sm"
+                class="members-pagination__btn members-pagination__btn--prev button button--secondary wt_px-3 wt_py-2 wt_text-sm"
                 <?php if ($prev_disabled) : ?>disabled<?php endif; ?>
                 <?php if (! $prev_disabled) : ?>data-on:click="<?php echo esc_attr($build_action($page - 1)); ?>" <?php endif; ?>
                 data-on:success="<?php echo esc_attr(wp_sprintf("select('#%s') | set(html)", $members_list_target)); ?>"
@@ -334,12 +334,12 @@ $no_members_message = __('No members found.', 'wicket-acc');
                 data-attr:disabled="$membersLoading">
                 <?php esc_html_e('Previous', 'wicket-acc'); ?>
             </button>
-            <div class="members-pagination__pages wt:flex wt:items-center wt:gap-1">
+            <div class="members-pagination__pages wt_flex wt_items-center wt_gap-1">
                 <?php for ($i = 1; $i <= $total_pages; $i++) :
                     $is_current = ($i === $page);
                 ?>
                     <button type="button"
-                        class="members-pagination__btn members-pagination__btn--page button wt:px-3 wt:py-2 wt:text-sm <?php echo $is_current ? 'button--primary' : 'button--secondary'; ?>"
+                        class="members-pagination__btn members-pagination__btn--page button wt_px-3 wt_py-2 wt_text-sm <?php echo $is_current ? 'button--primary' : 'button--secondary'; ?>"
                         <?php if ($is_current) : ?>disabled<?php endif; ?>
                         <?php if (! $is_current) : ?>data-on:click="<?php echo esc_attr($build_action($i)); ?>" <?php endif; ?>
                         data-on:success="<?php echo esc_attr(wp_sprintf("select('#%s') | set(html)", $members_list_target)); ?>"
@@ -351,7 +351,7 @@ $no_members_message = __('No members found.', 'wicket-acc');
             </div>
             <?php $next_disabled = $page >= $total_pages; ?>
             <button type="button"
-                class="members-pagination__btn members-pagination__btn--next button button--secondary wt:px-3 wt:py-2 wt:text-sm"
+                class="members-pagination__btn members-pagination__btn--next button button--secondary wt_px-3 wt_py-2 wt_text-sm"
                 <?php if ($next_disabled) : ?>disabled<?php endif; ?>
                 <?php if (! $next_disabled) : ?>data-on:click="<?php echo esc_attr($build_action($page + 1)); ?>" <?php endif; ?>
                 data-on:success="<?php echo esc_attr(wp_sprintf("select('#%s') | set(html)", $members_list_target)); ?>"
@@ -363,19 +363,19 @@ $no_members_message = __('No members found.', 'wicket-acc');
     </nav>
 
     <?php if (\OrgManagement\Helpers\PermissionHelper::can_add_members($org_uuid)): ?>
-        <div class="wt:mt-6">
+        <div class="wt_mt-6">
             <?php if ($has_seats_available): ?>
                 <button type="button"
-                    class="button button--primary add-member-button wt:w-full wt:py-2"
+                    class="button button--primary add-member-button wt_w-full wt_py-2"
                     data-on:click="$addMemberModalOpen = true">
                     <?php esc_html_e('Add Member', 'wicket-acc'); ?>
                 </button>
             <?php endif; ?>
 
             <?php if (!$has_seats_available): ?>
-                <div class="wt:mt-2 wt:p-3 wt:bg-yellow-50 wt:border wt:border-yellow-200 wt:rounded-md wt:text-yellow-800 wt:text-sm">
-                    <div class="wt:flex wt:items-center wt:gap-2">
-                        <svg class="wt:w-5 wt:h-5 wt:text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                <div class="wt_mt-2 wt_p-3 wt_bg-yellow-50 wt_border wt_border-yellow-200 wt_rounded-md wt_text-yellow-800 wt_text-sm">
+                    <div class="wt_flex wt_items-center wt_gap-2">
+                        <svg class="wt_w-5 wt_h-5 wt_text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
                         </svg>
                         <span><?php esc_html_e('All seats have been assigned. Please purchase additional seats to add more members.', 'wicket-acc'); ?></span>
@@ -387,23 +387,23 @@ $no_members_message = __('No members found.', 'wicket-acc');
 </div>
 
 <!-- Edit Permissions Modal - Single modal using pure Datastar -->
-<div class="wt:mt-6" data-signals='{"editPermissionsModalOpen": false, "editPermissionsSubmitting": false, "editPermissionsSuccess": false, "currentMemberUuid": "", "currentMemberName": "", "currentMemberRoles": [], "currentMemberRelationshipType": "", "removeMemberModalOpen": false, "removeMemberSubmitting": false, "removeMemberSuccess": false, "currentRemoveMemberUuid": "", "currentRemoveMemberName": "", "currentRemoveMemberEmail": "", "currentRemoveMemberConnectionId": "", "currentRemoveMemberPersonMembershipId": ""}'>
-    <dialog id="editPermissionsModal" class="modal wt:m-auto max-wt:3xl wt:rounded-md wt:shadow-md backdrop:wt:bg-black/50"
+<div class="wt_mt-6" data-signals='{"editPermissionsModalOpen": false, "editPermissionsSubmitting": false, "editPermissionsSuccess": false, "currentMemberUuid": "", "currentMemberName": "", "currentMemberRoles": [], "currentMemberRelationshipType": "", "removeMemberModalOpen": false, "removeMemberSubmitting": false, "removeMemberSuccess": false, "currentRemoveMemberUuid": "", "currentRemoveMemberName": "", "currentRemoveMemberEmail": "", "currentRemoveMemberConnectionId": "", "currentRemoveMemberPersonMembershipId": ""}'>
+    <dialog id="editPermissionsModal" class="modal wt_m-auto max_wt_3xl wt_rounded-md wt_shadow-md backdrop_wt_bg-black-50"
         data-show="$editPermissionsModalOpen"
         data-effect="if ($editPermissionsModalOpen) el.showModal(); else el.close();"
         data-on:close="($membersLoading = false); $editPermissionsModalOpen = false">
-        <div class="wt:bg-white wt:p-6 wt:relative">
-            <button type="button" class="wt:absolute wt:right-4 wt:top-4 wt:text-lg wt:font-semibold"
-                data-on:click="$editPermissionsModalOpen = false" data-class:wt:hidden="$editPermissionsSuccess">
+        <div class="wt_bg-white wt_p-6 wt_relative">
+            <button type="button" class="wt_absolute wt_right-4 wt_top-4 wt_text-lg wt_font-semibold"
+                data-on:click="$editPermissionsModalOpen = false" data-class_wt_hidden="$editPermissionsSuccess">
                 ×
             </button>
 
-            <h2 class="wt:text-2xl wt:font-semibold wt:mb-4">
-                <span data-class:wt:hidden="$currentMemberName === ''">
+            <h2 class="wt_text-2xl wt_font-semibold wt_mb-4">
+                <span data-class_wt_hidden="$currentMemberName === ''">
                     <?php echo esc_html(__('Edit Permissions for', 'wicket-acc')); ?>
                     <span data-text="$currentMemberName"></span>
                 </span>
-                <span data-class:wt:hidden="$currentMemberName !== ''">
+                <span data-class_wt_hidden="$currentMemberName !== ''">
                     <?php echo esc_html__('Edit Permissions', 'wicket-acc'); ?>
                 </span>
             </h2>
@@ -426,14 +426,14 @@ $no_members_message = __('No members found.', 'wicket-acc');
                 <input type="hidden" name="nonce" value="<?php echo esc_attr(wp_create_nonce('wicket-orgman-update-permissions')); ?>">
 
                 <?php if ($allow_relationship_editing && !empty($relationship_types)): ?>
-                <div class="wt:mb-6">
-                    <label class="wt:block wt:text-sm wt:font-medium wt:mb-2" for="edit-member-relationship-type">
+                <div class="wt_mb-6">
+                    <label class="wt_block wt_text-sm wt_font-medium wt_mb-2" for="edit-member-relationship-type">
                         <?php esc_html_e('Relationship Type', 'wicket-acc'); ?>
                     </label>
                     <select id="edit-member-relationship-type" name="relationship_type"
                         data-attr:value="$currentMemberRelationshipType"
                         data-effect="el.value = $currentMemberRelationshipType || ''"
-                        class="wt:w-full wt:border wt:border-[var(--om-border-color)] wt:rounded-md wt:p-2">
+                        class="wt_w-full wt_border wt_border-color wt_rounded-md wt_p-2">
                         <option value=""><?php esc_html_e('Select a relationship type', 'wicket-acc'); ?></option>
                         <?php foreach ($relationship_types as $type_key => $type_label): ?>
                             <option value="<?php echo esc_attr($type_key); ?>">
@@ -444,35 +444,35 @@ $no_members_message = __('No members found.', 'wicket-acc');
                 </div>
                 <?php endif; ?>
 
-                <div class="wt:mb-6">
-                    <p class="wt:font-bold wt:mb-3"><?php esc_html_e('Roles', 'wicket-acc'); ?></p>
+                <div class="wt_mb-6">
+                    <p class="wt_font-bold wt_mb-3"><?php esc_html_e('Roles', 'wicket-acc'); ?></p>
                     <?php if (!empty($available_roles)): ?>
-                        <div class="wt:space-y-2">
+                        <div class="wt_space-y-2">
                             <?php foreach ($available_roles as $slug => $role): ?>
-                                <div class="wt:flex wt:items-center wt:gap-2">
-                                    <label class="wt:flex wt:items-center wt:gap-2 wt:cursor-pointer">
+                                <div class="wt_flex wt_items-center wt_gap-2">
+                                    <label class="wt_flex wt_items-center wt_gap-2 wt_cursor-pointer">
                                         <input
                                             type="checkbox"
                                             name="roles[]"
                                             value="<?php echo esc_attr($slug); ?>"
-                                            class="form-checkbox wt:h-4 wt:w-4 wt:text-[var(--om-bg-interactive)] wt:rounded wt:focus:wt:ring-[var(--om-bg-interactive)]"
+                                            class="form-checkbox wt_h-4 wt_w-4 wt_text-bg-interactive wt_rounded wt_focus_ring-bg-interactive"
                                             data-attr:checked="$currentMemberRoles.includes('<?php echo esc_js($slug); ?>')"
                                         >
-                                        <span class="wt:text-sm wt:text-[var(--om-text-content)]"><?php echo esc_html($role); ?></span>
+                                        <span class="wt_text-sm wt_text-content"><?php echo esc_html($role); ?></span>
                                     </label>
                                 </div>
                             <?php endforeach; ?>
                         </div>
                     <?php else: ?>
-                        <p class="wt:text-sm wt:text-[var(--om-text-content)]"><?php esc_html_e('No roles available.', 'wicket-acc'); ?></p>
+                        <p class="wt_text-sm wt_text-content"><?php esc_html_e('No roles available.', 'wicket-acc'); ?></p>
                     <?php endif; ?>
                 </div>
 
-                <div class="wt:flex wt:justify-end wt:gap-3" data-class:wt:hidden="$editPermissionsSuccess">
+                <div class="wt_flex wt_justify-end wt_gap-3" data-class_wt_hidden="$editPermissionsSuccess">
                     <button
                         type="button"
                         data-on:click="$editPermissionsModalOpen = false"
-                        class="button button--secondary wt:px-4 wt:py-2 wt:text-sm"
+                        class="button button--secondary wt_px-4 wt_py-2 wt_text-sm"
                         data-class:disabled="$editPermissionsSubmitting"
                         data-attr:disabled="$editPermissionsSubmitting"
                     >
@@ -480,22 +480,22 @@ $no_members_message = __('No members found.', 'wicket-acc');
                     </button>
                     <button
                         type="submit"
-                        class="button button--primary wt:inline-flex wt:items-center wt:gap-2 wt:px-4 wt:py-2 wt:text-sm"
+                        class="button button--primary wt_inline-flex wt_items-center wt_gap-2 wt_px-4 wt_py-2 wt_text-sm"
                         data-class:disabled="$editPermissionsSubmitting"
                         data-attr:disabled="$editPermissionsSubmitting"
                     >
-                        <span data-class:wt:hidden="$editPermissionsSubmitting">
+                        <span data-class_wt_hidden="$editPermissionsSubmitting">
                             <?php esc_html_e('Save Permissions', 'wicket-acc'); ?>
                         </span>
                         <svg
-                            class="wt:h-4 wt:w-4 wt:text-[var(--om-text-button-label-reversed)] wt:hidden"
-                            data-class:wt:hidden="!$editPermissionsSubmitting"
+                            class="wt_h-4 wt_w-4 wt_text-button-label-reversed wt_hidden"
+                            data-class_wt_hidden="!$editPermissionsSubmitting"
                             viewBox="0 0 24 24"
                             fill="none"
                             xmlns="http://www.w3.org/2000/svg"
                         >
-                            <circle class="wt:opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="wt:opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            <circle class="wt_opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="wt_opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
                     </button>
                 </div>
@@ -505,27 +505,27 @@ $no_members_message = __('No members found.', 'wicket-acc');
 </div>
 
 <!-- Remove Member Modal -->
-<div class="wt:mt-6">
-    <dialog id="removeMemberModal" class="modal wt:m-auto max-wt-md wt:rounded-md wt:shadow-md backdrop:wt:bg-black/50"
+<div class="wt_mt-6">
+    <dialog id="removeMemberModal" class="modal wt_m-auto max_wt_md wt_rounded-md wt_shadow-md backdrop_wt_bg-black-50"
         data-show="$removeMemberModalOpen"
         data-effect="if ($removeMemberModalOpen) el.showModal(); else el.close();"
         data-on:close="($membersLoading = false); $removeMemberModalOpen = false">
-        <div class="wt:bg-white wt:p-6 wt:relative">
-            <button type="button" class="wt:absolute wt:right-4 wt:top-4 wt:text-lg wt:font-semibold"
-                data-on:click="$removeMemberModalOpen = false" data-class:wt:hidden="$removeMemberSuccess">
+        <div class="wt_bg-white wt_p-6 wt_relative">
+            <button type="button" class="wt_absolute wt_right-4 wt_top-4 wt_text-lg wt_font-semibold"
+                data-on:click="$removeMemberModalOpen = false" data-class_wt_hidden="$removeMemberSuccess">
                 ×
             </button>
-            <h2 class="wt:text-2xl wt:font-semibold wt:mb-4"><?php esc_html_e('Remove Member', 'wicket-acc'); ?></h2>
+            <h2 class="wt_text-2xl wt_font-semibold wt_mb-4"><?php esc_html_e('Remove Member', 'wicket-acc'); ?></h2>
             <div id="remove-member-messages">
                 <!-- Messages will be inserted here by Datastar -->
             </div>
 
-            <div data-class:wt:hidden="$removeMemberSuccess">
-                <p class="wt:mb-6">
-                    <span data-class:wt:hidden="$currentRemoveMemberName === ''">
+            <div data-class_wt_hidden="$removeMemberSuccess">
+                <p class="wt_mb-6">
+                    <span data-class_wt_hidden="$currentRemoveMemberName === ''">
                         <?php echo esc_html(__('Are you sure you want to remove this member from the organization?', 'wicket-acc')); ?>
                     </span>
-                    <span data-class:wt:hidden="$currentRemoveMemberName !== ''">
+                    <span data-class_wt_hidden="$currentRemoveMemberName !== ''">
                         <?php echo esc_html__('Are you sure you want to remove', 'wicket-acc'); ?>
                         <span data-text="$currentRemoveMemberName"></span>
                         <?php echo esc_html__('from this organization?', 'wicket-acc'); ?>
@@ -551,11 +551,11 @@ $no_members_message = __('No members found.', 'wicket-acc');
                     <input type="hidden" name="person_membership_id" data-attr:value="$currentRemoveMemberPersonMembershipId">
                     <input type="hidden" name="nonce" value="<?php echo esc_attr(wp_create_nonce('wicket-orgman-remove-member')); ?>">
 
-                    <div class="wt:flex wt:justify-end wt:gap-3">
+                    <div class="wt_flex wt_justify-end wt_gap-3">
                         <button
                             type="button"
                             data-on:click="$removeMemberModalOpen = false"
-                            class="button button--secondary wt:px-4 wt:py-2 wt:text-sm"
+                            class="button button--secondary wt_px-4 wt_py-2 wt_text-sm"
                             data-class:disabled="$removeMemberSubmitting"
                             data-attr:disabled="$removeMemberSubmitting"
                         >
@@ -563,22 +563,22 @@ $no_members_message = __('No members found.', 'wicket-acc');
                         </button>
                         <button
                             type="submit"
-                            class="button button--danger wt:inline-flex wt:items-center wt:gap-2 wt:px-4 wt:py-2 wt:text-sm"
+                            class="button button--danger wt_inline-flex wt_items-center wt_gap-2 wt_px-4 wt_py-2 wt_text-sm"
                             data-class:disabled="$removeMemberSubmitting"
                             data-attr:disabled="$removeMemberSubmitting"
                         >
-                            <span data-class:wt:hidden="$removeMemberSubmitting">
+                            <span data-class_wt_hidden="$removeMemberSubmitting">
                                 <?php esc_html_e('Remove Member', 'wicket-acc'); ?>
                             </span>
                             <svg
-                                class="wt:h-4 wt:w-4 wt:text-white wt:hidden"
-                                data-class:wt:hidden="!$removeMemberSubmitting"
+                                class="wt_h-4 wt_w-4 wt_text-white wt_hidden"
+                                data-class_wt_hidden="!$removeMemberSubmitting"
                                 viewBox="0 0 24 24"
                                 fill="none"
                                 xmlns="http://www.w3.org/2000/svg"
                             >
-                                <circle class="wt:opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="wt:opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                <circle class="wt_opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="wt_opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
                         </button>
                     </div>

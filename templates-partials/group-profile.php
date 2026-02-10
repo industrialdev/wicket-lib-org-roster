@@ -15,7 +15,7 @@ $group_uuid = isset( $_GET['group_uuid'] ) ? sanitize_text_field( (string) $_GET
 $org_uuid = isset( $_GET['org_uuid'] ) ? sanitize_text_field( (string) $_GET['org_uuid'] ) : '';
 
 if ( empty( $group_uuid ) ) {
-    echo '<p class="wt:text-gray-500">' . esc_html__( 'No group selected.', 'wicket-acc' ) . '</p>';
+    echo '<p class="wt_text-gray-500">' . esc_html__( 'No group selected.', 'wicket-acc' ) . '</p>';
     return;
 }
 
@@ -38,39 +38,39 @@ $group_description = $group_attrs[ $desc_key ] ?? $group_attrs['description'] ??
 
 $update_endpoint = \OrgManagement\Helpers\TemplateHelper::template_url() . 'process/update-group';
 ?>
-<div class="wt:rounded-[var(--om-card-corner-radius)] wt:bg-[var(--om-bg-light-neutral)] wt:p-6">
-    <h3 class="wt:text-lg wt:font-semibold wt:mb-4"><?php esc_html_e( 'Group Information', 'wicket-acc' ); ?></h3>
+<div class="wt_rounded-card wt_bg-light-neutral wt_p-6">
+    <h3 class="wt_text-lg wt_font-semibold wt_mb-4"><?php esc_html_e( 'Group Information', 'wicket-acc' ); ?></h3>
 
     <?php if ( ! $enable_edit ) : ?>
-        <p class="wt:text-sm wt:text-[var(--om-text-content)]">
+        <p class="wt_text-sm wt_text-content">
             <?php echo esc_html( $group_description ?: __( 'No description available.', 'wicket-acc' ) ); ?>
         </p>
     <?php else : ?>
-        <div id="group-update-messages" class="wt:mb-3"></div>
+        <div id="group-update-messages" class="wt_mb-3"></div>
         <form
             method="post"
             data-on:submit="@post('<?php echo esc_js( $update_endpoint ); ?>', { contentType: 'form' })"
             data-on:success="console.log('Group updated');"
-            class="wt:flex wt:flex-col wt:gap-4">
+            class="wt_flex wt_flex-col wt_gap-4">
             <input type="hidden" name="group_uuid" value="<?php echo esc_attr( $group_uuid ); ?>">
             <input type="hidden" name="org_uuid" value="<?php echo esc_attr( $org_uuid ); ?>">
             <input type="hidden" name="nonce" value="<?php echo esc_attr( wp_create_nonce( 'wicket-orgman-update-group' ) ); ?>">
 
             <?php if ( in_array( 'name', $editable_fields, true ) ) : ?>
                 <div>
-                    <label class="wt:block wt:text-sm wt:font-medium wt:mb-2" for="group-name"><?php esc_html_e( 'Group Name', 'wicket-acc' ); ?></label>
-                    <input id="group-name" name="group_name" type="text" class="wt:w-full wt:rounded-md wt:border wt:border-[var(--om-border-color)] wt:bg-white wt:p-2" value="<?php echo esc_attr( $group_name ); ?>" required>
+                    <label class="wt_block wt_text-sm wt_font-medium wt_mb-2" for="group-name"><?php esc_html_e( 'Group Name', 'wicket-acc' ); ?></label>
+                    <input id="group-name" name="group_name" type="text" class="wt_w-full wt_rounded-md wt_border wt_border-color wt_bg-white wt_p-2" value="<?php echo esc_attr( $group_name ); ?>" required>
                 </div>
             <?php endif; ?>
 
             <?php if ( in_array( 'description', $editable_fields, true ) ) : ?>
                 <div>
-                    <label class="wt:block wt:text-sm wt:font-medium wt:mb-2" for="group-description"><?php esc_html_e( 'Description', 'wicket-acc' ); ?></label>
-                    <textarea id="group-description" name="group_description" rows="4" class="wt:w-full wt:rounded-md wt:border wt:border-[var(--om-border-color)] wt:bg-white wt:p-2"><?php echo esc_textarea( $group_description ); ?></textarea>
+                    <label class="wt_block wt_text-sm wt_font-medium wt_mb-2" for="group-description"><?php esc_html_e( 'Description', 'wicket-acc' ); ?></label>
+                    <textarea id="group-description" name="group_description" rows="4" class="wt_w-full wt_rounded-md wt_border wt_border-color wt_bg-white wt_p-2"><?php echo esc_textarea( $group_description ); ?></textarea>
                 </div>
             <?php endif; ?>
 
-            <div class="wt:flex wt:justify-end">
+            <div class="wt_flex wt_justify-end">
                 <button type="submit" class="button button--primary">
                     <?php esc_html_e( 'Save Group', 'wicket-acc' ); ?>
                 </button>

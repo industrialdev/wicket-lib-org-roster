@@ -122,32 +122,32 @@ if ($membership_data) {
     }
 }
 ?>
-<div id="organization-details-container" class="org-details wt:flex wt:flex-col wt:gap-3">
-    <div class="org-details__summary-card wt:rounded-[var(--om-card-accent-corner-radius)] wt:p-4 wt:bg-[var(--om-bg-card)]">
-        <h2 class="org-details__title wt:text-[var(--om-heading-sm)] wt:mb-2 wt:text-[var(--om-heading-color)] wt:font-extrabold"><?php echo esc_html($org_name); ?></h2>
+<div id="organization-details-container" class="org-details wt_flex wt_flex-col wt_gap-3">
+    <div class="org-details__summary-card wt_rounded-card-accent wt_p-4 wt_bg-summary-card">
+        <h2 class="org-details__title wt_text-heading-sm wt_mb-2 wt_text-heading-color wt_font-extrabold"><?php echo esc_html($org_name); ?></h2>
         <?php if ($group_name): ?>
-            <p class="org-details__summary-item wt:leading-normal wt:text-[var(--om-text-content)] mb-1">
+            <p class="org-details__summary-item wt_leading-normal wt_text-content mb-1">
                 <?php echo esc_html($group_name); ?>
             </p>
         <?php endif; ?>
-        <div class="org-details__summary-list wt:flex wt:flex-col wt:gap-0">
-            <p class="org-details__summary-heading wt:font-bold wt:mb-1"><?php esc_html_e('Summary', 'wicket-acc'); ?></p>
+        <div class="org-details__summary-list wt_flex wt_flex-col wt_gap-0">
+            <p class="org-details__summary-heading wt_font-bold wt_mb-1"><?php esc_html_e('Summary', 'wicket-acc'); ?></p>
             <?php if ($membership_name): ?>
-                <p class="org-details__summary-item wt:leading-normal wt:text-[var(--om-text-content)] mb-1"><?php echo esc_html__('Membership Tier-', 'wicket-acc') . ' ' . esc_html($membership_name); ?></p>
+                <p class="org-details__summary-item wt_leading-normal wt_text-content mb-1"><?php echo esc_html__('Membership Tier-', 'wicket-acc') . ' ' . esc_html($membership_name); ?></p>
             <?php endif; ?>
             <?php if ($owner_name): ?>
-                <p class="org-details__summary-item wt:leading-normal wt:text-[var(--om-text-content)] mb-1"><?php echo esc_html__('Membership Owner-', 'wicket-acc') . ' ' . esc_html($owner_name); ?></p>
+                <p class="org-details__summary-item wt_leading-normal wt_text-content mb-1"><?php echo esc_html__('Membership Owner-', 'wicket-acc') . ' ' . esc_html($owner_name); ?></p>
             <?php endif; ?>
             <?php if ($renewal_date): ?>
-                <p class="org-details__summary-item wt:leading-normal wt:text-[var(--om-text-content)] mb-1"><?php echo esc_html__('Renewal Date-', 'wicket-acc') . ' ' . esc_html($renewal_date); ?></p>
+                <p class="org-details__summary-item wt_leading-normal wt_text-content mb-1"><?php echo esc_html__('Renewal Date-', 'wicket-acc') . ' ' . esc_html($renewal_date); ?></p>
             <?php endif; ?>
             <?php if ($seats_label): ?>
-                <p class="org-details__summary-item wt:leading-normal wt:text-[var(--om-text-content)] mb-1"><?php echo esc_html($seats_label); ?></p>
+                <p class="org-details__summary-item wt_leading-normal wt_text-content mb-1"><?php echo esc_html($seats_label); ?></p>
             <?php endif; ?>
         </div>
     </div>
 
-    <div class="org-details__actions wt:flex wt:items-center wt:justify-evenly wt:gap-8 wt:mt-4">
+    <div class="org-details__actions wt_flex wt_items-center wt_justify-evenly wt_gap-8 wt_mt-4">
         <?php
         // Check user permissions for this organization
         $can_edit_org = \OrgManagement\Helpers\PermissionHelper::can_edit_organization($org_uuid);
@@ -167,13 +167,13 @@ if ($membership_data) {
 
         <?php if ($can_edit_org): ?>
             <a href="<?php echo esc_url(add_query_arg($profile_params, $profile_url)); ?>"
-                class="org-details__action-link wt:text-primary-600 wt:hover:text-primary-700 underline underline-offset-4"><?php esc_html_e('Org Profile', 'wicket-acc'); ?></a>
+                class="org-details__action-link wt_text-primary-600 wt_hover_text-primary-700 underline underline-offset-4"><?php esc_html_e('Org Profile', 'wicket-acc'); ?></a>
         <?php endif; ?>
 
         <?php if ($is_membership_manager): ?>
             <a href="<?php echo esc_url(add_query_arg($members_params, $members_url)); ?>"
-                class="org-details__action-link wt:text-primary-600 wt:hover:text-primary-700 underline underline-offset-4"><?php esc_html_e('Manage Members', 'wicket-acc'); ?></a>
+                class="org-details__action-link wt_text-primary-600 wt_hover_text-primary-700 underline underline-offset-4"><?php esc_html_e('Manage Members', 'wicket-acc'); ?></a>
         <?php endif; ?>
     </div>
-    <div class="org-details__divider wt:border-b wt:border-primary-600 wt:mt-1"></div>
+    <div class="org-details__divider wt_border-b wt_border-primary-600 wt_mt-1"></div>
 </div>

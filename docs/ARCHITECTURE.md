@@ -24,7 +24,7 @@ The library decouples member management logic from the `MemberService` using the
 All business logic is encapsulated in a service layer. Services are domain-specific and typically lazily instantiated to minimize overhead.
 
 ## 3. Component Interaction
-- **Frontend**: A reactive UI built with Datastar and Tailwind CSS.
+- **Frontend**: A reactive UI built with Datastar and scoped vanilla CSS (BEM + `wt_` prefixed utility-style classes).
 - **Backend API**: WordPress REST API controllers that delegate to the service layer.
 - **Data Source**: Wicket MDP API (External).
 - **Payment/Seats**: WooCommerce integration for purchasing and updating seat limits.
@@ -39,4 +39,4 @@ All business logic is encapsulated in a service layer. Services are domain-speci
 - **Wicket MDP**: Primary source of truth for people, organizations, and memberships.
 - **WooCommerce**: Handles seat limit transactions.
 - **Datastar**: Provides the frontend reactivity framework.
-- **Tailwind CSS**: Utility-first styling with a `wt:` prefix to prevent collisions.
+- **Scoped CSS layer**: Vanilla CSS with `wt_` prefixed utility-style classes to prevent collisions.

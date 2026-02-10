@@ -1,1111 +1,1251 @@
 :root {
-  --om-primary-color: #132a55;
-  --om-primary-color-hover: #0f2348;
-  --om-border-color: #d9d9de;
-  --om-background-light: #f5f7fa;
-  --om-secondary-color: #005dab;
-  --om-secondary-outline-color: #005dab;
-  --om-modal-overlay-color: #00000080;
-  --om-text-content: #232a31;
-  --om-text-content-reversed: #fff;
-  --om-text-content-secondary: #4f5962;
-  --om-text-content-secondary-reversed: #d3d4d6;
-  --om-interactive: #4c4c92;
-  --om-interactive-reversed: #fff;
-  --om-text-disabled: #7e7e7e;
-  --om-text-button-label: #232a31;
-  --om-text-button-label-reversed: #fff;
-  --om-text-accent: #4c4c92;
-  --om-text-accent-reversed: #f9d84a;
-  --om-text-label-1: #232a31;
-  --om-text-label-2: #fff;
-  --om-text-tag: #4c4c92;
-  --om-bg-body: #fff;
-  --om-bg-label: #f9d84a;
-  --om-bg-label-2: #4c4c92;
-  --om-bg-tag: #fdf5d2;
-  --om-bg-interactive: #4c4c92;
-  --om-bg-interactive-reversed: #f9d84a;
-  --om-bg-white: #fff;
-  --om-bg-card: #fff;
-  --om-bg-dark: #4c4c92;
-  --om-bg-dark-alternate: #262749;
-  --om-bg-light: #fff;
-  --om-bg-light-alternate: #ededf4;
-  --om-bg-light-neutral: #ededf4;
-  --om-bg-image-overlay: #4c4c92d9;
-  --om-bg-accent-dark: #262749;
-  --om-bg-accent-light: #d2d2e4;
-  --om-bg-callout-1: #d2d2e4;
-  --om-bg-callout-2: #fde6cc;
-  --om-bg-disabled: #d3d4d6;
-  --om-highlight-light: #d2d2e4;
-  --om-highlight-dark: #4c4c92;
-  --om-status-active: #acdbc5;
-  --om-status-inactive: #7b7f83;
-  --om-border-card: #4c4c92;
-  --om-border-dark: #262749;
-  --om-border-light: #e9eaea;
-  --om-border-white: #fff;
-  --om-border-accent: #f9d84a;
-  --om-border-interactive: #4c4c92;
-  --om-border-interactive-reversed: #f9d84a;
-  --om-border-tag: #f9d84a;
-  --om-border-input-default: #4c4c92;
-  --om-border-disabled: #d3d4d6;
-  --om-state-info-primary: #8ed6eb;
-  --om-state-info-primary-light: #e3f5fa;
-  --om-state-info-secondary: #cca3be;
-  --om-state-info-secondary-light: #f2e8ef;
-  --om-state-warning: #f99c32;
-  --om-state-warning-light: #fde6cc;
-  --om-state-error: #f26c6c;
-  --om-state-error-light: #fcdada;
-  --om-state-success: #acdbc5;
-  --om-state-success-light: #eaf6f1;
-  --om-table-header-bg: #4c4c92;
-  --om-table-header-label: #fff;
-  --om-table-row: #fff;
-  --om-table-row-alternate: #ededf4;
-  --om-table-row-border: #a5a5c9;
-  --om-table-footer-bg: #4c4c92;
-  --om-table-footer-label: #fff;
-  --om-nav-contextual-title: #4c4c92;
-  --om-nav-contextual-link-lvl-1: #262749;
-  --om-nav-contextual-sublink: #232a31;
-  --om-dropshadow: #232a3133;
-  --om-modal-bg-overlay: #262749e6;
-  --om-border-sm: 1px;
-  --om-border-md: 2px;
-  --om-border-lg: 4px;
-  --om-border-interactive-sm: 1px;
-  --om-border-interactive-md: 2px;
-  --om-border-interactive-lg: 4px;
-  --om-border-alert: 4px;
-  --om-border-call-out: 0px;
-  --om-border-main-nav-top: 0px;
-  --om-border-footer-top: 1px;
-  --om-border-main-nav-bottom: 0px;
-  --om-border-card-size: 0px;
-  --om-border-tag-size: 2px;
-  --om-border-dynamic-card: 0px;
-  --om-border-listing-card: 0px;
-  --om-border-featured-card: 0px;
-  --om-border-banner-bottom: 1px;
-  --om-border-footer-social: 2px;
-  --om-border-footer-divider: 1px;
-  --om-space-0: 0px;
-  --om-space-025: 2px;
-  --om-space-050: 4px;
-  --om-space-075: 6px;
-  --om-space-100: 8px;
-  --om-space-150: 12px;
-  --om-space-200: 16px;
-  --om-space-250: 20px;
-  --om-space-300: 24px;
-  --om-space-400: 32px;
-  --om-space-500: 40px;
-  --om-space-600: 48px;
-  --om-space-800: 64px;
-  --om-space-1000: 80px;
-  --om-card-corner-radius: 8px;
-  --om-interactive-corner-radius-lg: 12px;
-  --om-interactive-corner-radius-md: 8px;
-  --om-image-corner-radius: 0px;
-  --om-card-accent-corner-radius: 16px;
-  --om-label-corner-radius: 8px;
-  --om-tag-corner-radius: 4px;
-  --om-input-fields-corner-radius-md: 8px;
-  --om-input-fields-corner-radius-sm: 2px;
-  --om-alerts-corner-radius: 0px;
-  --om-dropdown-mega-corner-radius: 8px;
-  --om-main-menu-highlight-radius: 8px;
-  --om-nav-links-highlight-radius: 8px;
-  --om-banner-radius: 0px;
-  --om-social-media-radius: 100px;
-  --om-elevation-4: 0 4px 8px var(--om-dropshadow);
-  --om-elevation-8: 0 8px 12px var(--om-dropshadow);
-  --om-elevation-12: 0 12px 12px var(--om-dropshadow);
-  --om-nav-main-bg: #fff;
-  --om-nav-main-border: #e9eaea;
-  --om-nav-main-label: #232a31;
-  --om-nav-main-highlight: #d2d2e4;
-  --om-nav-main-border-interactive: #4c4c92;
-  --om-nav-secondary-label: #4c4c92;
-  --om-dropdown-mega-bg: #262749;
-  --om-dropdown-mega-heading-link: #f9d84a;
-  --om-dropdown-mega-link: #fff;
-  --om-dropdown-mega-bg-highlight: #4c4c92;
-  --om-nav-utility-bg: #262749;
-  --om-nav-utility-label: #fff;
-  --om-nav-utility-bg-highlight: #4c4c92;
-  --om-nav-footer-bg: #262749;
-  --om-nav-footer-title: #f9d84a;
-  --om-nav-footer-sublink: #fff;
-  --om-nav-footer-border: #4c4c92;
-  --om-nav-footer-border-top: #262749;
-  --om-nav-footer-social-bg: #f9d84a;
-  --om-nav-footer-social-text: #262749;
-  --om-nav-footer-social-text-hover: #fff;
-  --om-nav-footer-social-border-hover: #f9d84a;
-  --om-nav-footer-text-content: #fff;
-  --om-nav-footer-text-interactive: #f9d84a;
-  --om-nav-footer-newsletter-bg: #4c4c92;
-  --om-nav-footer-newsletter-text-content: #fff;
-  --om-font-family-name: proxima-nova, sans-serif;
+  --wicket-orgman-primary-color: #132a55;
+  --wicket-orgman-primary-color-hover: #0f2348;
+  --wicket-orgman-border-color: #d9d9de;
+  --wicket-orgman-background-light: #f5f7fa;
+  --wicket-orgman-secondary-color: #005dab;
+  --wicket-orgman-secondary-outline-color: #005dab;
+  --wicket-orgman-modal-overlay-color: #00000080;
+  --wicket-orgman-text-content: #232a31;
+  --wicket-orgman-text-content-reversed: #fff;
+  --wicket-orgman-text-content-secondary: #4f5962;
+  --wicket-orgman-text-content-secondary-reversed: #d3d4d6;
+  --wicket-orgman-interactive: #4c4c92;
+  --wicket-orgman-interactive-reversed: #fff;
+  --wicket-orgman-text-disabled: #7e7e7e;
+  --wicket-orgman-text-button-label: #232a31;
+  --wicket-orgman-text-button-label-reversed: #fff;
+  --wicket-orgman-text-accent: #4c4c92;
+  --wicket-orgman-text-accent-reversed: #f9d84a;
+  --wicket-orgman-text-label-1: #232a31;
+  --wicket-orgman-text-label-2: #fff;
+  --wicket-orgman-text-tag: #4c4c92;
+  --wicket-orgman-bg-body: #fff;
+  --wicket-orgman-bg-label: #f9d84a;
+  --wicket-orgman-bg-label-2: #4c4c92;
+  --wicket-orgman-bg-tag: #fdf5d2;
+  --wicket-orgman-bg-interactive: #4c4c92;
+  --wicket-orgman-bg-interactive-reversed: #f9d84a;
+  --wicket-orgman-bg-white: #fff;
+  --wicket-orgman-bg-card: #fff;
+  --wicket-orgman-bg-dark: #4c4c92;
+  --wicket-orgman-bg-dark-alternate: #262749;
+  --wicket-orgman-bg-light: #fff;
+  --wicket-orgman-bg-light-alternate: #ededf4;
+  --wicket-orgman-bg-light-neutral: #ededf4;
+  --wicket-orgman-bg-image-overlay: #4c4c92d9;
+  --wicket-orgman-bg-accent-dark: #262749;
+  --wicket-orgman-bg-accent-light: #d2d2e4;
+  --wicket-orgman-bg-callout-1: #d2d2e4;
+  --wicket-orgman-bg-callout-2: #fde6cc;
+  --wicket-orgman-bg-summary-card: #cce4f3;
+  --wicket-orgman-bg-disabled: #d3d4d6;
+  --wicket-orgman-highlight-light: #d2d2e4;
+  --wicket-orgman-highlight-dark: #4c4c92;
+  --wicket-orgman-status-active: #acdbc5;
+  --wicket-orgman-status-inactive: #7b7f83;
+  --wicket-orgman-border-card: #4c4c92;
+  --wicket-orgman-border-dark: #262749;
+  --wicket-orgman-border-light: #e9eaea;
+  --wicket-orgman-border-white: #fff;
+  --wicket-orgman-border-accent: #f9d84a;
+  --wicket-orgman-border-interactive: #4c4c92;
+  --wicket-orgman-border-interactive-reversed: #f9d84a;
+  --wicket-orgman-border-tag: #f9d84a;
+  --wicket-orgman-border-input-default: #4c4c92;
+  --wicket-orgman-border-disabled: #d3d4d6;
+  --wicket-orgman-state-info-primary: #8ed6eb;
+  --wicket-orgman-state-info-primary-light: #e3f5fa;
+  --wicket-orgman-state-info-secondary: #cca3be;
+  --wicket-orgman-state-info-secondary-light: #f2e8ef;
+  --wicket-orgman-state-warning: #f99c32;
+  --wicket-orgman-state-warning-light: #fde6cc;
+  --wicket-orgman-state-error: #f26c6c;
+  --wicket-orgman-state-error-light: #fcdada;
+  --wicket-orgman-state-success: #acdbc5;
+  --wicket-orgman-state-success-light: #eaf6f1;
+  --wicket-orgman-table-header-bg: #4c4c92;
+  --wicket-orgman-table-header-label: #fff;
+  --wicket-orgman-table-row: #fff;
+  --wicket-orgman-table-row-alternate: #ededf4;
+  --wicket-orgman-table-row-border: #a5a5c9;
+  --wicket-orgman-table-footer-bg: #4c4c92;
+  --wicket-orgman-table-footer-label: #fff;
+  --wicket-orgman-nav-contextual-title: #4c4c92;
+  --wicket-orgman-nav-contextual-link-lvl-1: #262749;
+  --wicket-orgman-nav-contextual-sublink: #232a31;
+  --wicket-orgman-dropshadow: #232a3133;
+  --wicket-orgman-modal-bg-overlay: #262749e6;
+  --wicket-orgman-border-sm: 1px;
+  --wicket-orgman-border-md: 2px;
+  --wicket-orgman-border-lg: 4px;
+  --wicket-orgman-border-interactive-sm: 1px;
+  --wicket-orgman-border-interactive-md: 2px;
+  --wicket-orgman-border-interactive-lg: 4px;
+  --wicket-orgman-border-alert: 4px;
+  --wicket-orgman-border-call-out: 0px;
+  --wicket-orgman-border-main-nav-top: 0px;
+  --wicket-orgman-border-footer-top: 1px;
+  --wicket-orgman-border-main-nav-bottom: 0px;
+  --wicket-orgman-border-card-size: 0px;
+  --wicket-orgman-border-tag-size: 2px;
+  --wicket-orgman-border-dynamic-card: 0px;
+  --wicket-orgman-border-listing-card: 0px;
+  --wicket-orgman-border-featured-card: 0px;
+  --wicket-orgman-border-banner-bottom: 1px;
+  --wicket-orgman-border-footer-social: 2px;
+  --wicket-orgman-border-footer-divider: 1px;
+  --wicket-orgman-space-0: 0px;
+  --wicket-orgman-space-025: 2px;
+  --wicket-orgman-space-050: 4px;
+  --wicket-orgman-space-075: 6px;
+  --wicket-orgman-space-100: 8px;
+  --wicket-orgman-space-150: 12px;
+  --wicket-orgman-space-200: 16px;
+  --wicket-orgman-space-250: 20px;
+  --wicket-orgman-space-300: 24px;
+  --wicket-orgman-space-400: 32px;
+  --wicket-orgman-space-500: 40px;
+  --wicket-orgman-space-600: 48px;
+  --wicket-orgman-space-800: 64px;
+  --wicket-orgman-space-1000: 80px;
+  --wicket-orgman-card-corner-radius: 8px;
+  --wicket-orgman-interactive-corner-radius-lg: 12px;
+  --wicket-orgman-interactive-corner-radius-md: 8px;
+  --wicket-orgman-image-corner-radius: 0px;
+  --wicket-orgman-card-accent-corner-radius: 16px;
+  --wicket-orgman-label-corner-radius: 8px;
+  --wicket-orgman-tag-corner-radius: 4px;
+  --wicket-orgman-input-fields-corner-radius-md: 8px;
+  --wicket-orgman-input-fields-corner-radius-sm: 2px;
+  --wicket-orgman-alerts-corner-radius: 0px;
+  --wicket-orgman-dropdown-mega-corner-radius: 8px;
+  --wicket-orgman-main-menu-highlight-radius: 8px;
+  --wicket-orgman-nav-links-highlight-radius: 8px;
+  --wicket-orgman-banner-radius: 0px;
+  --wicket-orgman-social-media-radius: 100px;
+  --wicket-orgman-elevation-4: 0 4px 8px var(--wicket-orgman-dropshadow);
+  --wicket-orgman-elevation-8: 0 8px 12px var(--wicket-orgman-dropshadow);
+  --wicket-orgman-elevation-12: 0 12px 12px var(--wicket-orgman-dropshadow);
+  --wicket-orgman-nav-main-bg: #fff;
+  --wicket-orgman-nav-main-border: #e9eaea;
+  --wicket-orgman-nav-main-label: #232a31;
+  --wicket-orgman-nav-main-highlight: #d2d2e4;
+  --wicket-orgman-nav-main-border-interactive: #4c4c92;
+  --wicket-orgman-nav-secondary-label: #4c4c92;
+  --wicket-orgman-dropdown-mega-bg: #262749;
+  --wicket-orgman-dropdown-mega-heading-link: #f9d84a;
+  --wicket-orgman-dropdown-mega-link: #fff;
+  --wicket-orgman-dropdown-mega-bg-highlight: #4c4c92;
+  --wicket-orgman-nav-utility-bg: #262749;
+  --wicket-orgman-nav-utility-label: #fff;
+  --wicket-orgman-nav-utility-bg-highlight: #4c4c92;
+  --wicket-orgman-nav-footer-bg: #262749;
+  --wicket-orgman-nav-footer-title: #f9d84a;
+  --wicket-orgman-nav-footer-sublink: #fff;
+  --wicket-orgman-nav-footer-border: #4c4c92;
+  --wicket-orgman-nav-footer-border-top: #262749;
+  --wicket-orgman-nav-footer-social-bg: #f9d84a;
+  --wicket-orgman-nav-footer-social-text: #262749;
+  --wicket-orgman-nav-footer-social-text-hover: #fff;
+  --wicket-orgman-nav-footer-social-border-hover: #f9d84a;
+  --wicket-orgman-nav-footer-text-content: #fff;
+  --wicket-orgman-nav-footer-text-interactive: #f9d84a;
+  --wicket-orgman-nav-footer-newsletter-bg: #4c4c92;
+  --wicket-orgman-nav-footer-newsletter-text-content: #fff;
+  --wicket-orgman-font-family-name: proxima-nova, sans-serif;
 }
 
-/*! tailwindcss v4.1.16 | MIT License | https://tailwindcss.com */
-@layer properties {
-  @supports (((-webkit-hyphens: none)) and (not (margin-trim: inline))) or
-    ((-moz-orient: inline) and (not (color: rgb(from red r g b)))) {
-    *,
-    :before,
-    :after,
-    ::backdrop {
-      --tw-space-y-reverse: 0;
-      --tw-border-style: solid;
-      --tw-leading: initial;
-      --tw-font-weight: initial;
-      --tw-shadow: 0 0 #0000;
-      --tw-shadow-color: initial;
-      --tw-shadow-alpha: 100%;
-      --tw-inset-shadow: 0 0 #0000;
-      --tw-inset-shadow-color: initial;
-      --tw-inset-shadow-alpha: 100%;
-      --tw-ring-color: initial;
-      --tw-ring-shadow: 0 0 #0000;
-      --tw-inset-ring-color: initial;
-      --tw-inset-ring-shadow: 0 0 #0000;
-      --tw-ring-inset: initial;
-      --tw-ring-offset-width: 0px;
-      --tw-ring-offset-color: #fff;
-      --tw-ring-offset-shadow: 0 0 #0000;
-      --tw-backdrop-blur: initial;
-      --tw-backdrop-brightness: initial;
-      --tw-backdrop-contrast: initial;
-      --tw-backdrop-grayscale: initial;
-      --tw-backdrop-hue-rotate: initial;
-      --tw-backdrop-invert: initial;
-      --tw-backdrop-opacity: initial;
-      --tw-backdrop-saturate: initial;
-      --tw-backdrop-sepia: initial;
-      --tw-duration: initial;
-    }
-  }
+*,
+:before,
+:after,
+::backdrop {
+  --wicket-tw-space-y-reverse: 0;
+  --wicket-tw-border-style: solid;
+  --wicket-tw-leading: initial;
+  --wicket-tw-font-weight: initial;
+  --wicket-tw-shadow: 0 0 #0000;
+  --wicket-tw-shadow-color: initial;
+  --wicket-tw-shadow-alpha: 100%;
+  --wicket-tw-inset-shadow: 0 0 #0000;
+  --wicket-tw-inset-shadow-color: initial;
+  --wicket-tw-inset-shadow-alpha: 100%;
+  --wicket-tw-ring-color: initial;
+  --wicket-tw-ring-shadow: 0 0 #0000;
+  --wicket-tw-inset-ring-color: initial;
+  --wicket-tw-inset-ring-shadow: 0 0 #0000;
+  --wicket-tw-ring-inset: initial;
+  --wicket-tw-ring-offset-width: 0px;
+  --wicket-tw-ring-offset-color: #fff;
+  --wicket-tw-ring-offset-shadow: 0 0 #0000;
+  --wicket-tw-backdrop-blur: initial;
+  --wicket-tw-backdrop-brightness: initial;
+  --wicket-tw-backdrop-contrast: initial;
+  --wicket-tw-backdrop-grayscale: initial;
+  --wicket-tw-backdrop-hue-rotate: initial;
+  --wicket-tw-backdrop-invert: initial;
+  --wicket-tw-backdrop-opacity: initial;
+  --wicket-tw-backdrop-saturate: initial;
+  --wicket-tw-backdrop-sepia: initial;
+  --wicket-tw-duration: initial;
 }
-@layer theme {
-  :root,
-  :host {
-    --wt-font-sans:
-      ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
-      "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-    --wt-font-mono:
-      ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
-      "Courier New", monospace;
-    --wt-color-red-50: oklch(97.1% 0.013 17.38);
-    --wt-color-red-100: oklch(93.6% 0.032 17.717);
-    --wt-color-red-200: oklch(88.5% 0.062 18.334);
-    --wt-color-red-400: oklch(70.4% 0.191 22.216);
-    --wt-color-red-500: oklch(63.7% 0.237 25.331);
-    --wt-color-red-600: oklch(57.7% 0.245 27.325);
-    --wt-color-red-700: oklch(50.5% 0.213 27.518);
-    --wt-color-red-800: oklch(44.4% 0.177 26.899);
-    --wt-color-red-900: oklch(39.6% 0.141 25.723);
-    --wt-color-green-100: oklch(96.2% 0.044 156.743);
-    --wt-color-green-400: oklch(79.2% 0.209 151.711);
-    --wt-color-green-500: oklch(72.3% 0.219 149.579);
-    --wt-color-green-700: oklch(52.7% 0.154 150.069);
-    --wt-color-blue-500: oklch(62.3% 0.214 259.815);
-    --wt-color-blue-600: oklch(54.6% 0.245 262.881);
-    --wt-color-blue-700: oklch(48.8% 0.243 264.376);
-    --wt-color-blue-900: oklch(37.9% 0.146 265.522);
-    --wt-color-gray-100: oklch(96.7% 0.003 264.542);
-    --wt-color-gray-200: oklch(92.8% 0.006 264.531);
-    --wt-color-gray-300: oklch(87.2% 0.01 258.338);
-    --wt-color-gray-400: oklch(70.7% 0.022 261.325);
-    --wt-color-gray-500: oklch(55.1% 0.027 264.364);
-    --wt-color-gray-600: oklch(44.6% 0.03 256.802);
-    --wt-color-gray-700: oklch(37.3% 0.034 259.733);
-    --wt-color-gray-900: oklch(21% 0.034 264.665);
-    --wt-color-white: #fff;
-    --wt-spacing: 0.25rem;
-    --wt-text-xs: 0.75rem;
-    --wt-text-xs--line-height: calc(1 / 0.75);
-    --wt-text-sm: 0.875rem;
-    --wt-text-sm--line-height: calc(1.25 / 0.875);
-    --wt-text-base: 1rem;
-    --wt-text-base--line-height: calc(1.5 / 1);
-    --wt-text-lg: 1.125rem;
-    --wt-text-lg--line-height: calc(1.75 / 1.125);
-    --wt-text-xl: 1.25rem;
-    --wt-text-xl--line-height: calc(1.75 / 1.25);
-    --wt-text-2xl: 1.5rem;
-    --wt-text-2xl--line-height: calc(2 / 1.5);
-    --wt-text-3xl: 1.875rem;
-    --wt-text-3xl--line-height: calc(2.25 / 1.875);
-    --wt-text-4xl: 2.25rem;
-    --wt-text-4xl--line-height: calc(2.5 / 2.25);
-    --wt-text-5xl: 3rem;
-    --wt-text-5xl--line-height: 1;
-    --wt-font-weight-thin: 100;
-    --wt-font-weight-light: 300;
-    --wt-font-weight-normal: 400;
-    --wt-font-weight-medium: 500;
-    --wt-font-weight-semibold: 600;
-    --wt-font-weight-bold: 700;
-    --wt-font-weight-extrabold: 800;
-    --wt-leading-tight: 1.25;
-    --wt-leading-snug: 1.375;
-    --wt-leading-normal: 1.5;
-    --wt-leading-relaxed: 1.625;
-    --wt-leading-loose: 2;
-    --wt-radius-sm: 0.25rem;
-    --wt-radius-md: 0.375rem;
-    --wt-radius-lg: 0.5rem;
-    --wt-radius-xl: 0.75rem;
-    --wt-radius-2xl: 1rem;
-    --wt-ease-in: cubic-bezier(0.4, 0, 1, 1);
-    --wt-ease-out: cubic-bezier(0, 0, 0.2, 1);
-    --wt-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
-    --wt-animate-spin: spin 1s linear infinite;
-    --wt-animate-ping: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
-    --wt-animate-pulse: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-    --wt-animate-bounce: bounce 1s infinite;
-    --wt-blur-xs: 4px;
-    --wt-default-transition-duration: 0.15s;
-    --wt-default-transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-    --wt-default-font-family: var(--wt-font-sans);
-    --wt-default-mono-font-family: var(--wt-font-mono);
-  }
+
+:root,
+:host {
+  --wicket-orgman-font-sans:
+    ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+    "Segoe UI Symbol", "Noto Color Emoji";
+  --wicket-orgman-font-mono:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
+  --wicket-orgman-color-red-50: oklch(97.1% 0.013 17.38);
+  --wicket-orgman-color-red-100: oklch(93.6% 0.032 17.717);
+  --wicket-orgman-color-red-200: oklch(88.5% 0.062 18.334);
+  --wicket-orgman-color-red-400: oklch(70.4% 0.191 22.216);
+  --wicket-orgman-color-red-500: oklch(63.7% 0.237 25.331);
+  --wicket-orgman-color-red-600: oklch(57.7% 0.245 27.325);
+  --wicket-orgman-color-red-700: oklch(50.5% 0.213 27.518);
+  --wicket-orgman-color-red-800: oklch(44.4% 0.177 26.899);
+  --wicket-orgman-color-red-900: oklch(39.6% 0.141 25.723);
+  --wicket-orgman-color-green-100: oklch(96.2% 0.044 156.743);
+  --wicket-orgman-color-green-400: oklch(79.2% 0.209 151.711);
+  --wicket-orgman-color-green-500: oklch(72.3% 0.219 149.579);
+  --wicket-orgman-color-green-700: oklch(52.7% 0.154 150.069);
+  --wicket-orgman-color-blue-500: oklch(62.3% 0.214 259.815);
+  --wicket-orgman-color-blue-600: oklch(54.6% 0.245 262.881);
+  --wicket-orgman-color-blue-700: oklch(48.8% 0.243 264.376);
+  --wicket-orgman-color-blue-900: oklch(37.9% 0.146 265.522);
+  --wicket-orgman-color-gray-100: oklch(96.7% 0.003 264.542);
+  --wicket-orgman-color-gray-200: oklch(92.8% 0.006 264.531);
+  --wicket-orgman-color-gray-300: oklch(87.2% 0.01 258.338);
+  --wicket-orgman-color-gray-400: oklch(70.7% 0.022 261.325);
+  --wicket-orgman-color-gray-500: oklch(55.1% 0.027 264.364);
+  --wicket-orgman-color-gray-600: oklch(44.6% 0.03 256.802);
+  --wicket-orgman-color-gray-700: oklch(37.3% 0.034 259.733);
+  --wicket-orgman-color-gray-900: oklch(21% 0.034 264.665);
+  --wicket-orgman-color-yellow-50: #fefce8;
+  --wicket-orgman-color-yellow-200: #fef08a;
+  --wicket-orgman-color-yellow-600: #ca8a04;
+  --wicket-orgman-color-yellow-800: #854d0e;
+  --wicket-orgman-color-white: #fff;
+  --wicket-orgman-spacing: 0.25rem;
+  --wicket-orgman-text-xs: 0.75rem;
+  --wicket-orgman-text-xs--line-height: calc(1 / 0.75);
+  --wicket-orgman-text-sm: 0.875rem;
+  --wicket-orgman-text-sm--line-height: calc(1.25 / 0.875);
+  --wicket-orgman-text-base: 1rem;
+  --wicket-orgman-text-base--line-height: calc(1.5 / 1);
+  --wicket-orgman-text-lg: 1.125rem;
+  --wicket-orgman-text-lg--line-height: calc(1.75 / 1.125);
+  --wicket-orgman-text-xl: 1.25rem;
+  --wicket-orgman-text-xl--line-height: calc(1.75 / 1.25);
+  --wicket-orgman-text-2xl: 1.5rem;
+  --wicket-orgman-text-2xl--line-height: calc(2 / 1.5);
+  --wicket-orgman-text-3xl: 1.875rem;
+  --wicket-orgman-text-3xl--line-height: calc(2.25 / 1.875);
+  --wicket-orgman-text-4xl: 2.25rem;
+  --wicket-orgman-text-4xl--line-height: calc(2.5 / 2.25);
+  --wicket-orgman-text-5xl: 3rem;
+  --wicket-orgman-text-5xl--line-height: 1;
+  --wicket-orgman-font-weight-thin: 100;
+  --wicket-orgman-font-weight-light: 300;
+  --wicket-orgman-font-weight-normal: 400;
+  --wicket-orgman-font-weight-medium: 500;
+  --wicket-orgman-font-weight-semibold: 600;
+  --wicket-orgman-font-weight-bold: 700;
+  --wicket-orgman-font-weight-extrabold: 800;
+  --wicket-orgman-leading-tight: 1.25;
+  --wicket-orgman-leading-snug: 1.375;
+  --wicket-orgman-leading-normal: 1.5;
+  --wicket-orgman-leading-relaxed: 1.625;
+  --wicket-orgman-leading-loose: 2;
+  --wicket-orgman-radius-sm: 0.25rem;
+  --wicket-orgman-radius-md: 0.375rem;
+  --wicket-orgman-radius-lg: 0.5rem;
+  --wicket-orgman-radius-xl: 0.75rem;
+  --wicket-orgman-radius-2xl: 1rem;
+  --wicket-orgman-ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --wicket-orgman-ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --wicket-orgman-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --wicket-orgman-animate-spin: spin 1s linear infinite;
+  --wicket-orgman-animate-ping: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
+  --wicket-orgman-animate-pulse: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --wicket-orgman-animate-bounce: bounce 1s infinite;
+  --wicket-orgman-blur-xs: 4px;
+  --wicket-orgman-default-transition-duration: 0.15s;
+  --wicket-orgman-default-transition-timing-function: cubic-bezier(
+    0.4,
+    0,
+    0.2,
+    1
+  );
+  --wicket-orgman-default-font-family: var(--wicket-orgman-font-sans);
+  --wicket-orgman-default-mono-font-family: var(--wicket-orgman-font-mono);
 }
-@layer base {
-  *,
-  :after,
-  :before,
-  ::backdrop {
-    box-sizing: border-box;
-    border: 0 solid;
-    margin: 0;
-    padding: 0;
-  }
-  ::file-selector-button {
-    box-sizing: border-box;
-    border: 0 solid;
-    margin: 0;
-    padding: 0;
-  }
-  html,
-  :host {
-    -webkit-text-size-adjust: 100%;
-    tab-size: 4;
-    line-height: 1.5;
-    font-family: var(
-      --wt-default-font-family,
-      ui-sans-serif,
-      system-ui,
-      sans-serif,
-      "Apple Color Emoji",
-      "Segoe UI Emoji",
-      "Segoe UI Symbol",
-      "Noto Color Emoji"
-    );
-    font-feature-settings: var(--wt-default-font-feature-settings, normal);
-    font-variation-settings: var(--wt-default-font-variation-settings, normal);
-    -webkit-tap-highlight-color: transparent;
-  }
-  hr {
-    height: 0;
-    color: inherit;
-    border-top-width: 1px;
-  }
-  abbr:where([title]) {
-    -webkit-text-decoration: underline dotted;
-    text-decoration: underline dotted;
-  }
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    font-size: inherit;
-    font-weight: inherit;
-  }
-  a {
-    color: inherit;
-    -webkit-text-decoration: inherit;
-    -webkit-text-decoration: inherit;
-    -webkit-text-decoration: inherit;
-    text-decoration: inherit;
-  }
-  b,
-  strong {
-    font-weight: bolder;
-  }
-  code,
-  kbd,
-  samp,
-  pre {
-    font-family: var(
-      --wt-default-mono-font-family,
-      ui-monospace,
-      SFMono-Regular,
-      Menlo,
-      Monaco,
-      Consolas,
-      "Liberation Mono",
-      "Courier New",
-      monospace
-    );
-    font-feature-settings: var(--wt-default-mono-font-feature-settings, normal);
-    font-variation-settings: var(
-      --wt-default-mono-font-variation-settings,
-      normal
-    );
-    font-size: 1em;
-  }
-  small {
-    font-size: 80%;
-  }
-  sub,
-  sup {
-    vertical-align: baseline;
-    font-size: 75%;
-    line-height: 0;
-    position: relative;
-  }
-  sub {
-    bottom: -0.25em;
-  }
-  sup {
-    top: -0.5em;
-  }
-  table {
-    text-indent: 0;
-    border-color: inherit;
-    border-collapse: collapse;
-  }
-  :-moz-focusring {
-    outline: auto;
-  }
-  progress {
-    vertical-align: baseline;
-  }
-  summary {
-    display: list-item;
-  }
-  ol,
-  ul,
-  menu {
-    list-style: none;
-  }
-  img,
-  svg,
-  video,
-  canvas,
-  audio,
-  iframe,
-  embed,
-  object {
-    vertical-align: middle;
-    display: block;
-  }
-  img,
-  video {
-    max-width: 100%;
-    height: auto;
-  }
-  button,
-  input,
-  select,
-  optgroup,
-  textarea {
-    font: inherit;
-    font-feature-settings: inherit;
-    font-variation-settings: inherit;
-    letter-spacing: inherit;
-    color: inherit;
-    opacity: 1;
-    background-color: #0000;
-    border-radius: 0;
-  }
-  ::file-selector-button {
-    font: inherit;
-    font-feature-settings: inherit;
-    font-variation-settings: inherit;
-    letter-spacing: inherit;
-    color: inherit;
-    opacity: 1;
-    background-color: #0000;
-    border-radius: 0;
-  }
-  :where(select:is([multiple], [size])) optgroup {
-    font-weight: bolder;
-  }
-  :where(select:is([multiple], [size])) optgroup option {
-    padding-inline-start: 20px;
-  }
-  ::file-selector-button {
-    margin-inline-end: 4px;
-  }
+
+*,
+:after,
+:before,
+::backdrop {
+  box-sizing: border-box;
+  border: 0 solid;
+  margin: 0;
+  padding: 0;
+}
+::file-selector-button {
+  box-sizing: border-box;
+  border: 0 solid;
+  margin: 0;
+  padding: 0;
+}
+html,
+:host {
+  -webkit-text-size-adjust: 100%;
+  tab-size: 4;
+  line-height: 1.5;
+  font-family: var(
+    --wicket-orgman-default-font-family,
+    ui-sans-serif,
+    system-ui,
+    sans-serif,
+    "Apple Color Emoji",
+    "Segoe UI Emoji",
+    "Segoe UI Symbol",
+    "Noto Color Emoji"
+  );
+  font-feature-settings: var(
+    --wicket-orgman-default-font-feature-settings,
+    normal
+  );
+  font-variation-settings: var(
+    --wicket-orgman-default-font-variation-settings,
+    normal
+  );
+  -webkit-tap-highlight-color: transparent;
+}
+hr {
+  height: 0;
+  color: inherit;
+  border-top-width: 1px;
+}
+abbr:where([title]) {
+  -webkit-text-decoration: underline dotted;
+  text-decoration: underline dotted;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-size: inherit;
+  font-weight: inherit;
+}
+a {
+  color: inherit;
+  -webkit-text-decoration: inherit;
+  -webkit-text-decoration: inherit;
+  -webkit-text-decoration: inherit;
+  text-decoration: inherit;
+}
+b,
+strong {
+  font-weight: bolder;
+}
+code,
+kbd,
+samp,
+pre {
+  font-family: var(
+    --wicket-orgman-default-mono-font-family,
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    Consolas,
+    "Liberation Mono",
+    "Courier New",
+    monospace
+  );
+  font-feature-settings: var(
+    --wicket-orgman-default-mono-font-feature-settings,
+    normal
+  );
+  font-variation-settings: var(
+    --wicket-orgman-default-mono-font-variation-settings,
+    normal
+  );
+  font-size: 1em;
+}
+small {
+  font-size: 80%;
+}
+sub,
+sup {
+  vertical-align: baseline;
+  font-size: 75%;
+  line-height: 0;
+  position: relative;
+}
+sub {
+  bottom: -0.25em;
+}
+sup {
+  top: -0.5em;
+}
+table {
+  text-indent: 0;
+  border-color: inherit;
+  border-collapse: collapse;
+}
+:-moz-focusring {
+  outline: auto;
+}
+progress {
+  vertical-align: baseline;
+}
+summary {
+  display: list-item;
+}
+ol,
+ul,
+menu {
+  list-style: none;
+}
+img,
+svg,
+video,
+canvas,
+audio,
+iframe,
+embed,
+object {
+  vertical-align: middle;
+  display: block;
+}
+img,
+video {
+  max-width: 100%;
+  height: auto;
+}
+button,
+input,
+select,
+optgroup,
+textarea {
+  font: inherit;
+  font-feature-settings: inherit;
+  font-variation-settings: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+  opacity: 1;
+  background-color: #0000;
+  border-radius: 0;
+}
+::file-selector-button {
+  font: inherit;
+  font-feature-settings: inherit;
+  font-variation-settings: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+  opacity: 1;
+  background-color: #0000;
+  border-radius: 0;
+}
+:where(select:is([multiple], [size])) optgroup {
+  font-weight: bolder;
+}
+:where(select:is([multiple], [size])) optgroup option {
+  padding-inline-start: 20px;
+}
+::file-selector-button {
+  margin-inline-end: 4px;
+}
+::placeholder {
+  opacity: 1;
+}
+@supports (not ((-webkit-appearance: -apple-pay-button))) or
+  (contain-intrinsic-size: 1px) {
   ::placeholder {
-    opacity: 1;
-  }
-  @supports (not ((-webkit-appearance: -apple-pay-button))) or
-    (contain-intrinsic-size: 1px) {
-    ::placeholder {
-      color: currentColor;
-    }
-    @supports (color: color-mix(in lab, red, red)) {
-      ::placeholder {
-        color: color-mix(in oklab, currentcolor 50%, transparent);
-      }
-    }
-  }
-  textarea {
-    resize: vertical;
-  }
-  ::-webkit-search-decoration {
-    -webkit-appearance: none;
-  }
-  ::-webkit-date-and-time-value {
-    min-height: 1lh;
-    text-align: inherit;
-  }
-  ::-webkit-datetime-edit {
-    display: inline-flex;
-  }
-  ::-webkit-datetime-edit-fields-wrapper {
-    padding: 0;
-  }
-  ::-webkit-datetime-edit {
-    padding-block: 0;
-  }
-  ::-webkit-datetime-edit-year-field {
-    padding-block: 0;
-  }
-  ::-webkit-datetime-edit-month-field {
-    padding-block: 0;
-  }
-  ::-webkit-datetime-edit-day-field {
-    padding-block: 0;
-  }
-  ::-webkit-datetime-edit-hour-field {
-    padding-block: 0;
-  }
-  ::-webkit-datetime-edit-minute-field {
-    padding-block: 0;
-  }
-  ::-webkit-datetime-edit-second-field {
-    padding-block: 0;
-  }
-  ::-webkit-datetime-edit-millisecond-field {
-    padding-block: 0;
-  }
-  ::-webkit-datetime-edit-meridiem-field {
-    padding-block: 0;
-  }
-  ::-webkit-calendar-picker-indicator {
-    line-height: 1;
-  }
-  :-moz-ui-invalid {
-    box-shadow: none;
-  }
-  button,
-  input:where([type="button"], [type="reset"], [type="submit"]) {
-    appearance: button;
-  }
-  ::file-selector-button {
-    appearance: button;
-  }
-  ::-webkit-inner-spin-button {
-    height: auto;
-  }
-  ::-webkit-outer-spin-button {
-    height: auto;
-  }
-  [hidden]:where(:not([hidden="until-found"])) {
-    display: none;
-  }
-  *,
-  :after,
-  :before,
-  ::backdrop {
-    border-color: var(--color-gray-200, currentColor);
-  }
-  ::file-selector-button {
-    border-color: var(--color-gray-200, currentColor);
-  }
-}
-@layer components;
-@layer utilities {
-  .wt\:pointer-events-none {
-    pointer-events: none;
-  }
-  .wt\:absolute {
-    position: absolute;
-  }
-  .wt\:relative {
-    position: relative;
-  }
-  .wt\:inset-0 {
-    inset: calc(var(--wt-spacing) * 0);
-  }
-  .wt\:inset-y-0 {
-    inset-block: calc(var(--wt-spacing) * 0);
-  }
-  .wt\:top-4 {
-    top: calc(var(--wt-spacing) * 4);
-  }
-  .wt\:right-4 {
-    right: calc(var(--wt-spacing) * 4);
-  }
-  .wt\:left-0 {
-    left: calc(var(--wt-spacing) * 0);
-  }
-  .wt\:z-10 {
-    z-index: 10;
-  }
-  .wt\:m-auto {
-    margin: auto;
-  }
-  .wt\:my-3 {
-    margin-block: calc(var(--wt-spacing) * 3);
-  }
-  .wt\:mt-1 {
-    margin-top: calc(var(--wt-spacing) * 1);
-  }
-  .wt\:mt-2 {
-    margin-top: calc(var(--wt-spacing) * 2);
-  }
-  .wt\:mt-3 {
-    margin-top: calc(var(--wt-spacing) * 3);
-  }
-  .wt\:mt-4 {
-    margin-top: calc(var(--wt-spacing) * 4);
-  }
-  .wt\:mt-6 {
-    margin-top: calc(var(--wt-spacing) * 6);
-  }
-  .wt\:mr-2 {
-    margin-right: calc(var(--wt-spacing) * 2);
-  }
-  .wt\:mr-3 {
-    margin-right: calc(var(--wt-spacing) * 3);
-  }
-  .wt\:mb-0 {
-    margin-bottom: calc(var(--wt-spacing) * 0);
-  }
-  .wt\:mb-1 {
-    margin-bottom: calc(var(--wt-spacing) * 1);
-  }
-  .wt\:mb-2 {
-    margin-bottom: calc(var(--wt-spacing) * 2);
-  }
-  .wt\:mb-3 {
-    margin-bottom: calc(var(--wt-spacing) * 3);
-  }
-  .wt\:mb-4 {
-    margin-bottom: calc(var(--wt-spacing) * 4);
-  }
-  .wt\:mb-5 {
-    margin-bottom: calc(var(--wt-spacing) * 5);
-  }
-  .wt\:mb-6 {
-    margin-bottom: calc(var(--wt-spacing) * 6);
-  }
-  .wt\:ml-2 {
-    margin-left: calc(var(--wt-spacing) * 2);
-  }
-  .wt\:ml-6 {
-    margin-left: calc(var(--wt-spacing) * 6);
-  }
-  .wt\:block {
-    display: block;
-  }
-  .wt\:flex {
-    display: flex;
-  }
-  .wt\:hidden {
-    display: none;
-  }
-  .wt\:inline-block {
-    display: inline-block;
-  }
-  .wt\:inline-flex {
-    display: inline-flex;
-  }
-  .wt\:h-2 {
-    height: calc(var(--wt-spacing) * 2);
-  }
-  .wt\:h-4 {
-    height: calc(var(--wt-spacing) * 4);
-  }
-  .wt\:h-5 {
-    height: calc(var(--wt-spacing) * 5);
-  }
-  .wt\:h-10 {
-    height: calc(var(--wt-spacing) * 10);
-  }
-  .wt\:h-full {
-    height: 100%;
-  }
-  .wt\:w-2 {
-    width: calc(var(--wt-spacing) * 2);
-  }
-  .wt\:w-4 {
-    width: calc(var(--wt-spacing) * 4);
-  }
-  .wt\:w-5 {
-    width: calc(var(--wt-spacing) * 5);
-  }
-  .wt\:w-10 {
-    width: calc(var(--wt-spacing) * 10);
-  }
-  .wt\:w-full {
-    width: 100%;
-  }
-  .wt\:shrink-0 {
-    flex-shrink: 0;
-  }
-  .wt\:animate-spin {
-    animation: var(--wt-animate-spin);
-  }
-  .wt\:cursor-pointer {
-    cursor: pointer;
-  }
-  .wt\:grid-cols-1 {
-    grid-template-columns: repeat(1, minmax(0, 1fr));
-  }
-  .wt\:flex-col {
-    flex-direction: column;
-  }
-  .wt\:items-baseline {
-    align-items: baseline;
-  }
-  .wt\:items-center {
-    align-items: center;
-  }
-  .wt\:items-end {
-    align-items: flex-end;
-  }
-  .wt\:items-start {
-    align-items: flex-start;
-  }
-  .wt\:items-stretch {
-    align-items: stretch;
-  }
-  .wt\:justify-between {
-    justify-content: space-between;
-  }
-  .wt\:justify-center {
-    justify-content: center;
-  }
-  .wt\:justify-end {
-    justify-content: flex-end;
-  }
-  .wt\:justify-evenly {
-    justify-content: space-evenly;
-  }
-  .wt\:gap-0 {
-    gap: calc(var(--wt-spacing) * 0);
-  }
-  .wt\:gap-1 {
-    gap: calc(var(--wt-spacing) * 1);
-  }
-  .wt\:gap-2 {
-    gap: calc(var(--wt-spacing) * 2);
-  }
-  .wt\:gap-3 {
-    gap: calc(var(--wt-spacing) * 3);
-  }
-  .wt\:gap-4 {
-    gap: calc(var(--wt-spacing) * 4);
-  }
-  .wt\:gap-8 {
-    gap: calc(var(--wt-spacing) * 8);
-  }
-  :where(.wt\:space-y-2 > :not(:last-child)) {
-    --tw-space-y-reverse: 0;
-    margin-block-start: calc(
-      calc(var(--wt-spacing) * 2) * var(--tw-space-y-reverse)
-    );
-    margin-block-end: calc(
-      calc(var(--wt-spacing) * 2) * calc(1 - var(--tw-space-y-reverse))
-    );
-  }
-  .wt\:self-end {
-    align-self: flex-end;
-  }
-  .wt\:rounded {
-    border-radius: 0.25rem;
-  }
-  .wt\:rounded-\[var\(--om-card-accent-corner-radius\)\] {
-    border-radius: var(--om-card-accent-corner-radius);
-  }
-  .wt\:rounded-\[var\(--om-card-corner-radius\)\] {
-    border-radius: var(--om-card-corner-radius);
-  }
-  .wt\:rounded-full {
-    border-radius: 3.40282e38px;
-  }
-  .wt\:rounded-md {
-    border-radius: var(--wt-radius-md);
-  }
-  .wt\:rounded-sm {
-    border-radius: var(--wt-radius-sm);
-  }
-  .wt\:border {
-    border-style: var(--tw-border-style);
-    border-width: 1px;
-  }
-  .wt\:border-4 {
-    border-style: var(--tw-border-style);
-    border-width: 4px;
-  }
-  .wt\:border-b {
-    border-bottom-style: var(--tw-border-style);
-    border-bottom-width: 1px;
-  }
-  .wt\:border-\[var\(--om-bg-interactive\)\] {
-    border-color: var(--om-bg-interactive);
-  }
-  .wt\:border-\[var\(--om-border-color\)\] {
-    border-color: var(--om-border-color);
-  }
-  .wt\:border-\[var\(--om-border-light\)\] {
-    border-color: var(--om-border-light);
-  }
-  .wt\:border-gray-200 {
-    border-color: var(--wt-color-gray-200);
-  }
-  .wt\:border-gray-300 {
-    border-color: var(--wt-color-gray-300);
-  }
-  .wt\:border-green-400 {
-    border-color: var(--wt-color-green-400);
-  }
-  .wt\:border-red-200 {
-    border-color: var(--wt-color-red-200);
-  }
-  .wt\:border-red-400 {
-    border-color: var(--wt-color-red-400);
-  }
-  .wt\:border-transparent {
-    border-color: #0000;
-  }
-  .wt\:border-t-transparent {
-    border-top-color: #0000;
-  }
-  .wt\:bg-\[var\(--om-bg-light-neutral\)\],
-  .wt\:bg-\[var\(--om-bg-light-neutral\)\]\/85 {
-    background-color: var(--om-bg-light-neutral);
+    color: currentColor;
   }
   @supports (color: color-mix(in lab, red, red)) {
-    .wt\:bg-\[var\(--om-bg-light-neutral\)\]\/85 {
-      background-color: color-mix(
-        in oklab,
-        var(--om-bg-light-neutral) 85%,
-        transparent
-      );
+    ::placeholder {
+      color: color-mix(in oklab, currentcolor 50%, transparent);
     }
   }
-  .wt\:bg-\[var\(--om-border-light\)\] {
-    background-color: var(--om-border-light);
-  }
-  .wt\:bg-blue-600 {
-    background-color: var(--wt-color-blue-600);
-  }
-  .wt\:bg-gray-100 {
-    background-color: var(--wt-color-gray-100);
-  }
-  .wt\:bg-gray-400 {
-    background-color: var(--wt-color-gray-400);
-  }
-  .wt\:bg-green-100 {
-    background-color: var(--wt-color-green-100);
-  }
-  .wt\:bg-green-500 {
-    background-color: var(--wt-color-green-500);
-  }
-  .wt\:bg-red-50 {
-    background-color: var(--wt-color-red-50);
-  }
-  .wt\:bg-red-100 {
-    background-color: var(--wt-color-red-100);
-  }
-  .wt\:bg-red-600 {
-    background-color: var(--wt-color-red-600);
-  }
-  .wt\:bg-white {
-    background-color: var(--wt-color-white);
-  }
-  .wt\:p-2 {
-    padding: calc(var(--wt-spacing) * 2);
-  }
-  .wt\:p-2\.5 {
-    padding: calc(var(--wt-spacing) * 2.5);
-  }
-  .wt\:p-3 {
-    padding: calc(var(--wt-spacing) * 3);
-  }
-  .wt\:p-4 {
-    padding: calc(var(--wt-spacing) * 4);
-  }
-  .wt\:p-6 {
-    padding: calc(var(--wt-spacing) * 6);
-  }
-  .wt\:px-2 {
-    padding-inline: calc(var(--wt-spacing) * 2);
-  }
-  .wt\:px-3 {
-    padding-inline: calc(var(--wt-spacing) * 3);
-  }
-  .wt\:px-4 {
-    padding-inline: calc(var(--wt-spacing) * 4);
-  }
-  .wt\:py-0\.5 {
-    padding-block: calc(var(--wt-spacing) * 0.5);
-  }
-  .wt\:py-2 {
-    padding-block: calc(var(--wt-spacing) * 2);
-  }
-  .wt\:py-3 {
-    padding-block: calc(var(--wt-spacing) * 3);
-  }
-  .wt\:py-8 {
-    padding-block: calc(var(--wt-spacing) * 8);
-  }
-  .wt\:pt-4 {
-    padding-top: calc(var(--wt-spacing) * 4);
-  }
-  .wt\:pl-3 {
-    padding-left: calc(var(--wt-spacing) * 3);
-  }
-  .wt\:pl-10 {
-    padding-left: calc(var(--wt-spacing) * 10);
-  }
-  .wt\:text-center {
-    text-align: center;
-  }
-  .wt\:text-left {
-    text-align: left;
-  }
-  .wt\:text-2xl {
-    font-size: var(--wt-text-2xl);
-    line-height: var(--tw-leading, var(--wt-text-2xl--line-height));
-  }
-  .wt\:text-5xl {
-    font-size: var(--wt-text-5xl);
-    line-height: var(--tw-leading, var(--wt-text-5xl--line-height));
-  }
-  .wt\:text-base {
-    font-size: var(--wt-text-base);
-    line-height: var(--tw-leading, var(--wt-text-base--line-height));
-  }
-  .wt\:text-lg {
-    font-size: var(--wt-text-lg);
-    line-height: var(--tw-leading, var(--wt-text-lg--line-height));
-  }
-  .wt\:text-sm {
-    font-size: var(--wt-text-sm);
-    line-height: var(--tw-leading, var(--wt-text-sm--line-height));
-  }
-  .wt\:text-xl {
-    font-size: var(--wt-text-xl);
-    line-height: var(--tw-leading, var(--wt-text-xl--line-height));
-  }
-  .wt\:text-xs {
-    font-size: var(--wt-text-xs);
-    line-height: var(--tw-leading, var(--wt-text-xs--line-height));
-  }
-  .wt\:leading-none {
-    --tw-leading: 1;
-    line-height: 1;
-  }
-  .wt\:leading-normal {
-    --tw-leading: var(--wt-leading-normal);
-    line-height: var(--wt-leading-normal);
-  }
-  .wt\:font-bold {
-    --tw-font-weight: var(--wt-font-weight-bold);
-    font-weight: var(--wt-font-weight-bold);
-  }
-  .wt\:font-extrabold {
-    --tw-font-weight: var(--wt-font-weight-extrabold);
-    font-weight: var(--wt-font-weight-extrabold);
-  }
-  .wt\:font-medium {
-    --tw-font-weight: var(--wt-font-weight-medium);
-    font-weight: var(--wt-font-weight-medium);
-  }
-  .wt\:font-semibold {
-    --tw-font-weight: var(--wt-font-weight-semibold);
-    font-weight: var(--wt-font-weight-semibold);
-  }
-  .wt\:whitespace-nowrap {
-    white-space: nowrap;
-  }
-  .wt\:text-\[var\(--om-bg-interactive\)\] {
-    color: var(--om-bg-interactive);
-  }
-  .wt\:text-\[var\(--om-heading-color\)\] {
-    color: var(--om-heading-color);
-  }
-  .wt\:text-\[var\(--om-heading-sm\)\] {
-    color: var(--om-heading-sm);
-  }
-  .wt\:text-\[var\(--om-heading-xs\)\] {
-    color: var(--om-heading-xs);
-  }
-  .wt\:text-\[var\(--om-text-button-label-reversed\)\] {
-    color: var(--om-text-button-label-reversed);
-  }
-  .wt\:text-\[var\(--om-text-content\)\] {
-    color: var(--om-text-content);
-  }
-  .wt\:text-\[var\(--om-text-interactive\)\] {
-    color: var(--om-text-interactive);
-  }
-  .wt\:text-\[var\(--om-text-warning\)\] {
-    color: var(--om-text-warning);
-  }
-  .wt\:text-blue-600 {
-    color: var(--wt-color-blue-600);
-  }
-  .wt\:text-gray-400 {
-    color: var(--wt-color-gray-400);
-  }
-  .wt\:text-gray-500 {
-    color: var(--wt-color-gray-500);
-  }
-  .wt\:text-gray-600 {
-    color: var(--wt-color-gray-600);
-  }
-  .wt\:text-gray-700 {
-    color: var(--wt-color-gray-700);
-  }
-  .wt\:text-gray-900 {
-    color: var(--wt-color-gray-900);
-  }
-  .wt\:text-green-700 {
-    color: var(--wt-color-green-700);
-  }
-  .wt\:text-red-500 {
-    color: var(--wt-color-red-500);
-  }
-  .wt\:text-red-600 {
-    color: var(--wt-color-red-600);
-  }
-  .wt\:text-red-700 {
-    color: var(--wt-color-red-700);
-  }
-  .wt\:text-red-800 {
-    color: var(--wt-color-red-800);
-  }
-  .wt\:text-white {
-    color: var(--wt-color-white);
-  }
-  .wt\:opacity-25 {
-    opacity: 0.25;
-  }
-  .wt\:opacity-75 {
-    opacity: 0.75;
-  }
-  .wt\:shadow-md {
-    --tw-shadow:
-      0 4px 6px -1px var(--tw-shadow-color, #0000001a),
-      0 2px 4px -2px var(--tw-shadow-color, #0000001a);
-    box-shadow:
-      var(--tw-inset-shadow), var(--tw-inset-ring-shadow),
-      var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
-  }
-  .wt\:shadow-sm {
-    --tw-shadow:
-      0 1px 3px 0 var(--tw-shadow-color, #0000001a),
-      0 1px 2px -1px var(--tw-shadow-color, #0000001a);
-    box-shadow:
-      var(--tw-inset-shadow), var(--tw-inset-ring-shadow),
-      var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
-  }
-  .wt\:shadow-xs {
-    --tw-shadow: 0 1px 2px 0 var(--tw-shadow-color, #0000000d);
-    box-shadow:
-      var(--tw-inset-shadow), var(--tw-inset-ring-shadow),
-      var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
-  }
-  .wt\:backdrop-blur-xs {
-    --tw-backdrop-blur: blur(var(--wt-blur-xs));
-    -webkit-backdrop-filter: var(--tw-backdrop-blur)
-      var(--tw-backdrop-brightness) var(--tw-backdrop-contrast)
-      var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate)
-      var(--tw-backdrop-invert) var(--tw-backdrop-opacity)
-      var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
-    backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness)
-      var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale)
-      var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert)
-      var(--tw-backdrop-opacity) var(--tw-backdrop-saturate)
-      var(--tw-backdrop-sepia);
-  }
-  .wt\:transition-colors {
-    transition-property:
-      color, background-color, border-color, outline-color,
-      text-decoration-color, fill, stroke, --tw-gradient-from,
-      --tw-gradient-via, --tw-gradient-to;
-    transition-timing-function: var(
-      --tw-ease,
-      var(--wt-default-transition-timing-function)
+}
+textarea {
+  resize: vertical;
+}
+::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+::-webkit-date-and-time-value {
+  min-height: 1lh;
+  text-align: inherit;
+}
+::-webkit-datetime-edit {
+  display: inline-flex;
+}
+::-webkit-datetime-edit-fields-wrapper {
+  padding: 0;
+}
+::-webkit-datetime-edit {
+  padding-block: 0;
+}
+::-webkit-datetime-edit-year-field {
+  padding-block: 0;
+}
+::-webkit-datetime-edit-month-field {
+  padding-block: 0;
+}
+::-webkit-datetime-edit-day-field {
+  padding-block: 0;
+}
+::-webkit-datetime-edit-hour-field {
+  padding-block: 0;
+}
+::-webkit-datetime-edit-minute-field {
+  padding-block: 0;
+}
+::-webkit-datetime-edit-second-field {
+  padding-block: 0;
+}
+::-webkit-datetime-edit-millisecond-field {
+  padding-block: 0;
+}
+::-webkit-datetime-edit-meridiem-field {
+  padding-block: 0;
+}
+::-webkit-calendar-picker-indicator {
+  line-height: 1;
+}
+:-moz-ui-invalid {
+  box-shadow: none;
+}
+button,
+input:where([type="button"], [type="reset"], [type="submit"]) {
+  appearance: button;
+}
+::file-selector-button {
+  appearance: button;
+}
+::-webkit-inner-spin-button {
+  height: auto;
+}
+::-webkit-outer-spin-button {
+  height: auto;
+}
+[hidden]:where(:not([hidden="until-found"])) {
+  display: none;
+}
+*,
+:after,
+:before,
+::backdrop {
+  border-color: var(--color-gray-200, currentColor);
+}
+::file-selector-button {
+  border-color: var(--color-gray-200, currentColor);
+}
+
+.wt_pointer-events-none {
+  pointer-events: none;
+}
+.wt_absolute {
+  position: absolute;
+}
+.wt_relative {
+  position: relative;
+}
+.wt_inset-0 {
+  inset: calc(var(--wicket-orgman-spacing) * 0);
+}
+.wt_inset-y-0 {
+  inset-block: calc(var(--wicket-orgman-spacing) * 0);
+}
+.wt_top-4 {
+  top: calc(var(--wicket-orgman-spacing) * 4);
+}
+.wt_right-4 {
+  right: calc(var(--wicket-orgman-spacing) * 4);
+}
+.wt_left-0 {
+  left: calc(var(--wicket-orgman-spacing) * 0);
+}
+.wt_z-10 {
+  z-index: 10;
+}
+.wt_m-auto {
+  margin: auto;
+}
+.max_wt_3xl {
+  max-width: 48rem;
+}
+.max_wt_md {
+  max-width: 28rem;
+}
+.wt_my-3 {
+  margin-block: calc(var(--wicket-orgman-spacing) * 3);
+}
+.wt_mt-1 {
+  margin-top: calc(var(--wicket-orgman-spacing) * 1);
+}
+.wt_mt-2 {
+  margin-top: calc(var(--wicket-orgman-spacing) * 2);
+}
+.wt_mt-3 {
+  margin-top: calc(var(--wicket-orgman-spacing) * 3);
+}
+.wt_mt-4 {
+  margin-top: calc(var(--wicket-orgman-spacing) * 4);
+}
+.wt_mt-6 {
+  margin-top: calc(var(--wicket-orgman-spacing) * 6);
+}
+.wt_mr-2 {
+  margin-right: calc(var(--wicket-orgman-spacing) * 2);
+}
+.wt_mr-3 {
+  margin-right: calc(var(--wicket-orgman-spacing) * 3);
+}
+.wt_mb-0 {
+  margin-bottom: calc(var(--wicket-orgman-spacing) * 0);
+}
+.wt_mb-1 {
+  margin-bottom: calc(var(--wicket-orgman-spacing) * 1);
+}
+.wt_mb-2 {
+  margin-bottom: calc(var(--wicket-orgman-spacing) * 2);
+}
+.wt_mb-3 {
+  margin-bottom: calc(var(--wicket-orgman-spacing) * 3);
+}
+.wt_mb-4 {
+  margin-bottom: calc(var(--wicket-orgman-spacing) * 4);
+}
+.wt_mb-5 {
+  margin-bottom: calc(var(--wicket-orgman-spacing) * 5);
+}
+.wt_mb-6 {
+  margin-bottom: calc(var(--wicket-orgman-spacing) * 6);
+}
+.wt_ml-2 {
+  margin-left: calc(var(--wicket-orgman-spacing) * 2);
+}
+.wt_ml-6 {
+  margin-left: calc(var(--wicket-orgman-spacing) * 6);
+}
+.wt_block {
+  display: block;
+}
+.wt_flex {
+  display: flex;
+}
+.wt_hidden {
+  display: none;
+}
+.wt_inline-block {
+  display: inline-block;
+}
+.wt_inline-flex {
+  display: inline-flex;
+}
+.wt_h-2 {
+  height: calc(var(--wicket-orgman-spacing) * 2);
+}
+.wt_h-4 {
+  height: calc(var(--wicket-orgman-spacing) * 4);
+}
+.wt_h-5 {
+  height: calc(var(--wicket-orgman-spacing) * 5);
+}
+.wt_h-10 {
+  height: calc(var(--wicket-orgman-spacing) * 10);
+}
+.wt_h-full {
+  height: 100%;
+}
+.wt_w-2 {
+  width: calc(var(--wicket-orgman-spacing) * 2);
+}
+.wt_w-4 {
+  width: calc(var(--wicket-orgman-spacing) * 4);
+}
+.wt_w-5 {
+  width: calc(var(--wicket-orgman-spacing) * 5);
+}
+.wt_w-10 {
+  width: calc(var(--wicket-orgman-spacing) * 10);
+}
+.wt_w-full {
+  width: 100%;
+}
+.wt_shrink-0 {
+  flex-shrink: 0;
+}
+.wt_animate-spin {
+  animation: var(--wicket-orgman-animate-spin);
+}
+.wt_cursor-pointer {
+  cursor: pointer;
+}
+.wt_grid-cols-1 {
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+.wt_flex-col {
+  flex-direction: column;
+}
+.wt_items-baseline {
+  align-items: baseline;
+}
+.wt_items-center {
+  align-items: center;
+}
+.wt_items-end {
+  align-items: flex-end;
+}
+.wt_items-start {
+  align-items: flex-start;
+}
+.wt_items-stretch {
+  align-items: stretch;
+}
+.wt_justify-between {
+  justify-content: space-between;
+}
+.wt_justify-center {
+  justify-content: center;
+}
+.wt_justify-end {
+  justify-content: flex-end;
+}
+.wt_justify-evenly {
+  justify-content: space-evenly;
+}
+.wt_gap-0 {
+  gap: calc(var(--wicket-orgman-spacing) * 0);
+}
+.wt_gap-1 {
+  gap: calc(var(--wicket-orgman-spacing) * 1);
+}
+.wt_gap-2 {
+  gap: calc(var(--wicket-orgman-spacing) * 2);
+}
+.wt_gap-3 {
+  gap: calc(var(--wicket-orgman-spacing) * 3);
+}
+.wt_gap-4 {
+  gap: calc(var(--wicket-orgman-spacing) * 4);
+}
+.wt_gap-8 {
+  gap: calc(var(--wicket-orgman-spacing) * 8);
+}
+:where(.wt_space-y-2 > :not(:last-child)) {
+  --wicket-tw-space-y-reverse: 0;
+  margin-block-start: calc(
+    calc(var(--wicket-orgman-spacing) * 2) * var(--wicket-tw-space-y-reverse)
+  );
+  margin-block-end: calc(
+    calc(var(--wicket-orgman-spacing) * 2) *
+      calc(1 - var(--wicket-tw-space-y-reverse))
+  );
+}
+.wt_self-end {
+  align-self: flex-end;
+}
+.wt_rounded {
+  border-radius: 0.25rem;
+}
+.wt_rounded-card-accent {
+  border-radius: var(--wicket-orgman-card-accent-corner-radius);
+}
+.wt_rounded-card {
+  border-radius: var(--wicket-orgman-card-corner-radius);
+}
+.wt_rounded-full {
+  border-radius: 3.40282e38px;
+}
+.wt_rounded-md {
+  border-radius: var(--wicket-orgman-radius-md);
+}
+.wt_rounded-sm {
+  border-radius: var(--wicket-orgman-radius-sm);
+}
+.wt_border {
+  border-style: var(--wicket-tw-border-style);
+  border-width: 1px;
+}
+.wt_border-4 {
+  border-style: var(--wicket-tw-border-style);
+  border-width: 4px;
+}
+.wt_border-2 {
+  border-style: var(--wicket-tw-border-style);
+  border-width: 2px;
+}
+.wt_border-b {
+  border-bottom-style: var(--wicket-tw-border-style);
+  border-bottom-width: 1px;
+}
+.wt_border-bg-interactive {
+  border-color: var(--wicket-orgman-bg-interactive);
+}
+.wt_border-color {
+  border-color: var(--wicket-orgman-border-color);
+}
+.wt_border-light {
+  border-color: var(--wicket-orgman-border-light);
+}
+.wt_border-gray-200 {
+  border-color: var(--wicket-orgman-color-gray-200);
+}
+.wt_border-gray-300 {
+  border-color: var(--wicket-orgman-color-gray-300);
+}
+.wt_border-green-400 {
+  border-color: var(--wicket-orgman-color-green-400);
+}
+.wt_border-red-200 {
+  border-color: var(--wicket-orgman-color-red-200);
+}
+.wt_border-red-400 {
+  border-color: var(--wicket-orgman-color-red-400);
+}
+.wt_border-yellow-200 {
+  border-color: var(--wicket-orgman-color-yellow-200);
+}
+.wt_border-primary-600 {
+  border-color: var(--wicket-orgman-primary-color);
+}
+.wt_border-transparent {
+  border-color: #0000;
+}
+.wt_border-t-transparent {
+  border-top-color: #0000;
+}
+.wt_bg-light-neutral,
+.wt_bg-light-neutral-85 {
+  background-color: var(--wicket-orgman-bg-light-neutral);
+}
+@supports (color: color-mix(in lab, red, red)) {
+  .wt_bg-light-neutral-85 {
+    background-color: color-mix(
+      in oklab,
+      var(--wicket-orgman-bg-light-neutral) 85%,
+      transparent
     );
-    transition-duration: var(
-      --tw-duration,
-      var(--wt-default-transition-duration)
-    );
-  }
-  .wt\:duration-300 {
-    --tw-duration: 0.3s;
-    transition-duration: 0.3s;
-  }
-  .wt\:hover\:bg-blue-700:hover {
-    background-color: var(--wt-color-blue-700);
-  }
-  .wt\:hover\:bg-red-700:hover {
-    background-color: var(--wt-color-red-700);
-  }
-  .wt\:hover\:text-blue-900:hover {
-    color: var(--wt-color-blue-900);
-  }
-  .wt\:hover\:text-red-900:hover {
-    color: var(--wt-color-red-900);
-  }
-  .wt\:hover\:underline:hover {
-    text-decoration-line: underline;
-  }
-  .wt\:hover\:shadow-sm:hover {
-    --tw-shadow:
-      0 1px 3px 0 var(--tw-shadow-color, #0000001a),
-      0 1px 2px -1px var(--tw-shadow-color, #0000001a);
-    box-shadow:
-      var(--tw-inset-shadow), var(--tw-inset-ring-shadow),
-      var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
-  }
-  .wt\:focus\:border-blue-500:focus {
-    border-color: var(--wt-color-blue-500);
-  }
-  .wt\:focus\:ring-blue-500:focus {
-    --tw-ring-color: var(--wt-color-blue-500);
-  }
-  .wt\:focus\:ring-red-500:focus {
-    --tw-ring-color: var(--wt-color-red-500);
-  }
-  .wt\:focus\:ring-offset-2:focus {
-    --tw-ring-offset-width: 2px;
-    --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0
-      var(--tw-ring-offset-width) var(--tw-ring-offset-color);
   }
 }
+.wt_bg-border-light {
+  background-color: var(--wicket-orgman-border-light);
+}
+.wt_bg-accent-light {
+  background-color: var(--wicket-orgman-bg-accent-light);
+}
+.wt_bg-summary-card {
+  background-color: var(--wicket-orgman-bg-summary-card);
+}
+.wt_bg-blue-600 {
+  background-color: var(--wicket-orgman-color-blue-600);
+}
+.wt_bg-gray-100 {
+  background-color: var(--wicket-orgman-color-gray-100);
+}
+.wt_bg-gray-400 {
+  background-color: var(--wicket-orgman-color-gray-400);
+}
+.wt_bg-green-100 {
+  background-color: var(--wicket-orgman-color-green-100);
+}
+.wt_bg-green-500 {
+  background-color: var(--wicket-orgman-color-green-500);
+}
+.wt_bg-red-50 {
+  background-color: var(--wicket-orgman-color-red-50);
+}
+.wt_bg-red-100 {
+  background-color: var(--wicket-orgman-color-red-100);
+}
+.wt_bg-yellow-50 {
+  background-color: var(--wicket-orgman-color-yellow-50);
+}
+.wt_bg-red-600 {
+  background-color: var(--wicket-orgman-color-red-600);
+}
+.wt_bg-white {
+  background-color: var(--wicket-orgman-color-white);
+}
+.wt_p-2 {
+  padding: calc(var(--wicket-orgman-spacing) * 2);
+}
+.wt_p-2\.5 {
+  padding: calc(var(--wicket-orgman-spacing) * 2.5);
+}
+.wt_p-3 {
+  padding: calc(var(--wicket-orgman-spacing) * 3);
+}
+.wt_p-4 {
+  padding: calc(var(--wicket-orgman-spacing) * 4);
+}
+.wt_p-6 {
+  padding: calc(var(--wicket-orgman-spacing) * 6);
+}
+.wt_px-2 {
+  padding-inline: calc(var(--wicket-orgman-spacing) * 2);
+}
+.wt_px-3 {
+  padding-inline: calc(var(--wicket-orgman-spacing) * 3);
+}
+.wt_px-4 {
+  padding-inline: calc(var(--wicket-orgman-spacing) * 4);
+}
+.wt_py-0\.5 {
+  padding-block: calc(var(--wicket-orgman-spacing) * 0.5);
+}
+.wt_py-2 {
+  padding-block: calc(var(--wicket-orgman-spacing) * 2);
+}
+.wt_py-3 {
+  padding-block: calc(var(--wicket-orgman-spacing) * 3);
+}
+.wt_py-8 {
+  padding-block: calc(var(--wicket-orgman-spacing) * 8);
+}
+.wt_pt-4 {
+  padding-top: calc(var(--wicket-orgman-spacing) * 4);
+}
+.wt_pl-3 {
+  padding-left: calc(var(--wicket-orgman-spacing) * 3);
+}
+.wt_pl-10 {
+  padding-left: calc(var(--wicket-orgman-spacing) * 10);
+}
+.wt_text-center {
+  text-align: center;
+}
+.wt_text-left {
+  text-align: left;
+}
+.wt_text-2xl {
+  font-size: var(--wicket-orgman-text-2xl);
+  line-height: var(
+    --wicket-tw-leading,
+    var(--wicket-orgman-text-2xl--line-height)
+  );
+}
+.wt_text-5xl {
+  font-size: var(--wicket-orgman-text-5xl);
+  line-height: var(
+    --wicket-tw-leading,
+    var(--wicket-orgman-text-5xl--line-height)
+  );
+}
+.wt_text-base {
+  font-size: var(--wicket-orgman-text-base);
+  line-height: var(
+    --wicket-tw-leading,
+    var(--wicket-orgman-text-base--line-height)
+  );
+}
+.wt_text-lg {
+  font-size: var(--wicket-orgman-text-lg);
+  line-height: var(
+    --wicket-tw-leading,
+    var(--wicket-orgman-text-lg--line-height)
+  );
+}
+.wt_text-sm {
+  font-size: var(--wicket-orgman-text-sm);
+  line-height: var(
+    --wicket-tw-leading,
+    var(--wicket-orgman-text-sm--line-height)
+  );
+}
+.wt_text-xl {
+  font-size: var(--wicket-orgman-text-xl);
+  line-height: var(
+    --wicket-tw-leading,
+    var(--wicket-orgman-text-xl--line-height)
+  );
+}
+.wt_text-xs {
+  font-size: var(--wicket-orgman-text-xs);
+  line-height: var(
+    --wicket-tw-leading,
+    var(--wicket-orgman-text-xs--line-height)
+  );
+}
+.wt_leading-none {
+  --wicket-tw-leading: 1;
+  line-height: 1;
+}
+.wt_leading-normal {
+  --wicket-tw-leading: var(--wicket-orgman-leading-normal);
+  line-height: var(--wicket-orgman-leading-normal);
+}
+.wt_font-bold {
+  --wicket-tw-font-weight: var(--wicket-orgman-font-weight-bold);
+  font-weight: var(--wicket-orgman-font-weight-bold);
+}
+.wt_font-extrabold {
+  --wicket-tw-font-weight: var(--wicket-orgman-font-weight-extrabold);
+  font-weight: var(--wicket-orgman-font-weight-extrabold);
+}
+.wt_font-medium {
+  --wicket-tw-font-weight: var(--wicket-orgman-font-weight-medium);
+  font-weight: var(--wicket-orgman-font-weight-medium);
+}
+.wt_font-semibold {
+  --wicket-tw-font-weight: var(--wicket-orgman-font-weight-semibold);
+  font-weight: var(--wicket-orgman-font-weight-semibold);
+}
+.wt_whitespace-nowrap {
+  white-space: nowrap;
+}
+.wt_text-bg-interactive {
+  color: var(--wicket-orgman-bg-interactive);
+}
+.wt_text-heading-color {
+  color: var(--wicket-orgman-heading-color);
+}
+.wt_text-heading-sm {
+  color: var(--wicket-orgman-heading-sm);
+}
+.wt_text-heading-xs {
+  color: var(--wicket-orgman-heading-xs);
+}
+.wt_text-button-label-reversed {
+  color: var(--wicket-orgman-text-button-label-reversed);
+}
+.wt_text-content {
+  color: var(--wicket-orgman-text-content);
+}
+.wt_text-interactive {
+  color: var(--wicket-orgman-text-interactive);
+}
+.wt_text-warning {
+  color: var(--wicket-orgman-text-warning);
+}
+.wt_text-blue-600 {
+  color: var(--wicket-orgman-color-blue-600);
+}
+.wt_text-gray-400 {
+  color: var(--wicket-orgman-color-gray-400);
+}
+.wt_text-gray-500 {
+  color: var(--wicket-orgman-color-gray-500);
+}
+.wt_text-gray-600 {
+  color: var(--wicket-orgman-color-gray-600);
+}
+.wt_text-gray-700 {
+  color: var(--wicket-orgman-color-gray-700);
+}
+.wt_text-gray-900 {
+  color: var(--wicket-orgman-color-gray-900);
+}
+.wt_text-green-700 {
+  color: var(--wicket-orgman-color-green-700);
+}
+.wt_text-red-500 {
+  color: var(--wicket-orgman-color-red-500);
+}
+.wt_text-red-600 {
+  color: var(--wicket-orgman-color-red-600);
+}
+.wt_text-red-700 {
+  color: var(--wicket-orgman-color-red-700);
+}
+.wt_text-red-800 {
+  color: var(--wicket-orgman-color-red-800);
+}
+.wt_text-yellow-600 {
+  color: var(--wicket-orgman-color-yellow-600);
+}
+.wt_text-yellow-800 {
+  color: var(--wicket-orgman-color-yellow-800);
+}
+.wt_text-white {
+  color: var(--wicket-orgman-color-white);
+}
+.wt_text-primary-600 {
+  color: var(--wicket-orgman-primary-color);
+}
+.wt_opacity-25 {
+  opacity: 0.25;
+}
+.wt_opacity-50 {
+  opacity: 0.5;
+}
+.wt_opacity-75 {
+  opacity: 0.75;
+}
+.wt_shadow-md {
+  --wicket-tw-shadow:
+    0 4px 6px -1px var(--wicket-tw-shadow-color, #0000001a),
+    0 2px 4px -2px var(--wicket-tw-shadow-color, #0000001a);
+  box-shadow:
+    var(--wicket-tw-inset-shadow), var(--wicket-tw-inset-ring-shadow),
+    var(--wicket-tw-ring-offset-shadow), var(--wicket-tw-ring-shadow),
+    var(--wicket-tw-shadow);
+}
+.wt_shadow-sm {
+  --wicket-tw-shadow:
+    0 1px 3px 0 var(--wicket-tw-shadow-color, #0000001a),
+    0 1px 2px -1px var(--wicket-tw-shadow-color, #0000001a);
+  box-shadow:
+    var(--wicket-tw-inset-shadow), var(--wicket-tw-inset-ring-shadow),
+    var(--wicket-tw-ring-offset-shadow), var(--wicket-tw-ring-shadow),
+    var(--wicket-tw-shadow);
+}
+.wt_shadow-xs {
+  --wicket-tw-shadow: 0 1px 2px 0 var(--wicket-tw-shadow-color, #0000000d);
+  box-shadow:
+    var(--wicket-tw-inset-shadow), var(--wicket-tw-inset-ring-shadow),
+    var(--wicket-tw-ring-offset-shadow), var(--wicket-tw-ring-shadow),
+    var(--wicket-tw-shadow);
+}
+.wt_backdrop-blur-xs {
+  --wicket-tw-backdrop-blur: blur(var(--wicket-orgman-blur-xs));
+  -webkit-backdrop-filter: var(--wicket-tw-backdrop-blur)
+    var(--wicket-tw-backdrop-brightness) var(--wicket-tw-backdrop-contrast)
+    var(--wicket-tw-backdrop-grayscale) var(--wicket-tw-backdrop-hue-rotate)
+    var(--wicket-tw-backdrop-invert) var(--wicket-tw-backdrop-opacity)
+    var(--wicket-tw-backdrop-saturate) var(--wicket-tw-backdrop-sepia);
+  backdrop-filter: var(--wicket-tw-backdrop-blur)
+    var(--wicket-tw-backdrop-brightness) var(--wicket-tw-backdrop-contrast)
+    var(--wicket-tw-backdrop-grayscale) var(--wicket-tw-backdrop-hue-rotate)
+    var(--wicket-tw-backdrop-invert) var(--wicket-tw-backdrop-opacity)
+    var(--wicket-tw-backdrop-saturate) var(--wicket-tw-backdrop-sepia);
+}
+.backdrop_wt_bg-black-50::backdrop {
+  background-color: var(--wicket-orgman-modal-overlay-color);
+}
+.wt_transition-colors {
+  transition-property:
+    color, background-color, border-color, outline-color, text-decoration-color,
+    fill, stroke, --wicket-tw-gradient-from, --wicket-tw-gradient-via,
+    --wicket-tw-gradient-to;
+  transition-timing-function: var(
+    --wicket-tw-ease,
+    var(--wicket-orgman-default-transition-timing-function)
+  );
+  transition-duration: var(
+    --wicket-tw-duration,
+    var(--wicket-orgman-default-transition-duration)
+  );
+}
+.wt_transition-opacity {
+  transition-property: opacity;
+  transition-timing-function: var(
+    --wicket-tw-ease,
+    var(--wicket-orgman-default-transition-timing-function)
+  );
+  transition-duration: var(
+    --wicket-tw-duration,
+    var(--wicket-orgman-default-transition-duration)
+  );
+}
+.wt_duration-300 {
+  --wicket-tw-duration: 0.3s;
+  transition-duration: 0.3s;
+}
+.wt_hover_bg-blue-700:hover {
+  background-color: var(--wicket-orgman-color-blue-700);
+}
+.wt_hover_bg-red-700:hover {
+  background-color: var(--wicket-orgman-color-red-700);
+}
+.wt_hover_text-blue-900:hover {
+  color: var(--wicket-orgman-color-blue-900);
+}
+.wt_hover_text-red-900:hover {
+  color: var(--wicket-orgman-color-red-900);
+}
+.wt_hover_text-primary-600:hover {
+  color: var(--wicket-orgman-primary-color);
+}
+.wt_hover_text-primary-700:hover {
+  color: var(--wicket-orgman-primary-color-hover);
+}
+.wt_hover_underline:hover {
+  text-decoration-line: underline;
+}
+.wt_hover_shadow-sm:hover {
+  --wicket-tw-shadow:
+    0 1px 3px 0 var(--wicket-tw-shadow-color, #0000001a),
+    0 1px 2px -1px var(--wicket-tw-shadow-color, #0000001a);
+  box-shadow:
+    var(--wicket-tw-inset-shadow), var(--wicket-tw-inset-ring-shadow),
+    var(--wicket-tw-ring-offset-shadow), var(--wicket-tw-ring-shadow),
+    var(--wicket-tw-shadow);
+}
+.wt_focus_border-blue-500:focus {
+  border-color: var(--wicket-orgman-color-blue-500);
+}
+.wt_focus_outline-hidden:focus {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
+.wt_focus_ring-2:focus {
+  box-shadow: 0 0 0 2px var(--wicket-tw-ring-color, currentColor);
+}
+.wt_focus_ring-blue-500:focus {
+  --wicket-tw-ring-color: var(--wicket-orgman-color-blue-500);
+}
+.wt_focus_ring-primary-500:focus {
+  --wicket-tw-ring-color: var(--wicket-orgman-primary-color);
+}
+.wt_focus_ring-red-500:focus {
+  --wicket-tw-ring-color: var(--wicket-orgman-color-red-500);
+}
+.wt_focus_ring-offset-2:focus {
+  --wicket-tw-ring-offset-width: 2px;
+  --wicket-tw-ring-offset-shadow: var(--wicket-tw-ring-inset) 0 0 0
+    var(--wicket-tw-ring-offset-width) var(--wicket-tw-ring-offset-color);
+}
+.wt_decoration-none {
+  text-decoration: none;
+}
+
+@media (min-width: 640px) {
+  .sm_wt_flex-row {
+    flex-direction: row;
+  }
+  .sm_wt_items-center {
+    align-items: center;
+  }
+  .sm_wt_items-start {
+    align-items: flex-start;
+  }
+  .sm_wt_text-sm {
+    font-size: var(--wicket-orgman-text-sm);
+    line-height: var(
+      --wicket-tw-leading,
+      var(--wicket-orgman-text-sm--line-height)
+    );
+  }
+}
+
+@media (min-width: 768px) {
+  .md_wt_flex-row {
+    flex-direction: row;
+  }
+  .md_wt_w-4-5 {
+    width: 80%;
+  }
+  .md_wt_auto {
+    width: auto;
+  }
+  .md_wt_grid-cols-12 {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+  }
+}
+
 .wicket-orgman .button--primary {
-  background-color: var(--om-primary-color);
+  background-color: var(--wicket-orgman-primary-color);
   color: #fff;
   cursor: pointer;
   border-radius: 0.5rem;
@@ -1114,29 +1254,29 @@
 }
 .wicket-orgman .button--primary:hover,
 .wicket-orgman .button--primary:focus {
-  background-color: var(--om-primary-color-hover);
-  border-color: var(--om-primary-color-hover);
+  background-color: var(--wicket-orgman-primary-color-hover);
+  border-color: var(--wicket-orgman-primary-color-hover);
 }
 .wicket-orgman .button--secondary {
-  color: var(--om-primary-color);
+  color: var(--wicket-orgman-primary-color);
   cursor: pointer;
   background-color: #fff;
   padding: 0.5rem 0.875rem;
   text-decoration: none;
-  border: 2px solid var(--om-secondary-outline-color);
+  border: 2px solid var(--wicket-orgman-secondary-outline-color);
 }
 .wicket-orgman .button--secondary:hover,
 .wicket-orgman .button--secondary:focus {
-  background-color: var(--om-secondary-color);
-  color: var(--om-text-content-reversed);
+  background-color: var(--wicket-orgman-secondary-color);
+  color: var(--wicket-orgman-text-content-reversed);
 }
 .wicket-orgman .button--small {
   padding: 0.375rem 0.75rem;
   font-size: 0.875rem;
 }
 .wicket-orgman .member-card {
-  border: 1px solid var(--om-border-color);
-  background-color: var(--om-background-light);
+  border: 1px solid var(--wicket-orgman-border-color);
+  background-color: var(--wicket-orgman-background-light);
   border-radius: 0.5rem;
   justify-content: space-between;
   align-items: center;
@@ -1147,7 +1287,7 @@
 .wicket-orgman .members-loading-overlay {
   -webkit-backdrop-filter: blur(6px);
   backdrop-filter: blur(6px);
-  color: var(--om-text-content);
+  color: var(--wicket-orgman-text-content);
   text-align: center;
   opacity: 0;
   visibility: hidden;
@@ -1174,7 +1314,7 @@
   cursor: not-allowed;
 }
 .wicket-orgman .modal-overlay {
-  background-color: var(--om-modal-overlay-color);
+  background-color: var(--wicket-orgman-modal-overlay-color);
   z-index: 1000;
   justify-content: center;
   align-items: center;
@@ -1214,14 +1354,14 @@
   animation: 0.2s ease-in forwards orgman-modal-slide-out;
 }
 .wicket-orgman .business-info__header {
-  border: 1px solid var(--om-border-color);
+  border: 1px solid var(--wicket-orgman-border-color);
   background-color: #fff;
   border-radius: 0.5rem;
   margin-bottom: 2rem;
   padding: 1.5rem;
 }
 .wicket-orgman .business-info__section {
-  border: 1px solid var(--om-border-color);
+  border: 1px solid var(--wicket-orgman-border-color);
   background-color: #fff;
   border-radius: 0.5rem;
   padding: 1.5rem;
@@ -1242,12 +1382,12 @@
   border: 1px solid #f87171;
 }
 .wicket-orgman .document-card {
-  border: 1px solid var(--om-border-color);
+  border: 1px solid var(--wicket-orgman-border-color);
   background-color: #fff;
   border-radius: 0.5rem;
 }
 .wicket-orgman .document-upload-form {
-  border: 1px dashed var(--om-border-color);
+  border: 1px dashed var(--wicket-orgman-border-color);
   background-color: #fafafa;
   border-radius: 0.5rem;
   padding: 1.5rem;
@@ -1263,7 +1403,7 @@
   display: grid;
 }
 .wicket-orgman .subsidiaries-container .subsidiaries-grid .subsidiary-card {
-  border: 1px solid var(--om-border-color);
+  border: 1px solid var(--wicket-orgman-border-color);
   background-color: #fff;
   border-radius: 0.5rem;
   flex-direction: column;
@@ -1361,7 +1501,7 @@
   .members-loading-overlay {
   -webkit-backdrop-filter: blur(6px);
   backdrop-filter: blur(6px);
-  color: var(--om-text-content);
+  color: var(--wicket-orgman-text-content);
   text-align: center;
   opacity: 0;
   visibility: hidden;
@@ -1387,7 +1527,7 @@
   .subsidiary-info
   .subsidiary-status
   .members-loading-spinner {
-  border: 4px solid var(--om-bg-interactive);
+  border: 4px solid var(--wicket-orgman-bg-interactive);
   border-right-color: #0000;
   border-radius: 9999px;
   width: 2.5rem;
@@ -1406,13 +1546,13 @@
 }
 .wicket-orgman .subsidiaries-container .no-subsidiaries {
   text-align: center;
-  background-color: var(--om-background-light);
+  background-color: var(--wicket-orgman-background-light);
   color: #666;
   border-radius: 0.5rem;
   padding: 3rem;
 }
 .wicket-orgman .subsidiaries-container .add-subsidiary-section {
-  border: 1px solid var(--om-border-color);
+  border: 1px solid var(--wicket-orgman-border-color);
   background-color: #fff;
   border-radius: 0.5rem;
   margin-top: 2rem;
@@ -1444,7 +1584,7 @@
   .subsidiary-search
   .search-input-group
   input {
-  border: 1px solid var(--om-border-color);
+  border: 1px solid var(--wicket-orgman-border-color);
   border-radius: 0.375rem;
   width: 100%;
   padding: 0.75rem 1rem;
@@ -1457,7 +1597,7 @@
   .subsidiary-search
   .search-input-group
   input:focus {
-  border-color: var(--om-primary-color);
+  border-color: var(--wicket-orgman-primary-color);
   outline: none;
   box-shadow: 0 0 0 3px #0073aa1a;
 }
@@ -1467,7 +1607,7 @@
   .subsidiary-search
   .search-input-group
   .search-results-dropdown {
-  border: 1px solid var(--om-border-color);
+  border: 1px solid var(--wicket-orgman-border-color);
   z-index: 100;
   background-color: #fff;
   border-top: none;
@@ -1487,7 +1627,7 @@
   .search-input-group
   .search-results-dropdown
   .search-result-item {
-  border-bottom: 1px solid var(--om-border-color);
+  border-bottom: 1px solid var(--wicket-orgman-border-color);
   cursor: pointer;
   justify-content: space-between;
   align-items: center;
@@ -1502,7 +1642,7 @@
   .search-input-group
   .search-results-dropdown
   .search-result-item:hover {
-  background-color: var(--om-background-light);
+  background-color: var(--wicket-orgman-background-light);
 }
 .wicket-orgman
   .subsidiaries-container
@@ -1564,7 +1704,7 @@
   .subsidiaries-container
   .add-subsidiary-section
   .bulk-upload-section {
-  border-top: 1px solid var(--om-border-color);
+  border-top: 1px solid var(--wicket-orgman-border-color);
   padding-top: 2rem;
 }
 .wicket-orgman
@@ -1609,7 +1749,7 @@
   .bulk-upload-section
   .file-upload-group
   .form-control-file {
-  border: 1px solid var(--om-border-color);
+  border: 1px solid var(--wicket-orgman-border-color);
   background-color: #fff;
   border-radius: 0.375rem;
   width: 100%;
@@ -1836,7 +1976,7 @@
   left: 0;
 }
 .wicket-orgman .member-card {
-  background-color: var(--om-background-light);
+  background-color: var(--wicket-orgman-background-light);
 }
 .wicket-orgman .member-card > div {
   flex-direction: column;
@@ -1875,7 +2015,7 @@
   display: inline-block;
 }
 .wicket-orgman .member-card .button--secondary {
-  border-color: var(--om-primary-color);
+  border-color: var(--wicket-orgman-primary-color);
 }
 .wicket-orgman .member-card h3 {
   font-weight: 600;
@@ -1893,25 +2033,25 @@
   gap: 2rem;
   display: flex;
 }
-.wicket-orgman .wt\:flex {
+.wicket-orgman .wt_flex {
   display: flex;
 }
-.wicket-orgman .wt\:items-center {
+.wicket-orgman .wt_items-center {
   align-items: center;
 }
-.wicket-orgman .wt\:gap-2 {
+.wicket-orgman .wt_gap-2 {
   gap: 0.5rem;
 }
-.wicket-orgman .wt\:leading-none {
+.wicket-orgman .wt_leading-none {
   line-height: 1;
 }
-.wicket-orgman .wt\:shadow-sm,
-.wicket-orgman .wt\:hover\:shadow-sm:hover {
+.wicket-orgman .wt_shadow-sm,
+.wicket-orgman .wt_hover_shadow-sm:hover {
   box-shadow:
     0 4px 6px -1px #0000001a,
     0 2px 4px -2px #0000001a;
 }
-.wicket-orgman .wt\:transition-shadow {
+.wicket-orgman .wt_transition-shadow {
   transition-property: box-shadow;
   transition-duration: 0.15s;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
@@ -1943,25 +2083,25 @@
   [role="listitem"] {
   width: 100%;
 }
-.wicket-orgman .wt\:inline-block {
+.wicket-orgman .wt_inline-block {
   display: inline-block;
 }
-.wicket-orgman .wt\:w-2 {
+.wicket-orgman .wt_w-2 {
   width: 0.5rem;
 }
-.wicket-orgman .wt\:h-2 {
+.wicket-orgman .wt_h-2 {
   height: 0.5rem;
 }
-.wicket-orgman .wt\:rounded-full {
+.wicket-orgman .wt_rounded-full {
   border-radius: 9999px;
 }
-.wicket-orgman .wt\:bg-green-500 {
-  background-color: #22c55e;
+.wicket-orgman .wt_bg-green-500 {
+  background-color: var(--wicket-orgman-color-green-500);
 }
-.wicket-orgman .wt\:bg-gray-400 {
-  background-color: #9ca3af;
+.wicket-orgman .wt_bg-gray-400 {
+  background-color: var(--wicket-orgman-color-gray-400);
 }
-.wicket-orgman .wt\:mt-\[2px\] {
+.wicket-orgman .wt_mt-\[2px\] {
   margin-top: 2px;
 }
 @keyframes orgman-loading-spin {
@@ -2034,126 +2174,126 @@
     transform: translate(100%);
   }
 }
-@property --tw-space-y-reverse {
+@property --wicket-tw-space-y-reverse {
   syntax: "*";
   inherits: false;
   initial-value: 0;
 }
-@property --tw-border-style {
+@property --wicket-tw-border-style {
   syntax: "*";
   inherits: false;
   initial-value: solid;
 }
-@property --tw-leading {
+@property --wicket-tw-leading {
   syntax: "*";
   inherits: false;
 }
-@property --tw-font-weight {
+@property --wicket-tw-font-weight {
   syntax: "*";
   inherits: false;
 }
-@property --tw-shadow {
+@property --wicket-tw-shadow {
   syntax: "*";
   inherits: false;
   initial-value: 0 0 #0000;
 }
-@property --tw-shadow-color {
+@property --wicket-tw-shadow-color {
   syntax: "*";
   inherits: false;
 }
-@property --tw-shadow-alpha {
+@property --wicket-tw-shadow-alpha {
   syntax: "<percentage>";
   inherits: false;
   initial-value: 100%;
 }
-@property --tw-inset-shadow {
+@property --wicket-tw-inset-shadow {
   syntax: "*";
   inherits: false;
   initial-value: 0 0 #0000;
 }
-@property --tw-inset-shadow-color {
+@property --wicket-tw-inset-shadow-color {
   syntax: "*";
   inherits: false;
 }
-@property --tw-inset-shadow-alpha {
+@property --wicket-tw-inset-shadow-alpha {
   syntax: "<percentage>";
   inherits: false;
   initial-value: 100%;
 }
-@property --tw-ring-color {
+@property --wicket-tw-ring-color {
   syntax: "*";
   inherits: false;
 }
-@property --tw-ring-shadow {
-  syntax: "*";
-  inherits: false;
-  initial-value: 0 0 #0000;
-}
-@property --tw-inset-ring-color {
-  syntax: "*";
-  inherits: false;
-}
-@property --tw-inset-ring-shadow {
+@property --wicket-tw-ring-shadow {
   syntax: "*";
   inherits: false;
   initial-value: 0 0 #0000;
 }
-@property --tw-ring-inset {
+@property --wicket-tw-inset-ring-color {
   syntax: "*";
   inherits: false;
 }
-@property --tw-ring-offset-width {
+@property --wicket-tw-inset-ring-shadow {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0 0 #0000;
+}
+@property --wicket-tw-ring-inset {
+  syntax: "*";
+  inherits: false;
+}
+@property --wicket-tw-ring-offset-width {
   syntax: "<length>";
   inherits: false;
   initial-value: 0;
 }
-@property --tw-ring-offset-color {
+@property --wicket-tw-ring-offset-color {
   syntax: "*";
   inherits: false;
   initial-value: #fff;
 }
-@property --tw-ring-offset-shadow {
+@property --wicket-tw-ring-offset-shadow {
   syntax: "*";
   inherits: false;
   initial-value: 0 0 #0000;
 }
-@property --tw-backdrop-blur {
+@property --wicket-tw-backdrop-blur {
   syntax: "*";
   inherits: false;
 }
-@property --tw-backdrop-brightness {
+@property --wicket-tw-backdrop-brightness {
   syntax: "*";
   inherits: false;
 }
-@property --tw-backdrop-contrast {
+@property --wicket-tw-backdrop-contrast {
   syntax: "*";
   inherits: false;
 }
-@property --tw-backdrop-grayscale {
+@property --wicket-tw-backdrop-grayscale {
   syntax: "*";
   inherits: false;
 }
-@property --tw-backdrop-hue-rotate {
+@property --wicket-tw-backdrop-hue-rotate {
   syntax: "*";
   inherits: false;
 }
-@property --tw-backdrop-invert {
+@property --wicket-tw-backdrop-invert {
   syntax: "*";
   inherits: false;
 }
-@property --tw-backdrop-opacity {
+@property --wicket-tw-backdrop-opacity {
   syntax: "*";
   inherits: false;
 }
-@property --tw-backdrop-saturate {
+@property --wicket-tw-backdrop-saturate {
   syntax: "*";
   inherits: false;
 }
-@property --tw-backdrop-sepia {
+@property --wicket-tw-backdrop-sepia {
   syntax: "*";
   inherits: false;
 }
-@property --tw-duration {
+@property --wicket-tw-duration {
   syntax: "*";
   inherits: false;
 }
@@ -2185,62 +2325,63 @@
     transform: none;
   }
 }
-
 .wicket-orgman {
-  & .bg-\[var\(--om-bg-light-neutral\)\] {
-    background-color: var(--om-bg-light-neutral);
+  .wt_bg-light-neutral {
+    background-color: var(--wicket-orgman-bg-light-neutral);
   }
-  & .wt\:bg-\[var\(--om-bg-card\)\] {
-    background-color: var(--om-bg-card);
+  .wt_bg-card {
+    background-color: var(--wicket-orgman-bg-card);
   }
-  & .wt\:bg-\[var\(--om-bg-light-neutral\)\] {
-    background-color: var(--om-bg-light-neutral);
+  .wt_bg-accent-light {
+    background-color: var(--wicket-orgman-bg-accent-light);
   }
-  & .wt\:bg-\[var\(--om-border-white\)\] {
-    background-color: var(--om-border-white);
+  .wt_bg-summary-card {
+    background-color: var(--wicket-orgman-bg-summary-card);
   }
-  & .wt\:border-\[var\(--om-bg-interactive\)\] {
-    border-color: var(--om-bg-interactive);
+  .wt_bg-border-white {
+    background-color: var(--wicket-orgman-border-white);
   }
-  & .wt\:border-\[var\(--om-border-color\)\] {
-    border-color: var(--om-border-color);
+  .wt_border-bg-interactive {
+    border-color: var(--wicket-orgman-bg-interactive);
   }
-  & .wt\:rounded-\[var\(--om-card-accent-corner-radius\)\] {
-    border-radius: var(--om-card-accent-corner-radius);
+  .wt_border-color {
+    border-color: var(--wicket-orgman-border-color);
   }
-  & .wt\:rounded-\[var\(--om-card-corner-radius\)\] {
-    border-radius: var(--om-card-corner-radius);
+  .wt_rounded-card-accent {
+    border-radius: var(--wicket-orgman-card-accent-corner-radius);
   }
-  & .wt\:text-\[var\(--om-bg-interactive\)\] {
-    color: var(--om-bg-interactive);
+  .wt_rounded-card {
+    border-radius: var(--wicket-orgman-card-corner-radius);
   }
-  & .wt\:text-\[var\(--om-heading-color\)\] {
-    color: var(--om-heading-color);
+  .wt_text-bg-interactive {
+    color: var(--wicket-orgman-bg-interactive);
   }
-  & .wt\:text-\[var\(--om-heading-sm\)\] {
-    color: var(--om-heading-sm);
+  .wt_text-heading-color {
+    color: var(--wicket-orgman-heading-color);
   }
-  & .wt\:text-\[var\(--om-heading-xs\)\] {
-    color: var(--om-heading-xs);
+  .wt_text-heading-sm {
+    color: var(--wicket-orgman-heading-sm);
   }
-  & .wt\:text-\[var\(--om-text-button-label-reversed\)\] {
-    color: var(--om-text-button-label-reversed);
+  .wt_text-heading-xs {
+    color: var(--wicket-orgman-heading-xs);
   }
-  & .wt\:text-\[var\(--om-text-content\)\] {
-    color: var(--om-text-content);
+  .wt_text-button-label-reversed {
+    color: var(--wicket-orgman-text-button-label-reversed);
   }
-  & .wt\:text-\[var\(--om-text-interactive\)\] {
-    color: var(--om-text-interactive);
+  .wt_text-content {
+    color: var(--wicket-orgman-text-content);
   }
-  & .wt\:text-\[var\(--om-text-warning\)\] {
-    color: var(--om-text-warning);
+  .wt_text-interactive {
+    color: var(--wicket-orgman-text-interactive);
   }
-  & .wt\:focus\:wt\:border-\[var\(--om-bg-interactive\)\]:focus {
-    border-color: var(--om-bg-interactive);
+  .wt_text-warning {
+    color: var(--wicket-orgman-text-warning);
   }
-  & .wt\:focus\:wt\:ring-\[var\(--om-bg-interactive\)\]:focus,
-  & .focus\:wt\:ring-\[var\(--om-bg-interactive\)\]:focus {
-    --tw-ring-color: var(--om-bg-interactive);
-    box-shadow: 0 0 0 2px var(--om-bg-interactive);
+  .wt_focus_border-bg-interactive:focus {
+    border-color: var(--wicket-orgman-bg-interactive);
+  }
+  .wt_focus_ring-bg-interactive:focus {
+    --wicket-tw-ring-color: var(--wicket-orgman-bg-interactive);
+    box-shadow: 0 0 0 2px var(--wicket-orgman-bg-interactive);
   }
 }

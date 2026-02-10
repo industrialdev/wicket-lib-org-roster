@@ -12,8 +12,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <div id="subsidiaries-list-container" class="subsidiaries-container">
 	<?php if ( isset( $notice ) ) : ?>
-		<div class="notifications-wt:inline-container">
-			<div class="notification notification-<?php echo esc_attr( $notice['type'] ); ?> notification-wt:inline">
+		<div class="notifications-wt_inline-container">
+			<div class="notification notification-<?php echo esc_attr( $notice['type'] ); ?> notification-wt_inline">
 				<div class="notification-icon">
 					<?php
 					$icon = match( $notice['type'] ) {
@@ -33,7 +33,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<?php endif; ?>
 
 	<?php if ( ! empty( $subsidiaries ) ) : ?>
-		<div class="subsidiaries-wt:grid">
+		<div class="subsidiaries-wt_grid">
 			<?php foreach ( $subsidiaries as $subsidiary ) : ?>
 				<div class="subsidiary-card">
 					<div class="subsidiary-info">
@@ -70,7 +70,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<?php endif; ?>
 
 	<!-- Add Subsidiary Section -->
-	<div class="add-subsidiary-section wt:mt-6">
+	<div class="add-subsidiary-section wt_mt-6">
 		<h3><?php esc_html_e( 'Add Subsidiary', 'wicket-acc' ); ?></h3>
 
 		<!-- Search for Organization -->
@@ -91,7 +91,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</div>
 
 		<!-- Bulk Upload Section -->
-		<div class="bulk-upload-section wt:mt-6">
+		<div class="bulk-upload-section wt_mt-6">
 			<h4><?php esc_html_e( 'Bulk Upload Subsidiaries', 'wicket-acc' ); ?></h4>
 			<p class="description"><?php esc_html_e( 'Upload an Excel spreadsheet to add multiple subsidiaries at once.', 'wicket-acc' ); ?></p>
 
@@ -115,7 +115,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						   required>
 				</div>
 
-				<button type="submit" class="button button--primary wt:mt-3">
+				<button type="submit" class="button button--primary wt_mt-3">
 					<?php esc_html_e( 'Upload and Process', 'wicket-acc' ); ?>
 				</button>
 			</form>
@@ -158,7 +158,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Function to add a subsidiary
 function addSubsidiary(subsidiaryId, subsidiaryName) {
-	if (confirm('<?php echo esc_js( __( 'Are you sure you want to add this subsidiary?', 'wicket-acc' ); ?>')) {
+	if (confirm('<?php echo esc_js( __( 'Are you sure you want to add this subsidiary?', 'wicket-acc' ) ); ?>')) {
 		// Create form data
 		const formData = new FormData();
 		formData.append('org_id', '<?php echo esc_js( $org_id ); ?>');

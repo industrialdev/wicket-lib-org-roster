@@ -146,7 +146,7 @@ foreach ($organizations as $org) {
     .ginput_container_number input[type='number']:focus {
         border-color: #0073aa !important;
         box-shadow: 0 0 0 3px rgba(0, 115, 170, 0.1) !important;
-        wt:outline: none !important;
+        outline: none !important;
     }
 
     .ginput_container_number input[type='number']:hover {

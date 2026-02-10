@@ -32,7 +32,7 @@ class DatastarSSE
     public static function renderSuccess(string $message, string $targetSelector, array $signalsToSet = [], string $countdownId = 'countdown'): void
     {
         $html = sprintf(
-            '<div class="wt:bg-green-100 wt:border wt:border-green-400 wt:text-green-700 wt:px-4 wt:py-3 wt:rounded-sm wt:mb-4"><p><strong>%1$s</strong></p><p>%2$s</p><p class="wt:mt-2 wt:text-sm">%3$s <span id="%5$s">5</span> %4$s</p></div>',
+            '<div class="wt_bg-green-100 wt_border wt_border-green-400 wt_text-green-700 wt_px-4 wt_py-3 wt_rounded-sm wt_mb-4"><p><strong>%1$s</strong></p><p>%2$s</p><p class="wt_mt-2 wt_text-sm">%3$s <span id="%5$s">5</span> %4$s</p></div>',
             esc_html__('Success!', 'wicket-acc'),
             wp_kses_post($message),
             esc_html__('This page will reload in', 'wicket-acc'),
@@ -84,7 +84,7 @@ class DatastarSSE
     public static function renderError(string $message, string $targetSelector, array $signalsToSet = []): void
     {
         $html = sprintf(
-            '<div class="wt:bg-red-100 wt:border wt:border-red-400 wt:text-red-700 wt:px-4 wt:py-3 wt:rounded-sm wt:mb-4">%1$s</div>',
+            '<div class="wt_bg-red-100 wt_border wt_border-red-400 wt_text-red-700 wt_px-4 wt_py-3 wt_rounded-sm wt_mb-4">%1$s</div>',
             esc_html($message)
         );
 

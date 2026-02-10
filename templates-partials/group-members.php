@@ -18,7 +18,7 @@ $group_uuid = isset( $_GET['group_uuid'] ) ? sanitize_text_field( (string) $_GET
 $org_uuid = isset( $_GET['org_uuid'] ) ? sanitize_text_field( (string) $_GET['org_uuid'] ) : '';
 
 if ( empty( $group_uuid ) ) {
-    echo '<p class="wt:text-gray-500">' . esc_html__( 'No group selected.', 'wicket-acc' ) . '</p>';
+    echo '<p class="wt_text-gray-500">' . esc_html__( 'No group selected.', 'wicket-acc' ) . '</p>';
     return;
 }
 
@@ -26,7 +26,7 @@ $group_service = new GroupService();
 $current_user = wp_get_current_user();
 $access = $group_service->can_manage_group( $group_uuid, (string) $current_user->user_login );
 if ( empty( $access['allowed'] ) ) {
-    echo '<p class="wt:text-gray-500">' . esc_html__( 'You do not have permission to manage this group.', 'wicket-acc' ) . '</p>';
+    echo '<p class="wt_text-gray-500">' . esc_html__( 'You do not have permission to manage this group.', 'wicket-acc' ) . '</p>';
     return;
 }
 
@@ -84,23 +84,23 @@ if ( $use_unified_view ) {
 }
 ?>
 <div
-    class="group-members wt:relative"
+    class="group-members wt_relative"
     data-signals:='{"membersLoading": false, "addMemberModalOpen": false, "addMemberSubmitting": false, "addMemberSuccess": false, "removeMemberModalOpen": false, "removeMemberSubmitting": false, "removeMemberSuccess": false, "currentRemoveMemberUuid": "", "currentRemoveMemberName": "", "currentRemoveMemberEmail": "", "currentRemoveMemberGroupMemberId": "", "currentRemoveMemberRole": ""}'
     data-on:datastar-fetch="evt.detail.type === 'started' && ($membersLoading = true); (evt.detail.type === 'finished' || evt.detail.type === 'error') && ($membersLoading = false)">
-    <div class="members-loading-overlay wt:hidden wt:absolute wt:inset-0 wt:z-10 wt:bg-[var(--om-bg-light-neutral)]/85 wt:backdrop-blur-xs"
+    <div class="members-loading-overlay wt_hidden wt_absolute wt_inset-0 wt_z-10 wt_bg-light-neutral-85 wt_backdrop-blur-xs"
         data-class:hidden="!$membersLoading" data-class:is-active="$membersLoading">
-        <div class="wt:flex wt:h-full wt:w-full wt:flex-col wt:items-center wt:justify-center wt:gap-3">
-            <div class="members-loading-spinner wt:h-10 wt:w-10 wt:rounded-full wt:border-4 wt:border-[var(--om-bg-interactive)] wt:border-t-transparent wt:animate-spin"
+        <div class="wt_flex wt_h-full wt_w-full wt_flex-col wt_items-center wt_justify-center wt_gap-3">
+            <div class="members-loading-spinner wt_h-10 wt_w-10 wt_rounded-full wt_border-4 wt_border-bg-interactive wt_border-t-transparent wt_animate-spin"
                 aria-hidden="true"></div>
-            <p class="wt:text-sm wt:font-medium wt:text-[var(--om-text-content)]" role="status" aria-live="polite">
+            <p class="wt_text-sm wt_font-medium wt_text-content" role="status" aria-live="polite">
                 <?php esc_html_e( 'Loading...', 'wicket-acc' ); ?>
             </p>
         </div>
     </div>
-    <div class="members-search wt:flex wt:items-center wt:gap-2 wt:mb-6" data-signals:='<?php echo wp_json_encode( $signals, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT ); ?>'>
-        <div class="members-search__field wt:relative wt:w-full">
-            <div class="members-search__icon wt:absolute wt:inset-y-0 wt:left-0 wt:flex wt:items-center wt:pl-3 wt:pointer-events-none">
-                <svg class="wt:w-5 wt:h-5 wt:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+    <div class="members-search wt_flex wt_items-center wt_gap-2 wt_mb-6" data-signals:='<?php echo wp_json_encode( $signals, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT ); ?>'>
+        <div class="members-search__field wt_relative wt_w-full">
+            <div class="members-search__icon wt_absolute wt_inset-y-0 wt_left-0 wt_flex wt_items-center wt_pl-3 wt_pointer-events-none">
+                <svg class="wt_w-5 wt_h-5 wt_text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                     xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -117,7 +117,7 @@ if ( $use_unified_view ) {
             <input
                 type="text"
                 data-bind="searchQuery"
-                class="members-search__input bg-[var(--om-bg-light-neutral)] wt:border wt:border-[var(--om-border-color)] wt:text-[var(--om-text-content)] wt:text-sm wt:rounded-md focus:wt:ring-2 focus:wt:ring-[var(--om-bg-interactive)] wt:focus:wt:border-[var(--om-bg-interactive)] wt:block wt:w-full wt:pl-10 wt:p-2.5"
+                class="members-search__input wt_border wt_border-color wt_text-content wt_text-sm wt_rounded-md wt_focus_ring-2 wt_focus_ring-bg-interactive wt_focus_border-bg-interactive wt_block wt_w-full wt_pl-10 wt_p-2.5"
                 placeholder="<?php esc_attr_e( 'Start typing to search for members...', 'wicket-acc' ); ?>"
                 data-on:input__debounce.700ms="<?php echo esc_attr( $searchInputAction ); ?>"
                 data-on:success="<?php echo esc_attr( $search_success ); ?>"
@@ -126,8 +126,8 @@ if ( $use_unified_view ) {
                 data-on:keydown.enter="<?php echo esc_attr( $searchSubmitAction ); ?>"
                 data-on:keydown.enter__prevent-default="true">
         </div>
-        <div class="members-search__actions wt:flex wt:items-center wt:gap-2">
-            <button class="members-search__submit button button--primary wt:whitespace-nowrap"
+        <div class="members-search__actions wt_flex wt_items-center wt_gap-2">
+            <button class="members-search__submit button button--primary wt_whitespace-nowrap"
                 data-on:click="<?php echo esc_attr( $searchSubmitAction ); ?>"
                 data-on:success="<?php echo esc_attr( $search_success ); ?>"
                 data-show="!$searchSubmitted"
@@ -135,7 +135,7 @@ if ( $use_unified_view ) {
                 data-attr:disabled="$membersLoading">
                 <?php esc_html_e( 'Search', 'wicket-acc' ); ?>
             </button>
-            <button class="members-search__clear button button--secondary wt:whitespace-nowrap"
+            <button class="members-search__clear button button--secondary wt_whitespace-nowrap"
                 data-on:click="<?php echo esc_attr( $clearAction ); ?>"
                 data-on:success="<?php echo esc_attr( $search_success ); ?>"
                 data-show="$searchSubmitted && $searchQuery && $searchQuery.trim() !== ''"
@@ -228,23 +228,23 @@ if ( $use_unified_view ) {
     ?>
 
     <dialog id="groupMembersAddModal"
-        class="modal wt:m-auto max-wt:3xl wt:rounded-md wt:shadow-md backdrop:wt:bg-black/50"
+        class="modal wt_m-auto max_wt_3xl wt_rounded-md wt_shadow-md backdrop_wt_bg-black-50"
         data-show="$addMemberModalOpen"
         data-effect="if ($addMemberModalOpen) el.showModal(); else el.close();"
         data-on:close="($membersLoading = false); $addMemberModalOpen = false">
-        <div class="wt:bg-white wt:p-6 wt:relative" data-on:click__outside__capture="$addMemberModalOpen = false">
-            <button type="button" class="wt:absolute wt:right-4 wt:top-4 wt:text-lg wt:font-semibold"
+        <div class="wt_bg-white wt_p-6 wt_relative" data-on:click__outside__capture="$addMemberModalOpen = false">
+            <button type="button" class="wt_absolute wt_right-4 wt_top-4 wt_text-lg wt_font-semibold"
                 data-on:click="$addMemberModalOpen = false" data-class:hidden="$addMemberSuccess">
                 ×
             </button>
 
-            <h2 class="wt:text-2xl wt:font-semibold wt:mb-4">
+            <h2 class="wt_text-2xl wt_font-semibold wt_mb-4">
                 <?php esc_html_e( 'Add Member', 'wicket-acc' ); ?>
             </h2>
 
             <form
                 method="post"
-                class="wt:flex wt:flex-col wt:gap-4"
+                class="wt_flex wt_flex-col wt_gap-4"
                 data-on:submit="if(!$addMemberSubmitting){ $addMemberSubmitting = true; $membersLoading = true; @post('<?php echo esc_js( $add_member_endpoint ); ?>', { contentType: 'form' }); }"
                 data-on:submit__prevent-default="true"
                 data-on:success="<?php echo esc_attr( $add_member_success_actions ); ?>"
@@ -255,56 +255,56 @@ if ( $use_unified_view ) {
                 <input type="hidden" name="nonce" value="<?php echo esc_attr( wp_create_nonce( 'wicket-orgman-add-group-member' ) ); ?>">
 
                 <div>
-                    <label class="wt:block wt:text-sm wt:font-medium wt:mb-1" for="group-member-first-name">
+                    <label class="wt_block wt_text-sm wt_font-medium wt_mb-1" for="group-member-first-name">
                         <?php esc_html_e( 'First Name', 'wicket-acc' ); ?>
                     </label>
                     <input id="group-member-first-name" name="first_name" type="text"
-                        class="wt:w-full wt:border wt:border-[var(--om-border-color)] wt:rounded-md wt:p-2" required>
+                        class="wt_w-full wt_border wt_border-color wt_rounded-md wt_p-2" required>
                 </div>
                 <div>
-                    <label class="wt:block wt:text-sm wt:font-medium wt:mb-1" for="group-member-last-name">
+                    <label class="wt_block wt_text-sm wt_font-medium wt_mb-1" for="group-member-last-name">
                         <?php esc_html_e( 'Last Name', 'wicket-acc' ); ?>
                     </label>
                     <input id="group-member-last-name" name="last_name" type="text"
-                        class="wt:w-full wt:border wt:border-[var(--om-border-color)] wt:rounded-md wt:p-2" required>
+                        class="wt_w-full wt_border wt_border-color wt_rounded-md wt_p-2" required>
                 </div>
                 <div>
-                    <label class="wt:block wt:text-sm wt:font-medium wt:mb-1" for="group-member-email">
+                    <label class="wt_block wt_text-sm wt_font-medium wt_mb-1" for="group-member-email">
                         <?php esc_html_e( 'Email Address', 'wicket-acc' ); ?>
                     </label>
                     <input id="group-member-email" name="email" type="email"
-                        class="wt:w-full wt:border wt:border-[var(--om-border-color)] wt:rounded-md wt:p-2"
+                        class="wt_w-full wt_border wt_border-color wt_rounded-md wt_p-2"
                         placeholder="<?php echo esc_attr( __( 'user@mail.com', 'wicket-acc' ) ); ?>" required>
                 </div>
                 <div>
-                    <label class="wt:block wt:text-sm wt:font-medium wt:mb-1" for="group-member-role">
+                    <label class="wt_block wt_text-sm wt_font-medium wt_mb-1" for="group-member-role">
                         <?php esc_html_e( 'Role', 'wicket-acc' ); ?>
                     </label>
                     <select id="group-member-role" name="role"
-                        class="wt:w-full wt:border wt:border-[var(--om-border-color)] wt:rounded-md wt:p-2">
+                        class="wt_w-full wt_border wt_border-color wt_rounded-md wt_p-2">
                         <option value="<?php echo esc_attr( $member_role ); ?>"><?php esc_html_e( 'Member', 'wicket-acc' ); ?></option>
                         <option value="<?php echo esc_attr( $observer_role ); ?>"><?php esc_html_e( 'Observer', 'wicket-acc' ); ?></option>
                     </select>
                 </div>
 
-                <div class="wt:flex wt:justify-end wt:gap-3 wt:pt-4" data-class:hidden="$addMemberSuccess">
+                <div class="wt_flex wt_justify-end wt_gap-3 wt_pt-4" data-class:hidden="$addMemberSuccess">
                     <button type="button" class="button button--secondary"
                         data-on:click="$addMemberModalOpen = false"
-                        data-class="{ 'wt:pointer-events-none': $addMemberSubmitting, 'wt:opacity-50': $addMemberSubmitting }"
+                        data-class="{ 'wt_pointer-events-none': $addMemberSubmitting, 'wt_opacity-50': $addMemberSubmitting }"
                         data-attr:aria-disabled="$addMemberSubmitting ? 'true' : 'false'">
                         <?php esc_html_e( 'Cancel', 'wicket-acc' ); ?>
                     </button>
-                    <button type="submit" class="button button--primary wt:inline-flex wt:items-center wt:gap-2"
-                        data-class="{ 'wt:pointer-events-none': $addMemberSubmitting, 'wt:opacity-50': $addMemberSubmitting }"
+                    <button type="submit" class="button button--primary wt_inline-flex wt_items-center wt_gap-2"
+                        data-class="{ 'wt_pointer-events-none': $addMemberSubmitting, 'wt_opacity-50': $addMemberSubmitting }"
                         data-attr:aria-disabled="$addMemberSubmitting ? 'true' : 'false'">
                         <span data-class:hidden="$addMemberSubmitting">
                             <?php esc_html_e( 'Add Member', 'wicket-acc' ); ?>
                         </span>
-                        <svg class="wt:h-5 wt:w-5 wt:text-[var(--om-text-button-label-reversed)] wt:hidden"
+                        <svg class="wt_h-5 wt_w-5 wt_text-button-label-reversed wt_hidden"
                             data-class:hidden="!$addMemberSubmitting" viewBox="0 0 24 24" fill="none"
                             xmlns="http://www.w3.org/2000/svg">
-                            <circle class="wt:opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="wt:opacity-75" fill="currentColor"
+                            <circle class="wt_opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="wt_opacity-75" fill="currentColor"
                                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
                             </path>
                         </svg>
@@ -314,24 +314,24 @@ if ( $use_unified_view ) {
         </div>
     </dialog>
 
-    <dialog id="groupMembersRemoveModal" class="modal wt:m-auto max-wt-md wt:rounded-md wt:shadow-md backdrop:wt:bg-black/50"
+    <dialog id="groupMembersRemoveModal" class="modal wt_m-auto max_wt_md wt_rounded-md wt_shadow-md backdrop_wt_bg-black-50"
         data-show="$removeMemberModalOpen"
         data-effect="if ($removeMemberModalOpen) el.showModal(); else el.close();"
         data-on:close="($membersLoading = false); $removeMemberModalOpen = false">
-        <div class="wt:bg-white wt:p-6 wt:relative">
-            <button type="button" class="wt:absolute wt:right-4 wt:top-4 wt:text-lg wt:font-semibold"
-                data-on:click="$removeMemberModalOpen = false" data-class:wt:hidden="$removeMemberSuccess">
+        <div class="wt_bg-white wt_p-6 wt_relative">
+            <button type="button" class="wt_absolute wt_right-4 wt_top-4 wt_text-lg wt_font-semibold"
+                data-on:click="$removeMemberModalOpen = false" data-class_wt_hidden="$removeMemberSuccess">
                 ×
             </button>
-            <h2 class="wt:text-2xl wt:font-semibold wt:mb-4"><?php esc_html_e( 'Remove Member', 'wicket-acc' ); ?></h2>
+            <h2 class="wt_text-2xl wt_font-semibold wt_mb-4"><?php esc_html_e( 'Remove Member', 'wicket-acc' ); ?></h2>
             <div id="remove-member-messages"></div>
 
-            <div data-class:wt:hidden="$removeMemberSuccess">
-                <p class="wt:mb-6">
-                    <span data-class:wt:hidden="$currentRemoveMemberName === ''">
+            <div data-class_wt_hidden="$removeMemberSuccess">
+                <p class="wt_mb-6">
+                    <span data-class_wt_hidden="$currentRemoveMemberName === ''">
                         <?php echo esc_html__( 'Are you sure you want to remove this member from the group?', 'wicket-acc' ); ?>
                     </span>
-                    <span data-class:wt:hidden="$currentRemoveMemberName !== ''">
+                    <span data-class_wt_hidden="$currentRemoveMemberName !== ''">
                         <?php echo esc_html__( 'Are you sure you want to remove', 'wicket-acc' ); ?>
                         <span data-text="$currentRemoveMemberName"></span>
                         <?php echo esc_html__( 'from this group?', 'wicket-acc' ); ?>
@@ -354,31 +354,31 @@ if ( $use_unified_view ) {
                     <input type="hidden" name="role" data-attr:value="$currentRemoveMemberRole">
                     <input type="hidden" name="nonce" value="<?php echo esc_attr( wp_create_nonce( 'wicket-orgman-remove-group-member' ) ); ?>">
 
-                    <div class="wt:flex wt:justify-end wt:gap-3">
+                    <div class="wt_flex wt_justify-end wt_gap-3">
                         <button
                             type="button"
                             data-on:click="$removeMemberModalOpen = false"
-                            class="button button--secondary wt:px-4 wt:py-2 wt:text-sm"
+                            class="button button--secondary wt_px-4 wt_py-2 wt_text-sm"
                             data-class:disabled="$removeMemberSubmitting"
                             data-attr:disabled="$removeMemberSubmitting">
                             <?php esc_html_e( 'Cancel', 'wicket-acc' ); ?>
                         </button>
                         <button
                             type="submit"
-                            class="button button--danger wt:inline-flex wt:items-center wt:gap-2 wt:px-4 wt:py-2 wt:text-sm"
+                            class="button button--danger wt_inline-flex wt_items-center wt_gap-2 wt_px-4 wt_py-2 wt_text-sm"
                             data-class:disabled="$removeMemberSubmitting"
                             data-attr:disabled="$removeMemberSubmitting">
-                            <span data-class:wt:hidden="$removeMemberSubmitting">
+                            <span data-class_wt_hidden="$removeMemberSubmitting">
                                 <?php esc_html_e( 'Remove Member', 'wicket-acc' ); ?>
                             </span>
                             <svg
-                                class="wt:h-4 wt:w-4 wt:text-white wt:hidden"
-                                data-class:wt:hidden="!$removeMemberSubmitting"
+                                class="wt_h-4 wt_w-4 wt_text-white wt_hidden"
+                                data-class_wt_hidden="!$removeMemberSubmitting"
                                 viewBox="0 0 24 24"
                                 fill="none"
                                 xmlns="http://www.w3.org/2000/svg">
-                                <circle class="wt:opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="wt:opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                <circle class="wt_opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="wt_opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
                         </button>
                     </div>

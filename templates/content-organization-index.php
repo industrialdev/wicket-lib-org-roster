@@ -33,8 +33,8 @@ if (empty($org_uuid) && !empty($org_id_fallback)) {
 
 ?>
 
-<div id="org-management-index-app" class="org-management-app wicket-orgman wt:w-full wt:mt-6">
-    <h1 class="wt:text-2xl wt:font-bold wt:mb-4"><?php esc_html_e('Manage Organizations', 'wicket-acc'); ?></h1>
+<div id="org-management-index-app" class="org-management-app wicket-orgman wt_w-full wt_mt-6">
+    <h1 class="wt_text-2xl wt_font-bold wt_mb-4"><?php esc_html_e('Manage Organizations', 'wicket-acc'); ?></h1>
 
     <?php
     if ($roster_mode === 'groups') {

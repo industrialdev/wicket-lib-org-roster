@@ -36,14 +36,14 @@ if (! isset($organizations)) {
 if (isset($error) && is_array($error)) {
 ?>
 
-    <div id="organization-list-container" class="wt:bg-red-50 wt:border wt:border-red-200 wt:rounded-md wt:shadow-sm wt:p-6">
-        <div class="wt:flex wt:items-center">
-            <svg class="wt:w-5 wt:h-5 wt:text-red-500 wt:mr-2" fill="currentColor" viewBox="0 0 20 20">
+    <div id="organization-list-container" class="wt_bg-red-50 wt_border wt_border-red-200 wt_rounded-md wt_shadow-sm wt_p-6">
+        <div class="wt_flex wt_items-center">
+            <svg class="wt_w-5 wt_h-5 wt_text-red-500 wt_mr-2" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
             </svg>
-            <h3 class="wt:text-lg wt:font-medium wt:text-red-800"><?php esc_html_e('Connection Error', 'wicket-acc'); ?></h3>
+            <h3 class="wt_text-lg wt_font-medium wt_text-red-800"><?php esc_html_e('Connection Error', 'wicket-acc'); ?></h3>
         </div>
-        <p class="wt:mt-2 wt:text-red-700">
+        <p class="wt_mt-2 wt_text-red-700">
             <?php
             if (isset($error['message'])) {
                 echo esc_html($error['message']);
@@ -54,7 +54,7 @@ if (isset($error) && is_array($error)) {
         </p>
         <button
             onclick="location.reload()"
-            class="wt:mt-4 wt:px-4 wt:py-2 wt:bg-red-600 wt:text-white wt:rounded-md wt:hover:bg-red-700 focus:wt:outline-hidden focus:wt:ring-2 wt:focus:ring-red-500">
+            class="wt_mt-4 wt_px-4 wt_py-2 wt_bg-red-600 wt_text-white wt_rounded-md wt_hover_bg-red-700 wt_focus_outline-hidden wt_focus_ring-2 wt_focus_ring-red-500">
             <?php esc_html_e('Try Again', 'wicket-acc'); ?>
         </button>
     </div>
@@ -236,7 +236,7 @@ if (empty($organizations)) {
     echo "<p class='mb-2'>" . __('Organizations Found:', 'wicket-acc') . " " . $count . "</p>";
 
     // Start organization list
-    echo '<div class="wt:w-full wt:flex wt:flex-col wt:gap-4" role="list">';
+    echo '<div class="wt_w-full wt_flex wt_flex-col wt_gap-4" role="list">';
     // Initialize membership service once for the loop
     $membership_service = new \OrgManagement\Services\MembershipService();
     foreach ($organizations as $org) :
@@ -397,19 +397,19 @@ if (empty($organizations)) {
             }, $group_details) : null,
         ]);
     ?>
-        <div class="wt:w-full wt:rounded-[var(--om-card-accent-corner-radius)] wt:p-4 wt:mb-4 wt:hover:shadow-sm wt:transition:shadow wt:bg-[var(--om-bg-card)]"
+        <div class="wt_w-full wt_rounded-card-accent wt_p-4 wt_mb-4 wt_hover_shadow-sm wt_transition-shadow wt_bg-card wt_border wt_border-color"
             role="listitem">
-            <h2 class="wt:text-[var(--om-heading-xs)] wt:mb-3">
+            <h2 class="wt_text-heading-xs wt_mb-3">
                 <a href="<?php echo esc_url(\OrgManagement\Helpers\Helper::get_my_account_page_url('organization-management', '/my-account/organization-management/') . '?org_uuid=' . urlencode($org_id)); ?>"
-                    class="wt:text-[var(--om-text-content)] wt:hover:wt:text-primary-600 focus:wt:outline-hidden focus:wt:ring-2 focus:wt:ring-primary-500 wt:focus:ring-offset-2 !no-underline !wt:decoration-none">
+                    class="wt_text-content wt_hover_text-primary-600 wt_focus_outline-hidden wt_focus_ring-2 wt_focus_ring-primary-500 wt_focus_ring-offset-2 wt_decoration-none">
                     <?php echo esc_html($org_name); ?>
                 </a>
             </h2>
-            <div class="wt:flex wt:flex-col wt:gap-2">
+            <div class="wt_flex wt_flex-col wt_gap-2">
                 <!-- Membership Status -->
-                <div class="wt:flex wt:items-center wt:text-[var(--om-text-content)]">
+                <div class="wt_flex wt_items-center wt_text-content">
                     <?php if ($membership_uuid && $membership_name): ?>
-                        <span class="wt:text-base">
+                        <span class="wt_text-base">
                             <?php
                             printf(
                                 /* translators: %s: Membership tier name. */
@@ -419,29 +419,29 @@ if (empty($organizations)) {
                             ?>
                         </span>
                     <?php elseif ($membership_uuid): ?>
-                        <span class="wt:text-base"><?php esc_html_e('Active Membership', 'wicket-acc'); ?></span>
+                        <span class="wt_text-base"><?php esc_html_e('Active Membership', 'wicket-acc'); ?></span>
                     <?php else: ?>
-                        <span class="wt:text-base"><?php esc_html_e('No membership found', 'wicket-acc'); ?></span>
+                        <span class="wt_text-base"><?php esc_html_e('No membership found', 'wicket-acc'); ?></span>
                     <?php endif; ?>
                 </div>
 
                 <!-- Active Member Indicator -->
                 <?php if (\OrgManagement\Helpers\PermissionHelper::has_active_membership($org_id)): ?>
-                    <div class="wt:flex wt:items-center wt:gap-2">
-                        <span class="wt:inline-block wt:w-2 wt:h-2 wt:rounded-full wt:bg-green-500"
+                    <div class="wt_flex wt_items-center wt_gap-2">
+                        <span class="wt_inline-block wt_w-2 wt_h-2 wt_rounded-full wt_bg-green-500"
                             aria-hidden="true"></span>
-                        <span class="wt:text-base wt:leading-none wt:text-[var(--om-text-content)]"><?php esc_html_e('Active Member', 'wicket-acc'); ?></span>
+                        <span class="wt_text-base wt_leading-none wt_text-content"><?php esc_html_e('Active Member', 'wicket-acc'); ?></span>
                     </div>
                 <?php elseif ($membership_uuid): ?>
-                    <div class="wt:flex wt:items-center wt:gap-2">
-                        <span class="wt:inline-block wt:w-2 wt:h-2 wt:rounded-full wt:bg-gray-400"
+                    <div class="wt_flex wt_items-center wt_gap-2">
+                        <span class="wt_inline-block wt_w-2 wt_h-2 wt_rounded-full wt_bg-gray-400"
                             aria-hidden="true"></span>
-                        <span class="wt:text-base wt:leading-none wt:text-[var(--om-text-content)]"><?php esc_html_e('Inactive Membership', 'wicket-acc'); ?></span>
+                        <span class="wt_text-base wt_leading-none wt_text-content"><?php esc_html_e('Inactive Membership', 'wicket-acc'); ?></span>
                     </div>
                 <?php endif; ?>
 
                 <!-- User Roles -->
-                <div class="wt:text-base wt:font-bold wt:text-[var(--om-text-content)]">
+                <div class="wt_text-base wt_font-bold wt_text-content">
                     <span><?php esc_html_e('My Role(s):', 'wicket-acc'); ?></span>
                     <?php if (!empty($formatted_roles)): ?>
                         <?php echo esc_html(implode(', ', $formatted_roles)); ?>
@@ -450,8 +450,8 @@ if (empty($organizations)) {
                     <?php endif; ?>
                 </div>
                 <?php if (! empty($group_details)): ?>
-                    <div class="wt:text-base wt:text-[var(--om-text-content)]">
-                        <span class="wt:font-semibold"><?php esc_html_e('Group(s):', 'wicket-acc'); ?></span>
+                    <div class="wt_text-base wt_text-content">
+                        <span class="wt_font-semibold"><?php esc_html_e('Group(s):', 'wicket-acc'); ?></span>
                         <?php
                         $group_labels = [];
                         foreach ($group_details as $group_detail) {
@@ -473,7 +473,7 @@ if (empty($organizations)) {
                     </div>
                 <?php endif; ?>
                 <!-- Action Links -->
-                <div class="wt:flex wt:items-center wt:gap-4 wt:mt-4">
+                <div class="wt_flex wt_items-center wt_gap-4 wt_mt-4">
                     <?php
                     // Determine user permissions for this organization using PermissionHelper
                     $has_active_membership = \OrgManagement\Helpers\PermissionHelper::has_active_membership($org_id);
@@ -491,13 +491,13 @@ if (empty($organizations)) {
                         }
                         ?>
                         <a href="<?php echo esc_url(add_query_arg($profile_params, $profile_url_base)); ?>"
-                            class="wt:inline-flex wt:items-center wt:text-primary-600 wt:hover:text-primary-700 underline underline-offset-4">
+                            class="wt_inline-flex wt_items-center wt_text-primary-600 wt_hover_text-primary-700 underline underline-offset-4">
                             <?php esc_html_e('Edit Organization', 'wicket-acc'); ?>
                         </a>
                     <?php endif; ?>
 
                     <?php if ($has_any_roles): ?>
-                        <span class="wt:px wt:h-4 wt:bg-[var(--om-border-white)]" aria-hidden="true"></span>
+                        <span class="wt_px-2 wt_h-4 wt_bg-border-white" aria-hidden="true"></span>
                     <?php endif; ?>
 
                     <?php if ($is_membership_manager): ?>
@@ -509,7 +509,7 @@ if (empty($organizations)) {
                         }
                         ?>
                         <a href="<?php echo esc_url(add_query_arg($members_params, $members_url_base)); ?>"
-                            class="wt:inline-flex wt:items-center wt:text-primary-600 wt:hover:text-primary-700 underline underline-offset-4">
+                            class="wt_inline-flex wt_items-center wt_text-primary-600 wt_hover_text-primary-700 underline underline-offset-4">
                             <?php esc_html_e('Manage Members', 'wicket-acc'); ?>
                         </a>
                     <?php endif; ?>

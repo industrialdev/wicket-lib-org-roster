@@ -15,8 +15,8 @@ $notice    = $notice ?? null;
 ?>
 <div class="documents-list">
 	<?php if ( $notice ) : ?>
-		<div class="notifications-wt:inline-container">
-			<div class="notification notification-<?php echo esc_attr( $notice['type'] ); ?> notification-wt:inline">
+		<div class="notifications-wt_inline-container">
+			<div class="notification notification-<?php echo esc_attr( $notice['type'] ); ?> notification-wt_inline">
 				<div class="notification-icon">
 					<?php
 					$icon = match( $notice['type'] ) {
@@ -35,7 +35,7 @@ $notice    = $notice ?? null;
 		</div>
 	<?php endif; ?>
 
-	<div class="documents-toolbar wt:mb-4">
+	<div class="documents-toolbar wt_mb-4">
 		<form class="document-upload-form"
 		      ds-post="<?php echo esc_url( rest_url( 'org-management/v1/documents/upload' ) ); ?>"
 		      ds-target="#documents-list-container"
@@ -45,15 +45,15 @@ $notice    = $notice ?? null;
 			<input type="hidden" name="category" value="<?php echo esc_attr( $category ); ?>">
 			<input type="hidden" name="_wpnonce" value="<?php echo esc_attr( wp_create_nonce( 'org_management_document_upload_' . $org_id ) ); ?>">
 
-			<div class="grid wt:grid-cols-1 md:wt:grid-cols-12 wt:gap-4 wt:items-end">
+			<div class="grid wt_grid-cols-1 md_wt_grid-cols-12 wt_gap-4 wt_items-end">
 				<div class="md:col-span-5">
-					<label for="document_file" class="wt:block wt:text-sm wt:font-medium wt:text-gray-700 wt:mb-1">
+					<label for="document_file" class="wt_block wt_text-sm wt_font-medium wt_text-gray-700 wt_mb-1">
 						<?php esc_html_e( 'Select Document', 'wicket-acc' ); ?>
 					</label>
 					<input type="file"
 					       id="document_file"
 					       name="document"
-					       class="wt:block wt:w-full wt:text-sm wt:text-gray-500
+					       class="wt_block wt_w-full wt_text-sm wt_text-gray-500
 					              file:mr-4 file:py-2 file:px-4
 					              file:rounded file:border-0
 					              file:text-sm file:font-semibold
@@ -63,42 +63,42 @@ $notice    = $notice ?? null;
 				</div>
 
 				<div class="md:col-span-4">
-					<label for="document_title" class="wt:block wt:text-sm wt:font-medium wt:text-gray-700 wt:mb-1">
+					<label for="document_title" class="wt_block wt_text-sm wt_font-medium wt_text-gray-700 wt_mb-1">
 						<?php esc_html_e( 'Document Title', 'wicket-acc' ); ?>
 					</label>
 					<input type="text"
 					       id="document_title"
 					       name="title"
-					       class="wt:w-full wt:px-3 wt:py-2 wt:border wt:border-gray-300 wt:rounded-md wt:shadow-xs focus:wt:outline-hidden focus:wt:ring-2 focus:wt:ring-blue-500 wt:focus:border-blue-500 sm:wt:text-sm"
+					       class="wt_w-full wt_px-3 wt_py-2 wt_border wt_border-gray-300 wt_rounded-md wt_shadow-xs wt_focus_outline-hidden wt_focus_ring-2 wt_focus_ring-blue-500 wt_focus_border-blue-500 sm_wt_text-sm"
 					       placeholder="<?php esc_attr_e( 'Enter document title', 'wicket-acc' ); ?>">
 				</div>
 
 				<div class="md:col-span-2">
-					<button type="submit" class="wt:w-full wt:flex wt:justify-center wt:py-2 wt:px-4 wt:border wt:border-transparent wt:rounded-md wt:shadow-xs wt:text-sm wt:font-medium wt:text-white wt:bg-blue-600 wt:hover:bg-blue-700 focus:wt:outline-hidden focus:wt:ring-2 focus:wt:ring-offset-2 wt:focus:ring-blue-500">
+					<button type="submit" class="wt_w-full wt_flex wt_justify-center wt_py-2 wt_px-4 wt_border wt_border-transparent wt_rounded-md wt_shadow-xs wt_text-sm wt_font-medium wt_text-white wt_bg-blue-600 wt_hover_bg-blue-700 wt_focus_outline-hidden wt_focus_ring-2 wt_focus_ring-offset-2 wt_focus_ring-blue-500">
 						<?php esc_html_e( 'Upload Document', 'wicket-acc' ); ?>
 					</button>
 				</div>
 			</div>
 
-			<div class="wt:mt-2">
-				<label for="document_description" class="wt:block wt:text-sm wt:font-medium wt:text-gray-700 wt:mb-1">
+			<div class="wt_mt-2">
+				<label for="document_description" class="wt_block wt_text-sm wt_font-medium wt_text-gray-700 wt_mb-1">
 					<?php esc_html_e( 'Description (Optional)', 'wicket-acc' ); ?>
 				</label>
 				<textarea id="document_description"
 				          name="description"
 				          rows="2"
-				          class="wt:shadow-xs focus:wt:ring-2 focus:wt:ring-blue-500 wt:focus:border-blue-500 wt:mt-1 wt:block wt:w-full sm:wt:text-sm wt:border wt:border-gray-300 wt:rounded-md wt:p-2"
+				          class="wt_shadow-xs wt_focus_ring-2 wt_focus_ring-blue-500 wt_focus_border-blue-500 wt_mt-1 wt_block wt_w-full sm_wt_text-sm wt_border wt_border-gray-300 wt_rounded-md wt_p-2"
 				          placeholder="<?php esc_attr_e( 'Enter document description', 'wicket-acc' ); ?>"></textarea>
 			</div>
 		</form>
 	</div>
 
 	<?php if ( ! empty( $documents ) ) : ?>
-		<div class="documents-wt:grid wt:mt-6">
+		<div class="documents-wt_grid wt_mt-6">
 			<?php foreach ( $documents as $document ) : ?>
-				<div class="document-card wt:border wt:border-gray-200 wt:rounded-md wt:p-4 wt:mb-3 wt:flex wt:items-center wt:justify-between" data-document-id="<?php echo esc_attr( $document['id'] ); ?>">
-					<div class="document-info wt:flex wt:items-center">
-						<div class="document-icon wt:mr-3">
+				<div class="document-card wt_border wt_border-gray-200 wt_rounded-md wt_p-4 wt_mb-3 wt_flex wt_items-center wt_justify-between" data-document-id="<?php echo esc_attr( $document['id'] ); ?>">
+					<div class="document-info wt_flex wt_items-center">
+						<div class="document-icon wt_mr-3">
 							<?php
 							// Show appropriate icon based on file type
 							$file_ext = pathinfo( $document['filename'], PATHINFO_EXTENSION );
@@ -130,23 +130,23 @@ $notice    = $notice ?? null;
 							<span class="<?php echo esc_attr( $icon_class ); ?>" style="font-size: 24px;">📄</span>
 						</div>
 						<div class="document-details">
-							<h3 class="wt:font-medium wt:text-gray-900"><?php echo esc_html( $document['title'] ); ?></h3>
-							<p class="wt:text-sm wt:text-gray-500"><?php echo esc_html( $document['filename'] ); ?> (<?php echo esc_html( size_format( $document['filesize'] ) ); ?>)</p>
+							<h3 class="wt_font-medium wt_text-gray-900"><?php echo esc_html( $document['title'] ); ?></h3>
+							<p class="wt_text-sm wt_text-gray-500"><?php echo esc_html( $document['filename'] ); ?> (<?php echo esc_html( size_format( $document['filesize'] ) ); ?>)</p>
 							<?php if ( ! empty( $document['description'] ) ) : ?>
-								<p class="wt:text-sm wt:text-gray-600 wt:mt-1"><?php echo esc_html( $document['description'] ); ?></p>
+								<p class="wt_text-sm wt_text-gray-600 wt_mt-1"><?php echo esc_html( $document['description'] ); ?></p>
 							<?php endif; ?>
-							<p class="wt:text-xs wt:text-gray-400 wt:mt-1">
+							<p class="wt_text-xs wt_text-gray-400 wt_mt-1">
 								<?php echo esc_html( date_i18n( get_option( 'date_format' ), strtotime( $document['upload_date'] ) ) ); ?>
 								<?php if ( ! empty( $document['category'] ) ) : ?>
-									<span class="wt:ml-2 wt:px-2 wt:py-0.5 wt:bg-gray-100 wt:rounded-full wt:text-xs"><?php echo esc_html( $document['category'] ); ?></span>
+									<span class="wt_ml-2 wt_px-2 wt_py-0.5 wt_bg-gray-100 wt_rounded-full wt_text-xs"><?php echo esc_html( $document['category'] ); ?></span>
 								<?php endif; ?>
 							</p>
 						</div>
 					</div>
-					<div class="document-actions wt:flex wt:gap-2">
+					<div class="document-actions wt_flex wt_gap-2">
 						<a href="<?php echo esc_url( $document['url'] ); ?>"
 						   target="_blank"
-						   class="wt:text-blue-600 wt:hover:text-blue-900 wt:text-sm wt:font-medium"
+						   class="wt_text-blue-600 wt_hover_text-blue-900 wt_text-sm wt_font-medium"
 						   download>
 							<?php esc_html_e( 'Download', 'wicket-acc' ); ?>
 						</a>
@@ -156,7 +156,7 @@ $notice    = $notice ?? null;
 							ds-target="#documents-list-container"
 							ds-swap="innerHTML"
 							ds-confirm="<?php esc_attr_e( 'Are you sure you want to delete this document?', 'wicket-acc' ); ?>"
-							class="wt:text-red-600 wt:hover:text-red-900 wt:text-sm wt:font-medium">
+							class="wt_text-red-600 wt_hover_text-red-900 wt_text-sm wt_font-medium">
 							<?php esc_html_e( 'Delete', 'wicket-acc' ); ?>
 						</button>
 					</div>
@@ -164,10 +164,10 @@ $notice    = $notice ?? null;
 			<?php endforeach; ?>
 		</div>
 	<?php else : ?>
-		<div class="empty-documents-state wt:text-center wt:py-8">
-			<div class="wt:text-gray-400 wt:text-5xl wt:mb-4">📁</div>
-			<h3 class="wt:text-lg wt:font-medium wt:text-gray-900 wt:mb-1"><?php esc_html_e( 'No documents found', 'wicket-acc' ); ?></h3>
-			<p class="wt:text-gray-500"><?php esc_html_e( 'Upload your first document using the form above.', 'wicket-acc' ); ?></p>
+		<div class="empty-documents-state wt_text-center wt_py-8">
+			<div class="wt_text-gray-400 wt_text-5xl wt_mb-4">📁</div>
+			<h3 class="wt_text-lg wt_font-medium wt_text-gray-900 wt_mb-1"><?php esc_html_e( 'No documents found', 'wicket-acc' ); ?></h3>
+			<p class="wt_text-gray-500"><?php esc_html_e( 'Upload your first document using the form above.', 'wicket-acc' ); ?></p>
 		</div>
 	<?php endif; ?>
 </div>

@@ -26,71 +26,16 @@ Assets are served from the library directory. If your install path differs, over
 - `wicket/acc/orgman/base_path`
 - `wicket/acc/orgman/base_url`
 
-# Org Management Tailwind CSS Compiler
+# Styling
 
-Standalone Tailwind CSS v4 compiler for the org-management module. This setup allows you to compile Tailwind CSS independently without depending on the main theme's build process.
+The org-management frontend uses static vanilla CSS utilities and BEM-style component classes.
 
-## Setup
+## CSS Assets
 
-1. Install dependencies:
-```bash
-npm install
-```
+- `public/css/modern-orgman-static.css` - Primary stylesheet enqueued by `OrgMan`
 
-2. Start development:
-```bash
-npm run dev
-```
+## Conventions
 
-3. Watch for changes during development:
-```bash
-npm run watch
-```
-
-4. Build for production (minified):
-```bash
-npm run build
-```
-
-## File Structure
-
-- `public/css/tailwind-input.css` - Main Tailwind input file with `@import "tailwindcss";`
-- `public/css/modern-orgman-tailwind-compiled.css` - Compiled CSS output (minified in production)
-- `public/css/modern-orgman-legacy-fixes.css` - Legacy fixes (existing)
-- `public/css/modern-orgman.css` - Modern styles (existing)
-- `tailwind.config.js` - Tailwind configuration (scans all PHP files in this directory)
-
-## Configuration
-
-The Tailwind config is set to:
-- Scan all `.php` files in the org-management directory for classes
-- Disable preflight to avoid conflicts with existing theme styles
-- Output to `public/css/modern-orgman-tailwind-compiled.css`
-
-## WordPress Integration
-
-The compiled CSS is automatically enqueued by WordPress through the `OrgMan.php` class. The enqueue order is:
-1. `modern-orgman-legacy-fixes.css` - Legacy fixes
-2. `modern-orgman.css` - Modern styles
-3. `modern-orgman-tailwind-compiled.css` - Compiled Tailwind CSS
-
-## Adding Custom Styles
-
-Add custom Tailwind styles to `public/css/tailwind-input.css`:
-
-```css
-@import "tailwindcss";
-
-@layer base {
-  h1 { @apply text-2xl font-bold; }
-}
-
-@layer components {
-  .btn-primary { @apply bg-blue-500 text-white px-4 py-2 rounded; }
-}
-
-/* Custom org-management styles */
-.orgman-container {
-  @apply max-w-6xl mx-auto p-4;
-}
-```
+- Utility-style classes use the `wt_` prefix (scoped namespace)
+- Component classes follow BEM naming where possible
+- Theme values should come from CSS variables (no hardcoded utility colors)
