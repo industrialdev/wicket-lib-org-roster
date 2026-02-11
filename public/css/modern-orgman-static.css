@@ -1248,7 +1248,6 @@ input:where([type="button"], [type="reset"], [type="submit"]) {
   background-color: var(--wicket-orgman-primary-color);
   color: #fff;
   cursor: pointer;
-  border-radius: 0.5rem;
   padding: 0.5rem 0.875rem;
   text-decoration: none;
 }

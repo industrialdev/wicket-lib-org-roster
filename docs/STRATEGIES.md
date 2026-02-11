@@ -187,20 +187,12 @@ Current strategy keys:
 - `membership_cycle`
   - `strategy_key`
   - `permissions`:
-    - `view_roles`
     - `add_roles`
     - `remove_roles`
-    - `bulk_upload_roles`
     - `purchase_seats_roles`
     - `prevent_owner_removal`
   - `member_management`:
     - `require_explicit_membership_uuid`
-    - `duplicate_scope`
-    - `removal_mode`
-    - `removal_end_date_format`
-  - `bulk_upload`
-  - `seats`
-  - `ui`
 
 #### UI/Request Expectations
 - Membership UUID should be propagated in:

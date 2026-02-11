@@ -33,20 +33,12 @@ Maps roles to specific capabilities. Each key (e.g., `manage_members`) takes an 
 ### `membership_cycle` (Membership Cycle Strategy Only)
 - `strategy_key`: Strategy identifier (`membership_cycle`).
 - `permissions`:
-  - `view_roles`: Roles allowed to view cycle-scoped rosters.
   - `add_roles`: Roles allowed to add members in cycle-scoped mode.
   - `remove_roles`: Roles allowed to remove members in cycle-scoped mode.
-  - `bulk_upload_roles`: Roles allowed to run bulk upload in cycle-scoped mode.
   - `purchase_seats_roles`: Roles allowed to purchase additional seats.
   - `prevent_owner_removal`: Prevents organization owner removal in cycle-scoped remove flow.
 - `member_management`:
-  - `require_explicit_membership_uuid`: Requires explicit `membership_uuid` for mutating cycle-scoped actions.
-  - `duplicate_scope`: Duplicate detection strategy key.
-  - `removal_mode`: Removal behavior key (`end_date`).
-  - `removal_end_date_format`: Date format for end-dated removals.
-- `bulk_upload`: Reserved config block for cycle-scoped bulk upload constraints.
-- `seats`: Cycle-scoped seat behavior and messaging config.
-- `ui`: Cycle-scoped UI behavior (unified list/view flags, table fields, paging).
+  - `require_explicit_membership_uuid`: Requires explicit `membership_uuid` for cycle-scoped mutations.
 
 ### `additional_seats`
 - `enabled`: (bool) Toggle for the seat purchase feature.
@@ -56,7 +48,10 @@ Maps roles to specific capabilities. Each key (e.g., `manage_members`) takes an 
 ### `ui`
 - `member_list.use_unified`: (bool) Enables the modern, search-centric list view.
 - `member_view.use_unified`: (bool) Enables the modern reactive member cards.
-- `member_card_fields`: Configures which fields (Name, Job Title, Email, etc.) are visible and editable on the member cards.
+- `member_card_fields`: Configures shared member-card field visibility across strategies.
+  - `job_title.enabled`: used.
+  - `description.enabled`: used.
+  - `roles.enabled`: used (controls role display in member cards/lists).
 
 ## Strategy Examples
 

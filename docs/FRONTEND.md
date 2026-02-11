@@ -35,8 +35,10 @@ To avoid conflicts with WordPress themes and other plugins, all scoped utility-s
 ## 3. The "Unified View"
 The Unified View is a search-centric interface for managing rosters.
 - **Loading States**: Use the `searching` signal to show/hide loading indicators during API calls.
-- **Search Logic**: Search is submit-driven with explicit user action in current templates.
+- **Search Logic**: Search supports debounced input (minimum 3 chars or clear-to-empty) and explicit Search/Clear buttons in unified templates.
 - **Cycle Scope Propagation**: In `membership_cycle` mode, `membership_uuid` is propagated through list/search/pagination/add/remove refresh requests to keep operations cycle-scoped.
+- **Pagination Controls**: `Previous` is hidden on page 1; `Next` is hidden on the last page; both are hidden when only one page exists.
+- **Shared Role Visibility Toggle**: Member-card role display is controlled globally via `ui.member_card_fields.roles.enabled` across strategies.
 
 ## 4. Modals and Overlays
 Modals are managed via signals and the `notifications-container.php`.

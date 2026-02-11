@@ -222,6 +222,18 @@ abstract class Helper
     }
 
     /**
+     * Check if member roles should be shown on cards.
+     *
+     * @return bool True if roles should be shown, false otherwise
+     */
+    public static function should_show_member_roles(): bool
+    {
+        $config = self::get_config();
+
+        return $config['ui']['member_card_fields']['roles']['enabled'] ?? true;
+    }
+
+    /**
      * Get WPML-aware permalink for a my-account CPT page by slug.
      * Automatically detects current language and returns translated permalink.
      *

@@ -59,7 +59,7 @@ The library is highly configurable via the `wicket/acc/orgman/config` filter. Ke
 - `permissions`: Fine-grained control over who can edit orgs, manage members, and buy seats.
 - `member_addition`: Configuration for auto-assigned roles and relationship types.
 - `groups`: Settings for group-based management (tags, managing roles, roster roles, seat limits, additional_info mapping, removal mode, UI edit fields).
-- `membership_cycle`: Strategy-specific permissions, member-management guards, reserved bulk upload config, seat config, and UI config.
+- `membership_cycle`: Strategy-specific permissions and member-management guards.
 - `additional_seats`: SKU and Gravity Forms mapping for seat purchases.
 - `ui`: Toggles for "Unified View", card fields, and layout modes.
   - **Unified View Config Flags (Groups)**:
@@ -79,7 +79,7 @@ The library automatically injects its UI into the following "My Account" page sl
 - `organization-members` (Group detail card tab 2: member list for the entire group, defaulting to the unified view).
 - `supplemental-members`
 
-*Note: The unified view implements a submit-only search UX with loading indicators and card hiding. End-dated roles are excluded from the member list UI.*
+*Note: The unified view supports debounced search input plus explicit Search/Clear actions, with loading indicators and card hiding. End-dated roles are excluded from the member list UI.*
 
 ### 3.2 Hooks & Filters
 - **Filter**: `wicket/acc/orgman/config` - Modify the entire library configuration.

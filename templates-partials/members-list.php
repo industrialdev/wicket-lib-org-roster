@@ -280,10 +280,12 @@ $no_members_message = __('No members found.', 'wicket-acc');
                                 </a>
                             </div>
                         <?php endif; ?>
-                        <div class="wt_flex wt_items-baseline wt_gap-2 wt_text-sm">
-                            <strong><?php esc_html_e('Roles:', 'wicket-acc'); ?></strong>
-                            <span class="wt_text-content"><?php echo esc_html($roles_text); ?></span>
-                        </div>
+                        <?php if (OrgHelpers\Helper::should_show_member_roles()) : ?>
+                            <div class="wt_flex wt_items-baseline wt_gap-2 wt_text-sm">
+                                <strong><?php esc_html_e('Roles:', 'wicket-acc'); ?></strong>
+                                <span class="wt_text-content"><?php echo esc_html($roles_text); ?></span>
+                            </div>
+                        <?php endif; ?>
                     </div>
                     <div class="wt_flex wt_flex-col sm_wt_flex-row wt_items-stretch sm_wt_items-start wt_gap-2 wt_justify-between md_wt_auto wt_shrink-0">
                         <button type="button" class="acc-edit-button edit-permissions-button button button--primary wt_inline-flex wt_items-center wt_justify-between wt_gap-2 wt_px-4 wt_py-2 wt_text-sm wt_border wt_border-bg-interactive wt_transition-colors wt_whitespace-nowrap"
@@ -340,16 +342,17 @@ $no_members_message = __('No members found.', 'wicket-acc');
 ?>
         </div>
         <div class="members-pagination__controls wt_w-full wt_flex wt_items-center wt_gap-2 wt_justify-end wt_self-end">
-            <?php $prev_disabled = $page <= 1; ?>
-            <button type="button"
-                class="members-pagination__btn members-pagination__btn--prev button button--secondary wt_px-3 wt_py-2 wt_text-sm"
-                <?php if ($prev_disabled) : ?>disabled<?php endif; ?>
-                <?php if (!$prev_disabled) : ?>data-on:click="<?php echo esc_attr($build_action($page - 1)); ?>" <?php endif; ?>
-                data-on:success="<?php echo esc_attr(wp_sprintf("select('#%s') | set(html)", $members_list_target)); ?>"
-                data-indicator:members-loading
-                data-attr:disabled="$membersLoading">
-                <?php esc_html_e('Previous', 'wicket-acc'); ?>
-            </button>
+            <?php $show_prev = $page > 1; ?>
+            <?php if ($show_prev) : ?>
+                <button type="button"
+                    class="members-pagination__btn members-pagination__btn--prev button button--secondary wt_px-3 wt_py-2 wt_text-sm"
+                    data-on:click="<?php echo esc_attr($build_action($page - 1)); ?>"
+                    data-on:success="<?php echo esc_attr(wp_sprintf("select('#%s') | set(html)", $members_list_target)); ?>"
+                    data-indicator:members-loading
+                    data-attr:disabled="$membersLoading">
+                    <?php esc_html_e('Previous', 'wicket-acc'); ?>
+                </button>
+            <?php endif; ?>
             <div class="members-pagination__pages wt_flex wt_items-center wt_gap-1">
                 <?php for ($i = 1; $i <= $total_pages; $i++) :
                     $is_current = ($i === $page);
@@ -365,16 +368,17 @@ $no_members_message = __('No members found.', 'wicket-acc');
                     </button>
                 <?php endfor; ?>
             </div>
-            <?php $next_disabled = $page >= $total_pages; ?>
-            <button type="button"
-                class="members-pagination__btn members-pagination__btn--next button button--secondary wt_px-3 wt_py-2 wt_text-sm"
-                <?php if ($next_disabled) : ?>disabled<?php endif; ?>
-                <?php if (!$next_disabled) : ?>data-on:click="<?php echo esc_attr($build_action($page + 1)); ?>" <?php endif; ?>
-                data-on:success="<?php echo esc_attr(wp_sprintf("select('#%s') | set(html)", $members_list_target)); ?>"
-                data-indicator:members-loading
-                data-attr:disabled="$membersLoading">
-                <?php esc_html_e('Next', 'wicket-acc'); ?>
-            </button>
+            <?php $show_next = $page < $total_pages; ?>
+            <?php if ($show_next) : ?>
+                <button type="button"
+                    class="members-pagination__btn members-pagination__btn--next button button--secondary wt_px-3 wt_py-2 wt_text-sm"
+                    data-on:click="<?php echo esc_attr($build_action($page + 1)); ?>"
+                    data-on:success="<?php echo esc_attr(wp_sprintf("select('#%s') | set(html)", $members_list_target)); ?>"
+                    data-indicator:members-loading
+                    data-attr:disabled="$membersLoading">
+                    <?php esc_html_e('Next', 'wicket-acc'); ?>
+                </button>
+            <?php endif; ?>
         </div>
     </nav>
 
