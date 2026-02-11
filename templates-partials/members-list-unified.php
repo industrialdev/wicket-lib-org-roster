@@ -66,6 +66,11 @@ $base_query_args = [
     'size' => $page_size,
 ];
 
+$membership_uuid = isset($membership_uuid) ? (string) $membership_uuid : '';
+if ($mode !== 'groups' && $membership_uuid !== '') {
+    $base_query_args['membership_uuid'] = $membership_uuid;
+}
+
 if ($mode === 'groups' && isset($group_uuid) && $group_uuid !== '') {
     $base_query_args['group_uuid'] = (string) $group_uuid;
 }
@@ -82,10 +87,6 @@ $build_action = static function (int $page_number) use ($build_url) {
     return "@get('" . $build_url($page_number) . "')";
 };
 
-$membership_uuid = isset($membership_uuid) ? (string) $membership_uuid : '';
-if ($mode !== 'groups' && $membership_uuid !== '') {
-    $base_query_args['membership_uuid'] = $membership_uuid;
-}
 $max_seats = null;
 $active_seats = 0;
 $has_seats_available = true;

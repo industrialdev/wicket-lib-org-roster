@@ -50,7 +50,7 @@ if ($mode === 'groups') {
 } else {
     $search_action = "@get('{$members_list_endpoint}{$members_list_separator}org_uuid={$encoded_org_uuid}&page=1&query=' + encodeURIComponent(" . '$searchQuery' . '))';
 }
-$search_success = "$membersLoading = false; " . wp_sprintf("select('#%s') | set(html)", $members_list_target);
+$search_success = "\$membersLoading = false; " . wp_sprintf("select('#%s') | set(html)", $members_list_target);
 
 $signals = [
     'searchQuery' => $query,
@@ -89,6 +89,11 @@ if ($mode !== 'groups') {
 }
 
 $search_submit_action = '$membersLoading = true; $searchSubmitted = true; ' . $search_action;
+$search_input_action = '';
+if ($search_action !== '') {
+    $search_length_condition = '((($searchQuery || \'\').length >= 3) || (($searchQuery || \'\').length === 0))';
+    $search_input_action = '$membersLoading = true; ' . $search_length_condition . ' && ' . $search_action;
+}
 $clear_action = '(' . '$membersLoading' . ' = true, ' . '$searchQuery' . " = '', " . '$searchSubmitted' . " = false, {$search_action})";
 
 ?>
@@ -107,10 +112,8 @@ $clear_action = '(' . '$membersLoading' . ' = true, ' . '$searchQuery' . " = '',
         </div>
     </div>
 
-    <form class="members-search wt_flex wt_items-center wt_gap-2 wt_mb-6"
-        data-signals:='<?php echo wp_json_encode($signals, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT); ?>'
-        data-on:submit="<?php echo esc_attr($search_submit_action); ?>"
-        data-on:submit__prevent-default="true">
+    <div class="members-search wt_flex wt_items-center wt_gap-2 wt_mb-6"
+        data-signals:='<?php echo wp_json_encode($signals, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT); ?>'>
         <div class="members-search__field wt_relative wt_w-full">
             <div class="members-search__icon wt_absolute wt_inset-y-0 wt_left-0 wt_flex wt_items-center wt_pl-3 wt_pointer-events-none">
                 <svg class="wt_w-5 wt_h-5 wt_text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"
@@ -125,16 +128,19 @@ $clear_action = '(' . '$membersLoading' . ' = true, ' . '$searchQuery' . " = '',
                 data-bind="searchQuery"
                 class="members-search__input wt_border wt_border-color wt_text-content wt_text-sm wt_rounded-md wt_focus_ring-2 wt_focus_ring-bg-interactive wt_focus_border-bg-interactive wt_block wt_w-full wt_pl-10 wt_p-2.5"
                 placeholder="<?php esc_attr_e('Start typing to search for members...', 'wicket-acc'); ?>"
+                <?php if ($search_input_action !== '') : ?>
+                data-on:input__debounce.700ms="<?php echo esc_attr($search_input_action); ?>"
+                <?php endif; ?>
                 data-on:success="<?php echo esc_attr($search_success); ?>"
                 data-indicator:members-loading
                 data-attr:disabled="$membersLoading">
         </div>
         <div class="members-search__actions wt_flex wt_items-center wt_gap-2">
-            <button type="submit" class="members-search__submit button button--primary wt_whitespace-nowrap"
+            <button type="button" class="members-search__submit button button--primary wt_whitespace-nowrap"
                 data-on:click="<?php echo esc_attr($search_submit_action); ?>"
                 data-on:success="<?php echo esc_attr($search_success); ?>"
                 data-on:error="$membersLoading = false"
-                data-show="!$searchSubmitted"
+                data-show="!$searchQuery || $searchQuery.trim() === ''"
                 data-indicator:members-loading
                 data-attr:disabled="$membersLoading">
                 <?php esc_html_e('Search', 'wicket-acc'); ?>
@@ -143,13 +149,13 @@ $clear_action = '(' . '$membersLoading' . ' = true, ' . '$searchQuery' . " = '',
                 data-on:click="<?php echo esc_attr($clear_action); ?>"
                 data-on:success="<?php echo esc_attr($search_success); ?>"
                 data-on:error="$membersLoading = false"
-                data-show="$searchSubmitted && $searchQuery && $searchQuery.trim() !== ''"
+                data-show="$searchQuery && $searchQuery.trim() !== ''"
                 data-indicator:members-loading
                 data-attr:disabled="$membersLoading">
                 <?php esc_html_e('Clear', 'wicket-acc'); ?>
             </button>
         </div>
-    </form>
+    </div>
 
     <?php if ($mode === 'groups') : ?>
         <div id="group-member-messages" class="wt_mb-3"></div>
@@ -187,23 +193,23 @@ include __DIR__ . '/members-list-unified.php';
     <?php endif; ?>
 
     <?php
-    $add_member_success_actions = "console.log('Member added successfully'); $addMemberSubmitting = false; $membersLoading = false; $addMemberModalOpen = false; $addMemberSuccess = true; @get('{$members_list_endpoint}{$members_list_separator}";
+    $add_member_success_actions = "console.log('Member added successfully'); \$addMemberSubmitting = false; \$membersLoading = false; \$addMemberModalOpen = false; \$addMemberSuccess = true; @get('{$members_list_endpoint}{$members_list_separator}";
 if ($mode === 'groups') {
     $add_member_success_actions .= "group_uuid={$encoded_group_uuid}&org_uuid={$encoded_org_uuid}&page=1') >> select('#{$members_list_target}') | set(html);";
 } else {
     $add_member_success_actions .= "org_uuid={$encoded_org_uuid}{$membership_query_fragment}&page=1') >> select('#{$members_list_target}') | set(html);";
 }
-$add_member_success_actions .= " setTimeout(() => { $addMemberSuccess = false; $addMemberSubmitting = false; }, 3000);";
-$add_member_error_actions = "console.error('Failed to add member'); $addMemberSubmitting = false; $membersLoading = false; $addMemberModalOpen = false;";
+$add_member_success_actions .= " setTimeout(() => { \$addMemberSuccess = false; \$addMemberSubmitting = false; }, 3000);";
+$add_member_error_actions = "console.error('Failed to add member'); \$addMemberSubmitting = false; \$membersLoading = false; \$addMemberModalOpen = false;";
 
-$remove_member_success_actions = "console.log('Member removed successfully'); $removeMemberSubmitting = false; $membersLoading = false; $removeMemberModalOpen = false; $removeMemberSuccess = true; @get('{$members_list_endpoint}{$members_list_separator}";
+$remove_member_success_actions = "console.log('Member removed successfully'); \$removeMemberSubmitting = false; \$membersLoading = false; \$removeMemberModalOpen = false; \$removeMemberSuccess = true; @get('{$members_list_endpoint}{$members_list_separator}";
 if ($mode === 'groups') {
     $remove_member_success_actions .= "group_uuid={$encoded_group_uuid}&org_uuid={$encoded_org_uuid}&page=1') >> select('#{$members_list_target}') | set(html);";
 } else {
     $remove_member_success_actions .= "org_uuid={$encoded_org_uuid}{$membership_query_fragment}&page=1') >> select('#{$members_list_target}') | set(html);";
 }
-$remove_member_success_actions .= " setTimeout(() => { $removeMemberSuccess = false; $removeMemberSubmitting = false; }, 3000);";
-$remove_member_error_actions = "console.error('Failed to remove member'); $removeMemberSubmitting = false; $membersLoading = false; $removeMemberModalOpen = false;";
+$remove_member_success_actions .= " setTimeout(() => { \$removeMemberSuccess = false; \$removeMemberSubmitting = false; }, 3000);";
+$remove_member_error_actions = "console.error('Failed to remove member'); \$removeMemberSubmitting = false; \$membersLoading = false; \$removeMemberModalOpen = false;";
 ?>
 
     <?php if ($mode !== 'groups' && $show_edit_permissions) : ?>
@@ -234,8 +240,8 @@ $remove_member_error_actions = "console.error('Failed to remove member'); $remov
         $relationship_types = $orgman_config['relationship_types']['custom_types'] ?? [];
         $update_permissions_endpoint = OrgHelpers\template_url() . 'process/update-permissions';
         $members_list_separator = str_contains($members_list_endpoint, '?') ? '&' : '?';
-        $update_permissions_success_actions = "console.log('Permissions updated successfully'); $editPermissionsSubmitting = false; $editPermissionsSuccess = true; $membersLoading = false; $editPermissionsModalOpen = false; @get('{$members_list_endpoint}{$members_list_separator}org_uuid={$encoded_org_uuid}{$membership_query_fragment}&page=1') >> select('#{$members_list_target}') | set(html); setTimeout(() => $editPermissionsSuccess = false, 3000);";
-        $update_permissions_error_actions = "console.error('Failed to update permissions'); $editPermissionsSubmitting = false; $membersLoading = false; $editPermissionsModalOpen = false;";
+        $update_permissions_success_actions = "console.log('Permissions updated successfully'); \$editPermissionsSubmitting = false; \$editPermissionsSuccess = true; \$membersLoading = false; \$editPermissionsModalOpen = false; @get('{$members_list_endpoint}{$members_list_separator}org_uuid={$encoded_org_uuid}{$membership_query_fragment}&page=1') >> select('#{$members_list_target}') | set(html); setTimeout(() => \$editPermissionsSuccess = false, 3000);";
+        $update_permissions_error_actions = "console.error('Failed to update permissions'); \$editPermissionsSubmitting = false; \$membersLoading = false; \$editPermissionsModalOpen = false;";
         ?>
         <div class="wt_mt-6" data-signals='{"editPermissionsModalOpen": false, "editPermissionsSubmitting": false, "editPermissionsSuccess": false, "currentMemberUuid": "", "currentMemberName": "", "currentMemberRoles": [], "currentMemberRelationshipType": "", "currentMemberDescription": "", "removeMemberModalOpen": false, "removeMemberSubmitting": false, "removeMemberSuccess": false, "currentRemoveMemberUuid": "", "currentRemoveMemberName": "", "currentRemoveMemberEmail": "", "currentRemoveMemberConnectionId": "", "currentRemoveMemberPersonMembershipId": ""}'>
             <dialog id="editPermissionsModal" class="modal wt_m-auto max_wt_3xl wt_rounded-md wt_shadow-md backdrop_wt_bg-black-50"

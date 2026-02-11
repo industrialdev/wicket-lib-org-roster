@@ -292,22 +292,14 @@ class MemberService
                     ]
                 );
 
-                if (!is_wp_error($searchResult) && !empty($searchResult)) {
-                    return $searchResult;
+                if (!is_wp_error($searchResult) && is_array($searchResult)) {
+                    $searchData = $searchResult['data'] ?? null;
+                    if (is_array($searchData) && !empty($searchData)) {
+                        return $searchResult;
+                    }
                 }
 
                 if (is_wp_error($searchResult)) {
-                    $logger->warning(
-                        '[OrgMan] MembershipService member search returned WP_Error',
-                        [
-                            'source'          => 'wicket-orgman',
-                            'membership_uuid' => $membershipUuid,
-                            'error_code'      => $searchResult->get_error_code(),
-                            'error_message'   => $searchResult->get_error_message(),
-                        ]
-                    );
-                } else {
-
                 }
             } catch (\Throwable $searchException) {
                 $logger->error(
@@ -397,6 +389,35 @@ class MemberService
             }
         }
 
+        if ('' !== $searchTerm && function_exists('wicket_api_client')) {
+            try {
+                $client = wicket_api_client();
+                $endpoint = '/organization_memberships/' . rawurlencode($membershipUuid) . '/person_memberships';
+                $fallbackResponse = $client->get($endpoint . '?' . http_build_query([
+                    'page[number]' => 1,
+                    'page[size]' => max(100, $size),
+                    'filter[active_at]' => 'now',
+                    'include' => 'person,emails,phones',
+                ]));
+
+                $normalizedFallback = $this->normalizeMembershipResponse($fallbackResponse);
+                if (is_array($normalizedFallback) && isset($normalizedFallback['data']) && is_array($normalizedFallback['data'])) {
+                    $locallyFiltered = $this->filter_membership_response_by_query($normalizedFallback, $searchTerm);
+
+                    return $locallyFiltered;
+                }
+            } catch (\Throwable $localFallbackException) {
+                $logger->error(
+                    '[OrgMan] Local search fallback failed: ' . $localFallbackException->getMessage(),
+                    [
+                        'source' => 'wicket-orgman',
+                        'membership_uuid' => $membershipUuid,
+                        'query' => $searchTerm,
+                    ]
+                );
+            }
+        }
+
         $response = $this->membership_service()->get_org_membership_members($membershipUuid, $args);
         if (is_wp_error($response)) {
             /** @var \WP_Error $response */
@@ -421,6 +442,80 @@ class MemberService
         }
 
         return $final_response;
+    }
+
+    /**
+     * Filter a normalized membership response by search term using person name/email fields.
+     *
+     * @param array $response
+     * @param string $query
+     * @return array
+     */
+    private function filter_membership_response_by_query(array $response, string $query): array
+    {
+        $query = strtolower(trim($query));
+        if ($query === '') {
+            return $response;
+        }
+
+        $peopleIndex = [];
+        $emailsByPerson = [];
+        $included = is_array($response['included'] ?? null) ? $response['included'] : [];
+
+        foreach ($included as $item) {
+            $type = (string) ($item['type'] ?? '');
+            $id = (string) ($item['id'] ?? '');
+            if ($type === 'people' && $id !== '') {
+                $peopleIndex[$id] = $item;
+                continue;
+            }
+
+            if ($type === 'emails') {
+                $personId = (string) ($item['relationships']['person']['data']['id'] ?? '');
+                $emailAddress = (string) ($item['attributes']['address'] ?? '');
+                if ($personId !== '' && $emailAddress !== '') {
+                    if (!isset($emailsByPerson[$personId])) {
+                        $emailsByPerson[$personId] = [];
+                    }
+                    $emailsByPerson[$personId][] = $emailAddress;
+                }
+            }
+        }
+
+        $filteredData = [];
+        $sourceData = is_array($response['data'] ?? null) ? $response['data'] : [];
+        foreach ($sourceData as $membershipRow) {
+            $personId = (string) ($membershipRow['relationships']['person']['data']['id'] ?? '');
+            $personAttrs = is_array($peopleIndex[$personId]['attributes'] ?? null) ? $peopleIndex[$personId]['attributes'] : [];
+
+            $parts = [];
+            $parts[] = (string) ($personAttrs['full_name'] ?? '');
+            $parts[] = trim((string) ($personAttrs['first_name'] ?? '') . ' ' . (string) ($personAttrs['last_name'] ?? ''));
+            $parts[] = (string) ($personAttrs['name'] ?? '');
+
+            if (isset($emailsByPerson[$personId]) && is_array($emailsByPerson[$personId])) {
+                foreach ($emailsByPerson[$personId] as $emailAddress) {
+                    $parts[] = (string) $emailAddress;
+                }
+            }
+
+            $haystack = strtolower(implode(' ', array_filter($parts, static function ($value) {
+                return is_string($value) && $value !== '';
+            })));
+
+            if ($haystack !== '' && str_contains($haystack, $query)) {
+                $filteredData[] = $membershipRow;
+            }
+        }
+
+        $response['data'] = $filteredData;
+        if (isset($response['meta']['page']) && is_array($response['meta']['page'])) {
+            $response['meta']['page']['total_items'] = count($filteredData);
+            $response['meta']['page']['total_pages'] = 1;
+            $response['meta']['page']['number'] = 1;
+        }
+
+        return $response;
     }
 
     /**

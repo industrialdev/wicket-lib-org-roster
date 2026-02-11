@@ -67,17 +67,6 @@ $remove_member_success_actions = "console.log('Member removed successfully'); $r
 
 $orgman_config = \OrgManagement\Config\get_config();
 $use_unified_member_list = (bool) ($orgman_config['ui']['member_list']['use_unified'] ?? false);
-if ($use_unified_member_list) {
-    $mode = isset($mode) ? (string) $mode : (string) (new OrgManagement\Services\ConfigService())->get_roster_mode();
-    $members = isset($members) && is_array($members) ? $members : [];
-    $pagination = isset($pagination) && is_array($pagination) ? $pagination : [];
-    $query = isset($query) ? (string) $query : '';
-    $members_list_endpoint = isset($members_list_endpoint) ? (string) $members_list_endpoint : OrgHelpers\template_url() . 'members-list';
-    $members_list_target = isset($members_list_target) ? (string) $members_list_target : 'members-list-container-' . sanitize_html_class($org_uuid ?: 'default');
-    include __DIR__ . '/members-list-unified.php';
-
-    return;
-}
 
 if ((!isset($members) || !is_array($members)) && !empty($org_uuid)) {
     $config_service = new OrgManagement\Services\ConfigService();
@@ -108,6 +97,18 @@ if ((!isset($members) || !is_array($members)) && !empty($org_uuid)) {
         $page_size = (int) ($pagination['pageSize'] ?? $page_size);
         $total_items = (int) ($pagination['totalItems'] ?? $total_items);
     }
+}
+
+if ($use_unified_member_list) {
+    $mode = isset($mode) ? (string) $mode : (string) (new OrgManagement\Services\ConfigService())->get_roster_mode();
+    $members = isset($members) && is_array($members) ? $members : [];
+    $pagination = isset($pagination) && is_array($pagination) ? $pagination : [];
+    $query = isset($query) ? (string) $query : '';
+    $members_list_endpoint = isset($members_list_endpoint) ? (string) $members_list_endpoint : OrgHelpers\template_url() . 'members-list';
+    $members_list_target = isset($members_list_target) ? (string) $members_list_target : 'members-list-container-' . sanitize_html_class($org_uuid ?: 'default');
+    include __DIR__ . '/members-list-unified.php';
+
+    return;
 }
 
 // Seat availability check
