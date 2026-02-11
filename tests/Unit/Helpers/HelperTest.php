@@ -13,3 +13,14 @@ it('falls back to the provided path when my-account post is missing', function (
 
     expect($url)->toBe('https://example.test/my-account/organization-members/');
 });
+
+it('shows member roles on cards by default', function (): void {
+    expect(Helper::should_show_member_roles())->toBeTrue();
+});
+
+it('is aligned with shared config for member roles visibility', function (): void {
+    $config = \OrgManagement\Config\get_config();
+
+    expect($config['ui']['member_card_fields']['roles']['enabled'] ?? null)->toBeTrue();
+    expect(Helper::should_show_member_roles())->toBeTrue();
+});

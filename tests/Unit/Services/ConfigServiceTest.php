@@ -23,3 +23,33 @@ it('includes membership cycle strategy configuration defaults', function (): voi
     expect($config['membership_cycle']['strategy_key'] ?? null)->toBe('membership_cycle');
     expect($config['membership_cycle']['member_management']['require_explicit_membership_uuid'] ?? null)->toBeTrue();
 });
+
+it('keeps membership cycle config limited to active keys', function (): void {
+    $config = \OrgManagement\Config\get_config();
+    $cycle = $config['membership_cycle'] ?? [];
+
+    expect($cycle['permissions'] ?? [])->toHaveKeys([
+        'add_roles',
+        'remove_roles',
+        'purchase_seats_roles',
+        'prevent_owner_removal',
+    ]);
+
+    expect($cycle['permissions'] ?? [])->not->toHaveKeys([
+        'view_roles',
+        'bulk_upload_roles',
+    ]);
+
+    expect($cycle['member_management'] ?? [])->toHaveKey('require_explicit_membership_uuid');
+    expect($cycle['member_management'] ?? [])->not->toHaveKeys([
+        'duplicate_scope',
+        'removal_mode',
+        'removal_end_date_format',
+    ]);
+
+    expect($cycle)->not->toHaveKeys([
+        'bulk_upload',
+        'seats',
+        'ui',
+    ]);
+});
