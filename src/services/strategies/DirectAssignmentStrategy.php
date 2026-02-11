@@ -101,7 +101,7 @@ class DirectAssignmentStrategy implements RosterManagementStrategy {
                 // Future enhancement: map to actual Wicket relationship types if needed
             }
 
-            $membership_uuid = $this->resolve_membership_uuid( $org_id );
+            $membership_uuid = $this->resolve_membership_uuid( $org_id, $context );
             if ( is_wp_error( $membership_uuid ) ) {
                 $logger->error('[OrgMan] Unable to resolve membership UUID for organization', array_merge($log_context, [
                     'error' => $membership_uuid->get_error_message(),
@@ -261,12 +261,28 @@ class DirectAssignmentStrategy implements RosterManagementStrategy {
      * Resolve the membership UUID for an organization.
      *
      * @param string $org_id
+     * @param array  $context
      * @return string|WP_Error
      */
-    private function resolve_membership_uuid( $org_id ) {
+    private function resolve_membership_uuid( $org_id, array $context = [] ) {
         $org_id = sanitize_text_field( (string) $org_id );
         if ( '' === $org_id ) {
             return new WP_Error( 'invalid_org_id', 'Organization identifier is required.' );
+        }
+
+        $context_membership_uuid = sanitize_text_field( (string) ( $context['membership_uuid'] ?? $context['membership_id'] ?? '' ) );
+        if ( '' !== $context_membership_uuid ) {
+            $membership_data = $this->membership_service()->getOrgMembershipData( $context_membership_uuid );
+            if ( empty( $membership_data ) || ! is_array( $membership_data ) ) {
+                return new WP_Error( 'invalid_membership_uuid', 'Membership UUID is invalid or unavailable.' );
+            }
+
+            $membership_org_id = $membership_data['data']['relationships']['organization']['data']['id'] ?? '';
+            if ( '' !== $membership_org_id && $membership_org_id !== $org_id ) {
+                return new WP_Error( 'membership_org_mismatch', 'Membership does not belong to the selected organization.' );
+            }
+
+            return $context_membership_uuid;
         }
 
         $membership_uuid = $this->membership_service()->getOrganizationMembershipUuid( $org_id );

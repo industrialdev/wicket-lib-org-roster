@@ -41,8 +41,11 @@ $additional_seats_service = new \OrgManagement\Services\AdditionalSeatsService($
 
 // Load org management configuration
 $orgman_config = \OrgManagement\Config\get_config();
+$requested_membership_uuid = isset($_GET['membership_uuid']) ? sanitize_text_field((string) wp_unslash($_GET['membership_uuid'])) : '';
 
-$membershipUuid = $membership_service->getMembershipForOrganization($org_uuid);
+$membershipUuid = $requested_membership_uuid !== ''
+    ? $requested_membership_uuid
+    : $membership_service->getMembershipForOrganization($org_uuid);
 
 $membersResult = [
     'members'    => [],
@@ -104,7 +107,8 @@ $searchAction = "";
 $searchSuccess = "";
 
 if (!empty($membershipUuid)) {
-    $searchAction = "@get('{$membersListEndpoint}{$membersListSeparator}org_uuid={$encodedOrgUuid}&page=1&query=' + encodeURIComponent(\$searchQuery))";
+    $membership_query_fragment = '&membership_uuid=' . rawurlencode((string) $membershipUuid);
+    $searchAction = "@get('{$membersListEndpoint}{$membersListSeparator}org_uuid={$encodedOrgUuid}{$membership_query_fragment}&page=1&query=' + encodeURIComponent(\$searchQuery))";
     $searchSuccess = wp_sprintf("select('#%s') | set(html)", $containerId);
 }
 
@@ -219,7 +223,8 @@ $members_list_endpoint = $membersListEndpoint;
 	        include __DIR__ . '/members-list.php';
 	    }
 
-	    $add_member_success_actions = "console.log('Member added successfully'); \$addMemberSubmitting = false; \$membersLoading = false; \$addMemberModalOpen = false; \$addMemberSuccess = true; @get('{$membersListEndpoint}{$membersListSeparator}org_uuid={$encodedOrgUuid}&page=1') >> select('#{$containerId}') | set(html); setTimeout(() => { \$addMemberSuccess = false; \$addMemberSubmitting = false; }, 3000);";
+		    $membership_query_fragment = $membershipUuid ? '&membership_uuid=' . rawurlencode((string) $membershipUuid) : '';
+		    $add_member_success_actions = "console.log('Member added successfully'); \$addMemberSubmitting = false; \$membersLoading = false; \$addMemberModalOpen = false; \$addMemberSuccess = true; @get('{$membersListEndpoint}{$membersListSeparator}org_uuid={$encodedOrgUuid}{$membership_query_fragment}&page=1') >> select('#{$containerId}') | set(html); setTimeout(() => { \$addMemberSuccess = false; \$addMemberSubmitting = false; }, 3000);";
 	    $add_member_error_actions   = "console.error('Failed to add member'); \$addMemberSubmitting = false; \$membersLoading = false; \$addMemberModalOpen = false;";
 	    $add_member_endpoint        = \OrgManagement\Helpers\template_url() . 'process/add-member';
 	    ?>

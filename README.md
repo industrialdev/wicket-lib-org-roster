@@ -20,6 +20,16 @@ Ensure your application loads Composer's autoloader before using OrgMan or templ
 
 The Datastar PHP SDK is a Composer dependency (`starfederation/datastar-php`). Do not vendor the SDK in this library.
 
+## Documentation
+
+- [Architecture](docs/ARCHITECTURE.md)
+- [Strategies](docs/STRATEGIES.md)
+- [Configuration](docs/CONFIGURATION.md)
+- [Design](docs/DESIGN.md)
+- [Frontend](docs/FRONTEND.md)
+- [Testing](docs/TESTING.md)
+- [Unified Specifications](docs/SPECS.md)
+
 ## Assets
 
 Assets are served from the library directory. If your install path differs, override:

@@ -51,3 +51,8 @@ When testing controllers that return SSE, check the output buffer for Datastar-s
 - **Isolation**: Each test should be independent. Use `setUp` and `tearDown` (managed by Brain Monkey automatically in Pest) to clear mocks.
 - **Naming**: Use descriptive test names starting with `it` or `test`.
 - **Coverage**: Aim for 100% coverage on new Service methods.
+
+## 5. Current High-Value Strategy Tests
+- `tests/Unit/Services/StrategiesWiringTest.php`: verifies strategy registration includes `membership_cycle`.
+- `tests/Unit/Services/DirectAssignmentStrategyTest.php`: verifies explicit membership UUID resolution and scope validation behavior.
+- `tests/Unit/Services/MembershipCycleStrategyTest.php`: verifies required-context guards and organization/membership scope validation.

@@ -64,6 +64,11 @@ $additional_seats_service = new \OrgManagement\Services\AdditionalSeatsService($
 if ($membership_uuid === '' && $org_uuid !== '') {
     $membership_uuid = $membership_service->getMembershipForOrganization($org_uuid);
 }
+$encoded_membership_uuid = rawurlencode((string) $membership_uuid);
+$membership_query_fragment = $membership_uuid !== '' ? "&membership_uuid={$encoded_membership_uuid}" : '';
+if ($mode !== 'groups') {
+    $search_action = "@get('{$members_list_endpoint}{$members_list_separator}org_uuid={$encoded_org_uuid}{$membership_query_fragment}&page=1&query=' + encodeURIComponent(" . '$searchQuery' . "))";
+}
 
 $can_purchase_seats = $org_uuid ? $additional_seats_service->can_purchase_additional_seats($org_uuid) : false;
 $purchase_url = ($can_purchase_seats && $membership_uuid)
@@ -75,6 +80,12 @@ $show_edit_permissions = isset($show_edit_permissions)
     : (bool) ($orgman_config['ui']['member_list']['show_edit_permissions'] ?? true);
 if ($mode === 'groups') {
     $show_edit_permissions = (bool) ($orgman_config['groups']['ui']['show_edit_permissions'] ?? false);
+}
+$show_add_member_button = true;
+$show_remove_button = true;
+if ($mode !== 'groups') {
+    $show_add_member_button = \OrgManagement\Helpers\PermissionHelper::can_add_members($org_uuid);
+    $show_remove_button = \OrgManagement\Helpers\PermissionHelper::can_remove_members($org_uuid);
 }
 
 $search_submit_action = '$membersLoading = true; $searchSubmitted = true; ' . $search_action;
@@ -149,8 +160,8 @@ $clear_action = '(' . '$membersLoading' . " = true, " . '$searchQuery' . " = '',
     $members_list_target = $members_list_target;
     $show_edit_permissions = $show_edit_permissions;
     $show_account_status = true;
-    $show_add_member_button = true;
-    $show_remove_button = true;
+    $show_add_member_button = $show_add_member_button;
+    $show_remove_button = $show_remove_button;
     include __DIR__ . '/members-list-unified.php';
     ?>
 
@@ -180,7 +191,7 @@ $clear_action = '(' . '$membersLoading' . " = true, " . '$searchQuery' . " = '',
     if ($mode === 'groups') {
         $add_member_success_actions .= "group_uuid={$encoded_group_uuid}&org_uuid={$encoded_org_uuid}&page=1') >> select('#{$members_list_target}') | set(html);";
     } else {
-        $add_member_success_actions .= "org_uuid={$encoded_org_uuid}&page=1') >> select('#{$members_list_target}') | set(html);";
+        $add_member_success_actions .= "org_uuid={$encoded_org_uuid}{$membership_query_fragment}&page=1') >> select('#{$members_list_target}') | set(html);";
     }
     $add_member_success_actions .= " setTimeout(() => { $addMemberSuccess = false; $addMemberSubmitting = false; }, 3000);";
     $add_member_error_actions = "console.error('Failed to add member'); $addMemberSubmitting = false; $membersLoading = false; $addMemberModalOpen = false;";
@@ -189,7 +200,7 @@ $clear_action = '(' . '$membersLoading' . " = true, " . '$searchQuery' . " = '',
     if ($mode === 'groups') {
         $remove_member_success_actions .= "group_uuid={$encoded_group_uuid}&org_uuid={$encoded_org_uuid}&page=1') >> select('#{$members_list_target}') | set(html);";
     } else {
-        $remove_member_success_actions .= "org_uuid={$encoded_org_uuid}&page=1') >> select('#{$members_list_target}') | set(html);";
+        $remove_member_success_actions .= "org_uuid={$encoded_org_uuid}{$membership_query_fragment}&page=1') >> select('#{$members_list_target}') | set(html);";
     }
     $remove_member_success_actions .= " setTimeout(() => { $removeMemberSuccess = false; $removeMemberSubmitting = false; }, 3000);";
     $remove_member_error_actions = "console.error('Failed to remove member'); $removeMemberSubmitting = false; $membersLoading = false; $removeMemberModalOpen = false;";
@@ -223,7 +234,7 @@ $clear_action = '(' . '$membersLoading' . " = true, " . '$searchQuery' . " = '',
         $relationship_types = $orgman_config['relationship_types']['custom_types'] ?? [];
         $update_permissions_endpoint = OrgHelpers\template_url() . 'process/update-permissions';
         $members_list_separator = str_contains($members_list_endpoint, '?') ? '&' : '?';
-        $update_permissions_success_actions = "console.log('Permissions updated successfully'); $editPermissionsSubmitting = false; $editPermissionsSuccess = true; $membersLoading = false; $editPermissionsModalOpen = false; @get('{$members_list_endpoint}{$members_list_separator}org_uuid={$encoded_org_uuid}&page=1') >> select('#{$members_list_target}') | set(html); setTimeout(() => $editPermissionsSuccess = false, 3000);";
+        $update_permissions_success_actions = "console.log('Permissions updated successfully'); $editPermissionsSubmitting = false; $editPermissionsSuccess = true; $membersLoading = false; $editPermissionsModalOpen = false; @get('{$members_list_endpoint}{$members_list_separator}org_uuid={$encoded_org_uuid}{$membership_query_fragment}&page=1') >> select('#{$members_list_target}') | set(html); setTimeout(() => $editPermissionsSuccess = false, 3000);";
         $update_permissions_error_actions = "console.error('Failed to update permissions'); $editPermissionsSubmitting = false; $membersLoading = false; $editPermissionsModalOpen = false;";
         ?>
         <div class="wt_mt-6" data-signals='{"editPermissionsModalOpen": false, "editPermissionsSubmitting": false, "editPermissionsSuccess": false, "currentMemberUuid": "", "currentMemberName": "", "currentMemberRoles": [], "currentMemberRelationshipType": "", "currentMemberDescription": "", "removeMemberModalOpen": false, "removeMemberSubmitting": false, "removeMemberSuccess": false, "currentRemoveMemberUuid": "", "currentRemoveMemberName": "", "currentRemoveMemberEmail": "", "currentRemoveMemberConnectionId": "", "currentRemoveMemberPersonMembershipId": ""}'>

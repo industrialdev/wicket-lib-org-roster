@@ -37,13 +37,12 @@ $members_list_target = isset($members_list_target)
 $members_list_endpoint = isset($members_list_endpoint)
     ? (string) $members_list_endpoint
     : OrgHelpers\template_url() . 'members-list';
+$members_list_separator = str_contains($members_list_endpoint, '?') ? '&' : '?';
+$encodedOrgUuid = rawurlencode((string) $org_uuid);
 
 $update_permissions_endpoint = OrgHelpers\template_url() . 'process/update-permissions';
-$update_permissions_success_actions = "console.log('Permissions updated successfully'); $editPermissionsSubmitting = false; $editPermissionsSuccess = true; $membersLoading = false; $editPermissionsModalOpen = false; @get('{$members_list_endpoint}{$members_list_separator}org_uuid={$encodedOrgUuid}&page=1') >> select('#{$members_list_target}') | set(html); setTimeout(() => $editPermissionsSuccess = false, 3000);";
 $update_permissions_error_actions = "console.error('Failed to update permissions'); $editPermissionsSubmitting = false; $membersLoading = false; $editPermissionsModalOpen = false;";
-
 $remove_member_endpoint = OrgHelpers\template_url() . 'process/remove-member';
-$remove_member_success_actions = "console.log('Member removed successfully'); $removeMemberSubmitting = false; $removeMemberSuccess = true; $membersLoading = false; $removeMemberModalOpen = false; @get('{$members_list_endpoint}{$members_list_separator}org_uuid={$encodedOrgUuid}&page=1') >> select('#{$members_list_target}') | set(html); setTimeout(() => $removeMemberSuccess = false, 3000);";
 $remove_member_error_actions = "console.error('Failed to remove member'); $removeMemberSubmitting = false; $membersLoading = false; $removeMemberModalOpen = false;";
 
 $page = isset($pagination['currentPage']) ? (int) $pagination['currentPage'] : 1;
@@ -56,6 +55,15 @@ $query = isset($query) ? (string) $query : '';
 if (!isset($membership_uuid) && isset($membershipUuid)) {
     $membership_uuid = $membershipUuid;
 }
+if (!isset($membership_uuid) && isset($_GET['membership_uuid'])) {
+    $membership_uuid = sanitize_text_field((string) $_GET['membership_uuid']);
+}
+$membership_query_fragment = '';
+if (!empty($membership_uuid)) {
+    $membership_query_fragment = '&membership_uuid=' . rawurlencode((string) $membership_uuid);
+}
+$update_permissions_success_actions = "console.log('Permissions updated successfully'); $editPermissionsSubmitting = false; $editPermissionsSuccess = true; $membersLoading = false; $editPermissionsModalOpen = false; @get('{$members_list_endpoint}{$members_list_separator}org_uuid={$encodedOrgUuid}{$membership_query_fragment}&page=1') >> select('#{$members_list_target}') | set(html); setTimeout(() => $editPermissionsSuccess = false, 3000);";
+$remove_member_success_actions = "console.log('Member removed successfully'); $removeMemberSubmitting = false; $removeMemberSuccess = true; $membersLoading = false; $removeMemberModalOpen = false; @get('{$members_list_endpoint}{$members_list_separator}org_uuid={$encodedOrgUuid}{$membership_query_fragment}&page=1') >> select('#{$members_list_target}') | set(html); setTimeout(() => $removeMemberSuccess = false, 3000);";
 
 $orgman_config = \OrgManagement\Config\get_config();
 $use_unified_member_list = (bool) ($orgman_config['ui']['member_list']['use_unified'] ?? false);
@@ -161,6 +169,9 @@ $base_query_args = [
     'query'    => $query,
     'size'     => $page_size,
 ];
+if (!empty($membership_uuid)) {
+    $base_query_args['membership_uuid'] = $membership_uuid;
+}
 
 $build_url = static function (int $page_number) use ($members_list_endpoint, $base_query_args) {
     $args       = array_merge($base_query_args, ['page' => $page_number]);

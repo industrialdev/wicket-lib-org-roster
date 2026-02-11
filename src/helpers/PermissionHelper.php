@@ -270,6 +270,14 @@ class PermissionHelper extends Helper {
     public static function can_add_members( $org_id = null ): bool {
         $config = \OrgManagement\Config\get_config();
         $add_roles = $config['permissions']['add_members'] ?? ['membership_manager', 'membership_owner'];
+        $roster_strategy = $config['roster']['strategy'] ?? 'direct';
+
+        if ( 'membership_cycle' === $roster_strategy ) {
+            $cycle_roles = $config['membership_cycle']['permissions']['add_roles'] ?? null;
+            if ( is_array( $cycle_roles ) && ! empty( $cycle_roles ) ) {
+                $add_roles = $cycle_roles;
+            }
+        }
 
         return self::has_active_membership( $org_id ) && self::role_check( $add_roles, $org_id, false );
     }
@@ -284,6 +292,14 @@ class PermissionHelper extends Helper {
     public static function can_remove_members( $org_id = null ): bool {
         $config = \OrgManagement\Config\get_config();
         $remove_roles = $config['permissions']['remove_members'] ?? ['membership_manager', 'membership_owner'];
+        $roster_strategy = $config['roster']['strategy'] ?? 'direct';
+
+        if ( 'membership_cycle' === $roster_strategy ) {
+            $cycle_roles = $config['membership_cycle']['permissions']['remove_roles'] ?? null;
+            if ( is_array( $cycle_roles ) && ! empty( $cycle_roles ) ) {
+                $remove_roles = $cycle_roles;
+            }
+        }
 
         return self::has_active_membership( $org_id ) && self::role_check( $remove_roles, $org_id, false );
     }
@@ -329,6 +345,14 @@ class PermissionHelper extends Helper {
     public static function can_purchase_seats( $org_id = null ): bool {
         $config = \OrgManagement\Config\get_config();
         $purchase_roles = $config['permissions']['purchase_seats'] ?? ['membership_owner'];
+        $roster_strategy = $config['roster']['strategy'] ?? 'direct';
+
+        if ( 'membership_cycle' === $roster_strategy ) {
+            $cycle_roles = $config['membership_cycle']['permissions']['purchase_seats_roles'] ?? null;
+            if ( is_array( $cycle_roles ) && ! empty( $cycle_roles ) ) {
+                $purchase_roles = $cycle_roles;
+            }
+        }
 
         return self::has_active_membership( $org_id ) && self::role_check( $purchase_roles, $org_id, false );
     }

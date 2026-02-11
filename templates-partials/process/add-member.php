@@ -42,6 +42,27 @@ if ('POST' === strtoupper($request_method)) {
         return;
     }
 
+    if (! \OrgManagement\Helpers\PermissionHelper::can_add_members($org_uuid)) {
+        status_header(200);
+        OrgManagement\Helpers\DatastarSSE::renderError(
+            __('You do not have permission to add members to this organization.', 'wicket-acc'),
+            '#add-member-messages-' . $org_dom_suffix,
+            ['addMemberSubmitting' => false, 'membersLoading' => false]
+        );
+        return;
+    }
+
+    $requested_roster_mode = (new ConfigService())->get_roster_mode();
+    if ($requested_roster_mode === 'membership_cycle' && empty($membership_uuid)) {
+        status_header(200);
+        OrgManagement\Helpers\DatastarSSE::renderError(
+            __('Membership UUID is required for membership cycle additions.', 'wicket-acc'),
+            '#add-member-messages-' . $org_dom_suffix,
+            ['addMemberSubmitting' => false, 'membersLoading' => false]
+        );
+        return;
+    }
+
     $member_data = [
         'first_name' => isset($_POST['first_name']) ? sanitize_text_field(wp_unslash($_POST['first_name'])) : '',
         'last_name'  => isset($_POST['last_name']) ? sanitize_text_field(wp_unslash($_POST['last_name'])) : '',
@@ -122,6 +143,7 @@ if ('POST' === strtoupper($request_method)) {
         $context = [
             'roles'            => $roles,
             'org_name'         => '',
+            'membership_uuid'  => $membership_uuid,
             'relationship_type' => $relationship_type,
             'relationship_description' => $relationship_description,
         ];
@@ -180,11 +202,14 @@ if ('POST' === strtoupper($request_method)) {
         }
 
         // Clear members cache for this organization after successful addition
-        $membership_service = new \OrgManagement\Services\MembershipService();
-        $membership_uuid = $membership_service->getMembershipForOrganization($org_uuid);
-        if ($membership_uuid) {
+        $cache_membership_uuid = $membership_uuid;
+        if ($cache_membership_uuid === '') {
+            $membership_service = new \OrgManagement\Services\MembershipService();
+            $cache_membership_uuid = (string) $membership_service->getMembershipForOrganization($org_uuid);
+        }
+        if ($cache_membership_uuid) {
             $orgman_instance = \OrgManagement\OrgMan::get_instance();
-            $orgman_instance->clear_members_cache($membership_uuid);
+            $orgman_instance->clear_members_cache($cache_membership_uuid);
         }
 
         // Success message

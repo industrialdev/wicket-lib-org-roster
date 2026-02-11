@@ -5,7 +5,7 @@ The library's behavior is primarily controlled by a central configuration array,
 ## Core Sections
 
 ### `roster`
-- `strategy`: (string) The active roster management logic. Options: `direct`, `cascade`, `groups`.
+- `strategy`: (string) The active roster management logic. Options: `direct`, `cascade`, `groups`, `membership_cycle`.
 
 ### `roles`
 Defines the internal slugs for key organizational roles:
@@ -30,6 +30,24 @@ Maps roles to specific capabilities. Each key (e.g., `manage_members`) takes an 
 - `seat_limited_roles`: Roles that are capped (typically one per organization per group).
 - `removal.mode`: `end_date` (soft delete) or `delete` (hard delete).
 
+### `membership_cycle` (Membership Cycle Strategy Only)
+- `strategy_key`: Strategy identifier (`membership_cycle`).
+- `permissions`:
+  - `view_roles`: Roles allowed to view cycle-scoped rosters.
+  - `add_roles`: Roles allowed to add members in cycle-scoped mode.
+  - `remove_roles`: Roles allowed to remove members in cycle-scoped mode.
+  - `bulk_upload_roles`: Roles allowed to run bulk upload in cycle-scoped mode.
+  - `purchase_seats_roles`: Roles allowed to purchase additional seats.
+  - `prevent_owner_removal`: Prevents organization owner removal in cycle-scoped remove flow.
+- `member_management`:
+  - `require_explicit_membership_uuid`: Requires explicit `membership_uuid` for mutating cycle-scoped actions.
+  - `duplicate_scope`: Duplicate detection strategy key.
+  - `removal_mode`: Removal behavior key (`end_date`).
+  - `removal_end_date_format`: Date format for end-dated removals.
+- `bulk_upload`: Reserved config block for cycle-scoped bulk upload constraints.
+- `seats`: Cycle-scoped seat behavior and messaging config.
+- `ui`: Cycle-scoped UI behavior (unified list/view flags, table fields, paging).
+
 ### `additional_seats`
 - `enabled`: (bool) Toggle for the seat purchase feature.
 - `sku`: The WooCommerce product SKU used for seat purchases.
@@ -40,16 +58,63 @@ Maps roles to specific capabilities. Each key (e.g., `manage_members`) takes an 
 - `member_view.use_unified`: (bool) Enables the modern reactive member cards.
 - `member_card_fields`: Configures which fields (Name, Job Title, Email, etc.) are visible and editable on the member cards.
 
-## Example Filter Usage
+## Strategy Examples
+
+### Example: `direct` Strategy
 
 ```php
-add_filter('wicket/acc/orgman/config', function($config) {
-    // Force Groups strategy
+add_filter('wicket/acc/orgman/config', function ($config) {
+    $config['roster']['strategy'] = 'direct';
+
+    // Keep direct mode strict by allowing only manager/owner to mutate roster.
+    $config['permissions']['add_members'] = ['membership_manager', 'membership_owner'];
+    $config['permissions']['remove_members'] = ['membership_manager', 'membership_owner'];
+
+    return $config;
+});
+```
+
+### Example: `cascade` Strategy
+
+```php
+add_filter('wicket/acc/orgman/config', function ($config) {
+    $config['roster']['strategy'] = 'cascade';
+
+    // Enable relationship-based role assignment used by cascade-style flows.
+    $config['permissions']['relationship_based_permissions'] = true;
+    $config['permissions']['relationship_roles_map']['ceo'] = ['org_editor', 'membership_manager'];
+
+    return $config;
+});
+```
+
+### Example: `groups` Strategy
+
+```php
+add_filter('wicket/acc/orgman/config', function ($config) {
     $config['roster']['strategy'] = 'groups';
-    
-    // Add a custom role to managers
-    $config['permissions']['manage_members'][] = 'senior_coordinator';
-    
+
+    // Configure group-managed roster behavior.
+    $config['groups']['tag_name'] = 'Roster Management';
+    $config['groups']['roster_roles'] = ['member', 'observer'];
+    $config['groups']['seat_limited_roles'] = ['member'];
+    $config['groups']['removal']['mode'] = 'end_date';
+
+    return $config;
+});
+```
+
+### Example: `membership_cycle` Strategy
+
+```php
+add_filter('wicket/acc/orgman/config', function ($config) {
+    $config['roster']['strategy'] = 'membership_cycle';
+
+    // Strategy-local permission overrides (does not change global defaults).
+    $config['membership_cycle']['permissions']['add_roles'] = ['membership_manager'];
+    $config['membership_cycle']['permissions']['remove_roles'] = ['membership_manager'];
+    $config['membership_cycle']['permissions']['purchase_seats_roles'] = ['membership_owner', 'membership_manager'];
+
     return $config;
 });
 ```

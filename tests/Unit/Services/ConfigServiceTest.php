@@ -14,3 +14,12 @@ it('detects additional seats form id by slug when form id is zero', function ():
 
     expect($service->get_additional_seats_form_id())->toBe(55);
 });
+
+it('includes membership cycle strategy configuration defaults', function (): void {
+    $config = \OrgManagement\Config\get_config();
+
+    expect($config['roster']['strategy'] ?? null)->toBeString();
+    expect($config['membership_cycle'] ?? null)->toBeArray();
+    expect($config['membership_cycle']['strategy_key'] ?? null)->toBe('membership_cycle');
+    expect($config['membership_cycle']['member_management']['require_explicit_membership_uuid'] ?? null)->toBeTrue();
+});

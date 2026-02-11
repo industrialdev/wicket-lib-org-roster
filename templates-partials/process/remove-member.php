@@ -59,8 +59,37 @@ if ('POST' === strtoupper($request_method)) {
 
     try {
         $config_service = new ConfigService();
+        $roster_mode = (string) $config_service->get_roster_mode();
         $membership_service = new \OrgManagement\Services\MembershipService();
         $permission_service = new \OrgManagement\Services\PermissionService();
+        $organization_service = new \OrgManagement\Services\OrganizationService();
+
+        if ($roster_mode === 'membership_cycle' && empty($membership_uuid)) {
+            status_header(200);
+            OrgManagement\Helpers\DatastarSSE::renderError(
+                __('Membership UUID is required for membership cycle removals.', 'wicket-acc'),
+                '#remove-member-messages',
+                ['removeMemberSubmitting' => false, 'membersLoading' => false]
+            );
+            return;
+        }
+
+        if ($roster_mode === 'membership_cycle') {
+            $cycle_config = \OrgManagement\Config\get_config()['membership_cycle'] ?? [];
+            $prevent_owner_removal = (bool) ($cycle_config['permissions']['prevent_owner_removal'] ?? true);
+            if ($prevent_owner_removal) {
+                $org_owner = $organization_service->get_organization_owner($org_uuid);
+                if (!is_wp_error($org_owner) && $org_owner && $org_owner->uuid === $person_uuid) {
+                    status_header(200);
+                    OrgManagement\Helpers\DatastarSSE::renderError(
+                        __('The organization owner (Primary Member) cannot be removed.', 'wicket-acc'),
+                        '#remove-member-messages',
+                        ['removeMemberSubmitting' => false, 'membersLoading' => false]
+                    );
+                    return;
+                }
+            }
+        }
 
         // Get person name for success message
         $member_name = 'Member';
@@ -155,8 +184,37 @@ if ('POST' === strtoupper($request_method)) {
             }
         }
 
-        $roster_mode = $config_service->get_roster_mode();
         \OrgManagement\Helpers\Helper::log_debug('[OrgMan Debug] Member removal roster mode', ['roster_mode' => $roster_mode, 'person_uuid' => $person_uuid]);
+
+        if ($roster_mode === 'membership_cycle') {
+            if (!$removal_success) {
+                status_header(200);
+                OrgManagement\Helpers\DatastarSSE::renderError(
+                    __('Failed to remove member. Person membership ID is required.', 'wicket-acc'),
+                    '#remove-member-messages',
+                    ['removeMemberSubmitting' => false, 'membersLoading' => false]
+                );
+                return;
+            }
+
+            if (!empty($membership_uuid)) {
+                $orgman_instance = \OrgManagement\OrgMan::get_instance();
+                $orgman_instance->clear_members_cache($membership_uuid);
+            }
+
+            $success_message = sprintf(
+                esc_html__( 'Successfully removed %1$s from the organization.', 'wicket-acc' ),
+                '<strong>' . esc_html( $member_name ) . '</strong>'
+            );
+
+            status_header(200);
+            OrgManagement\Helpers\DatastarSSE::renderSuccess($success_message, '#remove-member-messages', [
+                'removeMemberSubmitting' => false,
+                'removeMemberSuccess' => true,
+                'membersLoading' => false
+            ], 'remove-countdown');
+            return;
+        }
 
         // 3. End ALL connections for this person to this organization
         if (!empty($person_uuid) && $roster_mode !== 'direct') {

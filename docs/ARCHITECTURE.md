@@ -19,6 +19,7 @@ The library decouples member management logic from the `MemberService` using the
 - **DirectAssignmentStrategy**: Standard role/connection assignment.
 - **CascadeStrategy**: Complex membership-based cascading logic.
 - **GroupsStrategy**: MDP Group-based management with tag filtering.
+- **MembershipCycleStrategy**: Membership-cycle-scoped roster management requiring explicit `organization_membership_uuid` for mutating actions.
 
 ### 2.3 Service Layer
 All business logic is encapsulated in a service layer. Services are domain-specific and typically lazily instantiated to minimize overhead.

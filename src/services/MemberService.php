@@ -96,6 +96,7 @@ class MemberService {
         $this->strategies['cascade'] = new \OrgManagement\Services\Strategies\CascadeStrategy();
         $this->strategies['direct'] = new \OrgManagement\Services\Strategies\DirectAssignmentStrategy();
         $this->strategies['groups'] = new \OrgManagement\Services\Strategies\GroupsStrategy();
+        $this->strategies['membership_cycle'] = new \OrgManagement\Services\Strategies\MembershipCycleStrategy();
     }
 
     /**
