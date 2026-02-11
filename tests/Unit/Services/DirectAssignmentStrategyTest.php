@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use OrgManagement\Services\Strategies\DirectAssignmentStrategy;
 use OrgManagement\Services\MembershipService;
+use OrgManagement\Services\Strategies\DirectAssignmentStrategy;
 
 it('resolves context membership uuid when org matches', function (): void {
     $strategy = new DirectAssignmentStrategy();

@@ -2,8 +2,6 @@
 
 /**
  * Template for Additional Seats Purchase form.
- *
- * @package OrgManagement
  */
 
 declare(strict_types=1);

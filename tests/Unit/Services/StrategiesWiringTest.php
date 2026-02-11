@@ -14,4 +14,3 @@ it('registers membership cycle strategy in strategy map', function (): void {
 
     expect($strategies)->toHaveKey('membership_cycle');
 });
-

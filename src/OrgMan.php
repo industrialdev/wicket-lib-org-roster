@@ -2,14 +2,12 @@
 
 /**
  * Main orchestrator class for the Organization Management feature.
- *
- * @package OrgManagement
  */
 
 namespace OrgManagement;
 
 // Exit if accessed directly.
-if ( ! defined( 'ABSPATH' ) && ! defined( 'WICKET_ORGROSTER_DOINGTESTS' ) ) {
+if (!defined('ABSPATH') && !defined('WICKET_ORGROSTER_DOINGTESTS')) {
     exit;
 }
 
@@ -38,6 +36,7 @@ final class OrgMan
         if (is_null(self::$instance)) {
             self::$instance = new self();
         }
+
         return self::$instance;
     }
 
@@ -134,16 +133,16 @@ final class OrgMan
      */
     private function init_services()
     {
-        $this->services['config'] = new \OrgManagement\Services\ConfigService();
-        $this->services['organization'] = new \OrgManagement\Services\OrganizationService();
-        $this->services['member'] = new \OrgManagement\Services\MemberService($this->services['config']);
-        $this->services['permission'] = new \OrgManagement\Services\PermissionService();
-        $this->services['business_info'] = new \OrgManagement\Services\BusinessInfoService();
-        $this->services['document'] = new \OrgManagement\Services\DocumentService();
-        $this->services['subsidiary'] = new \OrgManagement\Services\SubsidiaryService($this->services['config']);
-        $this->services['notification'] = new \OrgManagement\Services\NotificationService();
-        $this->services['additional_seats'] = new \OrgManagement\Services\AdditionalSeatsService($this->services['config']);
-        $this->services['membership'] = new \OrgManagement\Services\MembershipService();
+        $this->services['config'] = new Services\ConfigService();
+        $this->services['organization'] = new Services\OrganizationService();
+        $this->services['member'] = new Services\MemberService($this->services['config']);
+        $this->services['permission'] = new Services\PermissionService();
+        $this->services['business_info'] = new Services\BusinessInfoService();
+        $this->services['document'] = new Services\DocumentService();
+        $this->services['subsidiary'] = new Services\SubsidiaryService($this->services['config']);
+        $this->services['notification'] = new Services\NotificationService();
+        $this->services['additional_seats'] = new Services\AdditionalSeatsService($this->services['config']);
+        $this->services['membership'] = new Services\MembershipService();
     }
 
     /**
@@ -151,10 +150,10 @@ final class OrgMan
      */
     private function init_controllers()
     {
-        $this->controllers['business_info'] = new \OrgManagement\Controllers\BusinessInfoController($this->services['business_info']);
-        $this->controllers['document'] = new \OrgManagement\Controllers\DocumentController($this->services['document']);
-        $this->controllers['subsidiary'] = new \OrgManagement\Controllers\SubsidiaryController($this->services['subsidiary']);
-        $this->controllers['configuration'] = new \OrgManagement\Controllers\ConfigurationController();
+        $this->controllers['business_info'] = new Controllers\BusinessInfoController($this->services['business_info']);
+        $this->controllers['document'] = new Controllers\DocumentController($this->services['document']);
+        $this->controllers['subsidiary'] = new Controllers\SubsidiaryController($this->services['subsidiary']);
+        $this->controllers['configuration'] = new Controllers\ConfigurationController();
     }
 
     private function add_hooks()
@@ -164,8 +163,8 @@ final class OrgMan
         add_action('wp_enqueue_scripts', [$this, 'enqueue_assets']);
 
         // Initialize helpers
-        add_action('init', [\OrgManagement\Helpers\GravityFormsHelper::class, 'init']);
-        add_action('init', [\OrgManagement\Helpers\TemplateHelper::class, 'init']);
+        add_action('init', [Helpers\GravityFormsHelper::class, 'init']);
+        add_action('init', [Helpers\TemplateHelper::class, 'init']);
 
         // Initialize configuration controller
         add_action('init', [$this->controllers['configuration'], 'init']);
@@ -216,7 +215,6 @@ final class OrgMan
         }
     }
 
-
     /**
      * Handle additional seats order processing.
      *
@@ -233,10 +231,11 @@ final class OrgMan
             'order_id' => $order_id,
         ]));
 
-        if (! $order) {
+        if (!$order) {
             $logger->error('[OrgMan] Order not found', array_merge($context, [
                 'order_id' => $order_id,
             ]));
+
             return;
         }
 
@@ -252,6 +251,7 @@ final class OrgMan
             $logger->info('[OrgMan] Skipping: already processed', array_merge($context, [
                 'order_id' => $order_id,
             ]));
+
             return;
         }
 
@@ -259,10 +259,11 @@ final class OrgMan
         $additional_seats_service = $this->services['additional_seats'];
         $additional_seats_product_id = $additional_seats_service->get_additional_seats_product();
 
-        if (! $additional_seats_product_id) {
+        if (!$additional_seats_product_id) {
             $logger->error('[OrgMan] Additional seats product not found by SKU', array_merge($context, [
                 'order_id' => $order_id,
             ]));
+
             return;
         }
 
@@ -291,7 +292,7 @@ final class OrgMan
                 'customer_id' => $user_id,
                 'org_uuid_present' => $org_uuid !== '',
                 'membership_id_present' => $membership_id !== '',
-                'membership_data_present' => ! empty($membership_data),
+                'membership_data_present' => !empty($membership_data),
             ]));
         }
 
@@ -320,7 +321,7 @@ final class OrgMan
 
                 if (empty($membership_post_id)) {
                     $membership_post_id = (int) $item->get_meta('membership_post_id_renew', true);
-                    if (! $membership_post_id) {
+                    if (!$membership_post_id) {
                         $membership_post_id = (int) $item->get_meta('_membership_post_id_renew', true);
                     }
                 }
@@ -344,9 +345,9 @@ final class OrgMan
             'membership_post_id' => (int) $membership_post_id,
         ]));
 
-        if (! $membership_post_id) {
+        if (!$membership_post_id) {
             $membership_post_id = (int) $order->get_meta('membership_post_id_renew', true);
-            if (! $membership_post_id) {
+            if (!$membership_post_id) {
                 $membership_post_id = (int) $order->get_meta('_membership_post_id_renew', true);
             }
         }
@@ -356,7 +357,7 @@ final class OrgMan
             'membership_post_id' => (int) $membership_post_id,
         ]));
 
-        if (! $has_additional_seats || empty($org_uuid) || (empty($membership_id) && empty($membership_post_id))) {
+        if (!$has_additional_seats || empty($org_uuid) || (empty($membership_id) && empty($membership_post_id))) {
             $logger->error('[OrgMan] Invalid additional seats order data', [
                 'source' => 'wicket-orgman',
                 'order_id' => $order_id,
@@ -366,10 +367,11 @@ final class OrgMan
                 'membership_post_id' => (int) $membership_post_id,
                 'total_additional_seats' => (int) $total_additional_seats,
             ]);
+
             return;
         }
 
-        if (! $membership_post_id && ! empty($membership_id)) {
+        if (!$membership_post_id && !empty($membership_id)) {
             $logger->debug('[OrgMan] Searching membership post by membership_wicket_uuid', array_merge($context, [
                 'order_id' => $order_id,
                 'membership_id' => $membership_id,
@@ -388,7 +390,7 @@ final class OrgMan
                 ],
             ]);
 
-            if (! empty($query->posts[0])) {
+            if (!empty($query->posts[0])) {
                 $membership_post_id = (int) $query->posts[0];
             }
 
@@ -399,23 +401,25 @@ final class OrgMan
             ]));
         }
 
-        if (! $membership_post_id) {
+        if (!$membership_post_id) {
             $logger->error('[OrgMan] Unable to locate membership post for additional seats order', [
                 'source' => 'wicket-orgman',
                 'order_id' => $order_id,
                 'membership_id' => $membership_id,
                 'org_uuid' => $org_uuid,
             ]);
+
             return;
         }
 
         $subscription_id = (int) get_post_meta($membership_post_id, 'membership_subscription_id', true);
-        if (! $subscription_id) {
+        if (!$subscription_id) {
             $logger->error('[OrgMan] Membership post missing membership_subscription_id', [
                 'source' => 'wicket-orgman',
                 'order_id' => $order_id,
                 'membership_post_id' => $membership_post_id,
             ]);
+
             return;
         }
 
@@ -438,7 +442,7 @@ final class OrgMan
         ]));
 
         // If no membership data in session, try to reconstruct it
-        if (! $membership_data) {
+        if (!$membership_data) {
             $logger->debug('[OrgMan] Reconstructing membership data for MDP payload', array_merge($context, [
                 'order_id' => $order_id,
                 'org_uuid_present' => $org_uuid !== '',
@@ -463,13 +467,14 @@ final class OrgMan
         }
 
         $subscription = function_exists('wcs_get_subscription') ? wcs_get_subscription($subscription_id) : null;
-        if (! $subscription) {
+        if (!$subscription) {
             $logger->error('[OrgMan] Subscription not found for membership post', [
                 'source' => 'wicket-orgman',
                 'order_id' => $order_id,
                 'membership_post_id' => $membership_post_id,
                 'subscription_id' => $subscription_id,
             ]);
+
             return;
         }
 
@@ -520,7 +525,7 @@ final class OrgMan
                 }
             }
 
-            if (! $updated_subscription_item) {
+            if (!$updated_subscription_item) {
                 $logger->warning('[OrgMan] Did not find matching subscription item to update quantity', array_merge($context, [
                     'order_id' => $order_id,
                     'subscription_id' => (int) $subscription_id,
@@ -550,7 +555,7 @@ final class OrgMan
             $mdp_membership_id = (string) get_post_meta($membership_post_id, 'membership_wicket_uuid', true);
         }
 
-        if (! empty($mdp_membership_id)) {
+        if (!empty($mdp_membership_id)) {
             $logger->info('[OrgMan] Updating MDP max_assignments', array_merge($context, [
                 'order_id' => $order_id,
                 'mdp_membership_id' => $mdp_membership_id,
@@ -614,7 +619,7 @@ final class OrgMan
         $logger = wc_get_logger();
         $context = ['source' => 'wicket-orgman'];
 
-        if (! $order || ! is_object($order)) {
+        if (!$order || !is_object($order)) {
             return $return_url;
         }
 
@@ -630,10 +635,11 @@ final class OrgMan
                 'order_id' => (int) $order->get_id(),
                 'target_url' => (string) $target_url,
             ]));
+
             return $target_url;
         }
 
-        if (! $this->order_has_additional_seats($order)) {
+        if (!$this->order_has_additional_seats($order)) {
             return $return_url;
         }
 
@@ -642,6 +648,7 @@ final class OrgMan
             'order_id' => (int) $order->get_id(),
             'target_url' => (string) $target_url,
         ]));
+
         return $target_url;
     }
 
@@ -651,18 +658,20 @@ final class OrgMan
         $context = ['source' => 'wicket-orgman'];
 
         $additional_seats_service = $this->services['additional_seats'] ?? null;
-        if (! $additional_seats_service) {
+        if (!$additional_seats_service) {
             $logger->error('[OrgMan] Additional seats service missing; cannot detect product', array_merge($context, [
                 'order_id' => is_callable([$order, 'get_id']) ? (int) $order->get_id() : null,
             ]));
+
             return false;
         }
 
         $product_id = $additional_seats_service->get_additional_seats_product();
-        if (! $product_id) {
+        if (!$product_id) {
             $logger->error('[OrgMan] Additional seats product not found; cannot detect additional seats order', array_merge($context, [
                 'order_id' => is_callable([$order, 'get_id']) ? (int) $order->get_id() : null,
             ]));
+
             return false;
         }
 
@@ -674,6 +683,7 @@ final class OrgMan
                     'order_item_id' => $item->get_id(),
                     'product_id' => (int) $product_id,
                 ]));
+
                 return true;
             }
         }
@@ -715,6 +725,7 @@ final class OrgMan
                 'order_id' => is_callable([$order, 'get_id']) ? (int) $order->get_id() : null,
                 'url' => (string) $url,
             ]));
+
             return $url;
         }
 
@@ -729,7 +740,7 @@ final class OrgMan
      */
     public function inject_orgman_content($content)
     {
-        if (! $this->is_orgman_screen() || ! in_the_loop() || is_admin()) {
+        if (!$this->is_orgman_screen() || !in_the_loop() || is_admin()) {
             return $content;
         }
 
@@ -766,7 +777,7 @@ final class OrgMan
     {
         $is_orgman = $this->is_orgman_screen();
 
-        if (! $is_orgman) {
+        if (!$is_orgman) {
             return;
         }
 
@@ -795,6 +806,7 @@ final class OrgMan
     private function get_base_path(): string
     {
         $base_path = dirname(__DIR__);
+
         return (string) apply_filters('wicket/acc/orgman/base_path', $base_path);
     }
 
@@ -824,7 +836,7 @@ final class OrgMan
      */
     private function is_orgman_screen()
     {
-        if (! is_singular('my-account')) {
+        if (!is_singular('my-account')) {
             return false;
         }
 
@@ -849,7 +861,6 @@ final class OrgMan
         return '';
     }
 
-
     /**
      * Map My Account slugs to content-only template paths for injection.
      *
@@ -857,7 +868,7 @@ final class OrgMan
      */
     private function get_content_map()
     {
-        if (! empty($this->content_map)) {
+        if (!empty($this->content_map)) {
             return $this->content_map;
         }
 
@@ -886,13 +897,13 @@ final class OrgMan
         $additional_seats_service = $this->services['additional_seats'];
         $additional_seats_product_id = $additional_seats_service->get_additional_seats_product();
 
-        if (! $additional_seats_product_id) {
+        if (!$additional_seats_product_id) {
             return;
         }
 
         // Check if this is an additional seats product
         $product = $item->get_product();
-        if (! $product || $product->get_id() !== $additional_seats_product_id) {
+        if (!$product || $product->get_id() !== $additional_seats_product_id) {
             return;
         }
 
@@ -900,14 +911,15 @@ final class OrgMan
         $user_id = $order->get_customer_id();
         $user_meta_data = $additional_seats_service->get_purchase_user_meta($user_id);
 
-        if (! $user_meta_data) {
+        if (!$user_meta_data) {
             $logger = wc_get_logger();
             $logger->warning('[OrgMan] No user meta data found for additional seats order item', [
                 'source' => 'wicket-orgman',
                 'user_id' => $user_id,
                 'order_id' => $order->get_id(),
-                'item_id' => $item->get_id()
+                'item_id' => $item->get_id(),
             ]);
+
             return;
         }
 
@@ -917,7 +929,7 @@ final class OrgMan
         $item->update_meta_data('membership_id', $user_meta_data['membership_id']);
         $item->update_meta_data('current_seats', $user_meta_data['membership_data']['membership']['current_max_assignments'] ?? 1);
 
-        if (! empty($values['membership_post_id_renew'])) {
+        if (!empty($values['membership_post_id_renew'])) {
             $item->update_meta_data('membership_post_id_renew', (int) $values['membership_post_id_renew']);
             $item->update_meta_data('_membership_post_id_renew', (int) $values['membership_post_id_renew']);
         }
@@ -929,7 +941,7 @@ final class OrgMan
             'order_id' => $order->get_id(),
             'item_id' => $item->get_id(),
             'org_uuid' => $user_meta_data['org_uuid'],
-            'membership_id' => $user_meta_data['membership_id']
+            'membership_id' => $user_meta_data['membership_id'],
         ]);
     }
 

@@ -4,13 +4,15 @@ declare(strict_types=1);
 
 namespace OrgManagement\Config {
     if (!function_exists(__NAMESPACE__ . '\\__')) {
-        function __($text, $domain = null) {
+        function __($text, $domain = null)
+        {
             return $text;
         }
     }
 
     if (!function_exists(__NAMESPACE__ . '\\apply_filters')) {
-        function apply_filters($tag, $value = null) {
+        function apply_filters($tag, $value = null)
+        {
             return $value;
         }
     }
@@ -18,75 +20,94 @@ namespace OrgManagement\Config {
 
 namespace OrgManagement\Services {
     if (!function_exists(__NAMESPACE__ . '\\__')) {
-        function __($text, $domain = null) {
+        function __($text, $domain = null)
+        {
             if (function_exists('\\__')) {
                 return \__($text, $domain);
             }
+
             return $text;
         }
     }
 
     if (!function_exists(__NAMESPACE__ . '\\apply_filters')) {
-        function apply_filters($tag, $value = null) {
+        function apply_filters($tag, $value = null)
+        {
             if (function_exists('\\apply_filters')) {
                 return \apply_filters($tag, $value);
             }
+
             return $value;
         }
     }
 
     if (!function_exists(__NAMESPACE__ . '\\sanitize_text_field')) {
-        function sanitize_text_field($value): string {
+        function sanitize_text_field($value): string
+        {
             if (function_exists('\\sanitize_text_field')) {
                 return \sanitize_text_field($value);
             }
+
             return is_scalar($value) ? (string) $value : '';
         }
     }
 
     if (!function_exists(__NAMESPACE__ . '\\sanitize_textarea_field')) {
-        function sanitize_textarea_field($value): string {
+        function sanitize_textarea_field($value): string
+        {
             if (function_exists('\\sanitize_textarea_field')) {
                 return \sanitize_textarea_field($value);
             }
+
             return is_scalar($value) ? (string) $value : '';
         }
     }
 
     if (!function_exists(__NAMESPACE__ . '\\sanitize_key')) {
-        function sanitize_key($value): string {
+        function sanitize_key($value): string
+        {
             if (function_exists('\\sanitize_key')) {
                 return \sanitize_key($value);
             }
+
             return is_scalar($value) ? strtolower((string) $value) : '';
         }
     }
 
     if (!function_exists(__NAMESPACE__ . '\\sanitize_title')) {
-        function sanitize_title($value): string {
+        function sanitize_title($value): string
+        {
             if (function_exists('\\sanitize_title')) {
                 return \sanitize_title($value);
             }
+
             return is_scalar($value) ? strtolower((string) $value) : '';
         }
     }
 
     if (!function_exists(__NAMESPACE__ . '\\wp_unslash')) {
-        function wp_unslash($value) {
+        function wp_unslash($value)
+        {
             if (function_exists('\\wp_unslash')) {
                 return \wp_unslash($value);
             }
+
             return $value;
         }
     }
 
     if (!function_exists(__NAMESPACE__ . '\\wc_get_logger')) {
-        function wc_get_logger() {
+        function wc_get_logger()
+        {
             return new class {
                 public function debug(string $message, array $context = []): void {}
+
                 public function info(string $message, array $context = []): void {}
+
                 public function warning(string $message, array $context = []): void {}
+
                 public function error(string $message, array $context = []): void {}
+
                 public function critical(string $message, array $context = []): void {}
             };
         }
@@ -95,19 +116,25 @@ namespace OrgManagement\Services {
 
 namespace OrgManagement\Helpers {
     if (!function_exists(__NAMESPACE__ . '\\wc_get_logger')) {
-        function wc_get_logger() {
+        function wc_get_logger()
+        {
             return new class {
                 public function debug(string $message, array $context = []): void {}
+
                 public function info(string $message, array $context = []): void {}
+
                 public function warning(string $message, array $context = []): void {}
+
                 public function error(string $message, array $context = []): void {}
+
                 public function critical(string $message, array $context = []): void {}
             };
         }
     }
 
     if (!function_exists(__NAMESPACE__ . '\\wp_die')) {
-        function wp_die($message = ''): void {
+        function wp_die($message = ''): void
+        {
             throw new \RuntimeException((string) $message);
         }
     }
@@ -208,9 +235,7 @@ namespace {
     }
 
     if (!function_exists('do_action')) {
-        function do_action(...$args): void
-        {
-        }
+        function do_action(...$args): void {}
     }
 
     if (!function_exists('wp_get_environment_type')) {
@@ -231,6 +256,7 @@ namespace {
         function set_transient($key, $value, $expiration = 0): bool
         {
             $GLOBALS['__orgroster_transients'][$key] = $value;
+
             return true;
         }
     }
@@ -239,6 +265,7 @@ namespace {
         function delete_transient($key): bool
         {
             unset($GLOBALS['__orgroster_transients'][$key]);
+
             return true;
         }
     }
@@ -270,6 +297,7 @@ namespace {
             if (array_key_exists($post_id, $GLOBALS['__orgroster_delete_attachment_results'])) {
                 return $GLOBALS['__orgroster_delete_attachment_results'][$post_id];
             }
+
             return true;
         }
     }

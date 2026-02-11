@@ -6,13 +6,14 @@ use Brain\Monkey\Functions;
 use OrgManagement\Services\MembershipService;
 
 if (!function_exists('wicket_api_client')) {
-    function wicket_api_client() {
+    function wicket_api_client()
+    {
         return $GLOBALS['__orgroster_api_client'] ?? null;
     }
 }
 
 it('returns active membership uuid when available', function (): void {
-    Functions\when('wicket_get_org_memberships')->alias(fn(string $orgUuid): array => [
+    Functions\when('wicket_get_org_memberships')->alias(fn (string $orgUuid): array => [
         [
             'membership' => [
                 'attributes' => [
@@ -41,7 +42,7 @@ it('returns active membership uuid when available', function (): void {
 });
 
 it('returns in-grace membership uuid when active is missing', function (): void {
-    Functions\when('wicket_get_org_memberships')->alias(fn(string $orgUuid): array => [
+    Functions\when('wicket_get_org_memberships')->alias(fn (string $orgUuid): array => [
         [
             'membership' => [
                 'attributes' => [
@@ -60,7 +61,7 @@ it('returns in-grace membership uuid when active is missing', function (): void 
 });
 
 it('falls back to the first membership uuid when none are active', function (): void {
-    Functions\when('wicket_get_org_memberships')->alias(fn(string $orgUuid): array => [
+    Functions\when('wicket_get_org_memberships')->alias(fn (string $orgUuid): array => [
         [
             'membership' => [
                 'attributes' => [
@@ -98,6 +99,7 @@ it('fetches org membership data via API when cache enabled', function (): void {
         public function get(string $path)
         {
             $this->calls++;
+
             return ['data' => ['id' => 'membership-1']];
         }
     };

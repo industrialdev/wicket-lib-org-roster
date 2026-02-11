@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use OrgManagement\Services\ConfigService;
-use OrgManagement\Services\MembershipService;
 use OrgManagement\Services\MemberService;
+use OrgManagement\Services\MembershipService;
 use OrgManagement\Services\Strategies\MembershipCycleStrategy;
 use OrgManagement\Services\Strategies\RosterManagementStrategy;
 

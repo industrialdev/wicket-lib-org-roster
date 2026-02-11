@@ -2,8 +2,6 @@
 
 /**
  * Content template for Supplemental Members page.
- *
- * @package OrgManagement
  */
 
 declare(strict_types=1);

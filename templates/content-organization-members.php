@@ -3,13 +3,11 @@
 /**
  * Content-only template for Organization Management Members.
  * This template contains only the OrgMan members content to be injected after the_content.
- *
- * @package OrgManagement
  */
 
 namespace OrgManagement\Templates;
 
-if (! is_user_logged_in()) {
+if (!is_user_logged_in()) {
     wp_redirect(wp_login_url());
     exit;
 }
@@ -32,7 +30,7 @@ if (empty($org_uuid) && !empty($org_id_fallback)) {
 }
 
 $org_type = '';
-if ($roster_mode !== 'groups' && ! empty($org_uuid) && function_exists('wicket_get_organization')) {
+if ($roster_mode !== 'groups' && !empty($org_uuid) && function_exists('wicket_get_organization')) {
     $org_response = wicket_get_organization($org_uuid);
     if (is_array($org_response) && isset($org_response['data']['attributes']['type'])) {
         $org_type = $org_response['data']['attributes']['type'];
@@ -54,8 +52,8 @@ $status = isset($_REQUEST['status']) ? sanitize_text_field(wp_unslash($_REQUEST[
     <?php if ($roster_mode === 'groups') : ?>
         <?php
         $group_uuid = isset($_GET['group_uuid']) ? sanitize_text_field((string) $_GET['group_uuid']) : '';
-        if (! empty($group_uuid)) :
-        ?>
+        if (!empty($group_uuid)) :
+            ?>
             <div class="org-management-profile-wrap" id="group-summary">
                 <?php include dirname(__DIR__) . '/templates-partials/organization-details.php'; ?>
             </div>
@@ -68,7 +66,7 @@ $status = isset($_REQUEST['status']) ? sanitize_text_field(wp_unslash($_REQUEST[
             </div>
         <?php endif; ?>
     <?php else : ?>
-        <?php if (! empty($org_uuid)) : ?>
+        <?php if (!empty($org_uuid)) : ?>
             <div class="org-management-profile-wrap" id="organization-summary">
                 <?php include dirname(__DIR__) . '/templates-partials/organization-details.php'; ?>
             </div>

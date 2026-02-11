@@ -19,7 +19,7 @@ it('rejects invalid document file types', function (): void {
 });
 
 it('rejects documents larger than configured max size', function (): void {
-    Functions\when('size_format')->alias(fn(int $bytes): string => $bytes . ' bytes');
+    Functions\when('size_format')->alias(fn (int $bytes): string => $bytes . ' bytes');
 
     $service = new DocumentService();
 

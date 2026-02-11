@@ -6,8 +6,8 @@ use Brain\Monkey\Functions;
 use OrgManagement\Services\BusinessInfoService;
 
 it('sanitizes business info payload values against configured options', function (): void {
-    Functions\when('wp_list_pluck')->alias(fn(array $list, string $field): array => array_map(
-        static fn(array $item) => $item[$field] ?? null,
+    Functions\when('wp_list_pluck')->alias(fn (array $list, string $field): array => array_map(
+        static fn (array $item) => $item[$field] ?? null,
         $list
     ));
 

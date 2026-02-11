@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use OrgManagement\Helpers as OrgHelpers;
 
-/**
+/*
  * Members list Datastar partial.
  *
  * This partial can be rendered directly (hypermedia request) or included server-side.
@@ -17,7 +17,7 @@ use OrgManagement\Helpers as OrgHelpers;
  * - $members_list_target (string)
  */
 
-if (! defined('ABSPATH')) {
+if (!defined('ABSPATH')) {
     exit;
 }
 
@@ -68,28 +68,29 @@ $remove_member_success_actions = "console.log('Member removed successfully'); $r
 $orgman_config = \OrgManagement\Config\get_config();
 $use_unified_member_list = (bool) ($orgman_config['ui']['member_list']['use_unified'] ?? false);
 if ($use_unified_member_list) {
-    $mode = isset($mode) ? (string) $mode : (string) (new \OrgManagement\Services\ConfigService())->get_roster_mode();
+    $mode = isset($mode) ? (string) $mode : (string) (new OrgManagement\Services\ConfigService())->get_roster_mode();
     $members = isset($members) && is_array($members) ? $members : [];
     $pagination = isset($pagination) && is_array($pagination) ? $pagination : [];
     $query = isset($query) ? (string) $query : '';
     $members_list_endpoint = isset($members_list_endpoint) ? (string) $members_list_endpoint : OrgHelpers\template_url() . 'members-list';
     $members_list_target = isset($members_list_target) ? (string) $members_list_target : 'members-list-container-' . sanitize_html_class($org_uuid ?: 'default');
     include __DIR__ . '/members-list-unified.php';
+
     return;
 }
 
-if ((! isset($members) || ! is_array($members)) && ! empty($org_uuid)) {
-    $config_service   = new \OrgManagement\Services\ConfigService();
-    $member_service   = new \OrgManagement\Services\MemberService($config_service);
-    $membership       = new \OrgManagement\Services\MembershipService();
+if ((!isset($members) || !is_array($members)) && !empty($org_uuid)) {
+    $config_service = new OrgManagement\Services\ConfigService();
+    $member_service = new OrgManagement\Services\MemberService($config_service);
+    $membership = new OrgManagement\Services\MembershipService();
     if (!isset($membership_uuid)) {
-        $membership_uuid  = $membership->getMembershipForOrganization($org_uuid);
+        $membership_uuid = $membership->getMembershipForOrganization($org_uuid);
     }
-    $page             = max(1, isset($_GET['page']) ? (int) $_GET['page'] : 1);
-    $page_size_param  = isset($_GET['size']) ? (int) $_GET['size'] : $page_size;
-    $query            = isset($_GET['query']) ? sanitize_text_field((string) $_GET['query']) : $query;
+    $page = max(1, isset($_GET['page']) ? (int) $_GET['page'] : 1);
+    $page_size_param = isset($_GET['size']) ? (int) $_GET['size'] : $page_size;
+    $query = isset($_GET['query']) ? sanitize_text_field((string) $_GET['query']) : $query;
 
-    if (! empty($membership_uuid)) {
+    if (!empty($membership_uuid)) {
         $result = $member_service->get_members(
             $membership_uuid,
             $org_uuid,
@@ -100,11 +101,11 @@ if ((! isset($members) || ! is_array($members)) && ! empty($org_uuid)) {
             ]
         );
 
-        $members     = $result['members'] ?? [];
-        $pagination  = $result['pagination'] ?? [];
-        $page        = (int) ($pagination['currentPage'] ?? $page);
+        $members = $result['members'] ?? [];
+        $pagination = $result['pagination'] ?? [];
+        $page = (int) ($pagination['currentPage'] ?? $page);
         $total_pages = (int) ($pagination['totalPages'] ?? $total_pages);
-        $page_size   = (int) ($pagination['pageSize'] ?? $page_size);
+        $page_size = (int) ($pagination['pageSize'] ?? $page_size);
         $total_items = (int) ($pagination['totalItems'] ?? $total_items);
     }
 }
@@ -115,7 +116,7 @@ $active_seats = 0;
 $has_seats_available = true;
 
 if (!empty($membership_uuid)) {
-    $membership_service = new \OrgManagement\Services\MembershipService();
+    $membership_service = new OrgManagement\Services\MembershipService();
     $membership_data = $membership_service->getOrgMembershipData($membership_uuid);
 
     if ($membership_data && isset($membership_data['data']['attributes'])) {
@@ -133,7 +134,7 @@ $total_pages = max(1, $total_pages);
 $page = min(max(1, $page), $total_pages);
 
 // Load available roles for the edit permissions modal
-$permission_service = new \OrgManagement\Services\PermissionService();
+$permission_service = new OrgManagement\Services\PermissionService();
 $available_roles = $permission_service->get_available_roles();
 
 // Load config for relationship type editing
@@ -152,7 +153,7 @@ $edit_excluded_roles = is_array($edit_permissions_config['excluded_roles'] ?? nu
     ? $edit_permissions_config['excluded_roles']
     : [];
 
-$available_roles = \OrgManagement\Helpers\PermissionHelper::filter_role_choices(
+$available_roles = OrgHelpers\PermissionHelper::filter_role_choices(
     $available_roles,
     $edit_allowed_roles,
     $edit_excluded_roles
@@ -174,14 +175,16 @@ if (!empty($membership_uuid)) {
 }
 
 $build_url = static function (int $page_number) use ($members_list_endpoint, $base_query_args) {
-    $args       = array_merge($base_query_args, ['page' => $page_number]);
-    $separator  = str_contains($members_list_endpoint, '?') ? '&' : '?';
+    $args = array_merge($base_query_args, ['page' => $page_number]);
+    $separator = str_contains($members_list_endpoint, '?') ? '&' : '?';
     $query_args = http_build_query($args, '', '&', PHP_QUERY_RFC3986);
+
     return $members_list_endpoint . $separator . $query_args;
 };
 
 $build_action = static function (int $page_number) use ($build_url) {
     $url = $build_url($page_number);
+
     return "@get('" . $url . "')";
 };
 
@@ -209,18 +212,19 @@ $no_members_message = __('No members found.', 'wicket-acc');
         <?php foreach ($members as $member) :
             $member_uuid = $member['person_uuid'] ?? null;
             $member_email = $member['email'] ?? '';
-            $current_roles = ! empty($member['current_roles']) ? $member['current_roles'] : ($member['roles'] ?? []);
+            $current_roles = !empty($member['current_roles']) ? $member['current_roles'] : ($member['roles'] ?? []);
             $formatted_roles = array_map(static function ($role) use ($role_display_map) {
                 if (isset($role_display_map[$role])) {
                     return $role_display_map[$role];
                 }
+
                 return ucwords(str_replace('_', ' ', (string) $role));
             }, is_array($current_roles) ? $current_roles : []);
-            $roles_text = ! empty($formatted_roles) ? implode(', ', $formatted_roles) : '—';
-        ?>
+            $roles_text = !empty($formatted_roles) ? implode(', ', $formatted_roles) : '—';
+            ?>
             <?php
-            // Create person UUID without dashes for unique IDs
-            $person_uuid_no_dashes = $member_uuid ? str_replace('-', '', $member_uuid) : uniqid('member', true);
+                // Create person UUID without dashes for unique IDs
+                $person_uuid_no_dashes = $member_uuid ? str_replace('-', '', $member_uuid) : uniqid('member', true);
             ?>
             <div class="member-card wt_bg-light-neutral wt_rounded-card wt_p-6 wt_transition-opacity wt_duration-300" id="member-<?php echo esc_attr($person_uuid_no_dashes); ?>">
                 <div class="wt_flex wt_w-full md_wt_flex-row wt_items-start wt_justify-between wt_gap-4">
@@ -232,10 +236,10 @@ $no_members_message = __('No members found.', 'wicket-acc');
                                 </h3>
                                 <?php
                             // Check confirmation status using helper method
-                            $config_service = new \OrgManagement\Services\ConfigService();
-                            $member_service = new \OrgManagement\Services\MemberService($config_service);
-                            $is_confirmed = $member_service->isUserConfirmed($member_uuid);
-                            ?>
+                            $config_service = new OrgManagement\Services\ConfigService();
+            $member_service = new OrgManagement\Services\MemberService($config_service);
+            $is_confirmed = $member_service->isUserConfirmed($member_uuid);
+            ?>
                             <?php if ($is_confirmed) : ?>
                                 <span class="wt_text-content" title="<?php esc_attr_e('Account confirmed', 'wicket-acc'); ?>">
                                     <span class="wt_inline-block wt_w-2 wt_h-2 wt_rounded-full wt_bg-green-500" aria-hidden="true"></span>
@@ -250,25 +254,25 @@ $no_members_message = __('No members found.', 'wicket-acc');
                             <?php endif; ?>
                             </div>
                         </div>
-                        <?php if (! empty($member['is_owner'])) : ?>
+                        <?php if (!empty($member['is_owner'])) : ?>
                             <div class="wt_flex wt_items-center wt_gap-2">
                                 <strong><?php esc_html_e('Organization Owner', 'wicket-acc'); ?></strong>
                             </div>
                         <?php endif; ?>
-                        <?php if (! empty($member['title']) && \OrgManagement\Helpers\Helper::should_show_member_job_title()) : ?>
+                        <?php if (!empty($member['title']) && OrgHelpers\Helper::should_show_member_job_title()) : ?>
                             <p class="member-job-title wt_text-sm wt_text-content">
                                 <?php echo esc_html($member['title']); ?>
                             </p>
                         <?php endif; ?>
                         <?php
                         // Check if relationship type should be hidden
-                        if (! empty($member['relationship_names']) && ! \OrgManagement\Helpers\Helper::should_hide_relationship_type()) :
-                        ?>
+                        if (!empty($member['relationship_names']) && !OrgHelpers\Helper::should_hide_relationship_type()) :
+                            ?>
                             <div class="wt_flex wt_items-center wt_gap-2">
                                 <span class="wt_text-content"><?php echo esc_html($member['relationship_names']); ?></span>
                             </div>
                         <?php endif; ?>
-                        <?php if (! empty($member_email)) : ?>
+                        <?php if (!empty($member_email)) : ?>
                             <div class="wt_flex wt_items-center wt_gap-2">
                                 <a href="mailto:<?php echo esc_attr($member_email); ?>" class="wt_text-sm wt_text-interactive wt_hover_underline">
                                     <?php echo esc_html($member_email); ?>
@@ -295,11 +299,11 @@ $no_members_message = __('No members found.', 'wicket-acc');
                             </svg>
                         </button>
                         <?php
-                        // Hide Remove button for membership owner
-                        $is_current_user_owner = !empty($member['is_owner']) &&
-                            !empty($current_user_uuid) &&
-                            $member_uuid === $current_user_uuid;
-                        ?>
+                            // Hide Remove button for membership owner
+                            $is_current_user_owner = !empty($member['is_owner'])
+                                && !empty($current_user_uuid)
+                                && $member_uuid === $current_user_uuid;
+            ?>
                         <?php if (!$is_current_user_owner): ?>
                             <button type="button" class="acc-remove-button remove-member-button button button--secondary wt_inline-flex wt_items-center wt_justify-between wt_gap-2 wt_px-4 wt_py-2 wt_bg-light-neutral wt_text-sm wt_border wt_border-bg-interactive wt_transition-colors wt_whitespace-nowrap"
                                 data-on:click="
@@ -327,19 +331,19 @@ $no_members_message = __('No members found.', 'wicket-acc');
             <?php
             if ($total_items > 0) {
                 $first = (($page - 1) * $page_size) + 1;
-                $last  = min($total_items, $page * $page_size);
+                $last = min($total_items, $page * $page_size);
                 echo esc_html(sprintf(__('Showing %1$d–%2$d of %3$d', 'wicket-acc'), $first, $last, $total_items));
             } else {
                 esc_html_e('No members to display.', 'wicket-acc');
             }
-            ?>
+?>
         </div>
         <div class="members-pagination__controls wt_w-full wt_flex wt_items-center wt_gap-2 wt_justify-end wt_self-end">
             <?php $prev_disabled = $page <= 1; ?>
             <button type="button"
                 class="members-pagination__btn members-pagination__btn--prev button button--secondary wt_px-3 wt_py-2 wt_text-sm"
                 <?php if ($prev_disabled) : ?>disabled<?php endif; ?>
-                <?php if (! $prev_disabled) : ?>data-on:click="<?php echo esc_attr($build_action($page - 1)); ?>" <?php endif; ?>
+                <?php if (!$prev_disabled) : ?>data-on:click="<?php echo esc_attr($build_action($page - 1)); ?>" <?php endif; ?>
                 data-on:success="<?php echo esc_attr(wp_sprintf("select('#%s') | set(html)", $members_list_target)); ?>"
                 data-indicator:members-loading
                 data-attr:disabled="$membersLoading">
@@ -348,11 +352,11 @@ $no_members_message = __('No members found.', 'wicket-acc');
             <div class="members-pagination__pages wt_flex wt_items-center wt_gap-1">
                 <?php for ($i = 1; $i <= $total_pages; $i++) :
                     $is_current = ($i === $page);
-                ?>
+                    ?>
                     <button type="button"
                         class="members-pagination__btn members-pagination__btn--page button wt_px-3 wt_py-2 wt_text-sm <?php echo $is_current ? 'button--primary' : 'button--secondary'; ?>"
                         <?php if ($is_current) : ?>disabled<?php endif; ?>
-                        <?php if (! $is_current) : ?>data-on:click="<?php echo esc_attr($build_action($i)); ?>" <?php endif; ?>
+                        <?php if (!$is_current) : ?>data-on:click="<?php echo esc_attr($build_action($i)); ?>" <?php endif; ?>
                         data-on:success="<?php echo esc_attr(wp_sprintf("select('#%s') | set(html)", $members_list_target)); ?>"
                         data-indicator:members-loading
                         data-attr:disabled="$membersLoading">
@@ -364,7 +368,7 @@ $no_members_message = __('No members found.', 'wicket-acc');
             <button type="button"
                 class="members-pagination__btn members-pagination__btn--next button button--secondary wt_px-3 wt_py-2 wt_text-sm"
                 <?php if ($next_disabled) : ?>disabled<?php endif; ?>
-                <?php if (! $next_disabled) : ?>data-on:click="<?php echo esc_attr($build_action($page + 1)); ?>" <?php endif; ?>
+                <?php if (!$next_disabled) : ?>data-on:click="<?php echo esc_attr($build_action($page + 1)); ?>" <?php endif; ?>
                 data-on:success="<?php echo esc_attr(wp_sprintf("select('#%s') | set(html)", $members_list_target)); ?>"
                 data-indicator:members-loading
                 data-attr:disabled="$membersLoading">
@@ -373,7 +377,7 @@ $no_members_message = __('No members found.', 'wicket-acc');
         </div>
     </nav>
 
-    <?php if (\OrgManagement\Helpers\PermissionHelper::can_add_members($org_uuid)): ?>
+    <?php if (OrgHelpers\PermissionHelper::can_add_members($org_uuid)): ?>
         <div class="wt_mt-6">
             <?php if ($has_seats_available): ?>
                 <button type="button"

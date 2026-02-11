@@ -14,13 +14,13 @@ Current strategy keys:
 ## 1) Strategy Architecture
 
 ### Strategy Interface
-- Contract: `src/services/strategies/RosterManagementStrategy.php`
+- Contract: `src/Services/Strategies/RosterManagementStrategy.php`
 - Required methods:
   - `add_member($org_id, $member_data, $context = [])`
   - `remove_member($org_id, $person_uuid, $context = [])`
 
 ### Strategy Registry
-- Service: `src/services/MemberService.php`
+- Service: `src/Services/MemberService.php`
 - Strategy map currently includes:
   - `cascade` => `CascadeStrategy`
   - `direct` => `DirectAssignmentStrategy`
@@ -83,7 +83,7 @@ Current strategy keys:
 ### A) `direct`
 
 #### Class
-- `src/services/strategies/DirectAssignmentStrategy.php`
+- `src/Services/Strategies/DirectAssignmentStrategy.php`
 
 #### Core Behavior
 - Creates/updates person profile.
@@ -118,7 +118,7 @@ Current strategy keys:
 ### B) `cascade`
 
 #### Class
-- `src/services/strategies/CascadeStrategy.php`
+- `src/Services/Strategies/CascadeStrategy.php`
 
 #### Core Behavior
 - Creates/updates person and relationship.
@@ -138,7 +138,7 @@ Current strategy keys:
 ### C) `groups`
 
 #### Class
-- `src/services/strategies/GroupsStrategy.php`
+- `src/Services/Strategies/GroupsStrategy.php`
 
 #### Core Behavior
 - Requires `group_uuid`.
@@ -170,7 +170,7 @@ Current strategy keys:
 ### D) `membership_cycle`
 
 #### Class
-- `src/services/strategies/MembershipCycleStrategy.php`
+- `src/Services/Strategies/MembershipCycleStrategy.php`
 
 #### Core Behavior
 - Requires explicit membership UUID for mutating operations.

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * General configuration for the Organization Management feature.
  *
@@ -16,15 +17,13 @@
  * !!! WARNING !!!
  * !!! WARNING !!!
  * !!! WARNING !!!
- *
- * @package OrgManagement
  */
 
 namespace OrgManagement\Config;
 
 // Exit if accessed directly.
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+if (!defined('ABSPATH')) {
+    exit;
 }
 
 /**
@@ -32,7 +31,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @return array
  */
-function get_config() {
+function get_config()
+{
     $orgmanConfig = [
         'roster' => [
             'strategy' => 'direct', // Roster management strategy: 'cascade', 'direct', 'groups', 'membership_cycle'
@@ -51,44 +51,44 @@ function get_config() {
         ],
         'permissions' => [
             'edit_organization' => [
-                'org_editor'
+                'org_editor',
             ], // Roles that can edit organization
             'manage_members' => [
                 'membership_manager',
-                'membership_owner'
+                'membership_owner',
             ], // Roles that can manage members
             'add_members' => [
                 'membership_manager',
-                'membership_owner'
+                'membership_owner',
             ], // Roles that can add members to organization
             'remove_members' => [
                 'membership_manager',
-                'membership_owner'
+                'membership_owner',
             ], // Roles that can remove members from organization
             'purchase_seats' => [
                 'membership_owner',
                 'membership_manager',
-                'org_editor'
+                'org_editor',
             ], // Roles that can purchase additional seats
             'any_management' => [
                 'org_editor',
                 'membership_manager',
-                'membership_owner'
+                'membership_owner',
             ], // Roles with any management access
             'prevent_owner_removal' => false, // Whether membership_owner removal should be prevented
             'relationship_based_permissions' => false, // Enable/disable role assignment based on relationship type
             'relationship_roles_map' => [ // Mapping of relationship types to roles
                 'ceo' => [
                     'org_editor',
-                    'membership_manager'
+                    'membership_manager',
                 ],
                 'primary_hr_contact' => [
                     'org_editor',
-                    'membership_manager'
+                    'membership_manager',
                 ],
                 'member_contact' => [
                     'org_editor',
-                    'membership_manager'
+                    'membership_manager',
                 ],
                 'employee_staff' => [],
                 'advertising_sponsor_contact' => [],
@@ -110,7 +110,7 @@ function get_config() {
                     'two',
                     'three',
                     'four',
-                    'five'
+                    'five',
                 ], // Sublists to opt-in to
             ],
         ],
@@ -139,7 +139,7 @@ function get_config() {
             ],
             'member_role' => 'member',
             'observer_role' => 'observer',
-            'seat_limited_roles' => [ 'member' ], // One per org per group
+            'seat_limited_roles' => ['member'], // One per org per group
             'list' => [
                 'page_size' => 20,
                 'member_page_size' => 15,
@@ -248,7 +248,7 @@ function get_config() {
         ],
         'documents' => [
             'allowed_types' => [ // Allowed document file types
-                'pdf', 'doc', 'docx', 'xls', 'xlsx', 'jpg', 'jpeg', 'png', 'gif'
+                'pdf', 'doc', 'docx', 'xls', 'xlsx', 'jpg', 'jpeg', 'png', 'gif',
             ],
             'max_size' => 10 * 1024 * 1024, // Maximum document size (10MB in bytes)
         ],
@@ -269,11 +269,11 @@ function get_config() {
             'member_card_fields' => [ // Configurable fields to display on member cards
                 'name' => [
                     'enabled' => true,
-                    'label' => __('Name', 'wicket-acc')
+                    'label' => __('Name', 'wicket-acc'),
                 ],
                 'job_title' => [
                     'enabled' => true,
-                    'label' => __('Job Title', 'wicket-acc')
+                    'label' => __('Job Title', 'wicket-acc'),
                 ],
                 'description' => [
                     'enabled' => true,
@@ -282,15 +282,15 @@ function get_config() {
                 ],
                 'email' => [
                     'enabled' => true,
-                    'label' => __('Email', 'wicket-acc')
+                    'label' => __('Email', 'wicket-acc'),
                 ],
                 'roles' => [
                     'enabled' => true,
-                    'label' => __('Roles', 'wicket-acc')
+                    'label' => __('Roles', 'wicket-acc'),
                 ],
                 'relationship_type' => [
                     'enabled' => false,
-                    'label' => __('Relationship', 'wicket-acc')
+                    'label' => __('Relationship', 'wicket-acc'),
                 ],
             ],
         ],
@@ -300,22 +300,22 @@ function get_config() {
                 'first_name' => [
                     'enabled' => true,
                     'required' => true,
-                    'label' => __('First Name', 'wicket-acc')
+                    'label' => __('First Name', 'wicket-acc'),
                 ],
                 'last_name' => [
                     'enabled' => true,
                     'required' => true,
-                    'label' => __('Last Name', 'wicket-acc')
+                    'label' => __('Last Name', 'wicket-acc'),
                 ],
                 'email' => [
                     'enabled' => true,
                     'required' => true,
-                    'label' => __('Email Address', 'wicket-acc')
+                    'label' => __('Email Address', 'wicket-acc'),
                 ],
                 'relationship_type' => [
                     'enabled' => false,
                     'required' => false,
-                    'label' => __('Relationship Type', 'wicket-acc')
+                    'label' => __('Relationship Type', 'wicket-acc'),
                 ],
                 'description' => [
                     'enabled' => true,
@@ -330,7 +330,7 @@ function get_config() {
                     'allowed_roles' => [], // Empty array = all roles allowed (default)
                     'excluded_roles' => [
                         'Cchlmembercommunity',
-                        'cchlmembercommunity'
+                        'cchlmembercommunity',
                     ], // Roles hidden from Add Member modal
                 ],
             ],
@@ -340,7 +340,7 @@ function get_config() {
             'allowed_roles' => [], // Empty array = all roles allowed (default)
             'excluded_roles' => [
                 'Cchlmembercommunity',
-                'cchlmembercommunity'
+                'cchlmembercommunity',
             ], // Roles hidden from Edit Permissions modal
         ],
         'notifications' => [
@@ -360,5 +360,5 @@ function get_config() {
         ],
     ];
 
-    return apply_filters( 'wicket/acc/orgman/config', $orgmanConfig );
+    return apply_filters('wicket/acc/orgman/config', $orgmanConfig);
 }

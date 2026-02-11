@@ -7,7 +7,8 @@ use OrgManagement\Services\AdditionalSeatsService;
 use OrgManagement\Services\ConfigService;
 
 if (!function_exists('wicket_api_client')) {
-    function wicket_api_client() {
+    function wicket_api_client()
+    {
         return $GLOBALS['__orgroster_api_client'] ?? null;
     }
 }
@@ -74,6 +75,7 @@ it('updates MDP max assignments when API responds with data', function (): void 
         public function patch(string $path, array $options)
         {
             $this->patchCalls[] = ['path' => $path, 'options' => $options];
+
             return ['data' => ['id' => 'mem-1']];
         }
     };

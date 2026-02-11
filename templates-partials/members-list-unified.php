@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use OrgManagement\Helpers as OrgHelpers;
 
-/**
+/*
  * Unified members list partial.
  *
  * Expects (when available):
@@ -18,7 +18,7 @@ use OrgManagement\Helpers as OrgHelpers;
  * - $membership_uuid (string)
  */
 
-if (! defined('ABSPATH')) {
+if (!defined('ABSPATH')) {
     exit;
 }
 
@@ -74,6 +74,7 @@ $build_url = static function (int $page_number) use ($members_list_endpoint, $ba
     $args = array_merge($base_query_args, ['page' => $page_number]);
     $separator = str_contains($members_list_endpoint, '?') ? '&' : '?';
     $query_args = http_build_query($args, '', '&', PHP_QUERY_RFC3986);
+
     return $members_list_endpoint . $separator . $query_args;
 };
 
@@ -91,7 +92,7 @@ $has_seats_available = true;
 $current_user_uuid = function_exists('wicket_current_person_uuid') ? wicket_current_person_uuid() : null;
 
 if ($membership_uuid !== '') {
-    $membership_service = new \OrgManagement\Services\MembershipService();
+    $membership_service = new OrgManagement\Services\MembershipService();
     $membership_data = $membership_service->getOrgMembershipData($membership_uuid);
     if ($membership_data && isset($membership_data['data']['attributes'])) {
         $max_seats = $membership_data['data']['attributes']['max_assignments'] ?? null;
@@ -104,7 +105,7 @@ if ($membership_uuid !== '') {
 
 $member_service = null;
 if ($show_account_status) {
-    $member_service = new \OrgManagement\Services\MemberService(new \OrgManagement\Services\ConfigService());
+    $member_service = new OrgManagement\Services\MemberService(new OrgManagement\Services\ConfigService());
 }
 
 $role_label = __('Role(s):', 'wicket-acc');
@@ -146,9 +147,9 @@ $role_label = __('Role(s):', 'wicket-acc');
             $member_role_label = $member['role'] ?? '';
 
             $current_roles = [];
-            if (! empty($member['current_roles']) && is_array($member['current_roles'])) {
+            if (!empty($member['current_roles']) && is_array($member['current_roles'])) {
                 $current_roles = $member['current_roles'];
-            } elseif (! empty($member['roles']) && is_array($member['roles'])) {
+            } elseif (!empty($member['roles']) && is_array($member['roles'])) {
                 $current_roles = $member['roles'];
             } elseif ($member_role_label !== '') {
                 $current_roles = [$member_role_label];
@@ -159,16 +160,17 @@ $role_label = __('Role(s):', 'wicket-acc');
                 if (isset($role_display_map[$role])) {
                     return $role_display_map[$role];
                 }
+
                 return ucwords(str_replace('_', ' ', $role));
             }, $current_roles);
-            $roles_text = ! empty($formatted_roles) ? implode(', ', $formatted_roles) : '—';
+            $roles_text = !empty($formatted_roles) ? implode(', ', $formatted_roles) : '—';
 
             $person_uuid_no_dashes = $member_uuid ? str_replace('-', '', $member_uuid) : uniqid('member', true);
             $is_confirmed = $show_account_status && $member_service ? $member_service->isUserConfirmed($member_uuid) : null;
             $relationship_names = $member['relationship_names'] ?? '';
-            $is_owner = ! empty($member['is_owner']);
+            $is_owner = !empty($member['is_owner']);
             $is_current_user_owner = $is_owner && $current_user_uuid && $member_uuid === $current_user_uuid;
-        ?>
+            ?>
             <div class="member-card wt_bg-light-neutral wt_rounded-card wt_p-6 wt_transition-opacity wt_duration-300"
                 id="member-<?php echo esc_attr($person_uuid_no_dashes); ?>"
                 data-class_wt_hidden="$membersLoading">
@@ -202,19 +204,19 @@ $role_label = __('Role(s):', 'wicket-acc');
                             </div>
                         <?php endif; ?>
 
-                        <?php if ($member_title !== '' && \OrgManagement\Helpers\Helper::should_show_member_job_title()) : ?>
+                        <?php if ($member_title !== '' && OrgHelpers\Helper::should_show_member_job_title()) : ?>
                             <p class="member-job-title wt_text-sm wt_text-content">
                                 <?php echo esc_html($member_title); ?>
                             </p>
                         <?php endif; ?>
 
-                        <?php if (! empty($member['relationship_description']) && \OrgManagement\Helpers\Helper::should_show_member_description()) : ?>
+                        <?php if (!empty($member['relationship_description']) && OrgHelpers\Helper::should_show_member_description()) : ?>
                             <p class="member-description wt_text-sm wt_text-content wt_mb-0">
                                 <?php echo esc_html($member['relationship_description']); ?>
                             </p>
                         <?php endif; ?>
 
-                        <?php if ($relationship_names !== '' && ! \OrgManagement\Helpers\Helper::should_hide_relationship_type()) : ?>
+                        <?php if ($relationship_names !== '' && !OrgHelpers\Helper::should_hide_relationship_type()) : ?>
                             <div class="wt_flex wt_items-center wt_gap-2">
                                 <span class="wt_text-content"><?php echo esc_html($relationship_names); ?></span>
                             </div>
@@ -252,7 +254,7 @@ $role_label = __('Role(s):', 'wicket-acc');
                             </button>
                         <?php endif; ?>
 
-                        <?php if ($show_remove_button && ! $is_current_user_owner) : ?>
+                        <?php if ($show_remove_button && !$is_current_user_owner) : ?>
                             <button type="button" class="acc-remove-button remove-member-button button button--secondary wt_inline-flex wt_items-center wt_justify-between wt_gap-2 wt_px-4 wt_py-2 wt_bg-light-neutral wt_text-sm wt_border wt_border-bg-interactive wt_transition-colors wt_whitespace-nowrap"
                                 data-on:click="
                                     $currentRemoveMemberUuid = '<?php echo esc_js($member_uuid); ?>';
@@ -282,21 +284,21 @@ $role_label = __('Role(s):', 'wicket-acc');
     <nav class="members-pagination wt_mt-6 wt_flex wt_flex-col wt_gap-4" aria-label="<?php esc_attr_e('Members pagination', 'wicket-acc'); ?>">
         <div class="members-pagination__info wt_w-full wt_text-left wt_text-sm wt_text-content">
             <?php
-            if ($total_items > 0) {
-                $first = (($page - 1) * $page_size) + 1;
-                $last  = min($total_items, $page * $page_size);
-                echo esc_html(sprintf(__('Showing %1$d–%2$d of %3$d', 'wicket-acc'), $first, $last, $total_items));
-            } else {
-                esc_html_e('No members to display.', 'wicket-acc');
-            }
-            ?>
+                if ($total_items > 0) {
+                    $first = (($page - 1) * $page_size) + 1;
+                    $last = min($total_items, $page * $page_size);
+                    echo esc_html(sprintf(__('Showing %1$d–%2$d of %3$d', 'wicket-acc'), $first, $last, $total_items));
+                } else {
+                    esc_html_e('No members to display.', 'wicket-acc');
+                }
+?>
         </div>
         <div class="members-pagination__controls wt_w-full wt_flex wt_items-center wt_gap-2 wt_justify-end wt_self-end">
             <?php $prev_disabled = $page <= 1; ?>
             <button type="button"
                 class="members-pagination__btn members-pagination__btn--prev button button--secondary wt_px-3 wt_py-2 wt_text-sm"
                 <?php if ($prev_disabled) : ?>disabled<?php endif; ?>
-                <?php if (! $prev_disabled) : ?>data-on:click="<?php echo esc_attr($build_action($page - 1)); ?>" <?php endif; ?>
+                <?php if (!$prev_disabled) : ?>data-on:click="<?php echo esc_attr($build_action($page - 1)); ?>" <?php endif; ?>
                 data-on:success="<?php echo esc_attr(wp_sprintf("select('#%s') | set(html)", $members_list_target)); ?>"
                 data-indicator:members-loading
                 data-attr:disabled="$membersLoading">
@@ -305,11 +307,11 @@ $role_label = __('Role(s):', 'wicket-acc');
             <div class="members-pagination__pages wt_flex wt_items-center wt_gap-1">
                 <?php for ($i = 1; $i <= $total_pages; $i++) :
                     $is_current = ($i === $page);
-                ?>
+                    ?>
                     <button type="button"
                         class="members-pagination__btn members-pagination__btn--page button wt_px-3 wt_py-2 wt_text-sm <?php echo $is_current ? 'button--primary' : 'button--secondary'; ?>"
                         <?php if ($is_current) : ?>disabled<?php endif; ?>
-                        <?php if (! $is_current) : ?>data-on:click="<?php echo esc_attr($build_action($i)); ?>" <?php endif; ?>
+                        <?php if (!$is_current) : ?>data-on:click="<?php echo esc_attr($build_action($i)); ?>" <?php endif; ?>
                         data-on:success="<?php echo esc_attr(wp_sprintf("select('#%s') | set(html)", $members_list_target)); ?>"
                         data-indicator:members-loading
                         data-attr:disabled="$membersLoading">
@@ -321,7 +323,7 @@ $role_label = __('Role(s):', 'wicket-acc');
             <button type="button"
                 class="members-pagination__btn members-pagination__btn--next button button--secondary wt_px-3 wt_py-2 wt_text-sm"
                 <?php if ($next_disabled) : ?>disabled<?php endif; ?>
-                <?php if (! $next_disabled) : ?>data-on:click="<?php echo esc_attr($build_action($page + 1)); ?>" <?php endif; ?>
+                <?php if (!$next_disabled) : ?>data-on:click="<?php echo esc_attr($build_action($page + 1)); ?>" <?php endif; ?>
                 data-on:success="<?php echo esc_attr(wp_sprintf("select('#%s') | set(html)", $members_list_target)); ?>"
                 data-indicator:members-loading
                 data-attr:disabled="$membersLoading">
@@ -340,7 +342,7 @@ $role_label = __('Role(s):', 'wicket-acc');
                 </button>
             <?php endif; ?>
 
-            <?php if (! $has_seats_available) : ?>
+            <?php if (!$has_seats_available) : ?>
                 <div class="wt_mt-2 wt_p-3 wt_bg-yellow-50 wt_border wt_border-yellow-200 wt_rounded-md wt_text-yellow-800 wt_text-sm">
                     <div class="wt_flex wt_items-center wt_gap-2">
                         <svg class="wt_w-5 wt_h-5 wt_text-yellow-600" fill="currentColor" viewBox="0 0 20 20">

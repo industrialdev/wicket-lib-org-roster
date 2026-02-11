@@ -8,7 +8,7 @@ use OrgManagement\Services\MemberService;
 it('matches any role for a person when all_true is false', function (): void {
     $service = new MemberService(new ConfigService());
 
-    $permissionStub = new class extends \OrgManagement\Services\PermissionService {
+    $permissionStub = new class extends OrgManagement\Services\PermissionService {
         public function get_person_current_roles_by_org_id($personUuid, $orgId): array
         {
             return ['membership_owner', 'org_editor'];
@@ -26,7 +26,7 @@ it('matches any role for a person when all_true is false', function (): void {
 it('requires all roles when all_true is true', function (): void {
     $service = new MemberService(new ConfigService());
 
-    $permissionStub = new class extends \OrgManagement\Services\PermissionService {
+    $permissionStub = new class extends OrgManagement\Services\PermissionService {
         public function get_person_current_roles_by_org_id($personUuid, $orgId): array
         {
             return ['membership_owner'];

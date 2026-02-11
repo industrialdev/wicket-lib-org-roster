@@ -1,21 +1,19 @@
 <?php
 
 /**
- * Organization Details Partial Template
+ * Organization Details Partial Template.
  *
  * Renders a single-organization summary view when org_id is present.
- *
- * @package OrgManagement
  */
 
 namespace OrgManagement\Templates;
 
 // Exit if accessed directly.
-if (! defined('ABSPATH')) {
+if (!defined('ABSPATH')) {
     exit;
 }
 // Basic permission check.
-if (! is_user_logged_in()) {
+if (!is_user_logged_in()) {
     wp_die('You must be logged in to access this content.');
 }
 
@@ -24,8 +22,9 @@ $org_uuid = isset($_GET['org_uuid']) ? sanitize_text_field($_GET['org_uuid']) : 
 if (empty($org_uuid) && isset($_GET['org_id'])) {
     $org_uuid = sanitize_text_field($_GET['org_id']);
 }
-if (! $org_uuid) {
+if (!$org_uuid) {
     echo '<div class="notice">' . esc_html__('Organization not specified.', 'wicket-acc') . '</div>';
+
     return;
 }
 
@@ -38,7 +37,7 @@ $roster_mode = $config_service->get_roster_mode();
 
 // Fetch organization basic info
 $org_name = '';
- $group_name = '';
+$group_name = '';
 if (function_exists('wicket_get_organization')) {
     $org = wicket_get_organization($org_uuid);
     if (is_array($org) && isset($org['data']['attributes'])) {
@@ -46,7 +45,7 @@ if (function_exists('wicket_get_organization')) {
         $org_name = $attrs['legal_name'] ?? ($attrs['legal_name_en'] ?? ($attrs['name'] ?? ''));
     }
 }
-if (! $org_name) {
+if (!$org_name) {
     $org_name = esc_html__('Organization', 'wicket-acc');
 }
 
@@ -118,7 +117,7 @@ if ($membership_data) {
     $max = $membership_data['data']['attributes']['max_assignments'] ?? null;
     if ($active !== null || $max !== null) {
         $max_label = $max !== null ? $max : esc_html__('Unlimited', 'wicket-acc');
-        $seats_label = sprintf('%s %s / %s', esc_html__('Seats:', 'wicket-acc'), (string)$active, (string)$max_label);
+        $seats_label = sprintf('%s %s / %s', esc_html__('Seats:', 'wicket-acc'), (string) $active, (string) $max_label);
     }
 }
 ?>
@@ -151,19 +150,19 @@ if ($membership_data) {
         <?php
         // Check user permissions for this organization
         $can_edit_org = \OrgManagement\Helpers\PermissionHelper::can_edit_organization($org_uuid);
-        $is_membership_manager = \OrgManagement\Helpers\PermissionHelper::is_membership_manager($org_uuid);
+$is_membership_manager = \OrgManagement\Helpers\PermissionHelper::is_membership_manager($org_uuid);
 
-    // Get WPML-aware URLs for my-account pages
-    $profile_url = \OrgManagement\Helpers\Helper::get_my_account_page_url('organization-profile', '/my-account/organization-profile/');
-    $members_url = \OrgManagement\Helpers\Helper::get_my_account_page_url('organization-members', '/my-account/organization-members/');
-    $group_uuid = isset($_GET['group_uuid']) ? sanitize_text_field($_GET['group_uuid']) : '';
-    $profile_params = [ 'org_uuid' => $org_uuid ];
-    $members_params = [ 'org_uuid' => $org_uuid ];
-    if ($roster_mode === 'groups' && $group_uuid !== '') {
-        $profile_params['group_uuid'] = $group_uuid;
-        $members_params['group_uuid'] = $group_uuid;
-    }
-        ?>
+// Get WPML-aware URLs for my-account pages
+$profile_url = \OrgManagement\Helpers\Helper::get_my_account_page_url('organization-profile', '/my-account/organization-profile/');
+$members_url = \OrgManagement\Helpers\Helper::get_my_account_page_url('organization-members', '/my-account/organization-members/');
+$group_uuid = isset($_GET['group_uuid']) ? sanitize_text_field($_GET['group_uuid']) : '';
+$profile_params = ['org_uuid' => $org_uuid];
+$members_params = ['org_uuid' => $org_uuid];
+if ($roster_mode === 'groups' && $group_uuid !== '') {
+    $profile_params['group_uuid'] = $group_uuid;
+    $members_params['group_uuid'] = $group_uuid;
+}
+?>
 
         <?php if ($can_edit_org): ?>
             <a href="<?php echo esc_url(add_query_arg($profile_params, $profile_url)); ?>"

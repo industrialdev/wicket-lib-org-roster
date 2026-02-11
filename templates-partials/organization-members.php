@@ -9,7 +9,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-/**
+/*
  * Renders the organization members partial.
  *
  * This template displays the list of organization members with search and filter functionality.
@@ -32,10 +32,10 @@ $lang = wicket_get_current_language();
 ]);
 
 // Fetch organization members if the Wicket function exists.
-$membership_service   = new \OrgManagement\Services\MembershipService();
-$config_service       = new \OrgManagement\Services\ConfigService();
-$member_service       = new \OrgManagement\Services\MemberService($config_service);
-$permission_service   = new \OrgManagement\Services\PermissionService();
+$membership_service = new \OrgManagement\Services\MembershipService();
+$config_service = new \OrgManagement\Services\ConfigService();
+$member_service = new \OrgManagement\Services\MemberService($config_service);
+$permission_service = new \OrgManagement\Services\PermissionService();
 
 $additional_seats_service = new \OrgManagement\Services\AdditionalSeatsService($config_service);
 
@@ -103,8 +103,8 @@ $containerId = 'members-list-container-' . $org_uuid_dom_suffix;
 $membersListEndpoint = \OrgManagement\Helpers\template_url() . 'members-list';
 $membersListSeparator = str_contains($membersListEndpoint, '?') ? '&' : '?';
 $encodedOrgUuid = rawurlencode((string) $org_uuid);
-$searchAction = "";
-$searchSuccess = "";
+$searchAction = '';
+$searchSuccess = '';
 
 if (!empty($membershipUuid)) {
     $membership_query_fragment = '&membership_uuid=' . rawurlencode((string) $membershipUuid);
@@ -115,9 +115,9 @@ if (!empty($membershipUuid)) {
 $signals = [
     'searchQuery' => $query,
 ];
-$use_unified_view = (bool) ( $orgman_config['ui']['member_view']['use_unified'] ?? false );
-if ( $use_unified_view ) {
-    $mode = (string) ( $config_service->get_roster_mode() ?? 'direct' );
+$use_unified_view = (bool) ($orgman_config['ui']['member_view']['use_unified'] ?? false);
+if ($use_unified_view) {
+    $mode = (string) ($config_service->get_roster_mode() ?? 'direct');
     $members = $membersResult['members'] ?? [];
     $pagination = $membersResult['pagination'] ?? [];
     $query = $membersResult['query'] ?? '';
@@ -125,6 +125,7 @@ if ( $use_unified_view ) {
     $members_list_endpoint = $membersListEndpoint;
     $members_list_target = $containerId;
     include __DIR__ . '/members-view-unified.php';
+
     return;
 }
 ?>
@@ -175,7 +176,7 @@ if (!empty($searchAction)) {
 		</div>
 		<?php
         $searchButtonAction = !empty($searchAction) ? $searchAction : '';
-$clearButtonAction  = '';
+$clearButtonAction = '';
 if (!empty($searchAction)) {
     $clearButtonAction = sprintf('(($searchQuery = \'\'), %s)', $searchAction);
 }
@@ -211,9 +212,9 @@ if (!empty($searchAction)) {
 $members_list_endpoint = $membersListEndpoint;
 	    $members_list_target = $containerId;
 	    $org_uuid_for_partial = $org_uuid;
-	    $use_unified_member_list = (bool) ( $orgman_config['ui']['member_list']['use_unified'] ?? false );
-	    if ( $use_unified_member_list ) {
-	        $mode = (string) ( $config_service->get_roster_mode() ?? 'direct' );
+	    $use_unified_member_list = (bool) ($orgman_config['ui']['member_list']['use_unified'] ?? false);
+	    if ($use_unified_member_list) {
+	        $mode = (string) ($config_service->get_roster_mode() ?? 'direct');
 	        $members = $membersResult['members'] ?? [];
 	        $pagination = $membersResult['pagination'] ?? [];
 	        $query = $membersResult['query'] ?? '';
@@ -223,10 +224,10 @@ $members_list_endpoint = $membersListEndpoint;
 	        include __DIR__ . '/members-list.php';
 	    }
 
-		    $membership_query_fragment = $membershipUuid ? '&membership_uuid=' . rawurlencode((string) $membershipUuid) : '';
-		    $add_member_success_actions = "console.log('Member added successfully'); \$addMemberSubmitting = false; \$membersLoading = false; \$addMemberModalOpen = false; \$addMemberSuccess = true; @get('{$membersListEndpoint}{$membersListSeparator}org_uuid={$encodedOrgUuid}{$membership_query_fragment}&page=1') >> select('#{$containerId}') | set(html); setTimeout(() => { \$addMemberSuccess = false; \$addMemberSubmitting = false; }, 3000);";
-	    $add_member_error_actions   = "console.error('Failed to add member'); \$addMemberSubmitting = false; \$membersLoading = false; \$addMemberModalOpen = false;";
-	    $add_member_endpoint        = \OrgManagement\Helpers\template_url() . 'process/add-member';
+	    $membership_query_fragment = $membershipUuid ? '&membership_uuid=' . rawurlencode((string) $membershipUuid) : '';
+	    $add_member_success_actions = "console.log('Member added successfully'); \$addMemberSubmitting = false; \$membersLoading = false; \$addMemberModalOpen = false; \$addMemberSuccess = true; @get('{$membersListEndpoint}{$membersListSeparator}org_uuid={$encodedOrgUuid}{$membership_query_fragment}&page=1') >> select('#{$containerId}') | set(html); setTimeout(() => { \$addMemberSuccess = false; \$addMemberSubmitting = false; }, 3000);";
+	    $add_member_error_actions = "console.error('Failed to add member'); \$addMemberSubmitting = false; \$membersLoading = false; \$addMemberModalOpen = false;";
+	    $add_member_endpoint = \OrgManagement\Helpers\template_url() . 'process/add-member';
 	    ?>
 
 	<div class="wt_mt-6">
@@ -246,7 +247,7 @@ $members_list_endpoint = $membersListEndpoint;
 	            'purchase_url' => $purchase_url,
 	            'additional_seats_enabled' => $config_service->is_additional_seats_enabled(),
 	            'current_user_roles' => wp_get_current_user()->roles,
-	            'current_user_login' => wp_get_current_user()->user_login
+	            'current_user_login' => wp_get_current_user()->user_login,
 	        ]);
 	    }
 
@@ -262,12 +263,12 @@ $members_list_endpoint = $membersListEndpoint;
 	                        'link' => [
 	                            'title' => __('Purchase Additional Seats', 'wicket-acc'),
 	                            'url' => $purchase_url,
-	                            'target' => '_self'
+	                            'target' => '_self',
 	                        ],
-	                        'link_style' => 'secondary'
-	                    ]
+	                        'link_style' => 'secondary',
+	                    ],
 	                ],
-	                'classes' => ['my-3']
+	                'classes' => ['my-3'],
 	            ]);
 	        ?>
 		<?php endif; ?>
@@ -376,17 +377,17 @@ $members_list_endpoint = $membersListEndpoint;
 
 					<?php
 		    $permissions_field_config = $orgman_config['member_addition_form']['fields']['permissions'] ?? [];
-$allowed_roles = $permissions_field_config['allowed_roles'] ?? [];
-$excluded_roles = $permissions_field_config['excluded_roles'] ?? [];
-// Filter out membership_owner if configured to prevent assignment
-if (!empty($orgman_config['permissions']['prevent_owner_assignment'])) {
-    unset($available_roles['membership_owner']);
-}
-$available_roles = \OrgManagement\Helpers\PermissionHelper::filter_role_choices(
-    $available_roles,
-    is_array($allowed_roles) ? $allowed_roles : [],
-    is_array($excluded_roles) ? $excluded_roles : []
-);
+		    $allowed_roles = $permissions_field_config['allowed_roles'] ?? [];
+		    $excluded_roles = $permissions_field_config['excluded_roles'] ?? [];
+		    // Filter out membership_owner if configured to prevent assignment
+		    if (!empty($orgman_config['permissions']['prevent_owner_assignment'])) {
+		        unset($available_roles['membership_owner']);
+		    }
+		    $available_roles = \OrgManagement\Helpers\PermissionHelper::filter_role_choices(
+		        $available_roles,
+		        is_array($allowed_roles) ? $allowed_roles : [],
+		        is_array($excluded_roles) ? $excluded_roles : []
+		    );
 		    ?>
 
 					<?php if (!empty($available_roles)) : ?>

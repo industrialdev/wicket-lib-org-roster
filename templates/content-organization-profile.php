@@ -3,13 +3,11 @@
 /**
  * Content-only template for Organization Management Index.
  * This template contains only the OrgMan content to be injected after the_content.
- *
- * @package OrgManagement
  */
 
 namespace OrgManagement\Templates;
 
-if (! is_user_logged_in()) {
+if (!is_user_logged_in()) {
     wp_redirect(wp_login_url());
     exit;
 }
@@ -32,7 +30,7 @@ if (empty($org_uuid) && !empty($org_id_fallback)) {
 }
 
 $org_type = '';
-if ($roster_mode !== 'groups' && ! empty($org_uuid) && function_exists('wicket_get_organization')) {
+if ($roster_mode !== 'groups' && !empty($org_uuid) && function_exists('wicket_get_organization')) {
     $org_response = wicket_get_organization($org_uuid);
     if (is_array($org_response) && isset($org_response['data']['attributes']['type'])) {
         $org_type = $org_response['data']['attributes']['type'];
@@ -55,16 +53,16 @@ $status = isset($_REQUEST['status']) ? sanitize_text_field(wp_unslash($_REQUEST[
     <?php
     if ($roster_mode === 'groups') {
         $group_uuid = isset($_GET['group_uuid']) ? sanitize_text_field((string) $_GET['group_uuid']) : '';
-        if (empty($org_uuid) && ! empty($group_uuid) && function_exists('wicket_get_group')) {
+        if (empty($org_uuid) && !empty($group_uuid) && function_exists('wicket_get_group')) {
             $group_response = wicket_get_group($group_uuid);
             if (is_array($group_response)) {
                 $org_uuid = $group_response['data']['relationships']['organization']['data']['id'] ?? $org_uuid;
             }
         }
     }
-    ?>
+?>
 
-    <?php if (! empty($org_uuid)) : ?>
+    <?php if (!empty($org_uuid)) : ?>
         <div class="org-management-profile-wrap" id="organization-summary">
             <?php include dirname(__DIR__) . '/templates-partials/organization-details.php'; ?>
         </div>
@@ -78,7 +76,7 @@ $status = isset($_REQUEST['status']) ? sanitize_text_field(wp_unslash($_REQUEST[
         </div>
     <?php endif; ?>
 
-    <?php if (! empty($org_type)) : ?>
+    <?php if (!empty($org_type)) : ?>
         <?php if ($org_type === 'professional_association') : ?>
             <style>
                 .assoc_demographics {

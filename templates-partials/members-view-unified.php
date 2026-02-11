@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use OrgManagement\Helpers as OrgHelpers;
 
-if (! defined('ABSPATH')) {
+if (!defined('ABSPATH')) {
     exit;
 }
 
@@ -46,9 +46,9 @@ $encoded_group_uuid = rawurlencode((string) $group_uuid);
 
 $search_action = '';
 if ($mode === 'groups') {
-    $search_action = "@get('{$members_list_endpoint}{$members_list_separator}group_uuid={$encoded_group_uuid}&org_uuid={$encoded_org_uuid}&page=1&query=' + encodeURIComponent(" . '$searchQuery' . "))";
+    $search_action = "@get('{$members_list_endpoint}{$members_list_separator}group_uuid={$encoded_group_uuid}&org_uuid={$encoded_org_uuid}&page=1&query=' + encodeURIComponent(" . '$searchQuery' . '))';
 } else {
-    $search_action = "@get('{$members_list_endpoint}{$members_list_separator}org_uuid={$encoded_org_uuid}&page=1&query=' + encodeURIComponent(" . '$searchQuery' . "))";
+    $search_action = "@get('{$members_list_endpoint}{$members_list_separator}org_uuid={$encoded_org_uuid}&page=1&query=' + encodeURIComponent(" . '$searchQuery' . '))';
 }
 $search_success = "$membersLoading = false; " . wp_sprintf("select('#%s') | set(html)", $members_list_target);
 
@@ -58,16 +58,16 @@ $signals = [
 ];
 
 $membership_uuid = isset($membership_uuid) ? (string) $membership_uuid : '';
-$membership_service = new \OrgManagement\Services\MembershipService();
-$config_service = new \OrgManagement\Services\ConfigService();
-$additional_seats_service = new \OrgManagement\Services\AdditionalSeatsService($config_service);
+$membership_service = new OrgManagement\Services\MembershipService();
+$config_service = new OrgManagement\Services\ConfigService();
+$additional_seats_service = new OrgManagement\Services\AdditionalSeatsService($config_service);
 if ($membership_uuid === '' && $org_uuid !== '') {
     $membership_uuid = $membership_service->getMembershipForOrganization($org_uuid);
 }
 $encoded_membership_uuid = rawurlencode((string) $membership_uuid);
 $membership_query_fragment = $membership_uuid !== '' ? "&membership_uuid={$encoded_membership_uuid}" : '';
 if ($mode !== 'groups') {
-    $search_action = "@get('{$members_list_endpoint}{$members_list_separator}org_uuid={$encoded_org_uuid}{$membership_query_fragment}&page=1&query=' + encodeURIComponent(" . '$searchQuery' . "))";
+    $search_action = "@get('{$members_list_endpoint}{$members_list_separator}org_uuid={$encoded_org_uuid}{$membership_query_fragment}&page=1&query=' + encodeURIComponent(" . '$searchQuery' . '))';
 }
 
 $can_purchase_seats = $org_uuid ? $additional_seats_service->can_purchase_additional_seats($org_uuid) : false;
@@ -84,12 +84,12 @@ if ($mode === 'groups') {
 $show_add_member_button = true;
 $show_remove_button = true;
 if ($mode !== 'groups') {
-    $show_add_member_button = \OrgManagement\Helpers\PermissionHelper::can_add_members($org_uuid);
-    $show_remove_button = \OrgManagement\Helpers\PermissionHelper::can_remove_members($org_uuid);
+    $show_add_member_button = OrgHelpers\PermissionHelper::can_add_members($org_uuid);
+    $show_remove_button = OrgHelpers\PermissionHelper::can_remove_members($org_uuid);
 }
 
 $search_submit_action = '$membersLoading = true; $searchSubmitted = true; ' . $search_action;
-$clear_action = '(' . '$membersLoading' . " = true, " . '$searchQuery' . " = '', " . '$searchSubmitted' . " = false, {$search_action})";
+$clear_action = '(' . '$membersLoading' . ' = true, ' . '$searchQuery' . " = '', " . '$searchSubmitted' . " = false, {$search_action})";
 
 ?>
 <div class="members-list wt_relative" data-member-view="unified"
@@ -157,58 +157,58 @@ $clear_action = '(' . '$membersLoading' . " = true, " . '$searchQuery' . " = '',
 
     <?php
     $members_list_endpoint = $members_list_endpoint;
-    $members_list_target = $members_list_target;
-    $show_edit_permissions = $show_edit_permissions;
-    $show_account_status = true;
-    $show_add_member_button = $show_add_member_button;
-    $show_remove_button = $show_remove_button;
-    include __DIR__ . '/members-list-unified.php';
-    ?>
+$members_list_target = $members_list_target;
+$show_edit_permissions = $show_edit_permissions;
+$show_account_status = true;
+$show_add_member_button = $show_add_member_button;
+$show_remove_button = $show_remove_button;
+include __DIR__ . '/members-list-unified.php';
+?>
 
-    <?php if ($can_purchase_seats && ! empty($purchase_url)) : ?>
+    <?php if ($can_purchase_seats && !empty($purchase_url)) : ?>
         <?php
-        get_component('card-call-out', [
-            'title' => __('Need More Seats?', 'wicket-acc'),
-            'description' => __('Purchase additional seats for your organization membership to accommodate more team members.', 'wicket-acc'),
-            'style' => 'secondary',
-            'links' => [
-                [
-                    'link' => [
-                        'title' => __('Purchase Additional Seats', 'wicket-acc'),
-                        'url' => $purchase_url,
-                        'target' => '_self',
-                    ],
-                    'link_style' => 'secondary',
+    get_component('card-call-out', [
+        'title' => __('Need More Seats?', 'wicket-acc'),
+        'description' => __('Purchase additional seats for your organization membership to accommodate more team members.', 'wicket-acc'),
+        'style' => 'secondary',
+        'links' => [
+            [
+                'link' => [
+                    'title' => __('Purchase Additional Seats', 'wicket-acc'),
+                    'url' => $purchase_url,
+                    'target' => '_self',
                 ],
+                'link_style' => 'secondary',
             ],
-            'classes' => ['my-3'],
-        ]);
+        ],
+        'classes' => ['my-3'],
+    ]);
         ?>
     <?php endif; ?>
 
     <?php
     $add_member_success_actions = "console.log('Member added successfully'); $addMemberSubmitting = false; $membersLoading = false; $addMemberModalOpen = false; $addMemberSuccess = true; @get('{$members_list_endpoint}{$members_list_separator}";
-    if ($mode === 'groups') {
-        $add_member_success_actions .= "group_uuid={$encoded_group_uuid}&org_uuid={$encoded_org_uuid}&page=1') >> select('#{$members_list_target}') | set(html);";
-    } else {
-        $add_member_success_actions .= "org_uuid={$encoded_org_uuid}{$membership_query_fragment}&page=1') >> select('#{$members_list_target}') | set(html);";
-    }
-    $add_member_success_actions .= " setTimeout(() => { $addMemberSuccess = false; $addMemberSubmitting = false; }, 3000);";
-    $add_member_error_actions = "console.error('Failed to add member'); $addMemberSubmitting = false; $membersLoading = false; $addMemberModalOpen = false;";
+if ($mode === 'groups') {
+    $add_member_success_actions .= "group_uuid={$encoded_group_uuid}&org_uuid={$encoded_org_uuid}&page=1') >> select('#{$members_list_target}') | set(html);";
+} else {
+    $add_member_success_actions .= "org_uuid={$encoded_org_uuid}{$membership_query_fragment}&page=1') >> select('#{$members_list_target}') | set(html);";
+}
+$add_member_success_actions .= " setTimeout(() => { $addMemberSuccess = false; $addMemberSubmitting = false; }, 3000);";
+$add_member_error_actions = "console.error('Failed to add member'); $addMemberSubmitting = false; $membersLoading = false; $addMemberModalOpen = false;";
 
-    $remove_member_success_actions = "console.log('Member removed successfully'); $removeMemberSubmitting = false; $membersLoading = false; $removeMemberModalOpen = false; $removeMemberSuccess = true; @get('{$members_list_endpoint}{$members_list_separator}";
-    if ($mode === 'groups') {
-        $remove_member_success_actions .= "group_uuid={$encoded_group_uuid}&org_uuid={$encoded_org_uuid}&page=1') >> select('#{$members_list_target}') | set(html);";
-    } else {
-        $remove_member_success_actions .= "org_uuid={$encoded_org_uuid}{$membership_query_fragment}&page=1') >> select('#{$members_list_target}') | set(html);";
-    }
-    $remove_member_success_actions .= " setTimeout(() => { $removeMemberSuccess = false; $removeMemberSubmitting = false; }, 3000);";
-    $remove_member_error_actions = "console.error('Failed to remove member'); $removeMemberSubmitting = false; $membersLoading = false; $removeMemberModalOpen = false;";
-    ?>
+$remove_member_success_actions = "console.log('Member removed successfully'); $removeMemberSubmitting = false; $membersLoading = false; $removeMemberModalOpen = false; $removeMemberSuccess = true; @get('{$members_list_endpoint}{$members_list_separator}";
+if ($mode === 'groups') {
+    $remove_member_success_actions .= "group_uuid={$encoded_group_uuid}&org_uuid={$encoded_org_uuid}&page=1') >> select('#{$members_list_target}') | set(html);";
+} else {
+    $remove_member_success_actions .= "org_uuid={$encoded_org_uuid}{$membership_query_fragment}&page=1') >> select('#{$members_list_target}') | set(html);";
+}
+$remove_member_success_actions .= " setTimeout(() => { $removeMemberSuccess = false; $removeMemberSubmitting = false; }, 3000);";
+$remove_member_error_actions = "console.error('Failed to remove member'); $removeMemberSubmitting = false; $membersLoading = false; $removeMemberModalOpen = false;";
+?>
 
     <?php if ($mode !== 'groups' && $show_edit_permissions) : ?>
         <?php
-        $permission_service = new \OrgManagement\Services\PermissionService();
+    $permission_service = new OrgManagement\Services\PermissionService();
         $available_roles = $permission_service->get_available_roles();
 
         if (!empty($orgman_config['permissions']['prevent_owner_assignment'])) {
@@ -223,7 +223,7 @@ $clear_action = '(' . '$membersLoading' . " = true, " . '$searchQuery' . " = '',
             ? $edit_permissions_config['excluded_roles']
             : [];
 
-        $available_roles = \OrgManagement\Helpers\PermissionHelper::filter_role_choices(
+        $available_roles = OrgHelpers\PermissionHelper::filter_role_choices(
             $available_roles,
             $edit_allowed_roles,
             $edit_excluded_roles
@@ -311,7 +311,7 @@ $clear_action = '(' . '$membersLoading' . " = true, " . '$searchQuery' . " = '',
 
                         <div class="wt_mb-6">
                             <p class="wt_font-bold wt_mb-3"><?php esc_html_e('Roles', 'wicket-acc'); ?></p>
-                            <?php if (! empty($available_roles)) : ?>
+                            <?php if (!empty($available_roles)) : ?>
                                 <div class="wt_space-y-2">
                                     <?php foreach ($available_roles as $slug => $role) : ?>
                                         <div class="wt_flex wt_items-center wt_gap-2">
@@ -370,7 +370,7 @@ $clear_action = '(' . '$membersLoading' . " = true, " . '$searchQuery' . " = '',
     $add_member_endpoint = ($mode === 'groups')
         ? OrgHelpers\template_url() . 'process/add-group-member'
         : OrgHelpers\template_url() . 'process/add-member';
-    ?>
+?>
 
     <dialog id="membersAddModal" class="modal wt_m-auto max_wt_3xl wt_rounded-md wt_shadow-md backdrop_wt_bg-black-50"
         data-show="$addMemberModalOpen"
@@ -428,10 +428,10 @@ $clear_action = '(' . '$membersLoading' . " = true, " . '$searchQuery' . " = '',
                         <select id="group-member-role" name="role"
                             class="wt_w-full wt_border wt_border-color wt_rounded-md wt_p-2">
                             <?php
-                            $groups_config = is_array($orgman_config['groups'] ?? null) ? $orgman_config['groups'] : [];
-                            $member_role = $groups_config['member_role'] ?? 'member';
-                            $observer_role = $groups_config['observer_role'] ?? 'observer';
-                            ?>
+                        $groups_config = is_array($orgman_config['groups'] ?? null) ? $orgman_config['groups'] : [];
+                $member_role = $groups_config['member_role'] ?? 'member';
+                $observer_role = $groups_config['observer_role'] ?? 'observer';
+                ?>
                             <option value="<?php echo esc_attr($member_role); ?>"><?php esc_html_e('Member', 'wicket-acc'); ?></option>
                             <option value="<?php echo esc_attr($observer_role); ?>"><?php esc_html_e('Observer', 'wicket-acc'); ?></option>
                         </select>
@@ -477,8 +477,8 @@ $clear_action = '(' . '$membersLoading' . " = true, " . '$searchQuery' . " = '',
 
                     <?php
                     $form_config = $orgman_config['member_addition_form']['fields'] ?? [];
-                    $relationship_types = $orgman_config['relationship_types']['custom_types'] ?? [];
-                    ?>
+                $relationship_types = $orgman_config['relationship_types']['custom_types'] ?? [];
+                ?>
 
                     <?php if ($form_config['first_name']['enabled'] ?? false) : ?>
                         <div>
@@ -517,7 +517,7 @@ $clear_action = '(' . '$membersLoading' . " = true, " . '$searchQuery' . " = '',
                         </div>
                     <?php endif; ?>
 
-                    <?php if (($form_config['relationship_type']['enabled'] ?? false) && ! empty($relationship_types)) : ?>
+                    <?php if (($form_config['relationship_type']['enabled'] ?? false) && !empty($relationship_types)) : ?>
                         <div>
                             <label class="wt_block wt_text-sm wt_font-medium wt_mb-1" for="new-member-relationship-type">
                                 <?php echo esc_html($form_config['relationship_type']['label'] ?? __('Relationship Type', 'wicket-acc')); ?>
@@ -556,22 +556,22 @@ $clear_action = '(' . '$membersLoading' . " = true, " . '$searchQuery' . " = '',
                     <?php endif; ?>
 
                     <?php
-                    $permissions_field_config = $orgman_config['member_addition_form']['fields']['permissions'] ?? [];
-                    $allowed_roles = $permissions_field_config['allowed_roles'] ?? [];
-                    $excluded_roles = $permissions_field_config['excluded_roles'] ?? [];
-                    $permission_service = new \OrgManagement\Services\PermissionService();
-                    $available_roles = $permission_service->get_available_roles();
-                    if (!empty($orgman_config['permissions']['prevent_owner_assignment'])) {
-                        unset($available_roles['membership_owner']);
-                    }
-                    $available_roles = \OrgManagement\Helpers\PermissionHelper::filter_role_choices(
-                        $available_roles,
-                        is_array($allowed_roles) ? $allowed_roles : [],
-                        is_array($excluded_roles) ? $excluded_roles : []
-                    );
-                    ?>
+                $permissions_field_config = $orgman_config['member_addition_form']['fields']['permissions'] ?? [];
+$allowed_roles = $permissions_field_config['allowed_roles'] ?? [];
+$excluded_roles = $permissions_field_config['excluded_roles'] ?? [];
+$permission_service = new OrgManagement\Services\PermissionService();
+$available_roles = $permission_service->get_available_roles();
+if (!empty($orgman_config['permissions']['prevent_owner_assignment'])) {
+    unset($available_roles['membership_owner']);
+}
+$available_roles = OrgHelpers\PermissionHelper::filter_role_choices(
+    $available_roles,
+    is_array($allowed_roles) ? $allowed_roles : [],
+    is_array($excluded_roles) ? $excluded_roles : []
+);
+?>
 
-                    <?php if (! empty($available_roles)) : ?>
+                    <?php if (!empty($available_roles)) : ?>
                         <fieldset class="wt_flex wt_flex-col wt_gap-2">
                             <legend class="wt_text-sm wt_font-medium"><?php esc_html_e('Security Roles', 'wicket-acc'); ?></legend>
                             <?php foreach ($available_roles as $role_slug => $role_name) : ?>
@@ -634,9 +634,9 @@ $clear_action = '(' . '$membersLoading' . " = true, " . '$searchQuery' . " = '',
 
                 <?php
                 $remove_member_endpoint = ($mode === 'groups')
-                    ? OrgHelpers\template_url() . 'process/remove-group-member'
-                    : OrgHelpers\template_url() . 'process/remove-member';
-                ?>
+? OrgHelpers\template_url() . 'process/remove-group-member'
+: OrgHelpers\template_url() . 'process/remove-member';
+?>
 
                 <form method="POST"
                     data-on:submit="$removeMemberSubmitting = true; $membersLoading = true; @post('<?php echo esc_js($remove_member_endpoint); ?>', { contentType: 'form' })"

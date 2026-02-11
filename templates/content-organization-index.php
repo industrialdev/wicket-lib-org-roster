@@ -3,13 +3,11 @@
 /**
  * Content-only template for Organization Management Index.
  * This template contains only the OrgMan content to be injected after the_content.
- *
- * @package OrgManagement
  */
 
 namespace OrgManagement\Templates;
 
-if (! is_user_logged_in()) {
+if (!is_user_logged_in()) {
     wp_redirect(wp_login_url());
     exit;
 }
@@ -44,5 +42,5 @@ if (empty($org_uuid) && !empty($org_id_fallback)) {
     } else {
         include dirname(__DIR__) . '/templates-partials/organization-list.php';
     }
-    ?>
+?>
 </div>

@@ -1,12 +1,9 @@
 <?php
 /**
  * Notifications container template.
- *
- * @package OrgManagement
  */
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+if (!defined('ABSPATH')) {
+    exit;
 }
 ?>
 <!-- Global notification container -->
