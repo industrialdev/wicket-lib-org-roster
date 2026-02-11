@@ -25,6 +25,7 @@ The Datastar PHP SDK is a Composer dependency (`starfederation/datastar-php`). D
 - [Architecture](docs/ARCHITECTURE.md)
 - [Strategies](docs/STRATEGIES.md)
 - [Configuration](docs/CONFIGURATION.md)
+- [Child Theme Integration](docs/CHILD-THEME-INTEGRATION.md)
 - [Design](docs/DESIGN.md)
 - [Frontend](docs/FRONTEND.md)
 - [Testing](docs/TESTING.md)
