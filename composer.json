@@ -1,7 +1,7 @@
 {
   "name": "industrialdev/wicket-lib-org-roster",
   "version": "0.2.1",
-  "description": "Organization management library for Wicket WordPress.",
+  "description": "Organization & Roster management library for Wicket Inc.",
   "type": "library",
   "license": "GPL-2.0-or-later",
   "require": {
@@ -10,9 +10,9 @@
     "starfederation/datastar-php": "^1.0.0-RC.5"
   },
   "require-dev": {
-    "pestphp/pest": "^4.0",
-    "brain/monkey": "^2.6",
-    "mockery/mockery": "^1.6",
+    "pestphp/pest": "^4",
+    "brain/monkey": "^2",
+    "mockery/mockery": "^1",
     "friendsofphp/php-cs-fixer": "^3"
   },
   "autoload": {

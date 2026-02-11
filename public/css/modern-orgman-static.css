@@ -156,6 +156,122 @@
   --wicket-orgman-font-family-name: proxima-nova, sans-serif;
 }
 
+/* Theme variable bridge:
+ * If host themes expose Wicket design tokens (e.g. --text-content, --bg-interactive),
+ * reuse them. Otherwise keep library defaults via fallbacks.
+ */
+:root {
+  --wicket-orgman-primary-color: var(--interactive, #132a55);
+  --wicket-orgman-primary-color-hover: var(--interactive, #0f2348);
+  --wicket-orgman-border-color: var(--border-light, #d9d9de);
+  --wicket-orgman-background-light: var(--bg-light-alternate, #f5f7fa);
+  --wicket-orgman-secondary-color: var(--bg-interactive, #005dab);
+  --wicket-orgman-secondary-outline-color: var(--border-interactive, #005dab);
+  --wicket-orgman-modal-overlay-color: var(--modal-bg-overlay, #00000080);
+
+  --wicket-orgman-text-content: var(--text-content, #232a31);
+  --wicket-orgman-text-content-reversed: var(--text-content-reversed, #fff);
+  --wicket-orgman-text-content-secondary: var(--text-content-secondary, #4f5962);
+  --wicket-orgman-text-content-secondary-reversed: var(--text-content-secondary-reversed, #d3d4d6);
+  --wicket-orgman-interactive: var(--interactive, #4c4c92);
+  --wicket-orgman-interactive-reversed: var(--interactive-reversed, #fff);
+  --wicket-orgman-text-disabled: var(--text-disabled, #7e7e7e);
+  --wicket-orgman-text-button-label: var(--text-button-label, #232a31);
+  --wicket-orgman-text-button-label-reversed: var(--text-button-label-reversed, #fff);
+  --wicket-orgman-text-accent: var(--text-accent, #4c4c92);
+  --wicket-orgman-text-accent-reversed: var(--text-accent-reversed, #f9d84a);
+  --wicket-orgman-text-label-1: var(--text-label-1, #232a31);
+  --wicket-orgman-text-label-2: var(--text-label-2, #fff);
+  --wicket-orgman-text-tag: var(--text-tag, #4c4c92);
+
+  --wicket-orgman-bg-body: var(--bg-body, #fff);
+  --wicket-orgman-bg-label: var(--bg-label, #f9d84a);
+  --wicket-orgman-bg-label-2: var(--bg-label-2, #4c4c92);
+  --wicket-orgman-bg-tag: var(--bg-tag, #fdf5d2);
+  --wicket-orgman-bg-interactive: var(--bg-interactive, #4c4c92);
+  --wicket-orgman-bg-interactive-reversed: var(--bg-interactive-reversed, #f9d84a);
+  --wicket-orgman-bg-white: var(--bg-white, #fff);
+  --wicket-orgman-bg-card: var(--bg-card, #fff);
+  --wicket-orgman-bg-dark: var(--bg-dark, #4c4c92);
+  --wicket-orgman-bg-dark-alternate: var(--bg-dark-alternate, #262749);
+  --wicket-orgman-bg-light: var(--bg-light, #fff);
+  --wicket-orgman-bg-light-alternate: var(--bg-light-alternate, #ededf4);
+  --wicket-orgman-bg-light-neutral: var(--bg-light-neutral, #ededf4);
+  --wicket-orgman-bg-image-overlay: var(--bg-image-overlay, #4c4c92d9);
+  --wicket-orgman-bg-accent-dark: var(--bg-accent-dark, #262749);
+  --wicket-orgman-bg-accent-light: var(--bg-accent-light, #d2d2e4);
+  --wicket-orgman-bg-callout-1: var(--bg-callout-1, #d2d2e4);
+  --wicket-orgman-bg-callout-2: var(--bg-callout-2, #fde6cc);
+  --wicket-orgman-bg-disabled: var(--bg-disabled, #d3d4d6);
+  --wicket-orgman-highlight-light: var(--highlight-light, #d2d2e4);
+  --wicket-orgman-highlight-dark: var(--highlight-dark, #4c4c92);
+  --wicket-orgman-status-active: var(--status-active, #acdbc5);
+  --wicket-orgman-status-inactive: var(--status-inactive, #7b7f83);
+
+  --wicket-orgman-border-card: var(--border-card, #4c4c92);
+  --wicket-orgman-border-dark: var(--border-dark, #262749);
+  --wicket-orgman-border-light: var(--border-light, #e9eaea);
+  --wicket-orgman-border-white: var(--border-white, #fff);
+  --wicket-orgman-border-accent: var(--border-accent, #f9d84a);
+  --wicket-orgman-border-interactive: var(--border-interactive, #4c4c92);
+  --wicket-orgman-border-interactive-reversed: var(--border-interactive-reversed, #f9d84a);
+  --wicket-orgman-border-tag: var(--border-tag, #f9d84a);
+  --wicket-orgman-border-input-default: var(--border-input-default, #4c4c92);
+  --wicket-orgman-border-disabled: var(--border-disabled, #d3d4d6);
+
+  --wicket-orgman-state-info-primary: var(--state-info-primary, #8ed6eb);
+  --wicket-orgman-state-info-primary-light: var(--state-info-primary-light, #e3f5fa);
+  --wicket-orgman-state-info-secondary: var(--state-info-secondary, #cca3be);
+  --wicket-orgman-state-info-secondary-light: var(--state-info-secondary-light, #f2e8ef);
+  --wicket-orgman-state-warning: var(--state-warning, #f99c32);
+  --wicket-orgman-state-warning-light: var(--state-warning-light, #fde6cc);
+  --wicket-orgman-state-error: var(--state-error, #f26c6c);
+  --wicket-orgman-state-error-light: var(--state-error-light, #fcdada);
+  --wicket-orgman-state-success: var(--state-success, #acdbc5);
+  --wicket-orgman-state-success-light: var(--state-success-light, #eaf6f1);
+
+  --wicket-orgman-table-header-bg: var(--table-header-bg, #4c4c92);
+  --wicket-orgman-table-header-label: var(--table-header-label, #fff);
+  --wicket-orgman-table-row: var(--table-row, #fff);
+  --wicket-orgman-table-row-alternate: var(--table-row-alternate, #ededf4);
+  --wicket-orgman-table-row-border: var(--table-row-border, #a5a5c9);
+  --wicket-orgman-table-footer-bg: var(--table-footer-bg, #4c4c92);
+  --wicket-orgman-table-footer-label: var(--table-footer-label, #fff);
+
+  --wicket-orgman-nav-contextual-title: var(--nav-contextual-title, #4c4c92);
+  --wicket-orgman-nav-contextual-link-lvl-1: var(--nav-contextual-link-lvl-1, #262749);
+  --wicket-orgman-nav-contextual-sublink: var(--nav-contextual-sublink, #232a31);
+  --wicket-orgman-dropshadow: var(--dropshadow, #232a3133);
+
+  --wicket-orgman-nav-main-bg: var(--nav-main-bg, #fff);
+  --wicket-orgman-nav-main-border: var(--nav-main-border, #e9eaea);
+  --wicket-orgman-nav-main-label: var(--nav-main-label, #232a31);
+  --wicket-orgman-nav-main-highlight: var(--nav-main-highlight, #d2d2e4);
+  --wicket-orgman-nav-main-border-interactive: var(--nav-main-border-interactive, #4c4c92);
+  --wicket-orgman-nav-secondary-label: var(--nav-secondary-label, #4c4c92);
+  --wicket-orgman-dropdown-mega-bg: var(--dropdown-mega-bg, #262749);
+  --wicket-orgman-dropdown-mega-heading-link: var(--dropdown-mega-heading-link, #f9d84a);
+  --wicket-orgman-dropdown-mega-link: var(--dropdown-mega-link, #fff);
+  --wicket-orgman-dropdown-mega-bg-highlight: var(--dropdown-mega-bg-highlight, #4c4c92);
+  --wicket-orgman-nav-utility-bg: var(--nav-utility-bg, #262749);
+  --wicket-orgman-nav-utility-label: var(--nav-utility-label, #fff);
+  --wicket-orgman-nav-utility-bg-highlight: var(--nav-utility-bg-highlight, #4c4c92);
+  --wicket-orgman-nav-footer-bg: var(--nav-footer-bg, #262749);
+  --wicket-orgman-nav-footer-title: var(--nav-footer-title, #f9d84a);
+  --wicket-orgman-nav-footer-sublink: var(--nav-footer-sublink, #fff);
+  --wicket-orgman-nav-footer-border: var(--nav-footer-border, #4c4c92);
+  --wicket-orgman-nav-footer-border-top: var(--nav-footer-border-top, #262749);
+  --wicket-orgman-nav-footer-social-bg: var(--nav-footer-social-bg, #f9d84a);
+  --wicket-orgman-nav-footer-social-text: var(--nav-footer-social-text, #262749);
+  --wicket-orgman-nav-footer-social-text-hover: var(--nav-footer-social-text-hover, #fff);
+  --wicket-orgman-nav-footer-social-border-hover: var(--nav-footer-social-border-hover, #f9d84a);
+  --wicket-orgman-nav-footer-text-content: var(--nav-footer-text-content, #fff);
+  --wicket-orgman-nav-footer-text-interactive: var(--nav-footer-text-interactive, #f9d84a);
+  --wicket-orgman-nav-footer-newsletter-bg: var(--nav-footer-newsletter-bg, #4c4c92);
+  --wicket-orgman-nav-footer-newsletter-text-content: var(--nav-footer-newsletter-text-content, #fff);
+  --wicket-orgman-font-family-name: var(--font-family-name, proxima-nova, sans-serif);
+}
+
 *,
 :before,
 :after,
