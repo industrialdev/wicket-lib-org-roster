@@ -6,12 +6,14 @@
   --wicket-orgman-secondary-color: #005dab;
   --wicket-orgman-secondary-outline-color: #005dab;
   --wicket-orgman-modal-overlay-color: #00000080;
+  --wicket-orgman-backdrop-grey: #232a3180;
   --wicket-orgman-text-content: #232a31;
   --wicket-orgman-text-content-reversed: #fff;
   --wicket-orgman-text-content-secondary: #4f5962;
   --wicket-orgman-text-content-secondary-reversed: #d3d4d6;
   --wicket-orgman-interactive: #4c4c92;
   --wicket-orgman-interactive-reversed: #fff;
+  --wicket-orgman-transparent: transparent;
   --wicket-orgman-text-disabled: #7e7e7e;
   --wicket-orgman-text-button-label: #232a31;
   --wicket-orgman-text-button-label-reversed: #fff;
@@ -168,6 +170,7 @@
   --wicket-orgman-secondary-color: var(--bg-interactive, #005dab);
   --wicket-orgman-secondary-outline-color: var(--border-interactive, #005dab);
   --wicket-orgman-modal-overlay-color: var(--modal-bg-overlay, #00000080);
+  --wicket-orgman-backdrop-grey: var(--backdrop-grey, #232a3180);
 
   --wicket-orgman-text-content: var(--text-content, #232a31);
   --wicket-orgman-text-content-reversed: var(--text-content-reversed, #fff);
@@ -1237,7 +1240,7 @@ input:where([type="button"], [type="reset"], [type="submit"]) {
     var(--wicket-tw-backdrop-saturate) var(--wicket-tw-backdrop-sepia);
 }
 .backdrop_wt_bg-black-50::backdrop {
-  background-color: var(--wicket-orgman-modal-overlay-color);
+  background-color: var(--wicket-orgman-backdrop-grey);
 }
 .wt_transition-colors {
   transition-property:
@@ -1361,21 +1364,21 @@ input:where([type="button"], [type="reset"], [type="submit"]) {
 }
 
 .wicket-orgman .button--primary {
-  background-color: var(--wicket-orgman-primary-color);
-  color: #fff;
+  background-color: var(--wicket-orgman-bg-interactive);
+  color: var(--wicket-orgman-text-content-reversed);
   cursor: pointer;
   padding: 0.5rem 0.875rem;
   text-decoration: none;
 }
 .wicket-orgman .button--primary:hover,
 .wicket-orgman .button--primary:focus {
-  background-color: var(--wicket-orgman-primary-color-hover);
-  border-color: var(--wicket-orgman-primary-color-hover);
+  background-color: var(--wicket-orgman-transparent);
+  border-color: var(--wicket-orgman-bg-interactive);
 }
 .wicket-orgman .button--secondary {
   color: var(--wicket-orgman-primary-color);
   cursor: pointer;
-  background-color: #fff;
+  background-color: var(--wicket-orgman-bg-white);
   padding: 0.5rem 0.875rem;
   text-decoration: none;
   border: 2px solid var(--wicket-orgman-secondary-outline-color);
@@ -1384,6 +1387,20 @@ input:where([type="button"], [type="reset"], [type="submit"]) {
 .wicket-orgman .button--secondary:focus {
   background-color: var(--wicket-orgman-secondary-color);
   color: var(--wicket-orgman-text-content-reversed);
+}
+.wicket-orgman .button--danger {
+  background-color: var(--wicket-orgman-state-error);
+  color: var(--wicket-orgman-text-content-reversed);
+  cursor: pointer;
+  padding: 0.5rem 0.875rem;
+  text-decoration: none;
+  border: 2px solid transparent;
+}
+.wicket-orgman .button--danger:hover,
+.wicket-orgman .button--danger:focus {
+  background-color: var(--wicket-orgman-transparent);
+  border: 2px solid var(--wicket-orgman-state-error);
+  color: var(--wicket-orgman-state-error);
 }
 .wicket-orgman .button--small {
   padding: 0.375rem 0.75rem;
@@ -1407,7 +1424,11 @@ input:where([type="button"], [type="reset"], [type="submit"]) {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  background-color: #ffffffd9;
+  background-color: color-mix(
+    in srgb,
+    var(--wicket-orgman-bg-white) 85%,
+    transparent
+  );
   transition:
     opacity 0.15s ease-in-out,
     visibility 0.15s ease-in-out;
@@ -1458,7 +1479,7 @@ input:where([type="button"], [type="reset"], [type="submit"]) {
     0 10px 10px -5px #0000000a;
 }
 .wicket-orgman dialog.modal::backdrop {
-  background-color: #00000080;
+  background-color: var(--wicket-orgman-backdrop-grey);
   animation: 0.2s ease-out orgman-modal-backdrop-fade-in;
 }
 .wicket-orgman dialog.modal[open] {
@@ -1470,14 +1491,14 @@ input:where([type="button"], [type="reset"], [type="submit"]) {
 }
 .wicket-orgman .business-info__header {
   border: 1px solid var(--wicket-orgman-border-color);
-  background-color: #fff;
+  background-color: var(--wicket-orgman-bg-card);
   border-radius: 0.5rem;
   margin-bottom: 2rem;
   padding: 1.5rem;
 }
 .wicket-orgman .business-info__section {
   border: 1px solid var(--wicket-orgman-border-color);
-  background-color: #fff;
+  background-color: var(--wicket-orgman-bg-card);
   border-radius: 0.5rem;
   padding: 1.5rem;
 }
@@ -1487,23 +1508,23 @@ input:where([type="button"], [type="reset"], [type="submit"]) {
   padding: 1rem;
 }
 .wicket-orgman .notice.notice--success {
-  color: #047857;
-  background-color: #ecfdf5;
-  border: 1px solid #34d399;
+  color: var(--wicket-orgman-state-success);
+  background-color: var(--wicket-orgman-state-success-light);
+  border: 1px solid var(--wicket-orgman-state-success);
 }
 .wicket-orgman .notice.notice--error {
-  color: #b91c1c;
-  background-color: #fef2f2;
-  border: 1px solid #f87171;
+  color: var(--wicket-orgman-state-error);
+  background-color: var(--wicket-orgman-state-error-light);
+  border: 1px solid var(--wicket-orgman-state-error);
 }
 .wicket-orgman .document-card {
   border: 1px solid var(--wicket-orgman-border-color);
-  background-color: #fff;
+  background-color: var(--wicket-orgman-bg-card);
   border-radius: 0.5rem;
 }
 .wicket-orgman .document-upload-form {
   border: 1px dashed var(--wicket-orgman-border-color);
-  background-color: #fafafa;
+  background-color: var(--wicket-orgman-bg-light-alternate);
   border-radius: 0.5rem;
   padding: 1.5rem;
 }
@@ -1519,7 +1540,7 @@ input:where([type="button"], [type="reset"], [type="submit"]) {
 }
 .wicket-orgman .subsidiaries-container .subsidiaries-grid .subsidiary-card {
   border: 1px solid var(--wicket-orgman-border-color);
-  background-color: #fff;
+  background-color: var(--wicket-orgman-bg-card);
   border-radius: 0.5rem;
   flex-direction: column;
   justify-content: space-between;
@@ -1539,7 +1560,7 @@ input:where([type="button"], [type="reset"], [type="submit"]) {
   .subsidiary-card
   .subsidiary-info
   .subsidiary-name {
-  color: #333;
+  color: var(--wicket-orgman-text-content);
   margin-bottom: 0.5rem;
   font-size: 1.125rem;
   font-weight: 600;
@@ -1550,7 +1571,7 @@ input:where([type="button"], [type="reset"], [type="submit"]) {
   .subsidiary-card
   .subsidiary-info
   .subsidiary-type {
-  color: #666;
+  color: var(--wicket-orgman-text-content-secondary);
   text-transform: capitalize;
   margin-bottom: 0.5rem;
   font-size: 0.875rem;
@@ -1584,8 +1605,8 @@ input:where([type="button"], [type="reset"], [type="submit"]) {
   .subsidiary-info
   .subsidiary-status
   .status-badge.status-active {
-  color: #166534;
-  background-color: #dcfce7;
+  color: var(--wicket-orgman-state-success);
+  background-color: var(--wicket-orgman-state-success-light);
 }
 .wicket-orgman
   .subsidiaries-container
@@ -1594,8 +1615,8 @@ input:where([type="button"], [type="reset"], [type="submit"]) {
   .subsidiary-info
   .subsidiary-status
   .status-badge.status-inactive {
-  color: #92400e;
-  background-color: #fef3c7;
+  color: var(--wicket-orgman-state-warning);
+  background-color: var(--wicket-orgman-state-warning-light);
 }
 .wicket-orgman
   .subsidiaries-container
@@ -1604,8 +1625,8 @@ input:where([type="button"], [type="reset"], [type="submit"]) {
   .subsidiary-info
   .subsidiary-status
   .status-badge.status-pending {
-  color: #1e40af;
-  background-color: #dbeafe;
+  color: var(--wicket-orgman-state-info-primary);
+  background-color: var(--wicket-orgman-state-info-primary-light);
 }
 .wicket-orgman
   .subsidiaries-container
@@ -1621,7 +1642,11 @@ input:where([type="button"], [type="reset"], [type="submit"]) {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  background-color: #ffffffd9;
+  background-color: color-mix(
+    in srgb,
+    var(--wicket-orgman-bg-white) 85%,
+    transparent
+  );
   transition: opacity 0.15s ease-in-out;
 }
 .wicket-orgman
@@ -1662,19 +1687,19 @@ input:where([type="button"], [type="reset"], [type="submit"]) {
 .wicket-orgman .subsidiaries-container .no-subsidiaries {
   text-align: center;
   background-color: var(--wicket-orgman-background-light);
-  color: #666;
+  color: var(--wicket-orgman-text-content-secondary);
   border-radius: 0.5rem;
   padding: 3rem;
 }
 .wicket-orgman .subsidiaries-container .add-subsidiary-section {
   border: 1px solid var(--wicket-orgman-border-color);
-  background-color: #fff;
+  background-color: var(--wicket-orgman-bg-card);
   border-radius: 0.5rem;
   margin-top: 2rem;
   padding: 2rem;
 }
 .wicket-orgman .subsidiaries-container .add-subsidiary-section h3 {
-  color: #333;
+  color: var(--wicket-orgman-text-content);
   margin-bottom: 1.5rem;
   font-size: 1.25rem;
   font-weight: 600;
@@ -1714,7 +1739,8 @@ input:where([type="button"], [type="reset"], [type="submit"]) {
   input:focus {
   border-color: var(--wicket-orgman-primary-color);
   outline: none;
-  box-shadow: 0 0 0 3px #0073aa1a;
+  box-shadow: 0 0 0 3px
+    color-mix(in srgb, var(--wicket-orgman-primary-color) 10%, transparent);
 }
 .wicket-orgman
   .subsidiaries-container
@@ -1724,7 +1750,7 @@ input:where([type="button"], [type="reset"], [type="submit"]) {
   .search-results-dropdown {
   border: 1px solid var(--wicket-orgman-border-color);
   z-index: 100;
-  background-color: #fff;
+  background-color: var(--wicket-orgman-bg-card);
   border-top: none;
   border-radius: 0 0 0.375rem 0.375rem;
   max-height: 300px;
@@ -1733,7 +1759,8 @@ input:where([type="button"], [type="reset"], [type="submit"]) {
   left: 0;
   right: 0;
   overflow-y: auto;
-  box-shadow: 0 4px 6px #0000001a;
+  box-shadow: 0 4px 6px
+    color-mix(in srgb, var(--wicket-orgman-dropshadow) 50%, transparent);
 }
 .wicket-orgman
   .subsidiaries-container
@@ -1799,7 +1826,7 @@ input:where([type="button"], [type="reset"], [type="submit"]) {
   .search-result-item
   .candidate-info
   .candidate-type {
-  color: #666;
+  color: var(--wicket-orgman-text-content-secondary);
   text-transform: capitalize;
   font-size: 0.875rem;
 }
@@ -1811,7 +1838,7 @@ input:where([type="button"], [type="reset"], [type="submit"]) {
   .search-results-dropdown
   .no-results {
   text-align: center;
-  color: #666;
+  color: var(--wicket-orgman-text-content-secondary);
   padding: 1rem;
   font-style: italic;
 }
@@ -1827,7 +1854,7 @@ input:where([type="button"], [type="reset"], [type="submit"]) {
   .add-subsidiary-section
   .bulk-upload-section
   h4 {
-  color: #333;
+  color: var(--wicket-orgman-text-content);
   margin-bottom: 1rem;
   font-size: 1.125rem;
   font-weight: 600;
@@ -1837,7 +1864,7 @@ input:where([type="button"], [type="reset"], [type="submit"]) {
   .add-subsidiary-section
   .bulk-upload-section
   .description {
-  color: #666;
+  color: var(--wicket-orgman-text-content-secondary);
   margin-bottom: 1rem;
 }
 .wicket-orgman
@@ -1853,7 +1880,7 @@ input:where([type="button"], [type="reset"], [type="submit"]) {
   .bulk-upload-section
   .file-upload-group
   .form-label {
-  color: #333;
+  color: var(--wicket-orgman-text-content);
   margin-bottom: 0.5rem;
   font-weight: 500;
   display: block;
@@ -1865,7 +1892,7 @@ input:where([type="button"], [type="reset"], [type="submit"]) {
   .file-upload-group
   .form-control-file {
   border: 1px solid var(--wicket-orgman-border-color);
-  background-color: #fff;
+  background-color: var(--wicket-orgman-bg-card);
   border-radius: 0.375rem;
   width: 100%;
   padding: 0.5rem;
@@ -1921,7 +1948,8 @@ input:where([type="button"], [type="reset"], [type="submit"]) {
   animation: 0.3s ease-out forwards slideIn;
   display: flex;
   transform: translate(100%);
-  box-shadow: 0 4px 6px #0000001a;
+  box-shadow: 0 4px 6px
+    color-mix(in srgb, var(--wicket-orgman-dropshadow) 50%, transparent);
 }
 .wicket-orgman .notification-container .notification.notification-show {
   opacity: 1;
@@ -1976,52 +2004,52 @@ input:where([type="button"], [type="reset"], [type="submit"]) {
   opacity: 1;
 }
 .wicket-orgman .notification-container .notification.notification-success {
-  color: #166534;
-  background-color: #f0fdf4;
-  border: 1px solid #86efac;
+  color: var(--wicket-orgman-state-success);
+  background-color: var(--wicket-orgman-state-success-light);
+  border: 1px solid var(--wicket-orgman-state-success);
 }
 .wicket-orgman
   .notification-container
   .notification.notification-success
   .notification-icon {
-  color: #fff;
-  background-color: #22c55e;
+  color: var(--wicket-orgman-text-content-reversed);
+  background-color: var(--wicket-orgman-state-success);
 }
 .wicket-orgman .notification-container .notification.notification-error {
-  color: #991b1b;
-  background-color: #fef2f2;
-  border: 1px solid #fca5a5;
+  color: var(--wicket-orgman-state-error);
+  background-color: var(--wicket-orgman-state-error-light);
+  border: 1px solid var(--wicket-orgman-state-error);
 }
 .wicket-orgman
   .notification-container
   .notification.notification-error
   .notification-icon {
-  color: #fff;
-  background-color: #ef4444;
+  color: var(--wicket-orgman-text-content-reversed);
+  background-color: var(--wicket-orgman-state-error);
 }
 .wicket-orgman .notification-container .notification.notification-warning {
-  color: #92400e;
-  background-color: #fffbeb;
-  border: 1px solid #fcd34d;
+  color: var(--wicket-orgman-state-warning);
+  background-color: var(--wicket-orgman-state-warning-light);
+  border: 1px solid var(--wicket-orgman-state-warning);
 }
 .wicket-orgman
   .notification-container
   .notification.notification-warning
   .notification-icon {
-  color: #fff;
-  background-color: #f59e0b;
+  color: var(--wicket-orgman-text-content-reversed);
+  background-color: var(--wicket-orgman-state-warning);
 }
 .wicket-orgman .notification-container .notification.notification-info {
-  color: #1e40af;
-  background-color: #eff6ff;
-  border: 1px solid #93c5fd;
+  color: var(--wicket-orgman-state-info-primary);
+  background-color: var(--wicket-orgman-state-info-primary-light);
+  border: 1px solid var(--wicket-orgman-state-info-primary);
 }
 .wicket-orgman
   .notification-container
   .notification.notification-info
   .notification-icon {
-  color: #fff;
-  background-color: #3b82f6;
+  color: var(--wicket-orgman-text-content-reversed);
+  background-color: var(--wicket-orgman-state-info-primary);
 }
 .wicket-orgman .notification-container .notification-inline {
   opacity: 1;
@@ -2056,10 +2084,14 @@ input:where([type="button"], [type="reset"], [type="submit"]) {
   content: "";
   background-image:
     linear-gradient(90deg, #fff0, #fffc 50%, #fff0 100%),
-    linear-gradient(#aaa 16px, #0000 0), linear-gradient(#aaa 16px, #0000 0),
-    linear-gradient(#aaa 16px, #0000 0), linear-gradient(#aaa 16px, #0000 0),
-    linear-gradient(#aaa 16px, #0000 0), linear-gradient(#aaa 16px, #0000 0),
-    linear-gradient(#aaa 16px, #0000 0), linear-gradient(#fff 100%, #0000 0);
+    linear-gradient(var(--wicket-orgman-border-disabled) 16px, #0000 0),
+    linear-gradient(var(--wicket-orgman-border-disabled) 16px, #0000 0),
+    linear-gradient(var(--wicket-orgman-border-disabled) 16px, #0000 0),
+    linear-gradient(var(--wicket-orgman-border-disabled) 16px, #0000 0),
+    linear-gradient(var(--wicket-orgman-border-disabled) 16px, #0000 0),
+    linear-gradient(var(--wicket-orgman-border-disabled) 16px, #0000 0),
+    linear-gradient(var(--wicket-orgman-border-disabled) 16px, #0000 0),
+    linear-gradient(var(--wicket-orgman-bg-card) 100%, #0000 0);
   background-position:
     0 0,
     16px 24px,
@@ -2130,7 +2162,7 @@ input:where([type="button"], [type="reset"], [type="submit"]) {
   display: inline-block;
 }
 .wicket-orgman .member-card .button--secondary {
-  border-color: var(--wicket-orgman-primary-color);
+  /*border-color: var(--wicket-orgman-primary-color);*/
 }
 .wicket-orgman .member-card h3 {
   font-weight: 600;

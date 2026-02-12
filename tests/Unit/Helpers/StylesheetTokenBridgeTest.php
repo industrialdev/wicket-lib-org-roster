@@ -13,4 +13,3 @@ it('includes a host-theme variable bridge with safe fallbacks', function (): voi
     expect($css)->toContain('--wicket-orgman-border-color: var(--border-light, #d9d9de);');
     expect($css)->toContain('--wicket-orgman-font-family-name: var(--font-family-name, proxima-nova, sans-serif);');
 });
-

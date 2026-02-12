@@ -490,7 +490,7 @@ foreach ($organizations as $org) :
                                         esc_html__('Membership Tier: %s', 'wicket-acc'),
                                         esc_html($entry_membership_name)
                                     );
-                                    ?>
+                                ?>
                                 </span>
                             <?php elseif ($entry_membership_uuid !== ''): ?>
                                 <span class="wt_text-base"><?php esc_html_e('Active Membership', 'wicket-acc'); ?></span>
@@ -525,21 +525,21 @@ foreach ($organizations as $org) :
                                 <span class="wt_font-semibold"><?php esc_html_e('Group(s):', 'wicket-acc'); ?></span>
                                 <?php
                                 $group_labels = [];
-                                foreach ($group_details as $group_detail) {
-                                    $label = $group_detail['name'] ?? '';
-                                    $type = $group_detail['type'] ?? '';
-                                    $tags = $group_detail['tags'] ?? null;
-                                    if ($label !== '' && $type !== '') {
-                                        $label .= ' (' . ucwords(str_replace('_', ' ', $type)) . ')';
-                                    }
-                                    if (is_array($tags) && !empty($tags)) {
-                                        $label .= ' [' . implode(', ', $tags) . ']';
-                                    }
-                                    if ($label !== '') {
-                                        $group_labels[] = $label;
-                                    }
+                            foreach ($group_details as $group_detail) {
+                                $label = $group_detail['name'] ?? '';
+                                $type = $group_detail['type'] ?? '';
+                                $tags = $group_detail['tags'] ?? null;
+                                if ($label !== '' && $type !== '') {
+                                    $label .= ' (' . ucwords(str_replace('_', ' ', $type)) . ')';
                                 }
-                                ?>
+                                if (is_array($tags) && !empty($tags)) {
+                                    $label .= ' [' . implode(', ', $tags) . ']';
+                                }
+                                if ($label !== '') {
+                                    $group_labels[] = $label;
+                                }
+                            }
+                            ?>
                                 <?php echo esc_html(implode(', ', $group_labels)); ?>
                             </div>
                         <?php endif; ?>
@@ -547,7 +547,7 @@ foreach ($organizations as $org) :
                         <div class="wt_flex wt_items-center wt_gap-4 wt_mt-4">
                             <?php if ($can_edit_org): ?>
                                 <?php
-                                $profile_url_base = \OrgManagement\Helpers\Helper::get_my_account_page_url('organization-profile', '/my-account/organization-profile/');
+                            $profile_url_base = \OrgManagement\Helpers\Helper::get_my_account_page_url('organization-profile', '/my-account/organization-profile/');
                                 $profile_params = ['org_uuid' => $org_id];
                                 if ($roster_mode === 'membership_cycle' && $entry_membership_uuid !== '') {
                                     $profile_params['membership_uuid'] = $entry_membership_uuid;

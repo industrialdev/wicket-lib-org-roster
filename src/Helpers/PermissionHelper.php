@@ -439,7 +439,7 @@ class PermissionHelper extends Helper
 
             $owner_id = $membership_data['data']['relationships']['owner']['data']['id'];
 
-            return  $person_uuid === $owner_id;
+            return $person_uuid === $owner_id;
 
         } catch (\Throwable $e) {
             wc_get_logger()->error('[PermissionHelper] Error checking membership owner: ' . $e->getMessage(), [

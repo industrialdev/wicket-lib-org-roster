@@ -155,7 +155,7 @@ $refresh_action = "@get('" . $build_url(1) . "') >> select('#" . $members_list_t
                                 </a>
                             </div>
                         <?php endif; ?>
-                        <?php if ($member_role_label && \OrgManagement\Helpers\Helper::should_show_member_roles()) : ?>
+                        <?php if ($member_role_label && OrgManagement\Helpers\Helper::should_show_member_roles()) : ?>
                             <div class="wt_flex wt_items-baseline wt_gap-2 wt_text-sm">
                                 <strong><?php esc_html_e('Role:', 'wicket-acc'); ?></strong>
                                 <span class="wt_text-content">

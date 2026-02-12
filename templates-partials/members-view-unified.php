@@ -50,7 +50,7 @@ if ($mode === 'groups') {
 } else {
     $search_action = "@get('{$members_list_endpoint}{$members_list_separator}org_uuid={$encoded_org_uuid}&page=1&query=' + encodeURIComponent(" . '$searchQuery' . '))';
 }
-$search_success = "\$membersLoading = false; " . wp_sprintf("select('#%s') | set(html)", $members_list_target);
+$search_success = '$membersLoading = false; ' . wp_sprintf("select('#%s') | set(html)", $members_list_target);
 
 $signals = [
     'searchQuery' => $query,
@@ -199,7 +199,7 @@ if ($mode === 'groups') {
 } else {
     $add_member_success_actions .= "org_uuid={$encoded_org_uuid}{$membership_query_fragment}&page=1') >> select('#{$members_list_target}') | set(html);";
 }
-$add_member_success_actions .= " setTimeout(() => { \$addMemberSuccess = false; \$addMemberSubmitting = false; }, 3000);";
+$add_member_success_actions .= ' setTimeout(() => { $addMemberSuccess = false; $addMemberSubmitting = false; }, 3000);';
 $add_member_error_actions = "console.error('Failed to add member'); \$addMemberSubmitting = false; \$membersLoading = false; \$addMemberModalOpen = false;";
 
 $remove_member_success_actions = "console.log('Member removed successfully'); \$removeMemberSubmitting = false; \$membersLoading = false; \$removeMemberModalOpen = false; \$removeMemberSuccess = true; @get('{$members_list_endpoint}{$members_list_separator}";
@@ -208,7 +208,7 @@ if ($mode === 'groups') {
 } else {
     $remove_member_success_actions .= "org_uuid={$encoded_org_uuid}{$membership_query_fragment}&page=1') >> select('#{$members_list_target}') | set(html);";
 }
-$remove_member_success_actions .= " setTimeout(() => { \$removeMemberSuccess = false; \$removeMemberSubmitting = false; }, 3000);";
+$remove_member_success_actions .= ' setTimeout(() => { $removeMemberSuccess = false; $removeMemberSubmitting = false; }, 3000);';
 $remove_member_error_actions = "console.error('Failed to remove member'); \$removeMemberSubmitting = false; \$membersLoading = false; \$removeMemberModalOpen = false;";
 ?>
 

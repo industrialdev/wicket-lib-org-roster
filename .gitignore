@@ -2,3 +2,4 @@ legacy-reference-only/
 /docs/mdp-bruno
 /.construct-clipboard
 /vendor/pestphp/pest/.temp
+*.cache
