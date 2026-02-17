@@ -62,8 +62,9 @@ if (isset($error) && is_array($error)) {
     return;
 }
 
-// Handle empty organizations data
-if (empty($organizations) || !is_array($organizations)) {
+// Handle empty organizations data.
+// In groups mode, organizations may be derived from manageable group memberships.
+if (($roster_mode !== 'groups') && (empty($organizations) || !is_array($organizations))) {
     ?>
     <div id="organization-list-container">
         <p><?php esc_html_e('You currently have no organizations to manage members for.', 'wicket-acc'); ?></p>
@@ -140,6 +141,8 @@ do {
             'name' => $group_name,
             'type' => $group_type,
             'tags' => $group_tags,
+            'org_name' => (string) ($group_item['org_name'] ?? ''),
+            'role_slug' => (string) ($group_item['role_slug'] ?? ''),
         ];
         $logger->debug('[OrgRoster] Group mapped to org', [
             'source' => 'wicket-orgroster',
@@ -161,6 +164,48 @@ $logger->info('[OrgRoster] Organization list group mapping complete', [
     'group_org_count' => count($groups_by_org),
     'group_total_pages' => $group_total_pages,
 ]);
+
+if (!is_array($organizations)) {
+    $organizations = [];
+}
+
+if ($roster_mode === 'groups' && !empty($groups_by_org)) {
+    $org_index = [];
+    foreach ($organizations as $organization) {
+        $existing_org_uuid = (string) ($organization['id'] ?? '');
+        if ($existing_org_uuid !== '') {
+            $org_index[$existing_org_uuid] = true;
+        }
+    }
+
+    foreach ($groups_by_org as $group_org_uuid => $group_details) {
+        if ($group_org_uuid === '' || isset($org_index[$group_org_uuid])) {
+            continue;
+        }
+
+        $group_org_name = '';
+        $group_fallback_name = '';
+        if (!empty($group_details) && is_array($group_details)) {
+            $group_org_name = (string) ($group_details[0]['org_name'] ?? '');
+            foreach ($group_details as $group_detail) {
+                $candidate_group_name = (string) ($group_detail['name'] ?? '');
+                if ($candidate_group_name !== '') {
+                    $group_fallback_name = $candidate_group_name;
+                    break;
+                }
+            }
+        }
+
+        $organizations[] = [
+            'id' => $group_org_uuid,
+            'org_name' => $group_org_name !== ''
+                ? $group_org_name
+                : ($group_fallback_name !== '' ? $group_fallback_name : __('Unknown', 'wicket-acc')),
+            'roles' => [],
+        ];
+        $org_index[$group_org_uuid] = true;
+    }
+}
 
 // Also get membership tier information for each organization.
 // Keep legacy single-tier behavior unless membership_cycle strategy is active.
@@ -248,15 +293,33 @@ if (empty($organizations)) {
 
 <div id="organization-list-container">
     <?php
+    $orgman_config = \OrgManagement\Config\get_config();
+    $org_list_config = is_array($orgman_config['ui']['organization_list'] ?? null)
+        ? $orgman_config['ui']['organization_list']
+        : [];
+    $org_page_size = max(1, (int) ($org_list_config['page_size'] ?? 5));
+    $org_total_items = count($organizations);
+    $org_total_pages = max(1, (int) ceil($org_total_items / $org_page_size));
+    $org_page_raw = isset($_GET['org_page']) ? wp_unslash($_GET['org_page']) : 1;
+    if (!is_scalar($org_page_raw)) {
+        $org_page_raw = 1;
+    }
+    $org_page = max(1, absint((string) $org_page_raw));
+    if ($org_page > $org_total_pages) {
+        $org_page = $org_total_pages;
+    }
+    $org_offset = ($org_page - 1) * $org_page_size;
+    $organizations_page = array_slice($organizations, $org_offset, $org_page_size);
+
     // Display organization count
-    $count = count($organizations);
-echo "<p class='mb-2'>" . __('Organizations Found:', 'wicket-acc') . ' ' . $count . '</p>';
+    $count = $org_total_items;
+    echo "<p class='mb-2'>" . __('Organizations Found:', 'wicket-acc') . ' ' . (int) $count . '</p>';
 
 // Start organization list
 echo '<div class="wt_w-full wt_flex wt_flex-col wt_gap-4" role="list">';
 // Initialize membership service once for the loop
 $membership_service = new \OrgManagement\Services\MembershipService();
-foreach ($organizations as $org) :
+foreach ($organizations_page as $org) :
     $org_id = $org['id'];
     $org_name = $org['org_name'] ?? __('Unknown', 'wicket-acc');
     $group_details = $groups_by_org[$org_id] ?? [];
@@ -439,6 +502,14 @@ foreach ($organizations as $org) :
     if (empty($raw_roles) && !empty($org['roles']) && is_array($org['roles'])) {
         $raw_roles = $org['roles'];
     }
+    if (empty($raw_roles) && $roster_mode === 'groups' && !empty($group_details)) {
+        $group_role_slugs = array_values(array_unique(array_filter(array_map(static function ($group_detail) {
+            return sanitize_key((string) ($group_detail['role_slug'] ?? ''));
+        }, $group_details))));
+        if (!empty($group_role_slugs)) {
+            $raw_roles = $group_role_slugs;
+        }
+    }
 
     // Prepare roles for display using PermissionHelper
     $formatted_roles = \OrgManagement\Helpers\PermissionHelper::format_roles_for_display($raw_roles);
@@ -448,9 +519,14 @@ foreach ($organizations as $org) :
         $primary_group_uuid = $group_details[0]['id'] ?? '';
     }
     $has_active_membership = \OrgManagement\Helpers\PermissionHelper::has_active_membership($org_id);
-    $is_membership_manager = \OrgManagement\Helpers\PermissionHelper::is_membership_manager($org_id);
+    $is_group_manager = ($roster_mode === 'groups' && !empty($group_details));
+    $is_membership_manager = $is_group_manager
+        ? true
+        : \OrgManagement\Helpers\PermissionHelper::is_membership_manager($org_id);
     $can_edit_org = \OrgManagement\Helpers\PermissionHelper::can_edit_organization($org_id);
-    $has_any_roles = \OrgManagement\Helpers\PermissionHelper::has_management_roles($org_id);
+    $has_any_roles = $is_group_manager
+        ? true
+        : \OrgManagement\Helpers\PermissionHelper::has_management_roles($org_id);
     $logger->debug('[OrgRoster] Org list manage members link context', [
         'source' => 'wicket-orgroster',
         'org_uuid' => $org_id,
@@ -461,133 +537,79 @@ foreach ($organizations as $org) :
             return $group_detail['id'] ?? '';
         }, $group_details) : null,
     ]);
-    ?>
-        <div class="wt_w-full wt_rounded-card-accent wt_p-4 wt_mb-4 wt_hover_shadow-sm wt_transition-shadow wt_bg-card wt_border wt_border-color"
-            role="listitem">
-            <h2 class="wt_text-heading-xs wt_mb-3">
-                <a href="<?php echo esc_url(\OrgManagement\Helpers\Helper::get_my_account_page_url('organization-management', '/my-account/organization-management/') . '?org_uuid=' . urlencode($org_id)); ?>"
-                    class="wt_text-content wt_hover_text-primary-600 wt_focus_outline-hidden wt_focus_ring-2 wt_focus_ring-primary-500 wt_focus_ring-offset-2 wt_decoration-none">
-                    <?php echo esc_html($org_name); ?>
-                </a>
-            </h2>
-            <div class="wt_flex wt_flex-col wt_gap-3">
-                <?php foreach ($membership_entries as $entry_index => $membership_entry): ?>
-                    <?php
-                    $entry_membership_uuid = (string) ($membership_entry['membership_uuid'] ?? '');
-                    $entry_membership_name = (string) ($membership_entry['membership_name'] ?? '');
-                    $entry_is_active = (bool) ($membership_entry['is_active'] ?? false);
-                    if ($roster_mode !== 'membership_cycle') {
-                        $entry_is_active = $has_active_membership;
-                    }
-                    ?>
-                    <div class="wt_flex wt_flex-col wt_gap-2<?php echo $entry_index > 0 ? ' wt_pt-4 wt_mt-1 wt_border-t wt_border-color' : ''; ?>">
-                        <div class="wt_flex wt_items-center wt_text-content">
-                            <?php if ($entry_membership_name !== ''): ?>
-                                <span class="wt_text-base">
-                                    <?php
-                                    printf(
-                                        /* translators: %s: Membership tier name. */
-                                        esc_html__('Membership Tier: %s', 'wicket-acc'),
-                                        esc_html($entry_membership_name)
-                                    );
-                                ?>
-                                </span>
-                            <?php elseif ($entry_membership_uuid !== ''): ?>
-                                <span class="wt_text-base"><?php esc_html_e('Active Membership', 'wicket-acc'); ?></span>
-                            <?php else: ?>
-                                <span class="wt_text-base"><?php esc_html_e('No membership found', 'wicket-acc'); ?></span>
-                            <?php endif; ?>
-                        </div>
-
-                        <?php if ($entry_is_active): ?>
-                            <div class="wt_flex wt_items-center wt_gap-2">
-                                <span class="wt_inline-block wt_w-2 wt_h-2 wt_rounded-full wt_bg-green-500" aria-hidden="true"></span>
-                                <span class="wt_text-base wt_leading-none wt_text-content"><?php esc_html_e('Active Member', 'wicket-acc'); ?></span>
-                            </div>
-                        <?php elseif ($entry_membership_uuid !== ''): ?>
-                            <div class="wt_flex wt_items-center wt_gap-2">
-                                <span class="wt_inline-block wt_w-2 wt_h-2 wt_rounded-full wt_bg-gray-400" aria-hidden="true"></span>
-                                <span class="wt_text-base wt_leading-none wt_text-content"><?php esc_html_e('Inactive Membership', 'wicket-acc'); ?></span>
-                            </div>
-                        <?php endif; ?>
-
-                        <div class="wt_text-base wt_font-bold wt_text-content">
-                            <span><?php esc_html_e('My Role(s):', 'wicket-acc'); ?></span>
-                            <?php if (!empty($formatted_roles)): ?>
-                                <?php echo esc_html(implode(', ', $formatted_roles)); ?>
-                            <?php else: ?>
-                                <?php esc_html_e('No roles assigned', 'wicket-acc'); ?>
-                            <?php endif; ?>
-                        </div>
-
-                        <?php if (!empty($group_details)): ?>
-                            <div class="wt_text-base wt_text-content">
-                                <span class="wt_font-semibold"><?php esc_html_e('Group(s):', 'wicket-acc'); ?></span>
-                                <?php
-                                $group_labels = [];
-                            foreach ($group_details as $group_detail) {
-                                $label = $group_detail['name'] ?? '';
-                                $type = $group_detail['type'] ?? '';
-                                $tags = $group_detail['tags'] ?? null;
-                                if ($label !== '' && $type !== '') {
-                                    $label .= ' (' . ucwords(str_replace('_', ' ', $type)) . ')';
-                                }
-                                if (is_array($tags) && !empty($tags)) {
-                                    $label .= ' [' . implode(', ', $tags) . ']';
-                                }
-                                if ($label !== '') {
-                                    $group_labels[] = $label;
-                                }
-                            }
-                            ?>
-                                <?php echo esc_html(implode(', ', $group_labels)); ?>
-                            </div>
-                        <?php endif; ?>
-
-                        <div class="wt_flex wt_items-center wt_gap-4 wt_mt-4">
-                            <?php if ($can_edit_org): ?>
-                                <?php
-                            $profile_url_base = \OrgManagement\Helpers\Helper::get_my_account_page_url('organization-profile', '/my-account/organization-profile/');
-                                $profile_params = ['org_uuid' => $org_id];
-                                if ($roster_mode === 'membership_cycle' && $entry_membership_uuid !== '') {
-                                    $profile_params['membership_uuid'] = $entry_membership_uuid;
-                                }
-                                if ($roster_mode === 'groups' && $primary_group_uuid !== '') {
-                                    $profile_params['group_uuid'] = $primary_group_uuid;
-                                }
-                                ?>
-                                <a href="<?php echo esc_url(add_query_arg($profile_params, $profile_url_base)); ?>"
-                                    class="wt_inline-flex wt_items-center wt_text-primary-600 wt_hover_text-primary-700 underline underline-offset-4">
-                                    <?php esc_html_e('Edit Organization', 'wicket-acc'); ?>
-                                </a>
-                            <?php endif; ?>
-
-                            <?php if ($has_any_roles): ?>
-                                <span class="wt_px-2 wt_h-4 wt_bg-border-white" aria-hidden="true"></span>
-                            <?php endif; ?>
-
-                            <?php if ($is_membership_manager): ?>
-                                <?php
-                                $members_url_base = \OrgManagement\Helpers\Helper::get_my_account_page_url('organization-members', '/my-account/organization-members/');
-                                $members_params = ['org_uuid' => $org_id];
-                                if ($roster_mode === 'membership_cycle' && $entry_membership_uuid !== '') {
-                                    $members_params['membership_uuid'] = $entry_membership_uuid;
-                                }
-                                if ($primary_group_uuid !== '') {
-                                    $members_params['group_uuid'] = $primary_group_uuid;
-                                }
-                                ?>
-                                <a href="<?php echo esc_url(add_query_arg($members_params, $members_url_base)); ?>"
-                                    class="wt_inline-flex wt_items-center wt_text-primary-600 wt_hover_text-primary-700 underline underline-offset-4">
-                                    <?php esc_html_e('Manage Members', 'wicket-acc'); ?>
-                                </a>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-            </div>
-        </div>
-    <?php endforeach; ?>
+    $card_template = __DIR__ . '/card-organization-direct-cascade.php';
+    if ($roster_mode === 'groups') {
+        $card_template = __DIR__ . '/card-organization-groups.php';
+    } elseif ($roster_mode === 'membership_cycle') {
+        $card_template = __DIR__ . '/card-organization-membership-cycle.php';
+    }
+    include $card_template;
+endforeach; ?>
 
     <?php echo '</div>'; ?>
+
+    <?php if ($org_total_pages > 1) : ?>
+        <?php
+        $base_query_args = [];
+        foreach ($_GET as $query_key => $query_value) {
+            if (is_scalar($query_value)) {
+                $base_query_args[$query_key] = sanitize_text_field(wp_unslash((string) $query_value));
+            }
+        }
+        unset($base_query_args['org_page']);
+
+        $base_list_url = \OrgManagement\Helpers\Helper::get_my_account_page_url(
+            'organization-management',
+            '/my-account/organization-management/'
+        );
+
+        $build_page_url = static function (int $page_number) use ($base_query_args, $base_list_url): string {
+            $args = $base_query_args;
+            if ($page_number > 1) {
+                $args['org_page'] = $page_number;
+            }
+
+            return add_query_arg($args, $base_list_url);
+        };
+
+        $first_item = $org_offset + 1;
+        $last_item = min($org_total_items, $org_offset + count($organizations_page));
+        ?>
+        <nav class="members-pagination wt_mt-6 wt_flex wt_flex-col wt_gap-4" aria-label="<?php esc_attr_e('Organizations pagination', 'wicket-acc'); ?>">
+            <div class="members-pagination__info wt_w-full wt_text-left wt_text-sm wt_text-content">
+                <?php
+                printf(
+                    /* translators: 1: first item number, 2: last item number, 3: total items. */
+                    esc_html__('Showing %1$d-%2$d of %3$d organizations', 'wicket-acc'),
+                    (int) $first_item,
+                    (int) $last_item,
+                    (int) $org_total_items
+                );
+                ?>
+            </div>
+            <div class="members-pagination__controls wt_w-full wt_flex wt_items-center wt_gap-2 wt_justify-end wt_self-end">
+                <?php if ($org_page > 1) : ?>
+                    <a href="<?php echo esc_url($build_page_url($org_page - 1)); ?>"
+                        class="members-pagination__btn members-pagination__btn--prev button button--secondary wt_px-3 wt_py-2 wt_text-sm">
+                        <?php esc_html_e('Previous', 'wicket-acc'); ?>
+                    </a>
+                <?php endif; ?>
+                <div class="members-pagination__pages wt_flex wt_items-center wt_gap-1">
+                    <?php for ($i = 1; $i <= $org_total_pages; $i++) : ?>
+                        <a href="<?php echo esc_url($build_page_url($i)); ?>"
+                            class="members-pagination__btn members-pagination__btn--page button wt_px-3 wt_py-2 wt_text-sm <?php echo $i === $org_page ? 'button--primary' : 'button--secondary'; ?>"
+                            <?php if ($i === $org_page) : ?>aria-current="page"<?php endif; ?>>
+                            <?php echo esc_html((string) $i); ?>
+                        </a>
+                    <?php endfor; ?>
+                </div>
+                <?php if ($org_page < $org_total_pages) : ?>
+                    <a href="<?php echo esc_url($build_page_url($org_page + 1)); ?>"
+                        class="members-pagination__btn members-pagination__btn--next button button--secondary wt_px-3 wt_py-2 wt_text-sm">
+                        <?php esc_html_e('Next', 'wicket-acc'); ?>
+                    </a>
+                <?php endif; ?>
+            </div>
+        </nav>
+    <?php endif; ?>
 </div>

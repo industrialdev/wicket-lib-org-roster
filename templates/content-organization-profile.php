@@ -42,7 +42,7 @@ $status = isset($_REQUEST['status']) ? sanitize_text_field(wp_unslash($_REQUEST[
 
 ?>
 
-<div id="org-management-index-app" class="org-management-app wicket-orgman wt_w-full wt_mt-6">
+<div id="org-management-index-app" class="org-management-app wicket-orgman wt_w-full wt_mt-6 wt_mb-6">
     <h1 class="wt_text-2xl wt_font-bold wt_mb-4"><?php echo esc_html($management_title); ?></h1>
 
     <?php if ($status === 'success') : ?>

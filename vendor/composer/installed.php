@@ -1,8 +1,8 @@
 <?php return array(
     'root' => array(
         'name' => 'industrialdev/wicket-lib-org-roster',
-        'pretty_version' => '0.2.2',
-        'version' => '0.2.2.0',
+        'pretty_version' => '0.2.3',
+        'version' => '0.2.3.0',
         'reference' => null,
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
@@ -11,8 +11,8 @@
     ),
     'versions' => array(
         'industrialdev/wicket-lib-org-roster' => array(
-            'pretty_version' => '0.2.2',
-            'version' => '0.2.2.0',
+            'pretty_version' => '0.2.3',
+            'version' => '0.2.3.0',
             'reference' => null,
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',

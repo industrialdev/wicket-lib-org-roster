@@ -205,6 +205,9 @@ function get_config()
             'seat_limit_info' => null, // Custom seat limit information (null = no info displayed)
         ],
         'ui' => [
+            'organization_list' => [
+                'page_size' => 5,
+            ],
             'hide_relationship_type' => true, // Hide person<>org relationship type from card view
             'show_special_relationships' => false, // Show Shuffle Exchange relationship types on member cards
             'member_list' => [
