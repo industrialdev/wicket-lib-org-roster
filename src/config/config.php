@@ -129,6 +129,8 @@ function get_config()
             'tag_case_sensitive' => false,
             'manage_roles' => [ // Group role slugs allowed to manage rosters
                 'president',
+                'delegate',
+                'alternate_delegate',
                 'council_delegate',
                 'council_alternate_delegate',
                 'correspondent',

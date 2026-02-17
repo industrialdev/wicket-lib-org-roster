@@ -130,6 +130,54 @@ class GroupService
     }
 
     /**
+     * Ensure group payload includes tags; fallback to group details endpoint when omitted.
+     *
+     * @param string $group_id
+     * @param array  $group
+     * @return array
+     */
+    private function ensure_group_tags(string $group_id, array $group): array
+    {
+        $group_attrs = is_array($group['attributes'] ?? null) ? $group['attributes'] : [];
+        $group_tags = $group_attrs['tags'] ?? null;
+        if (is_array($group_tags) && !empty($group_tags)) {
+            return $group;
+        }
+
+        if ($group_id === '' || !function_exists('wicket_api_client')) {
+            return $group;
+        }
+
+        static $group_details_cache = [];
+        if (isset($group_details_cache[$group_id])) {
+            return $group_details_cache[$group_id];
+        }
+
+        try {
+            $details = wicket_api_client()->get('/groups/' . rawurlencode($group_id));
+            $detail_attrs = is_array($details) ? ($details['data']['attributes'] ?? []) : [];
+            if (is_array($detail_attrs)) {
+                if (!isset($group['attributes']) || !is_array($group['attributes'])) {
+                    $group['attributes'] = [];
+                }
+                if (isset($detail_attrs['tags']) && is_array($detail_attrs['tags'])) {
+                    $group['attributes']['tags'] = $detail_attrs['tags'];
+                }
+            }
+        } catch (\Throwable $e) {
+            $this->get_logger()->error('[OrgRoster] Group detail tag fetch failed', [
+                'source' => 'wicket-orgroster',
+                'group_id' => $group_id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        $group_details_cache[$group_id] = $group;
+
+        return $group;
+    }
+
+    /**
      * Get page size for group list.
      *
      * @return int
@@ -344,7 +392,7 @@ class GroupService
                 continue;
             }
 
-            $group = $included_lookup['groups'][$group_id];
+            $group = $this->ensure_group_tags($group_id, $included_lookup['groups'][$group_id]);
             $group_attrs = is_array($group) ? ($group['attributes'] ?? []) : [];
             $group_tags = is_array($group_attrs) ? ($group_attrs['tags'] ?? null) : null;
             $this->get_logger()->debug('[OrgRoster] Group membership included group tags', [
@@ -353,28 +401,6 @@ class GroupService
                 'tags_present' => is_array($group_tags),
                 'tags' => is_array($group_tags) ? $group_tags : null,
             ]);
-            if ((!is_array($group_tags) || empty($group_tags)) && function_exists('wicket_api_client')) {
-                static $debug_tag_fetch_count = 0;
-                if ($debug_tag_fetch_count < 3) {
-                    $debug_tag_fetch_count++;
-                    try {
-                        $details = wicket_api_client()->get('/groups/' . rawurlencode($group_id));
-                        $detail_attrs = is_array($details) ? ($details['data']['attributes'] ?? []) : [];
-                        $this->get_logger()->debug('[OrgRoster] Group detail tag inspection', [
-                            'source' => 'wicket-orgroster',
-                            'group_id' => $group_id,
-                            'attribute_keys' => is_array($detail_attrs) ? array_keys($detail_attrs) : null,
-                            'tags' => is_array($detail_attrs) ? ($detail_attrs['tags'] ?? null) : null,
-                        ]);
-                    } catch (\Throwable $e) {
-                        $this->get_logger()->error('[OrgRoster] Group detail tag inspection failed', [
-                            'source' => 'wicket-orgroster',
-                            'group_id' => $group_id,
-                            'error' => $e->getMessage(),
-                        ]);
-                    }
-                }
-            }
             if (!$this->group_has_roster_tag($group)) {
                 $this->get_logger()->debug('[OrgRoster] Group skipped by tag filter', [
                     'source' => 'wicket-orgroster',

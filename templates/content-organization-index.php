@@ -15,6 +15,7 @@ if (!is_user_logged_in()) {
 // Roster mode selection
 $config_service = new \OrgManagement\Services\ConfigService();
 $roster_mode = $config_service->get_roster_mode();
+$management_title = $roster_mode === 'groups' ? __('Manage Groups', 'wicket-acc') : __('Manage Organizations', 'wicket-acc');
 
 // Normalize query param: prefer org_uuid; redirect from org_id => org_uuid
 $org_uuid = isset($_GET['org_uuid']) ? sanitize_text_field($_GET['org_uuid']) : '';
@@ -32,7 +33,7 @@ if (empty($org_uuid) && !empty($org_id_fallback)) {
 ?>
 
 <div id="org-management-index-app" class="org-management-app wicket-orgman wt_w-full wt_mt-6">
-    <h1 class="wt_text-2xl wt_font-bold wt_mb-4"><?php esc_html_e('Manage Organizations', 'wicket-acc'); ?></h1>
+    <h1 class="wt_text-2xl wt_font-bold wt_mb-4"><?php echo esc_html($management_title); ?></h1>
 
     <?php
     if ($roster_mode === 'groups') {
