@@ -46,6 +46,7 @@ Maps roles to specific capabilities. Each key (e.g., `manage_members`) takes an 
 - `form_id` / `form_slug`: Mapping for the Gravity Form used in the purchase flow.
 
 ### `ui`
+- `organization_list.page_size`: (int) Number of organization cards shown per page on `organization-management` (default `5`).
 - `member_list.use_unified`: (bool) Enables the modern, search-centric list view.
 - `member_view.use_unified`: (bool) Enables the modern reactive member cards.
 - `member_card_fields`: Configures shared member-card field visibility across strategies.

@@ -9,7 +9,8 @@ Implement roster management where access and membership operations are scoped by
 3. Resolve group metadata.
 4. Keep groups that match `groups.tag_name` (with configured case sensitivity).
 5. Keep groups attached to an organization.
-6. Build manageable group cards keyed by organization.
+6. Build organization cards keyed by organization UUID.
+7. Synthesize missing organizations from manageable groups when base organization list is incomplete.
 
 ## Organization Association Model
 - Group membership records carry org association in `custom_data_field`.
@@ -37,7 +38,8 @@ Implement roster management where access and membership operations are scoped by
   - hard delete.
 
 ## Display Logic
-- Strategy route `organization-management` renders manageable groups.
+- Strategy route `organization-management` renders manageable organizations derived from group access.
+- Route paginates organization cards using `ui.organization_list.page_size` and `org_page`.
 - In groups mode, primary heading is `Manage Groups`.
 - Group detail pages reuse shared templates with groups context.
 

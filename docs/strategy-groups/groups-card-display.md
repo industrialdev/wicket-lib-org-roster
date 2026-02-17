@@ -1,9 +1,14 @@
 # Groups Strategy: Card Display
 
-## Group List Screen
-- Lists only manageable groups (role + tag + organization attached).
-- Group cards are organized under organizations the user can manage.
+## Organization List Screen
+- Lists manageable organization cards derived from group access (role + tag + organization attached).
+- If base organization data is missing, cards are synthesized from manageable groups so managers still see eligible orgs.
 - In groups strategy, page heading is `Manage Groups`.
+- Organization cards are paginated (page size from `ui.organization_list.page_size`, query arg `org_page`).
+- Group-focused card metadata includes:
+  - Membership tier status.
+  - Current role labels.
+  - Group `Type` and `Tag(s)` aggregates.
 
 ## Group Members Screen
 - Displays group members scoped to the manager's org association within that group.

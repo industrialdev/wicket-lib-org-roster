@@ -7,6 +7,9 @@
 
 ## Current Default Config Block (`src/config/config.php`)
 
+Global `ui` keys used by groups screens:
+- `ui.organization_list.page_size`: `5`
+
 `groups`:
 - `tag_name`: `'Roster Management'`
 - `tag_case_sensitive`: `false`

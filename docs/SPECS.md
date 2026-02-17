@@ -62,6 +62,7 @@ The library is highly configurable via the `wicket/acc/orgman/config` filter. Ke
 - `membership_cycle`: Strategy-specific permissions and member-management guards.
 - `additional_seats`: SKU and Gravity Forms mapping for seat purchases.
 - `ui`: Toggles for "Unified View", card fields, and layout modes.
+  - `ui.organization_list.page_size`: organization card page size for `organization-management` (default `5`).
   - **Unified View Config Flags (Groups)**:
     - `ui.member_view.use_unified`: true (default)
     - `ui.member_list.use_unified`: true (default)
@@ -74,7 +75,7 @@ The library is highly configurable via the `wicket/acc/orgman/config` filter. Ke
 
 ### 3.1 Content Injection
 The library automatically injects its UI into the following "My Account" page slugs:
-- `organization-management` (Lists eligible groups for the groups strategy: user-accessible + org-attached only).
+- `organization-management` (Lists manageable organizations; in groups strategy this is built from eligible group memberships and includes org fallback synthesis when base org listing is incomplete).
 - `organization-profile` (Group detail card tab 1: group information editing).
 - `organization-members` (Group detail card tab 2: member list for the entire group, defaulting to the unified view).
 - `supplemental-members`
@@ -113,11 +114,12 @@ The library registers several endpoints under the `org-management/v1` namespace:
   - Only users assigned directly by IAA staff in the MDP as a *President*, *Council Delegate*, *Council Alternate Delegate*, or *Correspondent* may manage their organization's roster. Losing this role instantly revokes access.
   - Users cannot remove or modify these managing roles, nor can they explicitly remove themselves from these managing roles.
 
-## 6. Current Implementation Status (As of February 11, 2026)
+## 6. Current Implementation Status (As of February 17, 2026)
 
 **Completed (Groups):**
 - Groups strategy wiring, `GroupService`, templates, and process endpoints (no longer stubby).
-- Group list and member list UIs exist with pagination and search.
+- Organization-management card list (group-derived in groups mode) and member list UIs exist with pagination and search.
+- Organization-management list now paginates organization cards (`ui.organization_list.page_size`) and can synthesize organizations from manageable groups in groups mode.
 - Role-based access checks, tag filtering, and roster-role validation (member/observer seat limits in add flow).
 - Removal supports end-date and delete modes (configurable). End-dated roles are treated as removed (`active=true` queries).
 - Groups config block added.
@@ -128,7 +130,7 @@ The library registers several endpoints under the `org-management/v1` namespace:
 - Org identifier key/format in `custom_data_field` must be confirmed and aligned with MDP data.
 - Role identifiers are config-driven, not yet derived dynamically from MDP responses.
 - Seat-limit enforcement for the member role currently only checks the first 50 members.
-- Group list sorting requirements not defined/implemented.
+- Organization card sorting requirements (for groups-derived listings) are not defined/implemented.
 - Explicit self-removal prevention for managing roles is not separately enforced (covered by general role block).
 - Config filtering parity for all group settings (only base config array added).
 

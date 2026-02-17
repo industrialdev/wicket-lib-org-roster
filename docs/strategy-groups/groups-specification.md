@@ -25,12 +25,15 @@
   - organization association.
 
 ### 3.2 Group Eligibility Rules
-- A group is shown only when all criteria are true:
+- A group is considered manageable only when all criteria are true:
   - User has an active group role in `groups.manage_roles`.
   - Group carries `groups.tag_name` (default: `Roster Management`, case-insensitive by default).
   - Group is attached to an organization.
 - Additional tag fallback is supported:
   - If included group payload omits `tags`, the service fetches `/groups/{group_uuid}` and re-evaluates tag eligibility.
+- Organization cards on `organization-management` are then built from:
+  - base organization list entries, plus
+  - organizations inferred from manageable groups when missing in the base list.
 
 ### 3.3 Managing Roles
 - Default managing role slugs:
@@ -68,11 +71,14 @@
     - `delete`
 
 ### 3.6 List/Search/Pagination
-- Manageable group list and group member list are paginated.
+- Organization card list and group member list are paginated.
 - Search is supported:
-  - manageable groups by group name.
+  - manageable group data by group name.
   - members by group search endpoint (or standard list fallback).
 - Unified member list/view templates are default for groups mode.
+- Organization-management pagination contract:
+  - page size: `ui.organization_list.page_size` (default `5`)
+  - query arg: `org_page` (sanitized and clamped)
 
 ### 3.7 UI Labels
 - In groups mode, the top-level management heading must be `Manage Groups`.
@@ -99,7 +105,7 @@
 - Regression tests should prove no behavior drift in `direct`, `cascade`, `membership_cycle`.
 
 ## 7) Acceptance Criteria
-- Eligible managers can see roster-management groups on `organization-management`.
+- Eligible managers can see manageable organizations on `organization-management` based on roster-management group access.
 - Non-eligible roles/groups are excluded.
 - `Manage Groups` heading appears when strategy is `groups`.
 - Add/remove only works for groups and org association the actor manages.

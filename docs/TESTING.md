@@ -56,3 +56,5 @@ When testing controllers that return SSE, check the output buffer for Datastar-s
 - `tests/Unit/Services/StrategiesWiringTest.php`: verifies strategy registration includes `membership_cycle`.
 - `tests/Unit/Services/DirectAssignmentStrategyTest.php`: verifies explicit membership UUID resolution and scope validation behavior.
 - `tests/Unit/Services/MembershipCycleStrategyTest.php`: verifies required-context guards and organization/membership scope validation.
+- `tests/Unit/Services/GroupServiceTest.php`: verifies groups eligibility/tag filtering, org-association constraints, and group-list regression scenarios.
+- `tests/Unit/Helpers/StylesheetTokenBridgeTest.php`: verifies CSS token fallback bridge behavior used by static stylesheet output.

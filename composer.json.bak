@@ -1,0 +1,49 @@
+{
+  "name": "industrialdev/wicket-lib-org-roster",
+  "version": "0.2.3",
+  "description": "Organization & Roster management library for Wicket Inc.",
+  "type": "library",
+  "license": "GPL-2.0-or-later",
+  "require": {
+    "php": ">=8.2",
+    "ext-json": "*",
+    "starfederation/datastar-php": "^1.0.0-RC.5"
+  },
+  "require-dev": {
+    "pestphp/pest": "^4",
+    "brain/monkey": "^2",
+    "mockery/mockery": "^1",
+    "friendsofphp/php-cs-fixer": "^3"
+  },
+  "autoload": {
+    "psr-4": {
+      "OrgManagement\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "OrgManagement\\Tests\\": "tests/Unit/"
+    }
+  },
+  "scripts": {
+    "production": "rm -rf vendor && composer install --no-dev --optimize-autoloader",
+    "setup-hooks": "mkdir -p .git/hooks && if [ -f .ci/pre-push ]; then cp .ci/pre-push .git/hooks/pre-push && chmod +x .git/hooks/pre-push && echo 'Git hooks installed to .git/hooks/pre-push'; else echo '.ci/pre-push not found; skipping hook install'; fi",
+    "test": "pest",
+    "test:unit": "pest --testsuite unit",
+    "test:coverage": "pest --coverage-html coverage",
+    "test:browser": "sh -lc 'if [ -f .env ]; then set -a; . ./.env; set +a; fi; : \"${WICKET_BROWSER_BASE_URL:=https://localhost}\"; export WICKET_BROWSER_BASE_URL; ./vendor/bin/pest --testsuite browser'",
+    "lint": "php-cs-fixer fix --dry-run --diff",
+    "format": "php-cs-fixer fix",
+    "check": [
+      "@lint",
+      "@test"
+    ],
+    "cs:fix": "php-cs-fixer fix",
+    "version-bump": "echo 'Use wicket-cli-tools: wicket plugin version-bump'"
+  },
+  "config": {
+    "allow-plugins": {
+      "pestphp/pest-plugin": true
+    }
+  }
+}

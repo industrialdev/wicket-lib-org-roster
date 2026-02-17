@@ -145,6 +145,7 @@ Current strategy keys:
 - Adds/removes group members with group role constraints.
 - Validates manager access via group membership and org identifier mapping.
 - Enforces special role restrictions (for example managing roles non-removable).
+- Organization cards can be derived from manageable group memberships when the base org list omits those organizations.
 
 #### Key Config Namespace
 - `groups`

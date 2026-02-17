@@ -40,6 +40,14 @@ The Unified View is a search-centric interface for managing rosters.
 - **Pagination Controls**: `Previous` is hidden on page 1; `Next` is hidden on the last page; both are hidden when only one page exists.
 - **Shared Role Visibility Toggle**: Member-card role display is controlled globally via `ui.member_card_fields.roles.enabled` across strategies.
 
+## 3.1 Organization Management List
+- Organization cards on `organization-management` are paginated with `ui.organization_list.page_size` (default `5`).
+- Current organization page is read from `org_page` query arg; values are sanitized and clamped to valid page range.
+- In `groups` strategy, organizations can be synthesized from manageable group data when base org listings are missing, so eligible managers still get cards.
+- Card rendering is strategy-specific:
+  - `groups`: card emphasizes membership tier, role labels, group `Type`, and `Tag(s)`.
+  - `direct` / `cascade` / `membership_cycle`: card shows membership + roles and group labels where available.
+
 ## 4. Modals and Overlays
 Modals are managed via signals and the `notifications-container.php`.
 - Action handlers patch the modal content into the container and set the `show_modal` signal to `true`.
