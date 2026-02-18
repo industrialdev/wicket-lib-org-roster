@@ -1,4 +1,4 @@
-# Child Theme Integration
+# Installation
 
 This guide shows the supported way to load `industrialdev/wicket-lib-org-roster` from a WordPress child theme.
 
@@ -13,17 +13,42 @@ Initialize OrgMan on `after_setup_theme` (priority `20`), not `plugins_loaded`.
 From your child theme root (example: `web/app/themes/wicket-child`):
 
 ```bash
-composer require industrialdev/wicket-lib-org-roster
+composer init -n \
+  && composer config repositories.wicket-lib-org-roster vcs https://github.com/industrialdev/wicket-lib-org-roster.git \
+  && composer config minimum-stability RC \
+  && composer config prefer-stable true \
+  && composer require industrialdev/wicket-lib-org-roster:^0
 ```
 
 Minimal `composer.json` example:
 
 ```json
 {
+  "minimum-stability": "RC",
+  "prefer-stable": true,
+  "repositories": {
+    "wicket-lib-org-roster": {
+      "type": "vcs",
+      "url": "https://github.com/industrialdev/wicket-lib-org-roster.git"
+    }
+  },
   "require": {
     "industrialdev/wicket-lib-org-roster": "^0.2"
   }
 }
+```
+
+Why RC stability is required:
+- `industrialdev/wicket-lib-org-roster` currently depends on `starfederation/datastar-php:^1.0.0-RC.5`.
+- Without `minimum-stability` set to `RC` (or lower), Composer will reject that transitive dependency.
+
+If `composer.json` already exists, run only:
+
+```bash
+composer config repositories.wicket-lib-org-roster vcs https://github.com/industrialdev/wicket-lib-org-roster.git \
+  && composer config minimum-stability RC \
+  && composer config prefer-stable true \
+  && composer require industrialdev/wicket-lib-org-roster:^0
 ```
 
 ## 2) Bootstrap File (`custom/org-roster.php`)
