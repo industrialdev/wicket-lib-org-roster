@@ -12,7 +12,7 @@ if (!defined('ABSPATH') && !defined('WICKET_ORGROSTER_DOINGTESTS')) {
 }
 
 // Load shared Datastar helpers for modal processing
-require_once __DIR__ . '/helpers/DatastarSSE.php';
+require_once __DIR__ . '/Helpers/DatastarSSE.php';
 
 /**
  * Singleton class for managing the Organization Management feature.
@@ -89,35 +89,35 @@ final class OrgMan
     private function load_dependencies()
     {
         require_once __DIR__ . '/config/config.php';
-        require_once __DIR__ . '/services/ConfigService.php';
-        require_once __DIR__ . '/services/strategies/RosterManagementStrategy.php';
-        require_once __DIR__ . '/services/strategies/CascadeStrategy.php';
-        require_once __DIR__ . '/services/strategies/DirectAssignmentStrategy.php';
-        require_once __DIR__ . '/services/strategies/GroupsStrategy.php';
-        require_once __DIR__ . '/services/OrganizationService.php';
-        require_once __DIR__ . '/services/OrganizationBatchService.php';
-        require_once __DIR__ . '/services/MemberService.php';
-        require_once __DIR__ . '/services/PersonService.php';
-        require_once __DIR__ . '/services/PermissionService.php';
-        require_once __DIR__ . '/services/GroupService.php';
-        require_once __DIR__ . '/services/ConnectionService.php';
-        require_once __DIR__ . '/services/BusinessInfoService.php';
-        require_once __DIR__ . '/services/DocumentService.php';
-        require_once __DIR__ . '/services/SubsidiaryService.php';
-        require_once __DIR__ . '/services/NotificationService.php';
-        require_once __DIR__ . '/services/AdditionalSeatsService.php';
-        require_once __DIR__ . '/services/MembershipService.php';
-        require_once __DIR__ . '/helpers/Helper.php';
-        require_once __DIR__ . '/helpers/ConfigHelper.php';
-        require_once __DIR__ . '/helpers/RelationshipHelper.php';
-        require_once __DIR__ . '/helpers/TemplateHelper.php';
-        require_once __DIR__ . '/helpers/GravityFormsHelper.php';
-        require_once __DIR__ . '/helpers/PermissionHelper.php';
-        require_once __DIR__ . '/controllers/ApiController.php';
-        require_once __DIR__ . '/controllers/BusinessInfoController.php';
-        require_once __DIR__ . '/controllers/DocumentController.php';
-        require_once __DIR__ . '/controllers/SubsidiaryController.php';
-        require_once __DIR__ . '/controllers/ConfigurationController.php';
+        require_once __DIR__ . '/Services/ConfigService.php';
+        require_once __DIR__ . '/Services/Strategies/RosterManagementStrategy.php';
+        require_once __DIR__ . '/Services/Strategies/CascadeStrategy.php';
+        require_once __DIR__ . '/Services/Strategies/DirectAssignmentStrategy.php';
+        require_once __DIR__ . '/Services/Strategies/GroupsStrategy.php';
+        require_once __DIR__ . '/Services/OrganizationService.php';
+        require_once __DIR__ . '/Services/OrganizationBatchService.php';
+        require_once __DIR__ . '/Services/MemberService.php';
+        require_once __DIR__ . '/Services/PersonService.php';
+        require_once __DIR__ . '/Services/PermissionService.php';
+        require_once __DIR__ . '/Services/GroupService.php';
+        require_once __DIR__ . '/Services/ConnectionService.php';
+        require_once __DIR__ . '/Services/BusinessInfoService.php';
+        require_once __DIR__ . '/Services/DocumentService.php';
+        require_once __DIR__ . '/Services/SubsidiaryService.php';
+        require_once __DIR__ . '/Services/NotificationService.php';
+        require_once __DIR__ . '/Services/AdditionalSeatsService.php';
+        require_once __DIR__ . '/Services/MembershipService.php';
+        require_once __DIR__ . '/Helpers/Helper.php';
+        require_once __DIR__ . '/Helpers/ConfigHelper.php';
+        require_once __DIR__ . '/Helpers/RelationshipHelper.php';
+        require_once __DIR__ . '/Helpers/TemplateHelper.php';
+        require_once __DIR__ . '/Helpers/GravityFormsHelper.php';
+        require_once __DIR__ . '/Helpers/PermissionHelper.php';
+        require_once __DIR__ . '/Controllers/ApiController.php';
+        require_once __DIR__ . '/Controllers/BusinessInfoController.php';
+        require_once __DIR__ . '/Controllers/DocumentController.php';
+        require_once __DIR__ . '/Controllers/SubsidiaryController.php';
+        require_once __DIR__ . '/Controllers/ConfigurationController.php';
     }
 
     /**
