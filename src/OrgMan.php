@@ -160,6 +160,7 @@ final class OrgMan
     {
         add_action('rest_api_init', [$this, 'register_api_routes']);
         add_filter('the_content', [$this, 'inject_orgman_content']);
+        add_filter('the_content', [$this, 'cleanup_orgman_autop_artifacts'], 9999);
         add_action('wp_enqueue_scripts', [$this, 'enqueue_assets']);
 
         // Initialize helpers
@@ -758,16 +759,45 @@ final class OrgMan
             include $content_map[$slug];
             $orgman_content = ob_get_clean();
 
+            $orgman_markup = '<!-- ORGMAN:BEGIN -->' . $notifications . $orgman_content . '<!-- ORGMAN:END -->';
+
             if ($slug === 'organization-profile' || $slug === 'supplemental-members') {
                 // For organization-profile and supplemental-members we need the OrgMan content
                 // to appear before the post content to match legacy layout.
-                return $notifications . $orgman_content . $content;
+                return $orgman_markup . $content;
             }
 
-            return $content . $notifications . $orgman_content;
+            return $content . $orgman_markup;
         }
 
         return $content;
+    }
+
+    /**
+     * Remove wpautop artifacts added inside OrgMan injected markup.
+     *
+     * @param string $content The filtered content.
+     * @return string
+     */
+    public function cleanup_orgman_autop_artifacts($content)
+    {
+        if (!is_string($content) || strpos($content, '<!-- ORGMAN:BEGIN -->') === false) {
+            return $content;
+        }
+
+        return (string) preg_replace_callback(
+            '/<!-- ORGMAN:BEGIN -->(.*?)<!-- ORGMAN:END -->/s',
+            static function ($matches) {
+                $segment = (string) ($matches[1] ?? '');
+
+                // Remove empty paragraphs and auto-inserted line breaks in injected component markup.
+                $segment = preg_replace('/<p>\s*<\/p>/i', '', $segment);
+                $segment = preg_replace('/<br\s*\/?>\s*/i', '', (string) $segment);
+
+                return (string) $segment;
+            },
+            $content
+        );
     }
 
     /**
