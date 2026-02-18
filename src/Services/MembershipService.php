@@ -239,6 +239,129 @@ class MembershipService
     }
 
     /**
+     * Resolve effective max seat assignments for an organization membership.
+     * Uses configured tier mapping when available, otherwise falls back to API max_assignments.
+     *
+     * @param array|null $membershipData Organization membership payload.
+     * @return int|null
+     */
+    public function getEffectiveMaxAssignments(?array $membershipData): ?int
+    {
+        if (!is_array($membershipData)) {
+            return null;
+        }
+
+        $mapped = $this->getTierMappedMaxAssignments($membershipData);
+        if (null !== $mapped) {
+            return $mapped;
+        }
+
+        if (!isset($membershipData['data']['attributes']['max_assignments'])) {
+            return null;
+        }
+
+        return (int) $membershipData['data']['attributes']['max_assignments'];
+    }
+
+    /**
+     * Resolve membership tier label from org membership payload.
+     *
+     * @param array|null $membershipData Organization membership payload.
+     * @return string
+     */
+    public function getMembershipTierName(?array $membershipData): string
+    {
+        if (!is_array($membershipData)) {
+            return '';
+        }
+
+        $attributeCandidates = [
+            $membershipData['data']['attributes']['membership_tier'] ?? null,
+            $membershipData['data']['attributes']['membership_tier_name'] ?? null,
+            $membershipData['data']['attributes']['membership_name'] ?? null,
+            $membershipData['data']['attributes']['name'] ?? null,
+        ];
+
+        foreach ($attributeCandidates as $candidate) {
+            if (is_string($candidate) && trim($candidate) !== '') {
+                return trim($candidate);
+            }
+        }
+
+        $membershipRelationshipId = $membershipData['data']['relationships']['membership']['data']['id'] ?? null;
+        $included = $membershipData['included'] ?? null;
+        if (!is_array($included)) {
+            return '';
+        }
+
+        $firstMembershipName = '';
+        foreach ($included as $item) {
+            if (($item['type'] ?? '') !== 'memberships') {
+                continue;
+            }
+
+            $name = $item['attributes']['name'] ?? $item['attributes']['name_en'] ?? '';
+            if (!is_string($name) || trim($name) === '') {
+                continue;
+            }
+
+            $trimmedName = trim($name);
+            if ($firstMembershipName === '') {
+                $firstMembershipName = $trimmedName;
+            }
+
+            if ($membershipRelationshipId !== null && (string) ($item['id'] ?? '') === (string) $membershipRelationshipId) {
+                return $trimmedName;
+            }
+        }
+
+        return $firstMembershipName;
+    }
+
+    /**
+     * Resolve tier-mapped seat limit from config.
+     *
+     * @param array $membershipData Organization membership payload.
+     * @return int|null
+     */
+    private function getTierMappedMaxAssignments(array $membershipData): ?int
+    {
+        $tierMap = $this->config['seat_policy']['tier_max_assignments'] ?? [];
+        if (!is_array($tierMap) || empty($tierMap)) {
+            return null;
+        }
+
+        $tierName = $this->getMembershipTierName($membershipData);
+        if ($tierName === '') {
+            return null;
+        }
+
+        $caseSensitive = (bool) ($this->config['seat_policy']['tier_name_case_sensitive'] ?? false);
+        if ($caseSensitive) {
+            if (!array_key_exists($tierName, $tierMap)) {
+                return null;
+            }
+
+            return is_numeric($tierMap[$tierName]) ? (int) $tierMap[$tierName] : null;
+        }
+
+        $normalizedTier = strtolower(trim($tierName));
+        foreach ($tierMap as $mapTier => $seatLimit) {
+            if (!is_string($mapTier)) {
+                continue;
+            }
+
+            if (strtolower(trim($mapTier)) !== $normalizedTier) {
+                continue;
+            }
+
+            return is_numeric($seatLimit) ? (int) $seatLimit : null;
+        }
+
+        return null;
+    }
+
+    /**
      * Get current person's membership UUID for a specific organization.
      *
      * This method provides backward compatibility with the legacy function signature.

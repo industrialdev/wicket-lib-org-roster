@@ -128,3 +128,75 @@ it('returns cached org membership data when present', function (): void {
 
     expect($result)->toBe(['data' => ['id' => 'cached']]);
 });
+
+it('uses configured tier mapping for effective max assignments', function (): void {
+    $service = new MembershipService();
+    (function (): void {
+        $this->config['seat_policy']['tier_max_assignments'] = [
+            'MAS Sustaining' => 3,
+            'Joint Sustaining' => 6,
+        ];
+        $this->config['seat_policy']['tier_name_case_sensitive'] = false;
+    })->call($service);
+
+    $membershipData = [
+        'data' => [
+            'attributes' => [
+                'max_assignments' => 99,
+            ],
+            'relationships' => [
+                'membership' => [
+                    'data' => [
+                        'id' => 'tier-1',
+                    ],
+                ],
+            ],
+        ],
+        'included' => [
+            [
+                'id' => 'tier-1',
+                'type' => 'memberships',
+                'attributes' => [
+                    'name' => 'mas sustaining',
+                ],
+            ],
+        ],
+    ];
+
+    expect($service->getEffectiveMaxAssignments($membershipData))->toBe(3);
+});
+
+it('falls back to api max assignments when tier mapping does not match', function (): void {
+    $service = new MembershipService();
+    (function (): void {
+        $this->config['seat_policy']['tier_max_assignments'] = [
+            'Joint Sustaining' => 6,
+        ];
+    })->call($service);
+
+    $membershipData = [
+        'data' => [
+            'attributes' => [
+                'max_assignments' => 4,
+            ],
+            'relationships' => [
+                'membership' => [
+                    'data' => [
+                        'id' => 'tier-1',
+                    ],
+                ],
+            ],
+        ],
+        'included' => [
+            [
+                'id' => 'tier-1',
+                'type' => 'memberships',
+                'attributes' => [
+                    'name' => 'Sustaining',
+                ],
+            ],
+        ],
+    ];
+
+    expect($service->getEffectiveMaxAssignments($membershipData))->toBe(4);
+});

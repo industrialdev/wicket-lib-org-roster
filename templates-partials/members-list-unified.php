@@ -47,6 +47,12 @@ $orgman_config = \OrgManagement\Config\get_config();
 $role_display_map = $orgman_config['role_labels'] ?? [];
 $ui_config = $orgman_config['ui']['member_list'] ?? [];
 $show_edit_permissions_default = (bool) ($ui_config['show_edit_permissions'] ?? true);
+$show_remove_button_default = (bool) ($ui_config['show_remove_button'] ?? true);
+$seat_limit_message = (string) ($ui_config['seat_limit_message'] ?? __('All seats have been assigned. Please purchase additional seats to add more members.', 'wicket-acc'));
+$remove_policy_callout = is_array($ui_config['remove_policy_callout'] ?? null)
+    ? $ui_config['remove_policy_callout']
+    : [];
+$remove_policy_callout_placement = (string) ($remove_policy_callout['placement'] ?? 'above_members');
 $show_edit_permissions = isset($show_edit_permissions)
     ? (bool) $show_edit_permissions
     : $show_edit_permissions_default;
@@ -58,7 +64,7 @@ if ($mode === 'groups' && isset($groups_ui_config['show_edit_permissions'])) {
 
 $show_account_status = isset($show_account_status) ? (bool) $show_account_status : true;
 $show_add_member_button = isset($show_add_member_button) ? (bool) $show_add_member_button : true;
-$show_remove_button = isset($show_remove_button) ? (bool) $show_remove_button : true;
+$show_remove_button = isset($show_remove_button) ? (bool) $show_remove_button : $show_remove_button_default;
 
 $base_query_args = [
     'org_uuid' => $org_uuid,
@@ -96,7 +102,7 @@ if ($membership_uuid !== '') {
     $membership_service = new OrgManagement\Services\MembershipService();
     $membership_data = $membership_service->getOrgMembershipData($membership_uuid);
     if ($membership_data && isset($membership_data['data']['attributes'])) {
-        $max_seats = $membership_data['data']['attributes']['max_assignments'] ?? null;
+        $max_seats = $membership_service->getEffectiveMaxAssignments($membership_data);
         $active_seats = (int) ($membership_data['data']['attributes']['active_assignments_count'] ?? 0);
         if ($max_seats !== null && $active_seats >= (int) $max_seats) {
             $has_seats_available = false;
@@ -110,6 +116,12 @@ if ($show_account_status) {
 }
 
 $role_label = __('Role(s):', 'wicket-acc');
+$show_remove_policy_callout = (
+    $mode !== 'groups'
+    && !$show_remove_button
+    && !empty($remove_policy_callout['enabled'])
+    && !empty($remove_policy_callout['message'])
+);
 
 ?>
 <div
@@ -129,6 +141,23 @@ $role_label = __('Role(s):', 'wicket-acc');
             <span class="members-seat-summary__value"><?php echo esc_html((string) (int) $total_items); ?></span>
         <?php endif; ?>
     </div>
+
+    <?php if ($show_remove_policy_callout && $remove_policy_callout_placement === 'above_members') : ?>
+        <div class="wt_mt-1 wt_mb-3 wt_p-4 wt_border wt_border-yellow-200 wt_bg-yellow-50 wt_rounded-md wt_text-sm wt_text-yellow-900">
+            <?php if (!empty($remove_policy_callout['title'])) : ?>
+                <p class="wt_font-semibold wt_mb-1"><?php echo esc_html((string) $remove_policy_callout['title']); ?></p>
+            <?php endif; ?>
+            <p class="wt_mb-0">
+                <?php echo esc_html((string) $remove_policy_callout['message']); ?>
+                <?php if (!empty($remove_policy_callout['email'])) : ?>
+                    <br>
+                    <a class="wt_text-interactive wt_hover_underline" href="mailto:<?php echo esc_attr((string) $remove_policy_callout['email']); ?>">
+                        <?php echo esc_html((string) $remove_policy_callout['email']); ?>
+                    </a>
+                <?php endif; ?>
+            </p>
+        </div>
+    <?php endif; ?>
 
     <div class="members-loading-inline wt_hidden wt_items-center wt_gap-2 wt_text-sm wt_text-content"
         data-class_wt_hidden="!$membersLoading"
@@ -353,10 +382,27 @@ $role_label = __('Role(s):', 'wicket-acc');
                         <svg class="wt_w-5 wt_h-5 wt_text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
                         </svg>
-                        <span><?php esc_html_e('All seats have been assigned. Please purchase additional seats to add more members.', 'wicket-acc'); ?></span>
+                        <span><?php echo esc_html($seat_limit_message); ?></span>
                     </div>
                 </div>
             <?php endif; ?>
+        </div>
+    <?php endif; ?>
+
+    <?php if ($show_remove_policy_callout && $remove_policy_callout_placement === 'below_members') : ?>
+        <div class="wt_mt-2 wt_mb-0 wt_p-4 wt_border wt_border-yellow-200 wt_bg-yellow-50 wt_rounded-md wt_text-sm wt_text-yellow-900">
+            <?php if (!empty($remove_policy_callout['title'])) : ?>
+                <p class="wt_font-semibold wt_mb-1"><?php echo esc_html((string) $remove_policy_callout['title']); ?></p>
+            <?php endif; ?>
+            <p class="wt_mb-0">
+                <?php echo esc_html((string) $remove_policy_callout['message']); ?>
+                <?php if (!empty($remove_policy_callout['email'])) : ?>
+                    <br>
+                    <a class="wt_text-interactive wt_hover_underline" href="mailto:<?php echo esc_attr((string) $remove_policy_callout['email']); ?>">
+                        <?php echo esc_html((string) $remove_policy_callout['email']); ?>
+                    </a>
+                <?php endif; ?>
+            </p>
         </div>
     <?php endif; ?>
 </div>

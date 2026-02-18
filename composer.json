@@ -1,6 +1,6 @@
 {
   "name": "industrialdev/wicket-lib-org-roster",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "Organization & Roster management library for Wicket Inc.",
   "type": "library",
   "license": "GPL-2.0-or-later",
@@ -28,7 +28,7 @@
   "scripts": {
     "production": "rm -rf vendor && composer install --no-dev --optimize-autoloader",
     "setup-hooks": "mkdir -p .git/hooks && if [ -f .ci/pre-push ]; then cp .ci/pre-push .git/hooks/pre-push && chmod +x .git/hooks/pre-push && echo 'Git hooks installed to .git/hooks/pre-push'; else echo '.ci/pre-push not found; skipping hook install'; fi",
-    "test": "[ -f vendor/bin/pest ] || composer update && pest",
+    "test": "[ -x vendor/bin/pest ] || composer install && ./vendor/bin/pest",
     "test:unit": "pest --testsuite unit",
     "test:coverage": "pest --coverage-html coverage",
     "test:browser": "sh -lc 'if [ -f .env ]; then set -a; . ./.env; set +a; fi; : \"${WICKET_BROWSER_BASE_URL:=https://localhost}\"; export WICKET_BROWSER_BASE_URL; ./vendor/bin/pest --testsuite browser'",

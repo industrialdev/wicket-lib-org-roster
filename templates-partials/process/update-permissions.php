@@ -53,6 +53,22 @@ if ('POST' === strtoupper($request_method)) {
 
         // First update relationship type if provided and enabled
         $config = \OrgManagement\Config\get_config();
+        $edit_permissions_config = $config['edit_permissions_modal'] ?? [];
+        $edit_allowed_roles = is_array($edit_permissions_config['allowed_roles'] ?? null)
+            ? $edit_permissions_config['allowed_roles']
+            : [];
+        $edit_excluded_roles = is_array($edit_permissions_config['excluded_roles'] ?? null)
+            ? $edit_permissions_config['excluded_roles']
+            : [];
+        if (!empty($config['permissions']['prevent_owner_assignment'])) {
+            $edit_excluded_roles[] = 'membership_owner';
+        }
+        $roles = OrgManagement\Helpers\PermissionHelper::filter_role_submission(
+            $roles,
+            $edit_allowed_roles,
+            $edit_excluded_roles
+        );
+
         $allow_relationship_editing = $config['member_addition_form']['allow_relationship_type_editing'] ?? false;
         $form_fields = $config['member_addition_form']['fields'] ?? [];
         $allow_description_editing = $form_fields['description']['enabled'] ?? false;

@@ -53,3 +53,51 @@ it('keeps membership cycle config limited to active keys', function (): void {
         'ui',
     ]);
 });
+
+it('includes remove policy ui defaults for backward-compatible roster controls', function (): void {
+    $config = \OrgManagement\Config\get_config();
+    $member_list = $config['ui']['member_list'] ?? [];
+    $callout = $member_list['remove_policy_callout'] ?? [];
+
+    expect($member_list['show_remove_button'] ?? null)->toBeTrue();
+    expect($member_list['seat_limit_message'] ?? null)->toBeString();
+    expect($member_list['seat_limit_message'] ?? null)->not->toBe('');
+    expect($callout)->toHaveKeys([
+        'enabled',
+        'placement',
+        'title',
+        'message',
+        'email',
+    ]);
+    expect($callout['enabled'] ?? null)->toBeFalse();
+    expect($callout['placement'] ?? null)->toBe('above_members');
+    expect($callout['title'] ?? null)->toBe('Remove Members');
+    expect($callout['email'] ?? null)->toBeString();
+});
+
+it('includes member edit activity guard default as disabled for backward compatibility', function (): void {
+    $config = \OrgManagement\Config\get_config();
+
+    expect($config['member_edit'] ?? [])->toHaveKey('require_active_membership_for_role_updates');
+    expect($config['member_edit']['require_active_membership_for_role_updates'] ?? null)->toBeFalse();
+});
+
+it('keeps member card active-relationship filter disabled by default for backward compatibility', function (): void {
+    $config = \OrgManagement\Config\get_config();
+
+    expect($config['relationships'] ?? [])->toHaveKey('member_card_active_only');
+    expect($config['relationships']['member_card_active_only'] ?? null)->toBeFalse();
+});
+
+it('includes tier-based seat policy mapping defaults as opt-in only', function (): void {
+    $config = \OrgManagement\Config\get_config();
+    $seatPolicy = $config['seat_policy'] ?? [];
+
+    expect($seatPolicy)->toHaveKeys([
+        'tier_max_assignments',
+        'tier_name_case_sensitive',
+    ]);
+    expect($seatPolicy['tier_max_assignments'] ?? null)->toBeArray();
+    expect($seatPolicy['tier_max_assignments'] ?? null)->toBe([]);
+    expect($seatPolicy['tier_name_case_sensitive'] ?? null)->toBeFalse();
+});

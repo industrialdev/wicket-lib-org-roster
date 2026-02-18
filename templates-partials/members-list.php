@@ -66,6 +66,15 @@ $update_permissions_success_actions = "console.log('Permissions updated successf
 $remove_member_success_actions = "console.log('Member removed successfully'); $removeMemberSubmitting = false; $removeMemberSuccess = true; $membersLoading = false; $removeMemberModalOpen = false; @get('{$members_list_endpoint}{$members_list_separator}org_uuid={$encodedOrgUuid}{$membership_query_fragment}&page=1') >> select('#{$members_list_target}') | set(html); setTimeout(() => $removeMemberSuccess = false, 3000);";
 
 $orgman_config = \OrgManagement\Config\get_config();
+$member_list_config = is_array($orgman_config['ui']['member_list'] ?? null)
+    ? $orgman_config['ui']['member_list']
+    : [];
+$show_remove_button_by_config = (bool) ($member_list_config['show_remove_button'] ?? true);
+$seat_limit_message = (string) ($member_list_config['seat_limit_message'] ?? __('All seats have been assigned. Please purchase additional seats to add more members.', 'wicket-acc'));
+$remove_policy_callout = is_array($member_list_config['remove_policy_callout'] ?? null)
+    ? $member_list_config['remove_policy_callout']
+    : [];
+$remove_policy_callout_placement = (string) ($remove_policy_callout['placement'] ?? 'above_members');
 $use_unified_member_list = (bool) ($orgman_config['ui']['member_list']['use_unified'] ?? false);
 
 if ((!isset($members) || !is_array($members)) && !empty($org_uuid)) {
@@ -121,7 +130,7 @@ if (!empty($membership_uuid)) {
     $membership_data = $membership_service->getOrgMembershipData($membership_uuid);
 
     if ($membership_data && isset($membership_data['data']['attributes'])) {
-        $max_seats = $membership_data['data']['attributes']['max_assignments'] ?? null;
+        $max_seats = $membership_service->getEffectiveMaxAssignments($membership_data);
         $active_seats = (int) ($membership_data['data']['attributes']['active_assignments_count'] ?? 0);
 
         if ($max_seats !== null && $active_seats >= (int) $max_seats) {
@@ -162,6 +171,12 @@ $available_roles = OrgHelpers\PermissionHelper::filter_role_choices(
 
 $allow_relationship_editing = $orgman_config['member_addition_form']['allow_relationship_type_editing'] ?? false;
 $relationship_types = $orgman_config['relationship_types']['custom_types'] ?? [];
+$show_remove_button = $show_remove_button_by_config && OrgHelpers\PermissionHelper::can_remove_members($org_uuid);
+$show_remove_policy_callout = (
+    !$show_remove_button
+    && !empty($remove_policy_callout['enabled'])
+    && !empty($remove_policy_callout['message'])
+);
 
 // Get current user UUID for owner comparison
 $current_user_uuid = function_exists('wicket_current_person_uuid') ? wicket_current_person_uuid() : null;
@@ -206,6 +221,23 @@ $no_members_message = __('No members found.', 'wicket-acc');
             <?php echo (int) $total_items; ?>
         <?php endif; ?>
     </div>
+
+    <?php if ($show_remove_policy_callout && $remove_policy_callout_placement === 'above_members') : ?>
+        <div class="wt_mt-1 wt_mb-3 wt_p-4 wt_border wt_border-yellow-200 wt_bg-yellow-50 wt_rounded-md wt_text-sm wt_text-yellow-900">
+            <?php if (!empty($remove_policy_callout['title'])) : ?>
+                <p class="wt_font-semibold wt_mb-1"><?php echo esc_html((string) $remove_policy_callout['title']); ?></p>
+            <?php endif; ?>
+            <p class="wt_mb-0">
+                <?php echo esc_html((string) $remove_policy_callout['message']); ?>
+                <?php if (!empty($remove_policy_callout['email'])) : ?>
+                    <br>
+                    <a class="wt_text-interactive wt_hover_underline" href="mailto:<?php echo esc_attr((string) $remove_policy_callout['email']); ?>">
+                        <?php echo esc_html((string) $remove_policy_callout['email']); ?>
+                    </a>
+                <?php endif; ?>
+            </p>
+        </div>
+    <?php endif; ?>
 
     <?php if (empty($members)) : ?>
         <p class="wt_text-gray-500 wt_p-4"><?php echo esc_html($no_members_message); ?></p>
@@ -307,7 +339,7 @@ $no_members_message = __('No members found.', 'wicket-acc');
                                 && !empty($current_user_uuid)
                                 && $member_uuid === $current_user_uuid;
             ?>
-                        <?php if (!$is_current_user_owner): ?>
+                        <?php if ($show_remove_button && !$is_current_user_owner): ?>
                             <button type="button" class="acc-remove-button remove-member-button button button--secondary wt_inline-flex wt_items-center wt_justify-between wt_gap-2 wt_px-4 wt_py-2 wt_bg-light-neutral wt_text-sm wt_border wt_border-bg-interactive wt_transition-colors wt_whitespace-nowrap"
                                 data-on:click="
                                     $currentRemoveMemberUuid = '<?php echo esc_js($member_uuid ?? ''); ?>';
@@ -398,10 +430,27 @@ $no_members_message = __('No members found.', 'wicket-acc');
                         <svg class="wt_w-5 wt_h-5 wt_text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
                         </svg>
-                        <span><?php esc_html_e('All seats have been assigned. Please purchase additional seats to add more members.', 'wicket-acc'); ?></span>
+                        <span><?php echo esc_html($seat_limit_message); ?></span>
                     </div>
                 </div>
             <?php endif; ?>
+        </div>
+    <?php endif; ?>
+
+    <?php if ($show_remove_policy_callout && $remove_policy_callout_placement === 'below_members') : ?>
+        <div class="wt_mt-2 wt_mb-0 wt_p-4 wt_border wt_border-yellow-200 wt_bg-yellow-50 wt_rounded-md wt_text-sm wt_text-yellow-900">
+            <?php if (!empty($remove_policy_callout['title'])) : ?>
+                <p class="wt_font-semibold wt_mb-1"><?php echo esc_html((string) $remove_policy_callout['title']); ?></p>
+            <?php endif; ?>
+            <p class="wt_mb-0">
+                <?php echo esc_html((string) $remove_policy_callout['message']); ?>
+                <?php if (!empty($remove_policy_callout['email'])) : ?>
+                    <br>
+                    <a class="wt_text-interactive wt_hover_underline" href="mailto:<?php echo esc_attr((string) $remove_policy_callout['email']); ?>">
+                        <?php echo esc_html((string) $remove_policy_callout['email']); ?>
+                    </a>
+                <?php endif; ?>
+            </p>
         </div>
     <?php endif; ?>
 </div>
@@ -524,6 +573,7 @@ $no_members_message = __('No members found.', 'wicket-acc');
     </dialog>
 </div>
 
+<?php if ($show_remove_button): ?>
 <!-- Remove Member Modal -->
 <div class="wt_mt-6">
     <dialog id="removeMemberModal" class="modal wt_m-auto max_wt_md wt_rounded-md wt_shadow-md backdrop_wt_bg-black-50"
@@ -607,3 +657,4 @@ $no_members_message = __('No members found.', 'wicket-acc');
         </div>
     </dialog>
 </div>
+<?php endif; ?>

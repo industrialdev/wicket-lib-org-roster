@@ -71,13 +71,7 @@ $renewal_date = '';
 $seats_label = '';
 
 if ($membership_data) {
-    if (isset($membership_data['included']) && is_array($membership_data['included'])) {
-        foreach ($membership_data['included'] as $included) {
-            if (($included['type'] ?? '') === 'memberships') {
-                $membership_name = $included['attributes']['name'] ?? $included['attributes']['name_en'] ?? '';
-            }
-        }
-    }
+    $membership_name = $membership_service->getMembershipTierName($membership_data);
     $owner_id = $membership_data['data']['relationships']['owner']['data']['id'] ?? '';
     if ($owner_id && function_exists('wicket_get_person_by_id')) {
         $owner = wicket_get_person_by_id($owner_id);
@@ -114,7 +108,7 @@ if ($membership_data) {
     }
     // Seats (if available)
     $active = $membership_data['data']['attributes']['active_assignments_count'] ?? null;
-    $max = $membership_data['data']['attributes']['max_assignments'] ?? null;
+    $max = $membership_service->getEffectiveMaxAssignments($membership_data);
     if ($active !== null || $max !== null) {
         $max_label = $max !== null ? $max : esc_html__('Unlimited', 'wicket-acc');
         $seats_label = sprintf('%s %s / %s', esc_html__('Seats:', 'wicket-acc'), (string) $active, (string) $max_label);

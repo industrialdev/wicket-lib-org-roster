@@ -81,11 +81,15 @@ $show_edit_permissions = isset($show_edit_permissions)
 if ($mode === 'groups') {
     $show_edit_permissions = (bool) ($orgman_config['groups']['ui']['show_edit_permissions'] ?? false);
 }
+$member_list_config = is_array($orgman_config['ui']['member_list'] ?? null)
+    ? $orgman_config['ui']['member_list']
+    : [];
+$show_remove_button_by_config = (bool) ($member_list_config['show_remove_button'] ?? true);
 $show_add_member_button = true;
 $show_remove_button = true;
 if ($mode !== 'groups') {
     $show_add_member_button = OrgHelpers\PermissionHelper::can_add_members($org_uuid);
-    $show_remove_button = OrgHelpers\PermissionHelper::can_remove_members($org_uuid);
+    $show_remove_button = $show_remove_button_by_config && OrgHelpers\PermissionHelper::can_remove_members($org_uuid);
 }
 
 $search_submit_action = '$membersLoading = true; $searchSubmitted = true; ' . $search_action;
@@ -614,6 +618,7 @@ $available_roles = OrgHelpers\PermissionHelper::filter_role_choices(
         </div>
     </dialog>
 
+    <?php if ($show_remove_button) : ?>
     <dialog id="membersRemoveModal" class="modal wt_m-auto max_wt_md wt_rounded-md wt_shadow-md backdrop_wt_bg-black-50"
         data-show="$removeMemberModalOpen"
         data-effect="if ($removeMemberModalOpen) el.showModal(); else el.close();"
@@ -692,4 +697,5 @@ $available_roles = OrgHelpers\PermissionHelper::filter_role_choices(
             </div>
         </div>
     </dialog>
+    <?php endif; ?>
 </div>

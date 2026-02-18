@@ -123,6 +123,7 @@ function get_config()
             'member_addition_type' => 'position', // Relationship type used when adding members via roster (lowercase)
             'allowed_relationship_types' => [], // Array of relationship type slugs to include. Empty = all.
             'exclude_relationship_types' => [], // Array of relationship type slugs to exclude. Empty = none.
+            'member_card_active_only' => false, // When true, only active person-to-organization relationships appear on member cards.
         ],
         'groups' => [
             'tag_name' => 'Roster Management', // MDP tag name used to identify roster management groups
@@ -204,6 +205,10 @@ function get_config()
         'business_info' => [
             'seat_limit_info' => null, // Custom seat limit information (null = no info displayed)
         ],
+        'seat_policy' => [
+            'tier_max_assignments' => [], // Map membership tier names to max seat assignments. Empty = rely on API max_assignments.
+            'tier_name_case_sensitive' => false, // Whether tier mapping keys must match exact case.
+        ],
         'ui' => [
             'organization_list' => [
                 'page_size' => 5,
@@ -213,6 +218,15 @@ function get_config()
             'member_list' => [
                 'use_unified' => true,
                 'show_edit_permissions' => true,
+                'show_remove_button' => true,
+                'seat_limit_message' => __('All seats have been assigned. Please purchase additional seats to add more members.', 'wicket-acc'),
+                'remove_policy_callout' => [
+                    'enabled' => false,
+                    'placement' => 'above_members', // above_members or below_members
+                    'title' => __('Remove Members', 'wicket-acc'),
+                    'message' => __('To remove a member from your organization, please contact your association directly.', 'wicket-acc'),
+                    'email' => '',
+                ],
             ],
             'member_view' => [
                 'use_unified' => true,
@@ -294,6 +308,9 @@ function get_config()
                 'Cchlmembercommunity',
                 'cchlmembercommunity',
             ], // Roles hidden from Edit Permissions modal
+        ],
+        'member_edit' => [
+            'require_active_membership_for_role_updates' => false,
         ],
         'notifications' => [
             'confirmation_email_from' => 'cchl@wicketcloud.com', // Email address mentioned in account confirmation instructions

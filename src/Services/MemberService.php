@@ -783,11 +783,19 @@ class MemberService
             if ($personUuid) {
                 try {
                     $connections = $this->connectionService()->getPersonConnectionsById($personUuid);
+                    $activeOnlyConnections = (bool) ($this->config['relationships']['member_card_active_only'] ?? false);
                     if (is_array($connections) && !empty($connections['data'])) {
                         foreach ($connections['data'] as $conn) {
                             $orgId = $conn['relationships']['organization']['data']['id'] ?? null;
                             if ($orgId !== $orgUuid) {
                                 continue;
+                            }
+
+                            if ($activeOnlyConnections) {
+                                $isConnectionActive = (bool) ($conn['attributes']['active'] ?? false);
+                                if (!$isConnectionActive) {
+                                    continue;
+                                }
                             }
 
                             $slug = $conn['attributes']['type'] ?? null;
@@ -1159,6 +1167,17 @@ class MemberService
 
             if (!$person_membership) {
                 return new \WP_Error('membership_not_found', 'Person membership not found in this organization.');
+            }
+
+            $require_active_membership = (bool) ($this->config['member_edit']['require_active_membership_for_role_updates'] ?? false);
+            if ($require_active_membership) {
+                $is_active_membership = (bool) ($person_membership['attributes']['active'] ?? false);
+                if (!$is_active_membership) {
+                    return new \WP_Error(
+                        'inactive_member_role_update_forbidden',
+                        'Cannot update roles for an inactive member.'
+                    );
+                }
             }
 
             // Prepare the update payload with roles

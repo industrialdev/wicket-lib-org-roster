@@ -78,6 +78,7 @@ All keys below are current defaults from `src/config/config.php`.
 | `relationships.member_addition_type` | `position` | string | Normalized relationship type slug used by roster member-add flows. |
 | `relationships.allowed_relationship_types` | `[]` | array | Allowlist of relationship type slugs for editing/selection; empty means allow all. |
 | `relationships.exclude_relationship_types` | `[]` | array | Denylist of relationship type slugs removed from editing/selection; empty means none excluded. |
+| `relationships.member_card_active_only` | `false` | bool | When true, member cards only display active person-to-organization relationships for the current organization. |
 
 ### `groups`
 | Key | Default | Type | Description |
@@ -134,6 +135,12 @@ All keys below are current defaults from `src/config/config.php`.
 |---|---|---|---|
 | `business_info.seat_limit_info` | `null` | mixed | Optional seat-limit informational payload shown in business info UI (`null` disables). |
 
+### `seat_policy`
+| Key | Default | Type | Description |
+|---|---|---|---|
+| `seat_policy.tier_max_assignments` | `[]` | array | Optional mapping of membership tier names to max seat assignments; when empty, seat limits use API `max_assignments`. |
+| `seat_policy.tier_name_case_sensitive` | `false` | bool | Controls whether `seat_policy.tier_max_assignments` key matching is case-sensitive. |
+
 ### `ui`
 | Key | Default | Type | Description |
 |---|---|---|---|
@@ -142,6 +149,13 @@ All keys below are current defaults from `src/config/config.php`.
 | `ui.show_special_relationships` | `false` | bool | Shows special relationship types (e.g. exchange-defined) in member-facing UI. |
 | `ui.member_list.use_unified` | `true` | bool | Enables unified member list component instead of legacy list rendering. |
 | `ui.member_list.show_edit_permissions` | `true` | bool | Shows edit-permissions action in organization member list views. |
+| `ui.member_list.show_remove_button` | `true` | bool | Shows remove-member actions in organization member lists when user permissions also allow removal. |
+| `ui.member_list.seat_limit_message` | `All seats have been assigned. Please purchase additional seats to add more members.` | string | Message shown in member-list views when seat capacity is full and add-member action is hidden. |
+| `ui.member_list.remove_policy_callout.enabled` | `false` | bool | Enables an informational callout shown when remove actions are disabled/hidden. |
+| `ui.member_list.remove_policy_callout.placement` | `above_members` | string | Controls callout placement when enabled and remove actions are hidden (`above_members` or `below_members`). |
+| `ui.member_list.remove_policy_callout.title` | `Remove Members` | string | Optional callout title displayed above the remove-policy message. |
+| `ui.member_list.remove_policy_callout.message` | `To remove a member from your organization, please contact your association directly.` | string | Callout body message for removal policy instructions. |
+| `ui.member_list.remove_policy_callout.email` | `` | string | Optional support/contact email rendered as a `mailto:` link in the remove-policy callout. |
 | `ui.member_view.use_unified` | `true` | bool | Enables unified member card/view component instead of legacy view rendering. |
 | `ui.member_view.search_clear_requires_submit` | `false` | bool | Controls whether clearing member search triggers immediate refresh or requires submit. |
 | `ui.member_card_fields.name.enabled` | `true` | bool | Toggles display of member name field on member cards. |
@@ -190,6 +204,11 @@ All keys below are current defaults from `src/config/config.php`.
 |---|---|---|---|
 | `edit_permissions_modal.allowed_roles` | `[]` | array | Allowlist of roles that can be assigned in Edit Permissions modal; empty means all. |
 | `edit_permissions_modal.excluded_roles` | `['Cchlmembercommunity','cchlmembercommunity']` | array | Denylist of roles hidden from Edit Permissions modal choices. |
+
+### `member_edit`
+| Key | Default | Type | Description |
+|---|---|---|---|
+| `member_edit.require_active_membership_for_role_updates` | `false` | bool | When true, blocks role updates for inactive person-membership records in backend edit-permissions processing. |
 
 ### `notifications`
 | Key | Default | Type | Description |
