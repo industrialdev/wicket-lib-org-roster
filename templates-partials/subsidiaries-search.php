@@ -45,7 +45,7 @@ ob_start();
                         <strong><?php echo esc_html($candidate['name']); ?></strong>
                         <span class="candidate-type"><?php echo esc_html($candidate['type']); ?></span>
                     </div>
-                    <button class="button button--small button--primary"
+                    <button class="button button--small button--primary component-button"
                             onclick="addSubsidiary('<?php echo esc_js($candidate['id']); ?>', '<?php echo esc_js($candidate['name']); ?>')">
                         <?php esc_html_e('Add', 'wicket-acc'); ?>
                     </button>

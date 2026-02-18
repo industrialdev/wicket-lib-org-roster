@@ -54,9 +54,7 @@ if (isset($error) && is_array($error)) {
         </p>
         <button
             onclick="location.reload()"
-            class="wt_mt-4 wt_px-4 wt_py-2 wt_bg-red-600 wt_text-white wt_rounded-md wt_hover_bg-red-700 wt_focus_outline-hidden wt_focus_ring-2 wt_focus_ring-red-500">
-            <?php esc_html_e('Try Again', 'wicket-acc'); ?>
-        </button>
+            class="wt_mt-4 wt_px-4 wt_py-2 wt_bg-red-600 wt_text-white wt_rounded-md wt_hover_bg-red-700 wt_focus_outline-hidden wt_focus_ring-2 wt_focus_ring-red-500"><?php esc_html_e('Try Again', 'wicket-acc'); ?></button>
     </div>
 <?php
     return;

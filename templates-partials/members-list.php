@@ -320,7 +320,7 @@ $no_members_message = __('No members found.', 'wicket-acc');
                         <?php endif; ?>
                     </div>
                     <div class="wt_flex wt_flex-col sm_wt_flex-row wt_items-stretch sm_wt_items-start wt_gap-2 wt_justify-between md_wt_auto wt_shrink-0">
-                        <button type="button" class="acc-edit-button edit-permissions-button button button--primary wt_inline-flex wt_items-center wt_justify-between wt_gap-2 wt_px-4 wt_py-2 wt_text-sm wt_border wt_border-bg-interactive wt_transition-colors wt_whitespace-nowrap"
+                        <button type="button" class="acc-edit-button edit-permissions-button button button--primary wt_inline-flex wt_items-center wt_justify-between wt_gap-2 wt_px-4 wt_py-2 wt_text-sm wt_border wt_border-bg-interactive wt_transition-colors wt_whitespace-nowrap component-button"
                             data-on:click="
                                 $currentMemberUuid = '<?php echo esc_js($member_uuid ?? ''); ?>';
                                 $currentMemberName = '<?php echo esc_js($member['full_name'] ?? ''); ?>';
@@ -340,7 +340,7 @@ $no_members_message = __('No members found.', 'wicket-acc');
                                 && $member_uuid === $current_user_uuid;
             ?>
                         <?php if ($show_remove_button && !$is_current_user_owner): ?>
-                            <button type="button" class="acc-remove-button remove-member-button button button--secondary wt_inline-flex wt_items-center wt_justify-between wt_gap-2 wt_px-4 wt_py-2 wt_bg-light-neutral wt_text-sm wt_border wt_border-bg-interactive wt_transition-colors wt_whitespace-nowrap"
+                            <button type="button" class="acc-remove-button remove-member-button button button--secondary wt_inline-flex wt_items-center wt_justify-between wt_gap-2 wt_px-4 wt_py-2 wt_bg-light-neutral wt_text-sm wt_border wt_border-bg-interactive wt_transition-colors wt_whitespace-nowrap component-button"
                                 data-on:click="
                                     $currentRemoveMemberUuid = '<?php echo esc_js($member_uuid ?? ''); ?>';
                                     $currentRemoveMemberName = '<?php echo esc_js($member['full_name'] ?? ''); ?>';
@@ -377,7 +377,7 @@ $no_members_message = __('No members found.', 'wicket-acc');
             <?php $show_prev = $page > 1; ?>
             <?php if ($show_prev) : ?>
                 <button type="button"
-                    class="members-pagination__btn members-pagination__btn--prev button button--secondary wt_px-3 wt_py-2 wt_text-sm"
+                    class="members-pagination__btn members-pagination__btn--prev button button--secondary wt_px-3 wt_py-2 wt_text-sm component-button"
                     data-on:click="<?php echo esc_attr($build_action($page - 1)); ?>"
                     data-on:success="<?php echo esc_attr(wp_sprintf("select('#%s') | set(html)", $members_list_target)); ?>"
                     data-indicator:members-loading
@@ -390,7 +390,7 @@ $no_members_message = __('No members found.', 'wicket-acc');
                     $is_current = ($i === $page);
                     ?>
                     <button type="button"
-                        class="members-pagination__btn members-pagination__btn--page button wt_px-3 wt_py-2 wt_text-sm <?php echo $is_current ? 'button--primary' : 'button--secondary'; ?>"
+                        class="members-pagination__btn members-pagination__btn--page button wt_px-3 wt_py-2 wt_text-sm <?php echo $is_current ? 'button--primary' : 'button--secondary'; ?> component-button"
                         <?php if ($is_current) : ?>disabled<?php endif; ?>
                         <?php if (!$is_current) : ?>data-on:click="<?php echo esc_attr($build_action($i)); ?>" <?php endif; ?>
                         data-on:success="<?php echo esc_attr(wp_sprintf("select('#%s') | set(html)", $members_list_target)); ?>"
@@ -403,7 +403,7 @@ $no_members_message = __('No members found.', 'wicket-acc');
             <?php $show_next = $page < $total_pages; ?>
             <?php if ($show_next) : ?>
                 <button type="button"
-                    class="members-pagination__btn members-pagination__btn--next button button--secondary wt_px-3 wt_py-2 wt_text-sm"
+                    class="members-pagination__btn members-pagination__btn--next button button--secondary wt_px-3 wt_py-2 wt_text-sm component-button"
                     data-on:click="<?php echo esc_attr($build_action($page + 1)); ?>"
                     data-on:success="<?php echo esc_attr(wp_sprintf("select('#%s') | set(html)", $members_list_target)); ?>"
                     data-indicator:members-loading
@@ -418,10 +418,8 @@ $no_members_message = __('No members found.', 'wicket-acc');
         <div class="wt_mt-6">
             <?php if ($has_seats_available): ?>
                 <button type="button"
-                    class="button button--primary add-member-button wt_w-full wt_py-2"
-                    data-on:click="$addMemberModalOpen = true">
-                    <?php esc_html_e('Add Member', 'wicket-acc'); ?>
-                </button>
+                    class="button button--primary add-member-button wt_w-full wt_py-2 component-button"
+                    data-on:click="$addMemberModalOpen = true"><?php esc_html_e('Add Member', 'wicket-acc'); ?></button>
             <?php endif; ?>
 
             <?php if (!$has_seats_available): ?>
@@ -541,15 +539,13 @@ $no_members_message = __('No members found.', 'wicket-acc');
                     <button
                         type="button"
                         data-on:click="$editPermissionsModalOpen = false"
-                        class="button button--secondary wt_px-4 wt_py-2 wt_text-sm"
+                        class="button button--secondary wt_px-4 wt_py-2 wt_text-sm component-button"
                         data-class:disabled="$editPermissionsSubmitting"
                         data-attr:disabled="$editPermissionsSubmitting"
-                    >
-                        <?php esc_html_e('Cancel', 'wicket-acc'); ?>
-                    </button>
+                    ><?php esc_html_e('Cancel', 'wicket-acc'); ?></button>
                     <button
                         type="submit"
-                        class="button button--primary wt_inline-flex wt_items-center wt_gap-2 wt_px-4 wt_py-2 wt_text-sm"
+                        class="button button--primary wt_inline-flex wt_items-center wt_gap-2 wt_px-4 wt_py-2 wt_text-sm component-button"
                         data-class:disabled="$editPermissionsSubmitting"
                         data-attr:disabled="$editPermissionsSubmitting"
                     >
@@ -625,15 +621,13 @@ $no_members_message = __('No members found.', 'wicket-acc');
                         <button
                             type="button"
                             data-on:click="$removeMemberModalOpen = false"
-                            class="button button--secondary wt_px-4 wt_py-2 wt_text-sm"
+                            class="button button--secondary wt_px-4 wt_py-2 wt_text-sm component-button"
                             data-class:disabled="$removeMemberSubmitting"
                             data-attr:disabled="$removeMemberSubmitting"
-                        >
-                            <?php esc_html_e('Cancel', 'wicket-acc'); ?>
-                        </button>
+                        ><?php esc_html_e('Cancel', 'wicket-acc'); ?></button>
                         <button
                             type="submit"
-                            class="button button--danger wt_inline-flex wt_items-center wt_gap-2 wt_px-4 wt_py-2 wt_text-sm"
+                            class="button button--danger wt_inline-flex wt_items-center wt_gap-2 wt_px-4 wt_py-2 wt_text-sm component-button"
                             data-class:disabled="$removeMemberSubmitting"
                             data-attr:disabled="$removeMemberSubmitting"
                         >

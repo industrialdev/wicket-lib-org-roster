@@ -165,7 +165,7 @@ $refresh_action = "@get('" . $build_url(1) . "') >> select('#" . $members_list_t
                         <?php endif; ?>
                     </div>
                     <div class="wt_flex wt_flex-col sm_wt_flex-row wt_items-stretch sm_wt_items-start wt_gap-2 wt_justify-between md_wt_auto wt_shrink-0">
-                        <button type="button" class="acc-remove-button remove-member-button button button--secondary wt_inline-flex wt_items-center wt_justify-between wt_gap-2 wt_px-4 wt_py-2 wt_bg-light-neutral wt_text-sm wt_border wt_border-bg-interactive wt_transition-colors wt_whitespace-nowrap"
+                        <button type="button" class="acc-remove-button remove-member-button button button--secondary wt_inline-flex wt_items-center wt_justify-between wt_gap-2 wt_px-4 wt_py-2 wt_bg-light-neutral wt_text-sm wt_border wt_border-bg-interactive wt_transition-colors wt_whitespace-nowrap component-button"
                             data-on:click="
                                 $currentRemoveMemberUuid = '<?php echo esc_js($member_uuid); ?>';
                                 $currentRemoveMemberName = '<?php echo esc_js($member_name); ?>';
@@ -200,7 +200,7 @@ $refresh_action = "@get('" . $build_url(1) . "') >> select('#" . $members_list_t
         <div class="members-pagination__controls wt_w-full wt_flex wt_items-center wt_gap-2 wt_justify-end wt_self-end">
             <?php $prev_disabled = $page <= 1; ?>
             <button type="button"
-                class="members-pagination__btn members-pagination__btn--prev button button--secondary wt_px-3 wt_py-2 wt_text-sm"
+                class="members-pagination__btn members-pagination__btn--prev button button--secondary wt_px-3 wt_py-2 wt_text-sm component-button"
                 <?php if ($prev_disabled) : ?>disabled<?php endif; ?>
                 <?php if (!$prev_disabled) : ?>data-on:click="<?php echo esc_attr($build_action($page - 1)); ?>" <?php endif; ?>
                 data-on:success="<?php echo esc_attr(wp_sprintf("select('#%s') | set(html)", $members_list_target)); ?>"
@@ -213,7 +213,7 @@ $refresh_action = "@get('" . $build_url(1) . "') >> select('#" . $members_list_t
                     $is_current = ($i === $page);
                     ?>
                     <button type="button"
-                        class="members-pagination__btn members-pagination__btn--page button wt_px-3 wt_py-2 wt_text-sm <?php echo $is_current ? 'button--primary' : 'button--secondary'; ?>"
+                        class="members-pagination__btn members-pagination__btn--page button wt_px-3 wt_py-2 wt_text-sm <?php echo $is_current ? 'button--primary' : 'button--secondary'; ?> component-button"
                         <?php if ($is_current) : ?>disabled<?php endif; ?>
                         <?php if (!$is_current) : ?>data-on:click="<?php echo esc_attr($build_action($i)); ?>" <?php endif; ?>
                         data-on:success="<?php echo esc_attr(wp_sprintf("select('#%s') | set(html)", $members_list_target)); ?>"
@@ -225,7 +225,7 @@ $refresh_action = "@get('" . $build_url(1) . "') >> select('#" . $members_list_t
             </div>
             <?php $next_disabled = $page >= $total_pages; ?>
             <button type="button"
-                class="members-pagination__btn members-pagination__btn--next button button--secondary wt_px-3 wt_py-2 wt_text-sm"
+                class="members-pagination__btn members-pagination__btn--next button button--secondary wt_px-3 wt_py-2 wt_text-sm component-button"
                 <?php if ($next_disabled) : ?>disabled<?php endif; ?>
                 <?php if (!$next_disabled) : ?>data-on:click="<?php echo esc_attr($build_action($page + 1)); ?>" <?php endif; ?>
                 data-on:success="<?php echo esc_attr(wp_sprintf("select('#%s') | set(html)", $members_list_target)); ?>"
@@ -239,10 +239,8 @@ $refresh_action = "@get('" . $build_url(1) . "') >> select('#" . $members_list_t
     <div class="wt_mt-6">
         <?php if ($has_seats_available) : ?>
             <button type="button"
-                class="button button--primary add-member-button wt_w-full wt_py-2"
-                data-on:click="$addMemberModalOpen = true">
-                <?php esc_html_e('Add Member', 'wicket-acc'); ?>
-            </button>
+                class="button button--primary add-member-button wt_w-full wt_py-2 component-button"
+                data-on:click="$addMemberModalOpen = true"><?php esc_html_e('Add Member', 'wicket-acc'); ?></button>
         <?php endif; ?>
         <?php if (!$has_seats_available) : ?>
             <div class="wt_mt-2 wt_p-3 wt_bg-yellow-50 wt_border wt_border-yellow-200 wt_rounded-md wt_text-yellow-800 wt_text-sm">

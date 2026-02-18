@@ -51,7 +51,7 @@ if (!defined('ABSPATH')) {
 							<input type="hidden" name="subsidiary_org_id" value="<?php echo esc_attr($subsidiary['id']); ?>">
 							<?php wp_nonce_field('org_management_subsidiary_remove_' . $org_id, '_wpnonce'); ?>
 							<button type="submit"
-									class="button button--secondary"
+									class="button button--secondary component-button"
 									data-on:click="confirm('<?php echo esc_js(sprintf(__('Are you sure you want to remove %s as a subsidiary?', 'wicket-acc'), $subsidiary['name'])); ?>')">
 								<?php esc_html_e('Remove', 'wicket-acc'); ?>
 							</button>
@@ -112,9 +112,7 @@ if (!defined('ABSPATH')) {
 						   required>
 				</div>
 
-				<button type="submit" class="button button--primary wt_mt-3">
-					<?php esc_html_e('Upload and Process', 'wicket-acc'); ?>
-				</button>
+				<button type="submit" class="button button--primary wt_mt-3 component-button"><?php esc_html_e('Upload and Process', 'wicket-acc'); ?></button>
 			</form>
 		</div>
 	</div>
@@ -138,10 +136,8 @@ document.addEventListener('DOMContentLoaded', function() {
 							<strong>${candidate.name}</strong>
 							<span class="candidate-type">${candidate.type}</span>
 						</div>
-						<button class="button button--small button--primary"
-								onclick="addSubsidiary('${candidate.id}', '${candidate.name.replace(/'/g, "\\'")}')">
-							<?php esc_html_e('Add', 'wicket-acc'); ?>
-						</button>
+						<button class="button button--small button--primary component-button"
+								onclick="addSubsidiary('${candidate.id}', '${candidate.name.replace(/'/g, "\\'")}')"><?php esc_html_e('Add', 'wicket-acc'); ?></button>
 					</div>
 				`;
 			});

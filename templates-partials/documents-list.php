@@ -71,9 +71,7 @@ $notice ??= null;
 				</div>
 
 				<div class="md:col-span-2">
-					<button type="submit" class="wt_w-full wt_flex wt_justify-center wt_py-2 wt_px-4 wt_border wt_border-transparent wt_rounded-md wt_shadow-xs wt_text-sm wt_font-medium wt_text-white wt_bg-blue-600 wt_hover_bg-blue-700 wt_focus_outline-hidden wt_focus_ring-2 wt_focus_ring-offset-2 wt_focus_ring-blue-500">
-						<?php esc_html_e('Upload Document', 'wicket-acc'); ?>
-					</button>
+					<button type="submit" class="wt_w-full wt_flex wt_justify-center wt_py-2 wt_px-4 wt_border wt_border-transparent wt_rounded-md wt_shadow-xs wt_text-sm wt_font-medium wt_text-white wt_bg-blue-600 wt_hover_bg-blue-700 wt_focus_outline-hidden wt_focus_ring-2 wt_focus_ring-offset-2 wt_focus_ring-blue-500"><?php esc_html_e('Upload Document', 'wicket-acc'); ?></button>
 				</div>
 			</div>
 

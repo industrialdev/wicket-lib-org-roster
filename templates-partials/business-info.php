@@ -112,9 +112,7 @@ if ($seat_limit_info) : ?>
 		<?php endforeach; ?>
 
 		<div class="wt_flex wt_justify-end">
-			<button type="submit" class="button button--primary">
-				<?php esc_html_e('Save Changes', 'wicket-acc'); ?>
-			</button>
+			<button type="submit" class="button button--primary component-button"><?php esc_html_e('Save Changes', 'wicket-acc'); ?></button>
 		</div>
 	</form>
 	<?php endif; ?>

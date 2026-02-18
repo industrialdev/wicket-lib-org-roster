@@ -67,9 +67,7 @@ $update_endpoint = OrgManagement\Helpers\TemplateHelper::template_url() . 'proce
             <?php endif; ?>
 
             <div class="wt_flex wt_justify-end">
-                <button type="submit" class="button button--primary">
-                    <?php esc_html_e('Save Group', 'wicket-acc'); ?>
-                </button>
+                <button type="submit" class="button button--primary component-button"><?php esc_html_e('Save Group', 'wicket-acc'); ?></button>
             </div>
         </form>
     <?php endif; ?>

@@ -188,20 +188,16 @@ if (!empty($searchAction)) {
 				data-show="!$searchQuery || $searchQuery.trim() === ''"
 				data-indicator:members-loading
 				data-attr:disabled="$membersLoading"
-				class="members-search__submit button button--primary wt_whitespace-nowrap"
-				<?php disabled(empty($membershipUuid)); ?>>
-				<?php esc_html_e('Search', 'wicket-acc'); ?>
-			</button>
+				class="members-search__submit button button--primary wt_whitespace-nowrap component-button"
+				<?php disabled(empty($membershipUuid)); ?>><?php esc_html_e('Search', 'wicket-acc'); ?></button>
 			<button
 				<?php if (!empty($clearButtonAction)) : ?>data-on:click="<?php echo esc_attr($clearButtonAction); ?>"<?php endif; ?>
 				<?php if (!empty($searchSuccess)) : ?>data-on:success="<?php echo esc_attr($searchSuccess); ?>"<?php endif; ?>
 				data-show="$searchQuery && $searchQuery.trim() !== ''"
 				data-indicator:members-loading
 				data-attr:disabled="$membersLoading"
-				class="members-search__clear button button--secondary wt_whitespace-nowrap"
-				<?php disabled(empty($membershipUuid)); ?>>
-				<?php esc_html_e('Clear', 'wicket-acc'); ?>
-			</button>
+				class="members-search__clear button button--secondary wt_whitespace-nowrap component-button"
+				<?php disabled(empty($membershipUuid)); ?>><?php esc_html_e('Clear', 'wicket-acc'); ?></button>
 		</div>
 	</div>
     </div>
@@ -407,13 +403,11 @@ $members_list_endpoint = $membersListEndpoint;
 					<?php endif; ?>
 
 					<div class="wt_flex wt_justify-end wt_gap-3 wt_pt-4" data-class:hidden="$addMemberSuccess">
-						<button type="button" class="button button--secondary"
+						<button type="button" class="button button--secondary component-button"
 							data-on:click="$addMemberModalOpen = false"
 							data-class="{ 'wt_pointer-events-none': $addMemberSubmitting, 'wt_opacity-50': $addMemberSubmitting }"
-							data-attr:aria-disabled="$addMemberSubmitting ? 'true' : 'false'">
-							<?php esc_html_e('Cancel', 'wicket-acc'); ?>
-						</button>
-						<button type="submit" class="button button--primary wt_inline-flex wt_items-center wt_gap-2"
+							data-attr:aria-disabled="$addMemberSubmitting ? 'true' : 'false'"><?php esc_html_e('Cancel', 'wicket-acc'); ?></button>
+						<button type="submit" class="button button--primary wt_inline-flex wt_items-center wt_gap-2 component-button"
 							data-class="{ 'wt_pointer-events-none': $addMemberSubmitting, 'wt_opacity-50': $addMemberSubmitting }"
 							data-attr:aria-disabled="$addMemberSubmitting ? 'true' : 'false'">
 							<span data-class:hidden="$addMemberSubmitting">
