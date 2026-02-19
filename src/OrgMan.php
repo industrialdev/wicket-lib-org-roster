@@ -11,8 +11,89 @@ if (!defined('ABSPATH') && !defined('WICKET_ORGROSTER_DOINGTESTS')) {
     exit;
 }
 
+if (!function_exists(__NAMESPACE__ . '\\orgman_require_once_compat')) {
+    /**
+     * Require a file from src/ with case-insensitive path resolution.
+     *
+     * @param string $relative_path Relative path from src/.
+     * @return void
+     */
+    function orgman_require_once_compat($relative_path)
+    {
+        static $included_paths = [];
+
+        $normalized_path = ltrim(str_replace('\\', '/', $relative_path), '/');
+        $direct_path = __DIR__ . '/' . $normalized_path;
+
+        if (is_file($direct_path)) {
+            $canonical_path = realpath($direct_path);
+            if ($canonical_path === false) {
+                throw new \RuntimeException("Unable to resolve dependency path: {$relative_path}");
+            }
+
+            $normalized_canonical_path = strtolower(str_replace('\\', '/', $canonical_path));
+            if (isset($included_paths[$normalized_canonical_path])) {
+                return;
+            }
+
+            require_once $canonical_path;
+            $included_paths[$normalized_canonical_path] = true;
+
+            return;
+        }
+
+        $segments = array_values(array_filter(explode('/', $normalized_path), 'strlen'));
+        $resolved_path = __DIR__;
+
+        foreach ($segments as $segment) {
+            $candidate = $resolved_path . '/' . $segment;
+
+            if (file_exists($candidate)) {
+                $resolved_path = $candidate;
+                continue;
+            }
+
+            $entries = @scandir($resolved_path);
+            if ($entries === false) {
+                throw new \RuntimeException("Unable to scan directory while loading dependency: {$relative_path}");
+            }
+
+            $match = null;
+            foreach ($entries as $entry) {
+                if (strcasecmp($entry, $segment) === 0) {
+                    $match = $entry;
+                    break;
+                }
+            }
+
+            if ($match === null) {
+                throw new \RuntimeException("Missing required dependency: {$relative_path}");
+            }
+
+            $resolved_path .= '/' . $match;
+        }
+
+        if (!is_file($resolved_path)) {
+            throw new \RuntimeException("Resolved dependency is not a file: {$relative_path}");
+        }
+
+        $canonical_path = realpath($resolved_path);
+        if ($canonical_path === false) {
+            throw new \RuntimeException("Unable to resolve dependency path: {$relative_path}");
+        }
+
+        $normalized_canonical_path = strtolower(str_replace('\\', '/', $canonical_path));
+        if (isset($included_paths[$normalized_canonical_path])) {
+            return;
+        }
+
+        require_once $canonical_path;
+        $included_paths[$normalized_canonical_path] = true;
+    }
+}
+
 // Load shared Datastar helpers for modal processing
-require_once __DIR__ . '/Helpers/DatastarSSE.php';
+orgman_require_once_compat('Helpers/DatastarSSE.php');
 
 /**
  * Singleton class for managing the Organization Management feature.
@@ -88,36 +169,36 @@ final class OrgMan
      */
     private function load_dependencies()
     {
-        require_once __DIR__ . '/config/config.php';
-        require_once __DIR__ . '/Services/ConfigService.php';
-        require_once __DIR__ . '/Services/Strategies/RosterManagementStrategy.php';
-        require_once __DIR__ . '/Services/Strategies/CascadeStrategy.php';
-        require_once __DIR__ . '/Services/Strategies/DirectAssignmentStrategy.php';
-        require_once __DIR__ . '/Services/Strategies/GroupsStrategy.php';
-        require_once __DIR__ . '/Services/OrganizationService.php';
-        require_once __DIR__ . '/Services/OrganizationBatchService.php';
-        require_once __DIR__ . '/Services/MemberService.php';
-        require_once __DIR__ . '/Services/PersonService.php';
-        require_once __DIR__ . '/Services/PermissionService.php';
-        require_once __DIR__ . '/Services/GroupService.php';
-        require_once __DIR__ . '/Services/ConnectionService.php';
-        require_once __DIR__ . '/Services/BusinessInfoService.php';
-        require_once __DIR__ . '/Services/DocumentService.php';
-        require_once __DIR__ . '/Services/SubsidiaryService.php';
-        require_once __DIR__ . '/Services/NotificationService.php';
-        require_once __DIR__ . '/Services/AdditionalSeatsService.php';
-        require_once __DIR__ . '/Services/MembershipService.php';
-        require_once __DIR__ . '/Helpers/Helper.php';
-        require_once __DIR__ . '/Helpers/ConfigHelper.php';
-        require_once __DIR__ . '/Helpers/RelationshipHelper.php';
-        require_once __DIR__ . '/Helpers/TemplateHelper.php';
-        require_once __DIR__ . '/Helpers/GravityFormsHelper.php';
-        require_once __DIR__ . '/Helpers/PermissionHelper.php';
-        require_once __DIR__ . '/Controllers/ApiController.php';
-        require_once __DIR__ . '/Controllers/BusinessInfoController.php';
-        require_once __DIR__ . '/Controllers/DocumentController.php';
-        require_once __DIR__ . '/Controllers/SubsidiaryController.php';
-        require_once __DIR__ . '/Controllers/ConfigurationController.php';
+        orgman_require_once_compat('config/config.php');
+        orgman_require_once_compat('Services/ConfigService.php');
+        orgman_require_once_compat('Services/Strategies/RosterManagementStrategy.php');
+        orgman_require_once_compat('Services/Strategies/CascadeStrategy.php');
+        orgman_require_once_compat('Services/Strategies/DirectAssignmentStrategy.php');
+        orgman_require_once_compat('Services/Strategies/GroupsStrategy.php');
+        orgman_require_once_compat('Services/OrganizationService.php');
+        orgman_require_once_compat('Services/OrganizationBatchService.php');
+        orgman_require_once_compat('Services/MemberService.php');
+        orgman_require_once_compat('Services/PersonService.php');
+        orgman_require_once_compat('Services/PermissionService.php');
+        orgman_require_once_compat('Services/GroupService.php');
+        orgman_require_once_compat('Services/ConnectionService.php');
+        orgman_require_once_compat('Services/BusinessInfoService.php');
+        orgman_require_once_compat('Services/DocumentService.php');
+        orgman_require_once_compat('Services/SubsidiaryService.php');
+        orgman_require_once_compat('Services/NotificationService.php');
+        orgman_require_once_compat('Services/AdditionalSeatsService.php');
+        orgman_require_once_compat('Services/MembershipService.php');
+        orgman_require_once_compat('Helpers/Helper.php');
+        orgman_require_once_compat('Helpers/ConfigHelper.php');
+        orgman_require_once_compat('Helpers/RelationshipHelper.php');
+        orgman_require_once_compat('Helpers/TemplateHelper.php');
+        orgman_require_once_compat('Helpers/GravityFormsHelper.php');
+        orgman_require_once_compat('Helpers/PermissionHelper.php');
+        orgman_require_once_compat('Controllers/ApiController.php');
+        orgman_require_once_compat('Controllers/BusinessInfoController.php');
+        orgman_require_once_compat('Controllers/DocumentController.php');
+        orgman_require_once_compat('Controllers/SubsidiaryController.php');
+        orgman_require_once_compat('Controllers/ConfigurationController.php');
     }
 
     /**

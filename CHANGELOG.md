@@ -2,7 +2,7 @@
 
 All notable changes to this project are documented in this file.
 
-## [0.3.0] - 2026-02-19
+## [0.3.1] - 2026-02-19
 
 ### Added
 - Config-gated CSV member bulk upload flow in roster member views:
@@ -21,6 +21,9 @@ All notable changes to this project are documented in this file.
 - Added groups-strategy standalone bulk-upload flow:
   - standalone page now lists manageable groups directly in groups mode (with one-group auto-redirect)
   - bulk processor now accepts/validates `group_uuid` and routes row context to groups strategy (`group_uuid`, per-row role fallback)
+
+### Fixed
+- Added case-insensitive dependency loading in `OrgMan` to prevent Linux-only fatals when deployed directory casing differs (e.g., `helpers/` vs `Helpers/`).
 
 ### Documentation
 - Updated all docs under `docs/` to include:
