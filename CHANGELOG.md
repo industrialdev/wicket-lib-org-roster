@@ -2,6 +2,33 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.3.0] - 2026-02-19
+
+### Added
+- Config-gated CSV member bulk upload flow in roster member views:
+  - New config key: `ui.member_list.show_bulk_upload` (default `false`).
+  - New process handler: `templates-partials/process/bulk-upload-members.php`.
+  - New reusable UI partial: `templates-partials/members-bulk-upload.php`.
+- Strategy-aware CSV processing via `MemberService->add_member(...)` per row, with additive-only behavior and duplicate-skip handling.
+
+### Changed
+- Positioned bulk upload control in the member-management CTA region to match legacy flow intent.
+- Aligned `Bulk Upload Members` CTA width/position with `Add Member` by rendering it in a dedicated stacked container.
+- Added backend feature-gate enforcement so the process endpoint is disabled when `ui.member_list.show_bulk_upload` is `false`.
+- Updated standalone bulk upload page flow:
+  - if a user can bulk-manage exactly one organization, the page now redirects to that org via `?org_uuid=...`
+  - if a user can bulk-manage multiple organizations, the page now shows a simplified organization selector first
+- Added groups-strategy standalone bulk-upload flow:
+  - standalone page now lists manageable groups directly in groups mode (with one-group auto-redirect)
+  - bulk processor now accepts/validates `group_uuid` and routes row context to groups strategy (`group_uuid`, per-row role fallback)
+
+### Documentation
+- Updated all docs under `docs/` to include:
+  - new bulk upload feature behavior
+  - `ui.member_list.show_bulk_upload` configuration reference
+  - strategy-specific bulk upload status and expectations
+  - architecture/frontend/testing notes for the new endpoint flow
+
 ## [0.2.8] - 2026-02-18
 
 ### Fixed

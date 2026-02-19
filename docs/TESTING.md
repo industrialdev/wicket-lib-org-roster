@@ -58,3 +58,11 @@ When testing controllers that return SSE, check the output buffer for Datastar-s
 - `tests/Unit/Services/MembershipCycleStrategyTest.php`: verifies required-context guards and organization/membership scope validation.
 - `tests/Unit/Services/GroupServiceTest.php`: verifies groups eligibility/tag filtering, org-association constraints, and group-list regression scenarios.
 - `tests/Unit/Helpers/StylesheetTokenBridgeTest.php`: verifies CSS token fallback bridge behavior used by static stylesheet output.
+
+## 6. Bulk Upload Coverage Targets
+- Add process-handler tests for `templates-partials/process/bulk-upload-members.php`:
+  - feature toggle disabled path (`ui.member_list.show_bulk_upload = false`)
+  - nonce and permission guards
+  - header/schema validation
+  - duplicate skip behavior
+  - successful row additions and summary reporting

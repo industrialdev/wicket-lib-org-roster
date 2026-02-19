@@ -48,6 +48,15 @@ The Unified View is a search-centric interface for managing rosters.
   - `groups`: card emphasizes membership tier, role labels, group `Type`, and `Tag(s)`.
   - `direct` / `cascade` / `membership_cycle`: card shows membership + roles and group labels where available.
 
+## 3.2 Bulk Upload UI (CSV)
+- The member bulk-upload panel is controlled by `ui.member_list.show_bulk_upload` (default `false`).
+- The panel renders in organization member views for non-groups modes, in the same CTA region as member-management actions.
+- Datastar signals used by this flow:
+  - `bulkUploadSubmitting`
+  - `membersLoading`
+- Endpoint used by the form:
+  - `templates-partials/process/bulk-upload-members.php`
+
 ## 4. Modals and Overlays
 Modals are managed via signals and the `notifications-container.php`.
 - Action handlers patch the modal content into the container and set the `show_modal` signal to `true`.

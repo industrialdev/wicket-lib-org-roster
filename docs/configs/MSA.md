@@ -54,6 +54,7 @@ add_filter('wicket/acc/orgman/config', function (array $config): array {
     $config['ui']['member_list']['use_unified'] = true;
     $config['ui']['member_view']['use_unified'] = true;
     $config['ui']['member_list']['show_remove_button'] = false;
+    $config['ui']['member_list']['show_bulk_upload'] = false;
     $config['ui']['member_list']['seat_limit_message'] = __('You have reached the maximum number of assignable people under this membership.', 'wicket-acc');
     $config['seat_policy']['tier_max_assignments'] = [
         'MAS Sustaining' => 3,

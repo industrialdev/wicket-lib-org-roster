@@ -26,6 +26,7 @@ The UI avoids full-page reloads by using Datastar signals and SSE.
 - **Templates**: `templates/` contains top-level wrappers injected into the WordPress content area.
 - **Partials**: `templates-partials/` contains the actual UI components and logic fragments.
 - **Process Handlers**: `templates-partials/process/` contains PHP scripts that handle the logic for specific actions (like adding or removing a member) and generate the SSE responses.
+  - Includes CSV member bulk upload handler: `templates-partials/process/bulk-upload-members.php` (gated by `ui.member_list.show_bulk_upload`).
 
 ## 4. Caching Strategy
 The library uses WordPress Transients for caching expensive API calls.

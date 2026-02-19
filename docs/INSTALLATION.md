@@ -143,6 +143,7 @@ Inside the bootstrap filter, set the strategy and client-specific config:
 ```php
 add_filter('wicket/acc/orgman/config', static function (array $config): array {
     $config['roster']['strategy'] = 'membership_cycle';
+    $config['ui']['member_list']['show_bulk_upload'] = true; // default is false
     return $config;
 });
 ```

@@ -45,7 +45,7 @@ Exit Criteria:
 - [x] Add/remove behavior matches Membership Cycle strategy docs and does not alter non-membership-cycle flows.
 
 ## Phase 4 — Bulk Upload
-- [ ] Add bulk upload endpoint/service path for Membership Cycle strategy.
+- [x] Add CSV bulk upload process endpoint path (`templates-partials/process/bulk-upload-members.php`) and route rows through strategy-aware member add flow.
 - [ ] Enforce strict CSV schema and whitelist values.
 - [ ] Skip/reject invalid rows with row-level reporting.
 - [ ] Apply seat-capacity checks per membership cycle.

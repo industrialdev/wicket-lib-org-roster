@@ -36,6 +36,10 @@ All business logic is encapsulated in a service layer. Services are domain-speci
 3. **External Sync**: Services interact with the Wicket API and/or WooCommerce to persist changes.
 4. **Response**: The system returns Server-Sent Events (SSE) to patch the frontend UI reactively.
 
+Bulk CSV member upload follows the same flow using the process handler:
+- `templates-partials/process/bulk-upload-members.php`
+- gated by `ui.member_list.show_bulk_upload` (default `false`)
+
 ## 5. External Dependencies
 - **Wicket MDP**: Primary source of truth for people, organizations, and memberships.
 - **WooCommerce**: Handles seat limit transactions.

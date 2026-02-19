@@ -908,6 +908,7 @@ final class OrgMan
             'organization-management'           => $base_path . '/templates/content-organization-index.php',
             'organization-profile'              => $base_path . '/templates/content-organization-profile.php',
             'organization-members'              => $base_path . '/templates/content-organization-members.php',
+            'organization-members-bulk'         => $base_path . '/templates/content-organization-members-bulk.php',
             'supplemental-members'              => $base_path . '/templates/content-supplemental-members.php',
         ];
 

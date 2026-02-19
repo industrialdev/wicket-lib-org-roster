@@ -150,6 +150,7 @@ All keys below are current defaults from `src/config/config.php`.
 | `ui.member_list.use_unified` | `true` | bool | Enables unified member list component instead of legacy list rendering. |
 | `ui.member_list.show_edit_permissions` | `true` | bool | Shows edit-permissions action in organization member list views. |
 | `ui.member_list.show_remove_button` | `true` | bool | Shows remove-member actions in organization member lists when user permissions also allow removal. |
+| `ui.member_list.show_bulk_upload` | `false` | bool | Enables CSV bulk-upload panel in organization member views (non-groups modes only) when the user can add members. |
 | `ui.member_list.seat_limit_message` | `All seats have been assigned. Please purchase additional seats to add more members.` | string | Message shown in member-list views when seat capacity is full and add-member action is hidden. |
 | `ui.member_list.remove_policy_callout.enabled` | `false` | bool | Enables an informational callout shown when remove actions are disabled/hidden. |
 | `ui.member_list.remove_policy_callout.placement` | `above_members` | string | Controls callout placement when enabled and remove actions are hidden (`above_members` or `below_members`). |
@@ -248,6 +249,7 @@ add_filter('wicket/acc/orgman/config', function (array $config): array {
     $config['permissions']['add_members'] = ['membership_manager', 'membership_owner'];
     $config['permissions']['remove_members'] = ['membership_manager', 'membership_owner'];
     $config['permissions']['relationship_based_permissions'] = false;
+    $config['ui']['member_list']['show_bulk_upload'] = true;
 
     return $config;
 });

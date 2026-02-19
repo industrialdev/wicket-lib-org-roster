@@ -17,6 +17,9 @@
 - `member_management`:
   - `require_explicit_membership_uuid`: `true`
 
+Shared UI flag relevant to cycle bulk import:
+- `ui.member_list.show_bulk_upload`: `false` (must be enabled to expose CSV bulk upload UI)
+
 ## Filter Contract
 - Filter remains `wicket/acc/orgman/config`.
 - Strategy-local overrides are expected under `membership_cycle.*`.

@@ -70,6 +70,7 @@ $member_list_config = is_array($orgman_config['ui']['member_list'] ?? null)
     ? $orgman_config['ui']['member_list']
     : [];
 $show_remove_button_by_config = (bool) ($member_list_config['show_remove_button'] ?? true);
+$show_bulk_upload = (bool) ($member_list_config['show_bulk_upload'] ?? false);
 $seat_limit_message = (string) ($member_list_config['seat_limit_message'] ?? __('All seats have been assigned. Please purchase additional seats to add more members.', 'wicket-acc'));
 $remove_policy_callout = is_array($member_list_config['remove_policy_callout'] ?? null)
     ? $member_list_config['remove_policy_callout']
@@ -420,6 +421,13 @@ $no_members_message = __('No members found.', 'wicket-acc');
                 <button type="button"
                     class="button button--primary add-member-button wt_w-full wt_py-2 component-button"
                     data-on:click="$addMemberModalOpen = true"><?php esc_html_e('Add Member', 'wicket-acc'); ?></button>
+                <?php if ($show_bulk_upload) : ?>
+                    <div class="wt_mt-3">
+                        <button type="button"
+                            class="button button--primary add-member-button wt_w-full wt_py-2 component-button"
+                            data-on:click="$bulkUploadModalOpen = true"><?php esc_html_e('Bulk Upload Members', 'wicket-acc'); ?></button>
+                    </div>
+                <?php endif; ?>
             <?php endif; ?>
 
             <?php if (!$has_seats_available): ?>

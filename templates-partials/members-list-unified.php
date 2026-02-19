@@ -65,6 +65,9 @@ if ($mode === 'groups' && isset($groups_ui_config['show_edit_permissions'])) {
 $show_account_status = isset($show_account_status) ? (bool) $show_account_status : true;
 $show_add_member_button = isset($show_add_member_button) ? (bool) $show_add_member_button : true;
 $show_remove_button = isset($show_remove_button) ? (bool) $show_remove_button : $show_remove_button_default;
+$show_bulk_upload = isset($show_bulk_upload)
+    ? (bool) $show_bulk_upload
+    : (bool) ($ui_config['show_bulk_upload'] ?? false);
 
 $base_query_args = [
     'org_uuid' => $org_uuid,
@@ -367,6 +370,13 @@ $show_remove_policy_callout = (
                 <button type="button"
                     class="button button--primary add-member-button wt_w-full wt_py-2 component-button"
                     data-on:click="$addMemberModalOpen = true"><?php esc_html_e('Add Member', 'wicket-acc'); ?></button>
+                <?php if ($mode !== 'groups' && $show_bulk_upload) : ?>
+                    <div class="wt_mt-3">
+                        <button type="button"
+                            class="button button--primary add-member-button wt_w-full wt_py-2 component-button"
+                            data-on:click="$bulkUploadModalOpen = true"><?php esc_html_e('Bulk Upload Members', 'wicket-acc'); ?></button>
+                    </div>
+                <?php endif; ?>
             <?php endif; ?>
 
             <?php if (!$has_seats_available) : ?>

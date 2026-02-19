@@ -149,6 +149,7 @@ $is_membership_manager = \OrgManagement\Helpers\PermissionHelper::is_membership_
 // Get WPML-aware URLs for my-account pages
 $profile_url = \OrgManagement\Helpers\Helper::get_my_account_page_url('organization-profile', '/my-account/organization-profile/');
 $members_url = \OrgManagement\Helpers\Helper::get_my_account_page_url('organization-members', '/my-account/organization-members/');
+$members_bulk_url = \OrgManagement\Helpers\Helper::get_my_account_page_url('organization-members-bulk', '/my-account/organization-members-bulk/');
 $group_uuid = isset($_GET['group_uuid']) ? sanitize_text_field($_GET['group_uuid']) : '';
 $profile_params = ['org_uuid' => $org_uuid];
 $members_params = ['org_uuid' => $org_uuid];
@@ -166,6 +167,15 @@ if ($roster_mode === 'groups' && $group_uuid !== '') {
         <?php if ($is_membership_manager): ?>
             <a href="<?php echo esc_url(add_query_arg($members_params, $members_url)); ?>"
                 class="org-details__action-link wt_text-primary-600 wt_hover_text-primary-700 underline underline-offset-4"><?php esc_html_e('Manage Members', 'wicket-acc'); ?></a>
+        <?php endif; ?>
+
+        <?php
+        $member_list_config = \OrgManagement\Config\get_config()['ui']['member_list'] ?? [];
+        $show_bulk_upload = (bool) ($member_list_config['show_bulk_upload'] ?? false);
+        if ($show_bulk_upload && \OrgManagement\Helpers\PermissionHelper::can_add_members($org_uuid)):
+        ?>
+            <a href="<?php echo esc_url(add_query_arg($members_params, $members_bulk_url)); ?>"
+                class="org-details__action-link wt_text-primary-600 wt_hover_text-primary-700 underline underline-offset-4"><?php esc_html_e('Bulk Upload', 'wicket-acc'); ?></a>
         <?php endif; ?>
     </div>
     <div class="org-details__divider wt_border-b wt_border-primary-600 wt_mt-1"></div>

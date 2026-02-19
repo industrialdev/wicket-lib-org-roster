@@ -85,6 +85,7 @@ $member_list_config = is_array($orgman_config['ui']['member_list'] ?? null)
     ? $orgman_config['ui']['member_list']
     : [];
 $show_remove_button_by_config = (bool) ($member_list_config['show_remove_button'] ?? true);
+$show_bulk_upload = (bool) ($member_list_config['show_bulk_upload'] ?? false);
 $show_add_member_button = true;
 $show_remove_button = true;
 if ($mode !== 'groups') {
@@ -102,7 +103,7 @@ $clear_action = '(' . '$membersLoading' . ' = true, ' . '$searchQuery' . " = '',
 
 ?>
 <div class="members-list wt_relative" data-member-view="unified"
-    data-signals:='{"membersLoading": false, "addMemberModalOpen": false, "addMemberSubmitting": false, "addMemberSuccess": false, "removeMemberModalOpen": false, "removeMemberSubmitting": false, "removeMemberSuccess": false, "currentRemoveMemberUuid": "", "currentRemoveMemberName": "", "currentRemoveMemberEmail": "", "currentRemoveMemberConnectionId": "", "currentRemoveMemberPersonMembershipId": "", "currentRemoveMemberGroupMemberId": "", "currentRemoveMemberRole": "", "editPermissionsModalOpen": false, "editPermissionsSubmitting": false, "editPermissionsSuccess": false, "currentMemberUuid": "", "currentMemberName": "", "currentMemberRoles": [], "currentMemberRelationshipType": "", "currentMemberDescription": ""}'
+    data-signals:='{"membersLoading": false, "bulkUploadModalOpen": false, "bulkUploadSubmitting": false, "addMemberModalOpen": false, "addMemberSubmitting": false, "addMemberSuccess": false, "removeMemberModalOpen": false, "removeMemberSubmitting": false, "removeMemberSuccess": false, "currentRemoveMemberUuid": "", "currentRemoveMemberName": "", "currentRemoveMemberEmail": "", "currentRemoveMemberConnectionId": "", "currentRemoveMemberPersonMembershipId": "", "currentRemoveMemberGroupMemberId": "", "currentRemoveMemberRole": "", "editPermissionsModalOpen": false, "editPermissionsSubmitting": false, "editPermissionsSuccess": false, "currentMemberUuid": "", "currentMemberName": "", "currentMemberRoles": [], "currentMemberRelationshipType": "", "currentMemberDescription": ""}'
     data-on:datastar-fetch="evt.detail.type === 'started' && ($membersLoading = true); (evt.detail.type === 'finished' || evt.detail.type === 'error') && ($membersLoading = false)">
 
     <div class="members-loading-overlay wt_hidden wt_absolute wt_inset-0 wt_z-10 wt_bg-light-neutral-85 wt_backdrop-blur-xs"
@@ -171,7 +172,7 @@ $members_list_target = $members_list_target;
 $show_edit_permissions = $show_edit_permissions;
 $show_account_status = true;
 $show_add_member_button = $show_add_member_button;
-$show_remove_button = $show_remove_button;
+    $show_remove_button = $show_remove_button;
 include __DIR__ . '/members-list-unified.php';
 ?>
 
@@ -611,6 +612,26 @@ $available_roles = OrgHelpers\PermissionHelper::filter_role_choices(
             <?php endif; ?>
         </div>
     </dialog>
+
+    <?php if ($mode !== 'groups' && $show_add_member_button && $show_bulk_upload) : ?>
+        <?php
+        $bulk_upload_endpoint = OrgHelpers\template_url() . 'process/bulk-upload-members';
+        $bulk_upload_messages_id = 'bulk-upload-messages-' . sanitize_html_class($org_uuid ?: 'default');
+        $bulk_upload_wrapper_class = 'wt_rounded-md wt_border wt_border-color wt_bg-white wt_p-4';
+        ?>
+        <dialog id="membersBulkUploadModal" class="modal wt_m-auto max_wt_3xl wt_rounded-md wt_shadow-md backdrop_wt_bg-black-50"
+            data-show="$bulkUploadModalOpen"
+            data-effect="if ($bulkUploadModalOpen) el.showModal(); else el.close();"
+            data-on:close="($membersLoading = false); $bulkUploadModalOpen = false">
+            <div class="wt_bg-white wt_p-6 wt_relative" data-on:click__outside__capture="$bulkUploadModalOpen = false">
+                <button type="button" class="wt_absolute wt_right-4 wt_top-4 wt_text-lg wt_font-semibold"
+                    data-on:click="$bulkUploadModalOpen = false">
+                    ×
+                </button>
+                <?php include __DIR__ . '/members-bulk-upload.php'; ?>
+            </div>
+        </dialog>
+    <?php endif; ?>
 
     <?php if ($show_remove_button) : ?>
     <dialog id="membersRemoveModal" class="modal wt_m-auto max_wt_md wt_rounded-md wt_shadow-md backdrop_wt_bg-black-50"

@@ -9,6 +9,7 @@
 
 Global `ui` keys used by groups screens:
 - `ui.organization_list.page_size`: `5`
+- `ui.member_list.show_bulk_upload`: `false` by default (shared member CSV bulk upload is not rendered in groups mode)
 
 `groups`:
 - `tag_name`: `'Roster Management'`

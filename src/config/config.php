@@ -219,6 +219,7 @@ function get_config()
                 'use_unified' => true,
                 'show_edit_permissions' => true,
                 'show_remove_button' => true,
+                'show_bulk_upload' => false,
                 'seat_limit_message' => __('All seats have been assigned. Please purchase additional seats to add more members.', 'wicket-acc'),
                 'remove_policy_callout' => [
                     'enabled' => false,

@@ -1,52 +1,85 @@
-# Org Roster Management Library (Composer)
+# Org Roster Library (Composer)
 
-This directory is a Composer-installed library for Wicket organization roster management. It exposes the `OrgManagement\OrgMan` entrypoint and ships templates, assets, and service classes.
+Composer library for Wicket organization/group roster management.
 
-## Usage
+- Entrypoint: `OrgManagement\OrgMan`
+- Autoload: `OrgManagement\` => `src/`
+- Frontend: template-driven UI + Datastar interactions
 
-- Install via Composer path/VCS repository into `web/app/libs/wicket-lib-org-roster`
-- Autoload classes with Composer (PSR-4: `OrgManagement\` => `src/`)
-- Initialize via `\OrgManagement\OrgMan::get_instance()`
+## Quick Start
 
-### Composer Install
+Install in your theme/app:
 
 ```bash
 composer require industrialdev/wicket-lib-org-roster
 ```
 
-Ensure your application loads Composer's autoloader before using OrgMan or templates.
+Load Composer autoload, then initialize OrgMan on `after_setup_theme` (recommended) after registering your config filter:
 
-### Datastar SDK
+```php
+use OrgManagement\OrgMan;
 
-The Datastar PHP SDK is a Composer dependency (`starfederation/datastar-php`). Do not vendor the SDK in this library.
+add_action('after_setup_theme', static function (): void {
+    add_filter('wicket/acc/orgman/config', static function (array $config): array {
+        $config['ui']['member_list']['show_bulk_upload'] = true; // default false
+        return $config;
+    });
+
+    if (class_exists(OrgMan::class)) {
+        OrgMan::get_instance();
+    }
+}, 20);
+```
+
+See full install guidance in `docs/INSTALLATION.md`.
+
+## Bulk Upload (CSV)
+
+Feature flag:
+- `ui.member_list.show_bulk_upload` (default `false`)
+
+UI behavior:
+- Member list pages show a `Bulk Upload Members` CTA (same style as `Add Member`) that opens a modal.
+- CSV template file is served from:
+  - `public/templates/roster_template.csv`
+
+Standalone page:
+- Slug: `organization-members-bulk`
+- Supports strategy-aware selection before upload form:
+  - `direct` / `cascade` / `membership_cycle`: org selection (auto-redirect when exactly one manageable org).
+  - `groups`: manageable group selection (auto-redirect when exactly one manageable group).
+
+Processor behavior:
+- Endpoint: `templates-partials/process/bulk-upload-members.php`
+- Routes row creation through `MemberService->add_member(...)`, so active strategy is respected.
+- In groups mode, processor validates `group_uuid` access and passes `group_uuid` + role context to strategy.
+
+## Strategies
+
+Supported strategy keys:
+- `direct`
+- `cascade`
+- `groups`
+- `membership_cycle`
+
+Strategy resolution is runtime-configured via `ConfigService::get_roster_mode()`.
 
 ## Documentation
 
 - [Installation](docs/INSTALLATION.md)
-- [Configuration](docs/CONFIGURATION.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [Strategies](docs/STRATEGIES.md)
-- [Design](docs/DESIGN.md)
+- [Configuration](docs/CONFIGURATION.md)
 - [Frontend](docs/FRONTEND.md)
 - [Testing](docs/TESTING.md)
-- [Unified Specifications](docs/SPECS.md)
+- [Specifications](docs/SPECS.md)
+- [Changelog](CHANGELOG.md)
 
 ## Assets
 
-Assets are served from the library directory. If your install path differs, override:
+Primary stylesheet:
+- `public/css/modern-orgman-static.css`
+
+If your library install path differs, override:
 - `wicket/acc/orgman/base_path`
 - `wicket/acc/orgman/base_url`
-
-# Styling
-
-The org-management frontend uses static vanilla CSS utilities and BEM-style component classes.
-
-## CSS Assets
-
-- `public/css/modern-orgman-static.css` - Primary stylesheet enqueued by `OrgMan`
-
-## Conventions
-
-- Utility-style classes use the `wt_` prefix (scoped namespace)
-- Component classes follow BEM naming where possible
-- Theme values should come from CSS variables (no hardcoded utility colors)

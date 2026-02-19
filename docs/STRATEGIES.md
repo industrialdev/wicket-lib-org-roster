@@ -208,7 +208,7 @@ Current strategy keys:
 
 #### Risks
 - Any endpoint missing `membership_uuid` propagation can cause blocked actions in this mode.
-- Bulk upload and cycle tab UX are documented requirements but are not fully implemented yet.
+- Generic CSV bulk upload is available behind `ui.member_list.show_bulk_upload` (default `false`), but ESCRS-specific whitelist and cycle-tab UX are still pending.
 
 ## 5) Permission Model by Strategy
 
@@ -232,6 +232,7 @@ Current strategy keys:
 ### Process Endpoints
 - Add member: `templates-partials/process/add-member.php`
 - Remove member: `templates-partials/process/remove-member.php`
+- Bulk upload members (CSV): `templates-partials/process/bulk-upload-members.php`
 - Group add/remove:
   - `templates-partials/process/add-group-member.php`
   - `templates-partials/process/remove-group-member.php`

@@ -8,6 +8,9 @@ Changes in unreleased code must not introduce breaking behavior for currently re
 
 Default configuration values that affect released behavior must not be changed silently.
 
+Recent additive key:
+- `ui.member_list.show_bulk_upload` was introduced with default `false` to preserve existing behavior unless explicitly enabled via config filter.
+
 ## Deprecation
 
 Deprecated or compatibility layers may be removed only when both conditions are true:

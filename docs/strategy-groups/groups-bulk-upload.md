@@ -2,7 +2,8 @@
 
 ## Current State
 - Dedicated groups bulk-upload flow is not implemented in current strategy code.
-- Group member management is performed through explicit add/remove operations.
+- Shared member CSV bulk upload is intentionally hidden in groups mode (`mode !== groups` guard).
+- Group member management remains explicit add/remove operations.
 
 ## If Added Later
 - Keep it strategy-scoped (`groups` only).

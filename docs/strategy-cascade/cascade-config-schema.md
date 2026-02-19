@@ -22,6 +22,8 @@
 - `relationships`:
   - `default_type`
   - `member_addition_type`
+- `ui`:
+  - `ui.member_list.show_bulk_upload` (default `false`; enable to show CSV bulk upload panel)
 
 ## Runtime Context Contract
 - Add context supports:

@@ -24,6 +24,7 @@
   - `default_type`
 - `ui`:
   - shared member list/view and member card field flags.
+  - `ui.member_list.show_bulk_upload` (default `false`; enable to show CSV bulk upload panel)
 
 ## Context Contract (Runtime)
 - Optional membership override in add context:

@@ -54,6 +54,10 @@
 - Invalid membership values must skip/reject row (no partial coercion).
 - Bulk upload only adds records; no deletions.
 
+Current implementation note:
+- Shared CSV bulk upload endpoint exists and supports additive cycle-scoped adds.
+- ESCRS-specific membership-type whitelist enforcement remains pending.
+
 ### 3.6 Seats and Checkout
 - Seat capacity validation must be cycle-specific (`organization_membership_uuid` scope).
 - “Purchase Additional Seats” CTA must carry membership UUID for the selected cycle.
@@ -126,6 +130,10 @@
 - Dedicated process endpoint or service method for Membership Cycle strategy bulk import.
 - Validate CSV schema + strict membership whitelist.
 - Import report output per row: added / skipped / duplicate / invalid-membership / seat-full / error.
+
+Implementation status:
+- Shared process endpoint implemented: `templates-partials/process/bulk-upload-members.php`.
+- Strict membership whitelist and row classification for membership labels still pending.
 
 ### 6.5 Seat Purchase Path
 - Confirm `AdditionalSeatsService` and checkout hooks consume membership UUID from request metadata.

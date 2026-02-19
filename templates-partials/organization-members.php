@@ -89,6 +89,10 @@ $members = $membersResult['members'] ?? [];
 $pagination = $membersResult['pagination'];
 $query = $membersResult['query'] ?? '';
 $totalMemberCount = (int) ($pagination['totalItems'] ?? count($members));
+$member_list_config = is_array($orgman_config['ui']['member_list'] ?? null)
+    ? $orgman_config['ui']['member_list']
+    : [];
+$show_bulk_upload = (bool) ($member_list_config['show_bulk_upload'] ?? false);
 
 \OrgManagement\Helpers\Helper::log_debug('[OrgMan] Members render summary', [
     'render_count'      => count($members),
@@ -130,7 +134,7 @@ if ($use_unified_view) {
 }
 ?>
 	<div class="members-list wt_relative"
-	data-signals:='{"membersLoading": false, "addMemberModalOpen": false, "addMemberSubmitting": false, "addMemberSuccess": false}'
+	data-signals:='{"membersLoading": false, "bulkUploadModalOpen": false, "bulkUploadSubmitting": false, "addMemberModalOpen": false, "addMemberSubmitting": false, "addMemberSuccess": false}'
 	data-on:datastar-fetch="evt.detail.type === 'started' && ($membersLoading = true); (evt.detail.type === 'finished' || evt.detail.type === 'error') && ($membersLoading = false)">
 	<div class="members-loading-overlay wt_hidden wt_absolute wt_inset-0 wt_z-10 wt_bg-light-neutral-85 wt_backdrop-blur-xs"
 		data-class:hidden="!$membersLoading" data-class:is-active="$membersLoading">
@@ -427,6 +431,28 @@ $members_list_endpoint = $membersListEndpoint;
 				</form>
 			</div>
 		</dialog>
+
+		<?php if ($show_bulk_upload) : ?>
+		<?php
+            $bulk_upload_endpoint = \OrgManagement\Helpers\template_url() . 'process/bulk-upload-members';
+            $bulk_upload_messages_id = 'bulk-upload-messages-' . sanitize_html_class($org_uuid ?: 'default');
+            $membership_uuid = $membershipUuid;
+            $bulk_upload_wrapper_class = 'wt_rounded-md wt_border wt_border-color wt_bg-white wt_p-4';
+        ?>
+		<dialog id="membersBulkUploadModal"
+			class="modal wt_m-auto max_wt_3xl wt_rounded-md wt_shadow-md backdrop_wt_bg-black-50"
+			data-show="$bulkUploadModalOpen"
+			data-effect="if ($bulkUploadModalOpen) el.showModal(); else el.close();"
+			data-on:close="($membersLoading = false); $bulkUploadModalOpen = false">
+			<div class="wt_bg-white wt_p-6 wt_relative" data-on:click__outside__capture="$bulkUploadModalOpen = false">
+				<button type="button" class="wt_absolute wt_right-4 wt_top-4 wt_text-lg wt_font-semibold"
+					data-on:click="$bulkUploadModalOpen = false">
+					×
+				</button>
+				<?php include __DIR__ . '/members-bulk-upload.php'; ?>
+			</div>
+		</dialog>
+		<?php endif; ?>
 		<?php endif; ?>
 	</div>
 	<?php endif; ?>

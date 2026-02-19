@@ -19,6 +19,10 @@
   - Remove connection/role or end-date membership.
   - Supports "end-date" removal mode for soft deletes.
 - **Edit Permissions**: Modify roles and relationship types for existing members.
+- **Bulk Upload Members (CSV)**:
+  - Config-gated by `ui.member_list.show_bulk_upload` (default `false`).
+  - Available in non-groups member views for users who can add members.
+  - Additive only: rows are added when valid; duplicates/invalid rows are skipped with summary reporting.
 
 ### 1.3 Group Roster Strategy
 - Identify "Roster Management" groups via MDP tags (case-sensitive as shown in MDP data).
@@ -66,6 +70,7 @@ The library is highly configurable via the `wicket/acc/orgman/config` filter. Ke
   - **Unified View Config Flags (Groups)**:
     - `ui.member_view.use_unified`: true (default)
     - `ui.member_list.use_unified`: true (default)
+    - `ui.member_list.show_bulk_upload`: false (default)
     - `groups.ui.use_unified_member_view`: true (default)
     - `groups.ui.use_unified_member_list`: true (default)
     - `groups.ui.show_edit_permissions`: false (default)
@@ -147,5 +152,5 @@ The library registers several endpoints under the `org-management/v1` namespace:
 
 **Open / Needs Confirmation (Membership Cycle):**
 - Cycle tabs and multi-roster cycle resolver UI are not fully implemented.
-- Bulk upload flow for membership-cycle requirements is not implemented yet.
+- ESCRS-specific bulk-upload whitelist enforcement (membership label validation) is not fully implemented yet.
 - Full cycle-status mapping (`active/delayed/upcoming`) is not yet implemented in UI rendering.

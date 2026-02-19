@@ -1,11 +1,15 @@
 # Cascade Strategy: Bulk Upload
 
 ## Current State
-- Dedicated cascade-strategy bulk-upload flow is not implemented in current strategy code.
-- Member mutations in cascade mode are handled through interactive add/remove flows.
+- CSV bulk upload is available through shared member views when:
+  - `roster.strategy = cascade`
+  - `ui.member_list.show_bulk_upload = true`
+  - current user can add members
+- Endpoint: `templates-partials/process/bulk-upload-members.php`
+- Cascade behavior is preserved by routing each row through `MemberService->add_member()`.
 
-## If Added Later
-- Keep implementation strategy-scoped and backward-safe.
-- Reuse cascade membership resolution and seat assignment behavior.
-- Preserve relationship-mapping rules for role assignment.
-- Emit row-level outcomes (`added`, `duplicate`, `invalid`, `error`).
+## Current Behavior
+- CSV columns expected: first name, last name, email, optional roles.
+- Additive-only workflow: no removals.
+- Duplicate active members in the target membership are skipped.
+- Summary reporting includes processed/added/skipped/failed counts.
