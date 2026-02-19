@@ -1,4 +1,4 @@
-# Org Roster Library (Composer)
+# Org Roster Management Library (Composer)
 
 This directory is a Composer-installed library for Wicket organization roster management. It exposes the `OrgManagement\OrgMan` entrypoint and ships templates, assets, and service classes.
 
@@ -22,10 +22,10 @@ The Datastar PHP SDK is a Composer dependency (`starfederation/datastar-php`). D
 
 ## Documentation
 
+- [Installation](docs/INSTALLATION.md)
+- [Configuration](docs/CONFIGURATION.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [Strategies](docs/STRATEGIES.md)
-- [Configuration](docs/CONFIGURATION.md)
-- [Child Theme Integration](docs/CHILD-THEME-INTEGRATION.md)
 - [Design](docs/DESIGN.md)
 - [Frontend](docs/FRONTEND.md)
 - [Testing](docs/TESTING.md)
