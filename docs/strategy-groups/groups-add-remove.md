@@ -29,6 +29,7 @@
 ## Restrictions
 - Users cannot mutate groups they do not manage.
 - Users cannot manage roster entries associated with other organizations inside the same group.
+- Org-scope matching supports normalized UUID/name/identifier comparison for robust cross-endpoint data variance.
 - Invalid or missing `group_uuid` fails with explicit error.
 
 ## Success Criteria

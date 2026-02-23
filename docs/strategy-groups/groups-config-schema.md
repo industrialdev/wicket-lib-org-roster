@@ -8,7 +8,7 @@
 ## Current Default Config Block (`src/config/config.php`)
 
 Global `ui` keys used by groups screens:
-- `ui.organization_list.page_size`: `5`
+- `ui.organization_list.page_size`: `5` (used by non-groups organization-card pagination; groups mode uses group-membership list behavior)
 - `ui.member_list.show_bulk_upload`: `false` by default (shared member CSV bulk upload is not rendered in groups mode)
 
 `groups`:
@@ -28,6 +28,7 @@ Global `ui` keys used by groups screens:
 - `observer_role`: `'observer'`
 - `seat_limited_roles`: `['member']`
 - `list.page_size`: `20`
+  - Used as fetch page size for group-membership retrieval in groups landing resolution.
 - `list.member_page_size`: `15`
 - `additional_info`:
   - `key`: `'association'`

@@ -43,9 +43,13 @@ The Unified View is a search-centric interface for managing rosters.
 ## 3.1 Organization Management List
 - Organization cards on `organization-management` are paginated with `ui.organization_list.page_size` (default `5`).
 - Current organization page is read from `org_page` query arg; values are sanitized and clamped to valid page range.
-- In `groups` strategy, organizations can be synthesized from manageable group data when base org listings are missing, so eligible managers still get cards.
+- In `groups` strategy, this route switches to a groups list UX:
+  - heading: `Manage Groups`
+  - summary: `Groups Found: N`
+  - rows come from active, tagged group memberships for the current user.
+  - if there is exactly one row, the user is redirected to that group's `organization-members` URL.
 - Card rendering is strategy-specific:
-  - `groups`: card emphasizes membership tier, role labels, group `Type`, and `Tag(s)`.
+  - `groups`: row shows group name, organization label, and current user role; action links are shown only for manageable roles.
   - `direct` / `cascade` / `membership_cycle`: card shows membership + roles and group labels where available.
 
 ## 3.2 Bulk Upload UI (CSV)

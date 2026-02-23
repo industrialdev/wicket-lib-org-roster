@@ -42,6 +42,7 @@ $result = $group_service->get_group_members($group_uuid, $org_identifier, [
     'page' => $page,
     'size' => $group_service->get_group_member_page_size(),
     'query' => $query,
+    'org_uuid' => $org_uuid,
 ]);
 
 $group_members = $result['members'] ?? [];

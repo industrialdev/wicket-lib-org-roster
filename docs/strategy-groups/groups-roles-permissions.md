@@ -22,7 +22,11 @@ Default roster role slugs:
 - Group management is denied without a valid active managing role.
 - Access is scoped by organization association metadata.
 - Role and tag checks are config-driven and validated server-side.
+- Groups landing visibility is broader than management:
+  - active + roster-tagged group memberships are visible in the list.
+  - management links and mutations require `groups.manage_roles`.
 
 ## Success Criteria
+- Users can see groups they are in (active + tagged).
 - Eligible managers can view and mutate only their allowed group roster scope.
 - Non-managers cannot add/remove group roster entries.

@@ -12,6 +12,17 @@ if (!function_exists('wicket_api_client')) {
     }
 }
 
+beforeEach(function (): void {
+    // Default client stub prevents ConnectionService fallback error_log noise
+    // in member-list tests that don't care about live connection payloads.
+    $GLOBALS['__orgroster_api_client'] = new class {
+        public function get(string $endpoint)
+        {
+            return ['data' => []];
+        }
+    };
+});
+
 it('matches any role for a person when all_true is false', function (): void {
     $service = new MemberService(new ConfigService());
 

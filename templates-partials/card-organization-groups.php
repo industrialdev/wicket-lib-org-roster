@@ -1,7 +1,19 @@
 <div class="wt_w-full wt_rounded-card-accent wt_p-4 wt_mb-4 wt_hover_shadow-sm wt_transition-shadow wt_bg-card wt_border wt_border-color"
     role="listitem">
+    <?php
+    $org_uuid_param = isset($org_uuid_for_links) ? (string) $org_uuid_for_links : (string) $org_id;
+    $title_url_base = \OrgManagement\Helpers\Helper::get_my_account_page_url('organization-management', '/my-account/organization-management/');
+    $title_params = [];
+    if ($org_uuid_param !== '') {
+        $title_params['org_uuid'] = $org_uuid_param;
+    }
+    if ($primary_group_uuid !== '') {
+        $title_params['group_uuid'] = $primary_group_uuid;
+    }
+    $title_url = !empty($title_params) ? add_query_arg($title_params, $title_url_base) : $title_url_base;
+    ?>
     <h2 class="wt_text-2xl wt_mb-3">
-        <a href="<?php echo esc_url(\OrgManagement\Helpers\Helper::get_my_account_page_url('organization-management', '/my-account/organization-management/') . '?org_uuid=' . urlencode($org_id)); ?>"
+        <a href="<?php echo esc_url($title_url); ?>"
             class="wt_text-content wt_hover_text-primary-600 wt_focus_outline-hidden wt_focus_ring-2 wt_focus_ring-primary-500 wt_focus_ring-offset-2 wt_decoration-none">
             <?php echo esc_html($org_name); ?>
         </a>
@@ -95,7 +107,10 @@
                     <?php if ($can_edit_org): ?>
                         <?php
                         $profile_url_base = \OrgManagement\Helpers\Helper::get_my_account_page_url('organization-profile', '/my-account/organization-profile/');
-                        $profile_params = ['org_uuid' => $org_id];
+                        $profile_params = [];
+                        if ($org_uuid_param !== '') {
+                            $profile_params['org_uuid'] = $org_uuid_param;
+                        }
                         if ($roster_mode === 'membership_cycle' && $entry_membership_uuid !== '') {
                             $profile_params['membership_uuid'] = $entry_membership_uuid;
                         }
@@ -116,7 +131,10 @@
                     <?php if ($is_membership_manager): ?>
                         <?php
                         $members_url_base = \OrgManagement\Helpers\Helper::get_my_account_page_url('organization-members', '/my-account/organization-members/');
-                        $members_params = ['org_uuid' => $org_id];
+                        $members_params = [];
+                        if ($org_uuid_param !== '') {
+                            $members_params['org_uuid'] = $org_uuid_param;
+                        }
                         if ($roster_mode === 'membership_cycle' && $entry_membership_uuid !== '') {
                             $members_params['membership_uuid'] = $entry_membership_uuid;
                         }

@@ -22,11 +22,6 @@ $org_uuid = isset($_GET['org_uuid']) ? sanitize_text_field($_GET['org_uuid']) : 
 if (empty($org_uuid) && isset($_GET['org_id'])) {
     $org_uuid = sanitize_text_field($_GET['org_id']);
 }
-if (!$org_uuid) {
-    echo '<div class="notice">' . esc_html__('Organization not specified.', 'wicket-acc') . '</div>';
-
-    return;
-}
 
 $user_uuid = wp_get_current_user()->user_login;
 
@@ -34,11 +29,28 @@ $user_uuid = wp_get_current_user()->user_login;
 $membership_service = new \OrgManagement\Services\MembershipService();
 $config_service = new \OrgManagement\Services\ConfigService();
 $roster_mode = $config_service->get_roster_mode();
+$group_uuid = isset($_GET['group_uuid']) ? sanitize_text_field($_GET['group_uuid']) : '';
 
 // Fetch organization basic info
 $org_name = '';
 $group_name = '';
-if (function_exists('wicket_get_organization')) {
+if ($roster_mode === 'groups' && $group_uuid && function_exists('wicket_get_group')) {
+    $group = wicket_get_group($group_uuid);
+    if (is_array($group) && isset($group['data']['attributes'])) {
+        $attrs = $group['data']['attributes'];
+        $group_name = $attrs['name'] ?? $attrs['name_en'] ?? $attrs['name_fr'] ?? '';
+    }
+    if (empty($org_uuid) && is_array($group)) {
+        $org_uuid = (string) ($group['data']['relationships']['organization']['data']['id'] ?? '');
+    }
+}
+
+if (!$org_uuid && $roster_mode !== 'groups') {
+    echo '<div class="notice">' . esc_html__('Organization not specified.', 'wicket-acc') . '</div>';
+
+    return;
+}
+if ($org_uuid !== '' && function_exists('wicket_get_organization')) {
     $org = wicket_get_organization($org_uuid);
     if (is_array($org) && isset($org['data']['attributes'])) {
         $attrs = $org['data']['attributes'];
@@ -49,19 +61,8 @@ if (!$org_name) {
     $org_name = esc_html__('Organization', 'wicket-acc');
 }
 
-if ($roster_mode === 'groups') {
-    $group_uuid = isset($_GET['group_uuid']) ? sanitize_text_field($_GET['group_uuid']) : '';
-    if ($group_uuid && function_exists('wicket_get_group')) {
-        $group = wicket_get_group($group_uuid);
-        if (is_array($group) && isset($group['data']['attributes'])) {
-            $attrs = $group['data']['attributes'];
-            $group_name = $attrs['name'] ?? $attrs['name_en'] ?? $attrs['name_fr'] ?? '';
-        }
-    }
-}
-
 // Membership UUID and data
-$membership_uuid = $membership_service->getMembershipForOrganization($org_uuid);
+$membership_uuid = $org_uuid ? $membership_service->getMembershipForOrganization($org_uuid) : '';
 $membership_data = $membership_uuid ? $membership_service->getOrgMembershipData($membership_uuid) : null;
 
 // Extract membership summary info
@@ -143,16 +144,28 @@ if ($membership_data) {
     <div class="org-details__actions wt_flex wt_items-center wt_justify-evenly wt_gap-8 wt_mt-4">
         <?php
         // Check user permissions for this organization
-        $can_edit_org = \OrgManagement\Helpers\PermissionHelper::can_edit_organization($org_uuid);
-$is_membership_manager = \OrgManagement\Helpers\PermissionHelper::is_membership_manager($org_uuid);
+        if ($roster_mode === 'groups' && $group_uuid !== '') {
+            $group_service = new \OrgManagement\Services\GroupService();
+            $group_access = $group_service->can_manage_group($group_uuid, (string) $user_uuid);
+            $can_edit_org = !empty($group_access['allowed']);
+            $is_membership_manager = !empty($group_access['allowed']);
+            $can_bulk_upload = !empty($group_access['allowed']);
+        } else {
+            $can_edit_org = \OrgManagement\Helpers\PermissionHelper::can_edit_organization($org_uuid);
+            $is_membership_manager = \OrgManagement\Helpers\PermissionHelper::is_membership_manager($org_uuid);
+            $can_bulk_upload = \OrgManagement\Helpers\PermissionHelper::can_add_members($org_uuid);
+        }
 
 // Get WPML-aware URLs for my-account pages
 $profile_url = \OrgManagement\Helpers\Helper::get_my_account_page_url('organization-profile', '/my-account/organization-profile/');
 $members_url = \OrgManagement\Helpers\Helper::get_my_account_page_url('organization-members', '/my-account/organization-members/');
 $members_bulk_url = \OrgManagement\Helpers\Helper::get_my_account_page_url('organization-members-bulk', '/my-account/organization-members-bulk/');
-$group_uuid = isset($_GET['group_uuid']) ? sanitize_text_field($_GET['group_uuid']) : '';
-$profile_params = ['org_uuid' => $org_uuid];
-$members_params = ['org_uuid' => $org_uuid];
+$profile_params = [];
+$members_params = [];
+if ($org_uuid !== '') {
+    $profile_params['org_uuid'] = $org_uuid;
+    $members_params['org_uuid'] = $org_uuid;
+}
 if ($roster_mode === 'groups' && $group_uuid !== '') {
     $profile_params['group_uuid'] = $group_uuid;
     $members_params['group_uuid'] = $group_uuid;
@@ -172,7 +185,7 @@ if ($roster_mode === 'groups' && $group_uuid !== '') {
         <?php
         $member_list_config = \OrgManagement\Config\get_config()['ui']['member_list'] ?? [];
         $show_bulk_upload = (bool) ($member_list_config['show_bulk_upload'] ?? false);
-        if ($show_bulk_upload && \OrgManagement\Helpers\PermissionHelper::can_add_members($org_uuid)):
+        if ($show_bulk_upload && $can_bulk_upload):
         ?>
             <a href="<?php echo esc_url(add_query_arg($members_params, $members_bulk_url)); ?>"
                 class="org-details__action-link wt_text-primary-600 wt_hover_text-primary-700 underline underline-offset-4"><?php esc_html_e('Bulk Upload', 'wicket-acc'); ?></a>
