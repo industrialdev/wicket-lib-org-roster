@@ -25,7 +25,12 @@
   - Additive only: rows are added when valid; duplicates/invalid rows are skipped with summary reporting.
 
 ### 1.3 Group Roster Strategy
-- Identify "Roster Management" groups via MDP tags (case-sensitive as shown in MDP data).
+- Identify "Roster Management" groups via MDP tags (`groups.tag_name`, case-sensitivity configurable by `groups.tag_case_sensitive`).
+- On `organization-management` in groups mode:
+  - show active tagged groups the user belongs to,
+  - if exactly one group is found, redirect directly to that group,
+  - if multiple groups are found, show the group list.
+- Group list visibility is independent from organization membership/org roles; action links are role-gated.
 - Manage group members for specific organizations. 
   - Organization membership is determined by matching the group role additional info (`custom_data_field`) between the managing user's role and the roster member's role. 
   - Users cannot view or manage roster entries for other organizations within the same group.
@@ -67,6 +72,7 @@ The library is highly configurable via the `wicket/acc/orgman/config` filter. Ke
 - `additional_seats`: SKU and Gravity Forms mapping for seat purchases.
 - `ui`: Toggles for "Unified View", card fields, and layout modes.
   - `ui.organization_list.page_size`: organization card page size for `organization-management` (default `5`).
+    - Applies to non-groups organization cards; groups mode uses group-membership list behavior.
   - **Unified View Config Flags (Groups)**:
     - `ui.member_view.use_unified`: true (default)
     - `ui.member_list.use_unified`: true (default)
@@ -80,7 +86,7 @@ The library is highly configurable via the `wicket/acc/orgman/config` filter. Ke
 
 ### 3.1 Content Injection
 The library automatically injects its UI into the following "My Account" page slugs:
-- `organization-management` (Lists manageable organizations; in groups strategy this is built from eligible group memberships and includes org fallback synthesis when base org listing is incomplete).
+- `organization-management` (Lists organizations in non-groups modes; in groups strategy this renders the active tagged group list, with single-group auto-redirect).
 - `organization-profile` (Group detail card tab 1: group information editing).
 - `organization-members` (Group detail card tab 2: member list for the entire group, defaulting to the unified view).
 - `supplemental-members`
@@ -116,17 +122,19 @@ The library registers several endpoints under the `org-management/v1` namespace:
 - **Capability Checks**: Verifies if a user is an Administrator or has specific organization roles (`owner`, `org_editor`, `membership_manager`).
 - **Confirmation**: Checks `confirmed_at` status for users before allowing certain actions.
 - **Group Access Security**:
-  - Only users assigned directly by IAA staff in the MDP as a *President*, *Council Delegate*, *Council Alternate Delegate*, or *Correspondent* may manage their organization's roster. Losing this role instantly revokes access.
+  - By default, only users with active group role in `groups.manage_roles` (`president`, `delegate`, `alternate_delegate`, `council_delegate`, `council_alternate_delegate`, `correspondent`) may manage group roster actions.
   - Users cannot remove or modify these managing roles, nor can they explicitly remove themselves from these managing roles.
 
-## 6. Current Implementation Status (As of February 17, 2026)
+## 6. Current Implementation Status (As of February 23, 2026)
 
 **Completed (Groups):**
 - Groups strategy wiring, `GroupService`, templates, and process endpoints (no longer stubby).
-- Organization-management card list (group-derived in groups mode) and member list UIs exist with pagination and search.
-- Organization-management list now paginates organization cards (`ui.organization_list.page_size`) and can synthesize organizations from manageable groups in groups mode.
+- Organization-management groups landing now lists active tagged group memberships and auto-redirects only when one group exists.
+- Group list now includes non-manage roles for visibility, while management links are role-gated (`can_manage_group` / `groups.manage_roles`).
+- Group cards resolve organization display names via included org data with `wicket_get_organization` fallback.
 - Role-based access checks, tag filtering, and roster-role validation (member/observer seat limits in add flow).
 - Removal supports end-date and delete modes (configurable). End-dated roles are treated as removed (`active=true` queries).
+- Group org-scope matching now normalizes identifier/name/uuid tokens for member listing and removal lookups.
 - Groups config block added.
 - Unified members view (search + list + pagination + modals + seats callout) is the default. Legacy list preserved behind config flags.
 - Debug logging added across groups strategy via `wc_get_logger` (source: `wicket-orgroster`).
@@ -135,7 +143,7 @@ The library registers several endpoints under the `org-management/v1` namespace:
 - Org identifier key/format in `custom_data_field` must be confirmed and aligned with MDP data.
 - Role identifiers are config-driven, not yet derived dynamically from MDP responses.
 - Seat-limit enforcement for the member role currently only checks the first 50 members.
-- Organization card sorting requirements (for groups-derived listings) are not defined/implemented.
+- Group-list sorting beyond current name sort is not formally specified.
 - Explicit self-removal prevention for managing roles is not separately enforced (covered by general role block).
 - Config filtering parity for all group settings (only base config array added).
 

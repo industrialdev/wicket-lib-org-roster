@@ -145,7 +145,10 @@ Current strategy keys:
 - Adds/removes group members with group role constraints.
 - Validates manager access via group membership and org identifier mapping.
 - Enforces special role restrictions (for example managing roles non-removable).
-- Organization cards can be derived from manageable group memberships when the base org list omits those organizations.
+- Groups landing (`organization-management`) is membership-driven:
+  - shows active roster-tagged groups the user belongs to,
+  - auto-redirects only when exactly one group row is present,
+  - gates `Group Profile` / `Manage Members` actions by `groups.manage_roles`.
 
 #### Key Config Namespace
 - `groups`

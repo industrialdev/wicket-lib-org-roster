@@ -19,21 +19,21 @@
 ### 3.1 Core Model
 - Roster ownership is group-centric.
 - Access is based on active `group_members` records for the current user.
-- Group roster visibility is restricted to memberships that match:
+- Group landing visibility is restricted to active memberships that match roster-management group tag.
+- Management actions remain restricted to memberships that match:
   - allowed managing role, and
-  - roster-management group tag, and
   - organization association.
 
 ### 3.2 Group Eligibility Rules
-- A group is considered manageable only when all criteria are true:
-  - User has an active group role in `groups.manage_roles`.
+- A group is included on `organization-management` in groups mode when:
+  - User has an active group membership.
   - Group carries `groups.tag_name` (default: `Roster Management`, case-insensitive by default).
-  - Group is attached to an organization.
+- A group is considered manageable (action-enabled) when all criteria are true:
+  - User role is in `groups.manage_roles`.
+  - Group carries `groups.tag_name`.
 - Additional tag fallback is supported:
   - If included group payload omits `tags`, the service fetches `/groups/{group_uuid}` and re-evaluates tag eligibility.
-- Organization cards on `organization-management` are then built from:
-  - base organization list entries, plus
-  - organizations inferred from manageable groups when missing in the base list.
+- Group rows shown on `organization-management` are built from active memberships, deduplicated by `group_uuid`, and sorted by group name.
 
 ### 3.3 Managing Roles
 - Default managing role slugs:
@@ -71,14 +71,16 @@
     - `delete`
 
 ### 3.6 List/Search/Pagination
-- Organization card list and group member list are paginated.
+- Group member list is paginated.
 - Search is supported:
   - manageable group data by group name.
   - members by group search endpoint (or standard list fallback).
 - Unified member list/view templates are default for groups mode.
-- Organization-management pagination contract:
-  - page size: `ui.organization_list.page_size` (default `5`)
-  - query arg: `org_page` (sanitized and clamped)
+- Organization-management groups landing contract:
+  - heading: `Manage Groups`
+  - count line: `Groups Found: {n}`
+  - if exactly one eligible group is present, auto-redirect to `organization-members?group_uuid=...` (and `org_uuid` when available).
+  - if more than one group is present, show all rows and do not redirect.
 
 ### 3.7 UI Labels
 - In groups mode, the top-level management heading must be `Manage Groups`.
@@ -105,8 +107,8 @@
 - Regression tests should prove no behavior drift in `direct`, `cascade`, `membership_cycle`.
 
 ## 7) Acceptance Criteria
-- Eligible managers can see manageable organizations on `organization-management` based on roster-management group access.
-- Non-eligible roles/groups are excluded.
+- Users can see groups they belong to on `organization-management` (tag-filtered, active-only), even when their role is not in `groups.manage_roles`.
+- Non-eligible roles do not get management action links.
 - `Manage Groups` heading appears when strategy is `groups`.
 - Add/remove only works for groups and org association the actor manages.
 - Tests cover role/tag eligibility and keep cross-strategy safety.

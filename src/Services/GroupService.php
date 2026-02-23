@@ -140,7 +140,8 @@ class GroupService
     {
         $group_attrs = is_array($group['attributes'] ?? null) ? $group['attributes'] : [];
         $group_tags = $group_attrs['tags'] ?? null;
-        if (is_array($group_tags) && !empty($group_tags)) {
+        $group_org_uuid = (string) ($group['relationships']['organization']['data']['id'] ?? '');
+        if (is_array($group_tags) && !empty($group_tags) && $group_org_uuid !== '') {
             return $group;
         }
 
@@ -162,6 +163,21 @@ class GroupService
                 }
                 if (isset($detail_attrs['tags']) && is_array($detail_attrs['tags'])) {
                     $group['attributes']['tags'] = $detail_attrs['tags'];
+                }
+            }
+            $detail_relationships = is_array($details) ? ($details['data']['relationships'] ?? []) : [];
+            if (is_array($detail_relationships)) {
+                $detail_org = $detail_relationships['organization']['data']['id'] ?? '';
+                if (!isset($group['relationships']) || !is_array($group['relationships'])) {
+                    $group['relationships'] = [];
+                }
+                if ($detail_org !== '') {
+                    $group['relationships']['organization'] = [
+                        'data' => [
+                            'type' => 'organizations',
+                            'id' => $detail_org,
+                        ],
+                    ];
                 }
             }
         } catch (\Throwable $e) {
@@ -313,6 +329,143 @@ class GroupService
     }
 
     /**
+     * Normalize organization scope token for comparisons.
+     *
+     * @param string $value
+     * @return string
+     */
+    private function normalize_scope_token(string $value): string
+    {
+        $value = trim($value);
+        if ($value === '') {
+            return '';
+        }
+
+        $value = strtolower($value);
+        $value = preg_replace('/\s+/', ' ', $value) ?: $value;
+
+        return trim($value);
+    }
+
+    /**
+     * Resolve comparable scope tokens from a candidate identifier/name.
+     *
+     * @param string $candidate
+     * @param bool   $expand_lookup
+     * @return array<int, string>
+     */
+    private function resolve_scope_tokens(string $candidate, bool $expand_lookup = true): array
+    {
+        $tokens = [];
+        $normalized_candidate = $this->normalize_scope_token($candidate);
+        if ($normalized_candidate !== '') {
+            $tokens[$normalized_candidate] = true;
+        }
+
+        if (!$expand_lookup || $candidate === '' || !function_exists('wicket_get_organization')) {
+            return array_keys($tokens);
+        }
+
+        static $organization_scope_cache = [];
+        if (!array_key_exists($candidate, $organization_scope_cache)) {
+            $resolved_tokens = [];
+            try {
+                $organization_response = wicket_get_organization($candidate);
+                if (is_array($organization_response)) {
+                    $data = $organization_response['data'] ?? [];
+                    $resolved_id = is_array($data) ? (string) ($data['id'] ?? '') : '';
+                    if ($resolved_id !== '') {
+                        $resolved_tokens[] = $resolved_id;
+                    }
+
+                    $attrs = is_array($data) ? ($data['attributes'] ?? []) : [];
+                    if (is_array($attrs)) {
+                        foreach ([
+                            'legal_name',
+                            'legal_name_en',
+                            'legal_name_fr',
+                            'name',
+                            'name_en',
+                            'name_fr',
+                            'alternate_name',
+                            'alternate_name_en',
+                            'alternate_name_fr',
+                        ] as $name_key) {
+                            $candidate_value = isset($attrs[$name_key]) && is_string($attrs[$name_key])
+                                ? $attrs[$name_key]
+                                : '';
+                            if ($candidate_value !== '') {
+                                $resolved_tokens[] = $candidate_value;
+                            }
+                        }
+                    }
+                }
+            } catch (\Throwable $e) {
+                $resolved_tokens = [];
+            }
+
+            $organization_scope_cache[$candidate] = $resolved_tokens;
+        }
+
+        foreach ((array) $organization_scope_cache[$candidate] as $resolved_token) {
+            $normalized_resolved = $this->normalize_scope_token((string) $resolved_token);
+            if ($normalized_resolved !== '') {
+                $tokens[$normalized_resolved] = true;
+            }
+        }
+
+        return array_keys($tokens);
+    }
+
+    /**
+     * Determine whether a member belongs to the requested organization scope.
+     *
+     * @param array  $member
+     * @param string $org_identifier
+     * @param string $org_uuid
+     * @return bool
+     */
+    private function member_matches_org_scope(array $member, string $org_identifier, string $org_uuid = ''): bool
+    {
+        if ($org_identifier === '' && $org_uuid === '') {
+            return true;
+        }
+
+        $target_tokens = [];
+        foreach ([$org_identifier, $org_uuid] as $target_candidate) {
+            foreach ($this->resolve_scope_tokens((string) $target_candidate, true) as $token) {
+                $target_tokens[$token] = true;
+            }
+        }
+        if (empty($target_tokens)) {
+            return true;
+        }
+
+        $member_scope_tokens = [];
+        $member_org_uuid = (string) ($member['relationships']['organization']['data']['id'] ?? '');
+        $member_identifier = $this->extract_org_identifier($member, $member_org_uuid);
+
+        foreach ($this->resolve_scope_tokens($member_identifier, false) as $token) {
+            $member_scope_tokens[$token] = true;
+        }
+        foreach ($this->resolve_scope_tokens($member_org_uuid, true) as $token) {
+            $member_scope_tokens[$token] = true;
+        }
+
+        if (empty($member_scope_tokens)) {
+            return false;
+        }
+
+        foreach (array_keys($target_tokens) as $token) {
+            if (isset($member_scope_tokens[$token])) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Build custom_data_field payload for group membership.
      *
      * @param string $org_identifier
@@ -352,6 +505,7 @@ class GroupService
         $page = max(1, (int) ($args['page'] ?? 1));
         $size = max(1, (int) ($args['size'] ?? $this->get_group_list_page_size()));
         $query = isset($args['query']) ? sanitize_text_field((string) $args['query']) : '';
+        $include_all_roles = isset($args['include_all_roles']) ? (bool) $args['include_all_roles'] : false;
 
         $response = $this->get_person_group_memberships($person_uuid, [
             'page' => $page,
@@ -383,8 +537,17 @@ class GroupService
 
         foreach ($response['data'] as $membership) {
             $role_slug = sanitize_key((string) ($membership['attributes']['type'] ?? ''));
-            if (!in_array($role_slug, $manage_roles, true)) {
+            $can_manage = in_array($role_slug, $manage_roles, true);
+            if (!$include_all_roles && !$can_manage) {
                 continue;
+            }
+            if ($include_all_roles && !$can_manage) {
+                $this->get_logger()->debug('[OrgRoster] Including non-manage group role for groups landing list', [
+                    'source' => 'wicket-orgroster',
+                    'person_uuid' => $person_uuid,
+                    'role_slug' => $role_slug,
+                    'group_id' => $membership['relationships']['group']['data']['id'] ?? '',
+                ]);
             }
 
             $group_id = $membership['relationships']['group']['data']['id'] ?? '';
@@ -414,20 +577,63 @@ class GroupService
             if (empty($org_id)) {
                 $org_id = $group['relationships']['organization']['data']['id'] ?? '';
             }
-            if (empty($org_id)) {
-                $this->get_logger()->debug('[OrgRoster] Group skipped missing organization relationship', [
+            $org_identifier = $this->extract_org_identifier($membership, $org_id);
+            if (empty($org_id) && empty($org_identifier)) {
+                $this->get_logger()->debug('[OrgRoster] Group has no organization scope metadata; keeping as manageable group', [
                     'source' => 'wicket-orgroster',
                     'group_id' => $group_id,
+                    'membership_id' => $membership['id'] ?? '',
                 ]);
-                continue; // must be attached to an organization
             }
-
-            $org_identifier = $this->extract_org_identifier($membership, $org_id);
             $organization = $included_lookup['organizations'][$org_id] ?? null;
             $org_name = '';
             if (is_array($organization)) {
                 $org_attrs = $organization['attributes'] ?? [];
                 $org_name = $org_attrs['legal_name'] ?? $org_attrs['legal_name_en'] ?? $org_attrs['name'] ?? '';
+            }
+            if ($org_name === '' && function_exists('wicket_get_organization')) {
+                static $resolved_org_name_cache = [];
+                $org_candidates = array_values(array_unique(array_filter([
+                    (string) $org_id,
+                    (string) $org_identifier,
+                ], static function ($value): bool {
+                    return is_string($value) && trim($value) !== '';
+                })));
+
+                foreach ($org_candidates as $org_candidate) {
+                    if (!array_key_exists($org_candidate, $resolved_org_name_cache)) {
+                        $resolved_name = '';
+                        try {
+                            $organization_response = wicket_get_organization($org_candidate);
+                            $organization_attrs = is_array($organization_response)
+                                ? ($organization_response['data']['attributes'] ?? [])
+                                : [];
+                            if (is_array($organization_attrs)) {
+                                $resolved_name = (string) (
+                                    $organization_attrs['legal_name']
+                                    ?? $organization_attrs['legal_name_en']
+                                    ?? $organization_attrs['name']
+                                    ?? ''
+                                );
+                            }
+                        } catch (\Throwable $e) {
+                            $resolved_name = '';
+                        }
+                        $resolved_org_name_cache[$org_candidate] = $resolved_name;
+                    }
+
+                    $candidate_name = (string) ($resolved_org_name_cache[$org_candidate] ?? '');
+                    if ($candidate_name !== '') {
+                        $org_name = $candidate_name;
+                        if ($org_id === '') {
+                            $org_id = $org_candidate;
+                        }
+                        break;
+                    }
+                }
+            }
+            if ($org_name === '' && $org_identifier !== '') {
+                $org_name = $org_identifier;
             }
             $group_name = $group['attributes']['name'] ?? $group['attributes']['name_en'] ?? $group['attributes']['name_fr'] ?? '';
 
@@ -445,6 +651,7 @@ class GroupService
                 'org_identifier' => $org_identifier,
                 'org_name' => $org_name,
                 'role_slug' => $role_slug,
+                'can_manage' => $can_manage,
             ];
         }
 
@@ -461,6 +668,7 @@ class GroupService
             'count' => count($groups),
             'page' => $page,
             'size' => $size,
+            'include_all_roles' => $include_all_roles,
         ]);
 
         return [
@@ -559,6 +767,7 @@ class GroupService
         $page = max(1, (int) ($args['page'] ?? 1));
         $size = max(1, (int) ($args['size'] ?? $this->get_group_member_page_size()));
         $query = isset($args['query']) ? sanitize_text_field((string) $args['query']) : '';
+        $org_uuid = isset($args['org_uuid']) ? sanitize_text_field((string) $args['org_uuid']) : '';
 
         $roles = $this->get_roster_roles();
         $role_param = implode(',', $roles);
@@ -587,12 +796,14 @@ class GroupService
             'size' => $size,
             'query' => $query,
             'org_identifier' => $org_identifier,
+            'org_uuid' => $org_uuid,
         ]);
 
         return $this->normalize_group_members_response($response, $org_identifier, [
             'page' => $page,
             'size' => $size,
             'query' => $query,
+            'org_uuid' => $org_uuid,
         ]);
     }
 
@@ -605,8 +816,13 @@ class GroupService
      * @param array  $roles
      * @return string
      */
-    public function find_group_member_id(string $group_uuid, string $person_uuid, string $org_identifier, array $roles = []): string
-    {
+    public function find_group_member_id(
+        string $group_uuid,
+        string $person_uuid,
+        string $org_identifier,
+        array $roles = [],
+        string $org_uuid = ''
+    ): string {
         if (empty($group_uuid) || empty($person_uuid)) {
             return '';
         }
@@ -634,8 +850,7 @@ class GroupService
                 continue;
             }
 
-            $member_org_identifier = $this->extract_org_identifier($item, $org_identifier);
-            if ('' !== $org_identifier && $member_org_identifier !== $org_identifier) {
+            if (!$this->member_matches_org_scope($item, $org_identifier, $org_uuid)) {
                 continue;
             }
 
@@ -658,6 +873,7 @@ class GroupService
         $page = (int) ($context['page'] ?? 1);
         $size = (int) ($context['size'] ?? $this->get_group_member_page_size());
         $query = (string) ($context['query'] ?? '');
+        $org_uuid = (string) ($context['org_uuid'] ?? '');
 
         $members = [];
         $pagination = [
@@ -689,8 +905,7 @@ class GroupService
                 continue;
             }
 
-            $member_org_identifier = $this->extract_org_identifier($item, $org_identifier);
-            if ('' !== $org_identifier && $member_org_identifier !== $org_identifier) {
+            if (!$this->member_matches_org_scope($item, $org_identifier, $org_uuid)) {
                 continue;
             }
 

@@ -592,6 +592,7 @@ class MemberService
         $page = max(1, (int) ($args['page'] ?? 1));
         $size = max(1, (int) ($args['size'] ?? 15));
         $query = isset($args['query']) ? sanitize_text_field((string) $args['query']) : '';
+        $org_uuid = isset($args['org_uuid']) ? sanitize_text_field((string) $args['org_uuid']) : '';
 
         $group_service = new GroupService();
 
@@ -599,6 +600,7 @@ class MemberService
             'page' => $page,
             'size' => $size,
             'query' => $query,
+            'org_uuid' => $org_uuid,
         ]);
     }
 

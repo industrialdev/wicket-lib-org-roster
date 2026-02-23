@@ -90,7 +90,7 @@ All keys below are current defaults from `src/config/config.php`.
 | `groups.member_role` | `member` | string | Canonical "member" group role slug used by UI and write operations. |
 | `groups.observer_role` | `observer` | string | Canonical "observer" group role slug used by UI and write operations. |
 | `groups.seat_limited_roles` | `['member']` | array | Group roles that count toward seat-limited capacity checks. |
-| `groups.list.page_size` | `20` | int | Default number of groups returned/displayed per page in group listing views. |
+| `groups.list.page_size` | `20` | int | Fetch page size for resolving group-membership listings in groups mode. |
 | `groups.list.member_page_size` | `15` | int | Default number of group members returned/displayed per page in group member lists. |
 | `groups.additional_info.key` | `association` | string | Key expected inside group `custom_data_field` for organization association metadata. |
 | `groups.additional_info.value_field` | `name` | string | Nested field extracted from additional info value payload when resolving organization linkage. |
@@ -144,7 +144,7 @@ All keys below are current defaults from `src/config/config.php`.
 ### `ui`
 | Key | Default | Type | Description |
 |---|---|---|---|
-| `ui.organization_list.page_size` | `5` | int | Number of organizations shown per page in the organization index list. |
+| `ui.organization_list.page_size` | `5` | int | Number of organizations shown per page in non-groups organization index lists. |
 | `ui.hide_relationship_type` | `true` | bool | Hides relationship type text in legacy/member card presentation. |
 | `ui.show_special_relationships` | `false` | bool | Shows special relationship types (e.g. exchange-defined) in member-facing UI. |
 | `ui.member_list.use_unified` | `true` | bool | Enables unified member list component instead of legacy list rendering. |

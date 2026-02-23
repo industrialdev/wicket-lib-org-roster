@@ -19,12 +19,13 @@ Exit Criteria:
 
 ## Phase 1 — Eligibility and List Reliability
 - [x] Resolve manageable groups from active memberships and managing roles.
+- [x] Include active tagged groups in landing visibility even for non-manage roles; keep action gating role-based.
 - [x] Enforce roster tag filter.
 - [x] Add fallback tag fetch for payloads missing included tags (`/groups/{id}`).
 - [ ] Define and enforce deterministic group sort order (if business requires ordering).
 
 Exit Criteria:
-- [x] Eligible users consistently see manageable groups.
+- [x] Users consistently see active tagged groups they belong to; manageable actions remain gated.
 
 ## Phase 2 — Add/Remove Safety
 - [x] Enforce `group_uuid` requirement.

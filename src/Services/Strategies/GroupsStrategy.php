@@ -162,6 +162,7 @@ class GroupsStrategy implements RosterManagementStrategy
                     'page' => 1,
                     'size' => 50,
                     'query' => '',
+                    'org_uuid' => $org_uuid,
                 ]);
                 foreach ($existing_members['members'] ?? [] as $member) {
                     if (sanitize_key((string) ($member['role'] ?? '')) === $role_slug) {
@@ -279,7 +280,7 @@ class GroupsStrategy implements RosterManagementStrategy
 
             $group_member_id = (string) ($context['group_member_id'] ?? '');
             if ('' === $group_member_id) {
-                $group_member_id = $this->group_service()->find_group_member_id($group_uuid, $person_uuid, $org_identifier);
+                $group_member_id = $this->group_service()->find_group_member_id($group_uuid, $person_uuid, $org_identifier, [], $org_uuid);
             }
             if ('' === $group_member_id) {
                 $logger->error('[OrgRoster] Groups strategy could not locate group member', $log_context);
