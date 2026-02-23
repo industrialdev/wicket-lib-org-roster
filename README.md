@@ -47,11 +47,12 @@ Strategy resolution is runtime-configured via `ConfigService::get_roster_mode()`
 
 - [Installation](docs/INSTALLATION.md)
 - [Architecture](docs/ARCHITECTURE.md)
+- [Design](docs/DESIGN.md)
+- [Specifications](docs/SPECS.md)
 - [Strategies](docs/STRATEGIES.md)
 - [Configuration](docs/CONFIGURATION.md)
 - [Frontend](docs/FRONTEND.md)
 - [Testing](docs/TESTING.md)
-- [Specifications](docs/SPECS.md)
 - [Changelog](CHANGELOG.md)
 
 ## Assets
