@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit bootstrap="tests/bootstrap.php" colors="true">
     <testsuites>
-        <testsuite name="OrgManagement">
+        <testsuite name="unit">
             <directory>tests/Unit</directory>
+        </testsuite>
+        <testsuite name="browser">
+            <directory suffix=".pest.php">tests/Browser</directory>
         </testsuite>
     </testsuites>
 </phpunit>
