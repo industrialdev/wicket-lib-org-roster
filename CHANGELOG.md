@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.3.5] - 2026-02-25
+
+### Fixed
+- Bulk member upload no longer creates duplicate members in groups strategy when a person is already actively assigned:
+  - Added pre-add duplicate checks for active group membership by email/person within group and organization scope.
+  - Rows that map to an already-assigned group member now count as `skipped` instead of creating duplicates/failing.
+  - Added unit coverage for group-scope duplicate detection in `BulkMemberUploadServiceTest`.
+
 ## [0.3.3] - 2026-02-25
 
 ### Added

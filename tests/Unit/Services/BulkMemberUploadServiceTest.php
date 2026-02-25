@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Brain\Monkey\Functions;
 use OrgManagement\Services\BulkMemberUploadService;
+use OrgManagement\Services\GroupService;
 
 beforeEach(function (): void {
     $GLOBALS['__orgroster_bulk_options'] = [];
@@ -243,4 +244,54 @@ it('bounds batch size to supported min and max limits', function (): void {
     expect($call_get_batch_size($service, ['batch_size' => 0]))->toBe(1);
     expect($call_get_batch_size($service, ['batch_size' => 9999]))->toBe(500);
     expect($call_get_batch_size($service, ['batch_size' => 25]))->toBe(25);
+});
+
+it('detects existing active group membership for a person email within group/org scope', function (): void {
+    Functions\when('wicket_get_person_by_email')->alias(static function (string $email): array {
+        return ['id' => $email === 'existing@example.com' ? 'person-1' : ''];
+    });
+
+    $group_service = new class extends GroupService {
+        public function get_person_group_memberships(string $person_uuid, array $args = [])
+        {
+            if ($person_uuid !== 'person-1') {
+                return ['data' => []];
+            }
+
+            return [
+                'data' => [
+                    [
+                        'relationships' => [
+                            'group' => ['data' => ['id' => 'group-1']],
+                            'organization' => ['data' => ['id' => 'org-1']],
+                        ],
+                    ],
+                ],
+                'meta' => [
+                    'page' => [
+                        'total_pages' => 1,
+                    ],
+                ],
+            ];
+        }
+    };
+
+    $service = new BulkMemberUploadService();
+    $call_active_group_membership_exists = Closure::bind(
+        static function (
+            BulkMemberUploadService $svc,
+            string $group_uuid,
+            string $org_uuid,
+            string $email,
+            GroupService $group_svc
+        ): bool {
+            return $svc->active_group_membership_exists($group_uuid, $org_uuid, $email, $group_svc);
+        },
+        null,
+        BulkMemberUploadService::class
+    );
+
+    expect($call_active_group_membership_exists($service, 'group-1', 'org-1', 'existing@example.com', $group_service))->toBeTrue();
+    expect($call_active_group_membership_exists($service, 'group-2', 'org-1', 'existing@example.com', $group_service))->toBeFalse();
+    expect($call_active_group_membership_exists($service, 'group-1', 'org-2', 'existing@example.com', $group_service))->toBeFalse();
 });

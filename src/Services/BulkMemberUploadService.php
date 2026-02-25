@@ -417,9 +417,31 @@ class BulkMemberUploadService
             }
 
             $membership_uuid = (string) ($job['membership_uuid'] ?? '');
-            if (
-                (string) ($job['roster_mode'] ?? '') !== 'groups'
-                && ($this->active_membership_exists($membership_uuid, $email) || $this->active_membership_exists_by_person($membership_uuid, $email))
+            if ((string) ($job['roster_mode'] ?? '') === 'groups') {
+                $group_uuid = (string) ($job['group_uuid'] ?? '');
+                $org_uuid = (string) ($job['org_uuid'] ?? '');
+                if (
+                    $this->active_group_membership_exists(
+                        $group_uuid,
+                        $org_uuid,
+                        $email,
+                        $group_service_instance instanceof GroupService ? $group_service_instance : null
+                    )
+                ) {
+                    $job['skipped'] = (int) ($job['skipped'] ?? 0) + 1;
+                    $seen_emails[$email_key] = true;
+                    $this->log_activity('info', 'Bulk upload row skipped: active group membership already exists', [
+                        'job_id' => $job_id,
+                        'row_num' => $row_num,
+                        'email' => $email,
+                        'group_uuid' => $group_uuid,
+                        'org_uuid' => $org_uuid,
+                    ]);
+                    continue;
+                }
+            } elseif (
+                $this->active_membership_exists($membership_uuid, $email)
+                || $this->active_membership_exists_by_person($membership_uuid, $email)
             ) {
                 $job['skipped'] = (int) ($job['skipped'] ?? 0) + 1;
                 $seen_emails[$email_key] = true;
@@ -490,6 +512,18 @@ class BulkMemberUploadService
 
             $result = $this->member_service->add_member((string) ($job['org_uuid'] ?? ''), $member_data, $context);
             if (is_wp_error($result)) {
+                $error_code = (string) $result->get_error_code();
+                if ($error_code === 'group_member_exists') {
+                    $job['skipped'] = (int) ($job['skipped'] ?? 0) + 1;
+                    $seen_emails[$email_key] = true;
+                    $this->log_activity('info', 'Bulk upload row skipped: member already assigned to group', [
+                        'job_id' => $job_id,
+                        'row_num' => $row_num,
+                        'email' => $email,
+                    ]);
+                    continue;
+                }
+
                 $job['failed'] = (int) ($job['failed'] ?? 0) + 1;
                 $this->append_error_snippet(
                     $job,
@@ -1035,23 +1069,12 @@ class BulkMemberUploadService
      */
     private function active_membership_exists_by_person(string $membership_uuid, string $email): bool
     {
-        if ($membership_uuid === '' || $email === '' || !function_exists('wicket_get_person_by_email')) {
+        if ($membership_uuid === '' || $email === '') {
             return false;
         }
 
         try {
-            $person = wicket_get_person_by_email($email);
-            if (!$person) {
-                return false;
-            }
-
-            $person_uuid = '';
-            if (is_array($person)) {
-                $person_uuid = (string) ($person['id'] ?? ($person['data']['id'] ?? ''));
-            } elseif (is_object($person)) {
-                $person_uuid = (string) ($person->id ?? '');
-            }
-
+            $person_uuid = $this->resolve_person_uuid_by_email($email);
             if ($person_uuid === '') {
                 return false;
             }
@@ -1067,5 +1090,101 @@ class BulkMemberUploadService
         }
 
         return false;
+    }
+
+    /**
+     * @param string $group_uuid
+     * @param string $org_uuid
+     * @param string $email
+     * @param GroupService|null $group_service
+     * @return bool
+     */
+    private function active_group_membership_exists(
+        string $group_uuid,
+        string $org_uuid,
+        string $email,
+        ?GroupService $group_service = null
+    ): bool {
+        if ($group_uuid === '' || $email === '') {
+            return false;
+        }
+
+        $person_uuid = $this->resolve_person_uuid_by_email($email);
+        if ($person_uuid === '') {
+            return false;
+        }
+
+        $group_service = $group_service ?? new GroupService();
+        $page = 1;
+        $max_pages = 10;
+
+        while ($page <= $max_pages) {
+            $memberships = $group_service->get_person_group_memberships($person_uuid, [
+                'page' => $page,
+                'size' => 100,
+                'active' => true,
+            ]);
+
+            if (!is_array($memberships) || empty($memberships['data']) || !is_array($memberships['data'])) {
+                return false;
+            }
+
+            foreach ($memberships['data'] as $membership) {
+                $membership_group_uuid = (string) ($membership['relationships']['group']['data']['id'] ?? '');
+                if ($membership_group_uuid !== $group_uuid) {
+                    continue;
+                }
+
+                if ($org_uuid !== '') {
+                    $membership_org_uuid = (string) ($membership['relationships']['organization']['data']['id'] ?? '');
+                    if ($membership_org_uuid !== '' && $membership_org_uuid !== $org_uuid) {
+                        continue;
+                    }
+                }
+
+                return true;
+            }
+
+            $total_pages = (int) ($memberships['meta']['page']['total_pages'] ?? $page);
+            if ($page >= max(1, $total_pages)) {
+                break;
+            }
+
+            $page++;
+        }
+
+        return false;
+    }
+
+    /**
+     * @param string $email
+     * @return string
+     */
+    private function resolve_person_uuid_by_email(string $email): string
+    {
+        if ($email === '' || !function_exists('wicket_get_person_by_email')) {
+            return '';
+        }
+
+        try {
+            $person = wicket_get_person_by_email($email);
+            if (!$person) {
+                return '';
+            }
+
+            if (is_array($person)) {
+                return (string) ($person['id'] ?? ($person['data']['id'] ?? ''));
+            }
+
+            if (is_object($person)) {
+                return (string) ($person->id ?? '');
+            }
+        } catch (\Throwable $e) {
+            \OrgManagement\Helpers\Helper::log_error('[OrgMan] Bulk upload person lookup failed: ' . $e->getMessage(), [
+                'email' => $email,
+            ]);
+        }
+
+        return '';
     }
 }
