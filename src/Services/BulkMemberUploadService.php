@@ -1114,7 +1114,7 @@ class BulkMemberUploadService
             return false;
         }
 
-        $group_service = $group_service ?? new GroupService();
+        $group_service ??= new GroupService();
         $page = 1;
         $max_pages = 10;
 
