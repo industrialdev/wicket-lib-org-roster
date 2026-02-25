@@ -74,31 +74,89 @@ $seats_label = '';
 if ($membership_data) {
     $membership_name = $membership_service->getMembershipTierName($membership_data);
     $owner_id = $membership_data['data']['relationships']['owner']['data']['id'] ?? '';
-    if ($owner_id && function_exists('wicket_get_person_by_id')) {
-        $owner = wicket_get_person_by_id($owner_id);
-        $gn = '';
-        $fn = '';
-        if (is_array($owner) && isset($owner['attributes'])) {
-            $gn = $owner['attributes']['given_name'] ?? '';
-            $fn = $owner['attributes']['family_name'] ?? '';
-        } elseif (is_object($owner)) {
-            // Prefer direct properties on entity
-            if (isset($owner->given_name)) {
-                $gn = (string) $owner->given_name;
+    $resolve_person_name = static function ($person): string {
+        if (empty($person)) {
+            return '';
+        }
+
+        $attributes = [];
+        if (is_array($person)) {
+            if (isset($person['data']['attributes']) && is_array($person['data']['attributes'])) {
+                $attributes = $person['data']['attributes'];
+            } elseif (isset($person['attributes']) && is_array($person['attributes'])) {
+                $attributes = $person['attributes'];
+            } else {
+                $attributes = $person;
             }
-            if (isset($owner->family_name)) {
-                $fn = (string) $owner->family_name;
-            }
-            // Fallback: attributes bag as object/array
-            if ((empty($gn) || empty($fn)) && isset($owner->attributes)) {
-                $attrs = is_array($owner->attributes) ? $owner->attributes : (array) $owner->attributes;
-                $gn = $gn ?: ($attrs['given_name'] ?? '');
-                $fn = $fn ?: ($attrs['family_name'] ?? '');
+        } elseif (is_object($person)) {
+            $attributes = isset($person->attributes)
+                ? (is_array($person->attributes) ? $person->attributes : (array) $person->attributes)
+                : (array) $person;
+        }
+
+        $first = trim((string) ($attributes['given_name'] ?? $attributes['first_name'] ?? ''));
+        $last = trim((string) ($attributes['family_name'] ?? $attributes['last_name'] ?? ''));
+        $full = trim($first . ' ' . $last);
+
+        if ($full !== '') {
+            return $full;
+        }
+
+        $fallback = trim((string) ($attributes['full_name'] ?? $attributes['name'] ?? ''));
+
+        return $fallback;
+    };
+
+    if ($owner_id !== '') {
+        if (function_exists('wicket_get_person_by_id')) {
+            $owner = wicket_get_person_by_id($owner_id);
+            $owner_name = $resolve_person_name($owner);
+        }
+
+        if ($owner_name === '' && !empty($membership_data['included']) && is_array($membership_data['included'])) {
+            foreach ($membership_data['included'] as $included_item) {
+                if (($included_item['type'] ?? '') !== 'people') {
+                    continue;
+                }
+                if ((string) ($included_item['id'] ?? '') !== (string) $owner_id) {
+                    continue;
+                }
+
+                $owner_name = $resolve_person_name($included_item);
+                if ($owner_name !== '') {
+                    break;
+                }
             }
         }
-        $owner_name = trim(trim($gn) . ' ' . trim($fn));
     }
-    $ends_at = $membership_data['data']['attributes']['ends_at'] ?? '';
+
+    $date_candidates = [
+        $membership_data['data']['attributes']['ends_at'] ?? '',
+        $membership_data['data']['attributes']['end_at'] ?? '',
+        $membership_data['data']['attributes']['expires_at'] ?? '',
+        $membership_data['data']['attributes']['renewal_date'] ?? '',
+        $membership_data['data']['attributes']['next_renewal_at'] ?? '',
+    ];
+    if (!empty($membership_data['included']) && is_array($membership_data['included'])) {
+        foreach ($membership_data['included'] as $included_item) {
+            if (($included_item['type'] ?? '') !== 'memberships') {
+                continue;
+            }
+            $date_candidates[] = $included_item['attributes']['ends_at'] ?? '';
+            $date_candidates[] = $included_item['attributes']['expires_at'] ?? '';
+            $date_candidates[] = $included_item['attributes']['renewal_date'] ?? '';
+        }
+    }
+
+    $ends_at = '';
+    foreach ($date_candidates as $candidate_date) {
+        $candidate_date = is_string($candidate_date) ? trim($candidate_date) : '';
+        if ($candidate_date !== '') {
+            $ends_at = $candidate_date;
+            break;
+        }
+    }
+
     if ($ends_at) {
         try {
             $dt = new \DateTime($ends_at);
@@ -129,12 +187,8 @@ if ($membership_data) {
             <?php if ($membership_name): ?>
                 <p class="org-details__summary-item wt_leading-normal wt_text-content mb-1"><?php echo esc_html__('Membership Tier-', 'wicket-acc') . ' ' . esc_html($membership_name); ?></p>
             <?php endif; ?>
-            <?php if ($owner_name): ?>
-                <p class="org-details__summary-item wt_leading-normal wt_text-content mb-1"><?php echo esc_html__('Membership Owner-', 'wicket-acc') . ' ' . esc_html($owner_name); ?></p>
-            <?php endif; ?>
-            <?php if ($renewal_date): ?>
-                <p class="org-details__summary-item wt_leading-normal wt_text-content mb-1"><?php echo esc_html__('Renewal Date-', 'wicket-acc') . ' ' . esc_html($renewal_date); ?></p>
-            <?php endif; ?>
+            <p class="org-details__summary-item wt_leading-normal wt_text-content mb-1"><?php echo esc_html__('Membership Owner-', 'wicket-acc') . ' ' . esc_html($owner_name !== '' ? $owner_name : '—'); ?></p>
+            <p class="org-details__summary-item wt_leading-normal wt_text-content mb-1"><?php echo esc_html__('Renewal Date-', 'wicket-acc') . ' ' . esc_html($renewal_date !== '' ? $renewal_date : '—'); ?></p>
             <?php if ($seats_label): ?>
                 <p class="org-details__summary-item wt_leading-normal wt_text-content mb-1"><?php echo esc_html($seats_label); ?></p>
             <?php endif; ?>

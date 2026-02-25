@@ -55,6 +55,13 @@ add_filter('wicket/acc/orgman/config', function (array $config): array {
     $config['ui']['member_view']['use_unified'] = true;
     $config['ui']['member_list']['show_remove_button'] = false;
     $config['ui']['member_list']['show_bulk_upload'] = false;
+    $config['ui']['member_list']['display_roles_allowlist'] = ['membership_owner', 'membership_manager', 'org_editor', 'member'];
+    $config['ui']['member_list']['display_roles_exclude'] = ['supplemental_member', 'cchlmembercommunity', 'cchl_member_community'];
+    $config['ui']['member_list']['account_status']['enabled'] = true;
+    $config['ui']['member_list']['account_status']['show_unconfirmed_label'] = true;
+    $config['ui']['member_list']['account_status']['confirmed_tooltip'] = __('Account confirmed', 'wicket-acc');
+    $config['ui']['member_list']['account_status']['unconfirmed_tooltip'] = __('Has not confirmed their account', 'wicket-acc');
+    $config['ui']['member_list']['account_status']['unconfirmed_label'] = __('Has not confirmed their account', 'wicket-acc');
     $config['ui']['member_list']['seat_limit_message'] = __('You have reached the maximum number of assignable people under this membership.', 'wicket-acc');
     $config['seat_policy']['tier_max_assignments'] = [
         'MAS Sustaining' => 3,
@@ -88,6 +95,10 @@ add_filter('wicket/acc/orgman/config', function (array $config): array {
 - [x] Manage Team Members page supports keyword search.
 - [x] Team member cards show active relationships only and support comma-separated multi-relationship display.
 - [x] Relationship filtering includes `company_admin` and `regular_member`, excludes `affiliate`.
+- [x] Relationship-type alias normalization excludes `Affiliation`/`Affiliate` variants when `exclude_relationship_types = ['affiliate']`.
+- [x] Duplicate person entries (for example, same person with `company_admin` and `regular_member`) are merged into one roster row.
+- [x] Team member role labels are restricted to `membership_owner`, `membership_manager`, `org_editor`, and `member`.
+- [x] Unconfirmed account helper copy is configurable and set to `Has not confirmed their account`.
 - [x] Remove-from-roster actions are hidden and MSA callout is displayed with email contact.
 - [x] Add Member required fields are First Name, Last Name, and Email.
 - [x] Optional additional role is limited to `org_editor`.

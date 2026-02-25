@@ -63,7 +63,7 @@ if ($use_unified_member_list) {
     $membership_service = new OrgManagement\Services\MembershipService();
     $membership_uuid = $org_uuid ? $membership_service->getMembershipForOrganization($org_uuid) : '';
     $show_edit_permissions = (bool) ($orgman_config['groups']['ui']['show_edit_permissions'] ?? false);
-    $show_account_status = true;
+    $show_account_status = (bool) (($orgman_config['ui']['member_list']['account_status']['enabled'] ?? true));
     $show_add_member_button = true;
     $show_remove_button = true;
     include __DIR__ . '/members-list-unified.php';

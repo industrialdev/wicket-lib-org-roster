@@ -205,6 +205,15 @@ function get_config()
                 'show_edit_permissions' => true,
                 'show_remove_button' => true,
                 'show_bulk_upload' => false,
+                'display_roles_allowlist' => [], // Optional role slug allowlist for member card role display. Empty = show all.
+                'display_roles_exclude' => [], // Optional role slug denylist for member card role display.
+                'account_status' => [
+                    'enabled' => true,
+                    'show_unconfirmed_label' => true,
+                    'confirmed_tooltip' => __('Account confirmed', 'wicket-acc'),
+                    'unconfirmed_tooltip' => __('Account not confirmed', 'wicket-acc'),
+                    'unconfirmed_label' => __('Account not confirmed', 'wicket-acc'),
+                ],
                 'seat_limit_message' => __('All seats have been assigned. Please purchase additional seats to add more members.', 'wicket-acc'),
                 'remove_policy_callout' => [
                     'enabled' => false,

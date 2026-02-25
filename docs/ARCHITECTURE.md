@@ -24,6 +24,11 @@ The library decouples member management logic from the `MemberService` using the
 ### 2.3 Service Layer
 All business logic is encapsulated in a service layer. Services are domain-specific and typically lazily instantiated to minimize overhead.
 
+Notable roster-read behaviors in `MemberService`:
+- Relationship types are normalized before allowlist/denylist checks.
+- Member rows are merged by person UUID to avoid duplicate cards when one person has multiple relationship records in the same organization.
+- Role lists used for member-card display can be filtered by configuration allowlist/denylist before template rendering.
+
 ## 3. Component Interaction
 - **Frontend**: A reactive UI built with Datastar and scoped vanilla CSS (BEM + `wt_` prefixed utility-style classes).
 - **Backend API**: WordPress REST API controllers that delegate to the service layer.

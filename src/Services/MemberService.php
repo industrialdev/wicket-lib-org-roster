@@ -519,6 +519,235 @@ class MemberService
     }
 
     /**
+     * Normalize relationship type slug for matching/filtering.
+     *
+     * @param string $type Raw relationship type value.
+     * @return string
+     */
+    private function normalizeRelationshipType(string $type): string
+    {
+        $normalized = strtolower(trim($type));
+        if ($normalized === '') {
+            return '';
+        }
+
+        $normalized = str_replace(['-', ' '], '_', $normalized);
+        $normalized = (string) preg_replace('/_+/', '_', $normalized);
+        $normalized = sanitize_key($normalized);
+
+        $aliases = [
+            'affiliation' => 'affiliate',
+            'affiliated' => 'affiliate',
+            'affiliation_relationship' => 'affiliate',
+            'companyadmin' => 'company_admin',
+            'companyadministrator' => 'company_admin',
+            'regularmember' => 'regular_member',
+        ];
+
+        return $aliases[$normalized] ?? $normalized;
+    }
+
+    /**
+     * Normalize a relationship-type list into unique slugs.
+     *
+     * @param array $types
+     * @return array
+     */
+    private function normalizeRelationshipTypeList(array $types): array
+    {
+        $normalized = [];
+        foreach ($types as $type) {
+            $slug = $this->normalizeRelationshipType((string) $type);
+            if ($slug === '') {
+                continue;
+            }
+            $normalized[] = $slug;
+        }
+
+        return array_values(array_unique($normalized));
+    }
+
+    /**
+     * Resolve a human-readable label for a relationship slug.
+     *
+     * @param string $slug
+     * @param array  $labels
+     * @return string
+     */
+    private function resolveRelationshipLabel(string $slug, array $labels): string
+    {
+        if (isset($labels[$slug]) && is_string($labels[$slug]) && trim($labels[$slug]) !== '') {
+            return trim($labels[$slug]);
+        }
+
+        return ucwords(str_replace('_', ' ', $slug));
+    }
+
+    /**
+     * Normalize role value into canonical slug for filtering/display.
+     *
+     * @param string $role
+     * @return string
+     */
+    private function normalizeRoleSlug(string $role): string
+    {
+        $normalized = strtolower(trim($role));
+        if ($normalized === '') {
+            return '';
+        }
+
+        $normalized = str_replace(['-', ' '], '_', $normalized);
+        $normalized = (string) preg_replace('/_+/', '_', $normalized);
+        $normalized = sanitize_key($normalized);
+
+        $aliases = [
+            'cchl_member_community' => 'cchlmembercommunity',
+        ];
+
+        return $aliases[$normalized] ?? $normalized;
+    }
+
+    /**
+     * Normalize role-list values into canonical slugs.
+     *
+     * @param array $roles
+     * @return array
+     */
+    private function normalizeRoleList(array $roles): array
+    {
+        $normalized = [];
+        foreach ($roles as $role) {
+            $slug = $this->normalizeRoleSlug((string) $role);
+            if ($slug === '') {
+                continue;
+            }
+            $normalized[] = $slug;
+        }
+
+        return array_values(array_unique($normalized));
+    }
+
+    /**
+     * Filter role list by allowlist/excludelist and normalize output slugs.
+     *
+     * @param array $roles
+     * @param array $allowlist
+     * @param array $excludes
+     * @return array
+     */
+    private function filterDisplayRoles(array $roles, array $allowlist = [], array $excludes = []): array
+    {
+        $allowLookup = !empty($allowlist) ? array_fill_keys($allowlist, true) : [];
+        $excludeLookup = !empty($excludes) ? array_fill_keys($excludes, true) : [];
+
+        $filtered = [];
+        foreach ($roles as $role) {
+            $slug = $this->normalizeRoleSlug((string) $role);
+            if ($slug === '') {
+                continue;
+            }
+
+            if (!empty($allowLookup) && !isset($allowLookup[$slug])) {
+                continue;
+            }
+
+            if (!empty($excludeLookup) && isset($excludeLookup[$slug])) {
+                continue;
+            }
+
+            $filtered[] = $slug;
+        }
+
+        return array_values(array_unique($filtered));
+    }
+
+    /**
+     * Merge duplicate prepared member rows for the same person.
+     *
+     * @param array $existing
+     * @param array $incoming
+     * @return array
+     */
+    private function mergePreparedMemberRows(array $existing, array $incoming): array
+    {
+        $existing['roles'] = array_values(array_unique(array_merge(
+            (array) ($existing['roles'] ?? []),
+            (array) ($incoming['roles'] ?? [])
+        )));
+
+        $existing['current_roles'] = array_values(array_unique(array_merge(
+            (array) ($existing['current_roles'] ?? []),
+            (array) ($incoming['current_roles'] ?? [])
+        )));
+
+        if (empty($existing['current_roles']) && !empty($existing['roles'])) {
+            $existing['current_roles'] = (array) $existing['roles'];
+        }
+
+        $existing['relationship_names_list'] = array_values(array_unique(array_merge(
+            (array) ($existing['relationship_names_list'] ?? []),
+            (array) ($incoming['relationship_names_list'] ?? [])
+        )));
+
+        $existing['relationship_slugs'] = array_values(array_unique(array_merge(
+            (array) ($existing['relationship_slugs'] ?? []),
+            (array) ($incoming['relationship_slugs'] ?? [])
+        )));
+
+        $existing['person_connection_ids_list'] = array_values(array_unique(array_merge(
+            (array) ($existing['person_connection_ids_list'] ?? []),
+            (array) ($incoming['person_connection_ids_list'] ?? [])
+        )));
+
+        if (empty($existing['relationship_description']) && !empty($incoming['relationship_description'])) {
+            $existing['relationship_description'] = $incoming['relationship_description'];
+        }
+
+        if (empty($existing['person_membership_id']) && !empty($incoming['person_membership_id'])) {
+            $existing['person_membership_id'] = $incoming['person_membership_id'];
+        }
+
+        if (!empty($incoming['is_owner'])) {
+            $existing['is_owner'] = true;
+        }
+
+        foreach (['first_name', 'last_name', 'full_name', 'title', 'email', 'status', 'job_level', 'confirmed_at'] as $field) {
+            if (empty($existing[$field]) && !empty($incoming[$field])) {
+                $existing[$field] = $incoming[$field];
+            }
+        }
+
+        return $existing;
+    }
+
+    /**
+     * Convert internal prepared row arrays to template payload shape.
+     *
+     * @param array $memberRow
+     * @return array
+     */
+    private function finalizePreparedMemberRow(array $memberRow): array
+    {
+        $relationshipNames = array_values(array_filter((array) ($memberRow['relationship_names_list'] ?? []), static function ($value): bool {
+            return is_string($value) && trim($value) !== '';
+        }));
+        $relationshipSlugs = array_values(array_filter((array) ($memberRow['relationship_slugs'] ?? []), static function ($value): bool {
+            return is_string($value) && trim($value) !== '';
+        }));
+        $personConnectionIds = array_values(array_filter((array) ($memberRow['person_connection_ids_list'] ?? []), static function ($value): bool {
+            return is_string($value) && trim($value) !== '';
+        }));
+
+        $memberRow['relationship_names'] = !empty($relationshipNames) ? implode(', ', $relationshipNames) : null;
+        $memberRow['relationship_type'] = !empty($relationshipSlugs) ? reset($relationshipSlugs) : null;
+        $memberRow['person_connection_ids'] = !empty($personConnectionIds) ? implode(',', $personConnectionIds) : null;
+
+        unset($memberRow['relationship_names_list'], $memberRow['relationship_slugs'], $memberRow['person_connection_ids_list']);
+
+        return $memberRow;
+    }
+
+    /**
      * Clear the cached member list for a specific organization membership.
      *
      * @param string $membershipUuid The membership UUID.
@@ -688,7 +917,14 @@ class MemberService
             }
         }
 
-        $members = [];
+        $allowedTypes = $this->normalizeRelationshipTypeList((array) ($this->config['relationships']['allowed_relationship_types'] ?? []));
+        $excludedTypes = $this->normalizeRelationshipTypeList((array) ($this->config['relationships']['exclude_relationship_types'] ?? []));
+        $displayRoleAllowlist = $this->normalizeRoleList((array) ($this->config['ui']['member_list']['display_roles_allowlist'] ?? []));
+        $displayRoleExcludes = $this->normalizeRoleList((array) ($this->config['ui']['member_list']['display_roles_exclude'] ?? []));
+        $relationshipTypeLabels = (array) ($this->config['relationship_types']['custom_types'] ?? []);
+
+        $membersByPerson = [];
+        $membersWithoutPerson = [];
 
         foreach ($rawMembers as $member) {
             // Convert stdClass objects to arrays
@@ -747,6 +983,7 @@ class MemberService
                     );
                 }
             }
+            $currentRolesList = $this->filterDisplayRoles($currentRolesList, $displayRoleAllowlist, $displayRoleExcludes);
 
             $firstName = $personAttributes['given_name']
                 ?? $personAttributes['first_name']
@@ -777,9 +1014,10 @@ class MemberService
             } elseif (!empty($memberAttributes['type'])) {
                 $roles = [str_replace('_', ' ', (string) $memberAttributes['type'])];
             }
+            $roles = $this->filterDisplayRoles($roles, $displayRoleAllowlist, $displayRoleExcludes);
 
-            $relationshipNames = [];
             $relationshipSlugs = [];
+            $relationshipNamesBySlug = [];
             $relationshipDescription = null;
             $personConnectionIds = []; // Store all connection IDs for this organization
             if ($personUuid) {
@@ -800,12 +1038,15 @@ class MemberService
                                 }
                             }
 
-                            $slug = $conn['attributes']['type'] ?? null;
+                            $rawRelationshipType = (string) ($conn['attributes']['type'] ?? '');
+                            $slug = $this->normalizeRelationshipType($rawRelationshipType);
                             $connId = $conn['attributes']['uuid'] ?? null;
 
-                            if ($slug) {
-                                $relationshipNames[] = ucwords(str_replace('_', ' ', $slug));
+                            if ($slug !== '') {
                                 $relationshipSlugs[] = $slug;
+                                if (!isset($relationshipNamesBySlug[$slug])) {
+                                    $relationshipNamesBySlug[$slug] = $this->resolveRelationshipLabel($slug, $relationshipTypeLabels);
+                                }
                             }
 
                             if ($relationshipDescription === null) {
@@ -821,9 +1062,10 @@ class MemberService
                             }
                         }
 
-                        if (in_array('Primary Contact', $relationshipNames, true)) {
-                            $relationshipNames = array_values(array_diff($relationshipNames, ['Primary Contact']));
-                            array_unshift($relationshipNames, 'Primary Contact');
+                        $relationshipSlugs = array_values(array_unique($relationshipSlugs));
+                        if (in_array('primary_contact', $relationshipSlugs, true)) {
+                            $relationshipSlugs = array_values(array_diff($relationshipSlugs, ['primary_contact']));
+                            array_unshift($relationshipSlugs, 'primary_contact');
                         }
                     }
                 } catch (\Throwable $e) {
@@ -838,28 +1080,27 @@ class MemberService
                 }
             }
 
-            // Filter by relationship type
-            $allowedTypes = $this->config['relationships']['allowed_relationship_types'] ?? [];
-            $excludedTypes = $this->config['relationships']['exclude_relationship_types'] ?? [];
-
             if (!empty($allowedTypes)) {
-                $hasAllowed = false;
-                foreach ($relationshipSlugs as $slug) {
-                    if (in_array($slug, $allowedTypes, true)) {
-                        $hasAllowed = true;
-                        break;
-                    }
-                }
-                if (!$hasAllowed) {
-                    continue;
-                }
+                $relationshipSlugs = array_values(array_filter($relationshipSlugs, static function ($slug) use ($allowedTypes): bool {
+                    return in_array($slug, $allowedTypes, true);
+                }));
             }
 
             if (!empty($excludedTypes)) {
-                foreach ($relationshipSlugs as $slug) {
-                    if (in_array($slug, $excludedTypes, true)) {
-                        continue 2;
-                    }
+                $relationshipSlugs = array_values(array_filter($relationshipSlugs, static function ($slug) use ($excludedTypes): bool {
+                    return !in_array($slug, $excludedTypes, true);
+                }));
+            }
+
+            if ((!empty($allowedTypes) || !empty($excludedTypes)) && empty($relationshipSlugs)) {
+                continue;
+            }
+
+            $relationshipNames = [];
+            foreach ($relationshipSlugs as $slug) {
+                $label = $relationshipNamesBySlug[$slug] ?? $this->resolveRelationshipLabel($slug, $relationshipTypeLabels);
+                if ($label !== '') {
+                    $relationshipNames[] = $label;
                 }
             }
 
@@ -868,7 +1109,7 @@ class MemberService
                     ?? ($personAttributes['confirmed_at']
                         ?? ($memberAttributes['confirmed_at'] ?? null)));
 
-            $members[] = [
+            $memberRow = [
                 'person_uuid'           => $personUuid,
                 'first_name'            => $firstName,
                 'last_name'             => $lastName,
@@ -876,17 +1117,36 @@ class MemberService
                 'title'                 => $title,
                 'email'                 => $email,
                 'roles'                 => $roles,
-                'current_roles'         => $currentRolesList,
+                'current_roles'         => !empty($currentRolesList) ? $currentRolesList : $roles,
                 'confirmed_at'          => $confirmedAt,
                 'status'                => $personAttributes['status'] ?? null,
                 'job_level'             => $personAttributes['job_level'] ?? null,
-                'relationship_names'    => !empty($relationshipNames) ? implode(', ', $relationshipNames) : null,
-                'relationship_type'     => !empty($relationshipSlugs) ? reset($relationshipSlugs) : null,
+                'relationship_names_list' => array_values(array_unique($relationshipNames)),
+                'relationship_slugs'      => array_values(array_unique($relationshipSlugs)),
                 'relationship_description' => $relationshipDescription,
                 'is_owner'              => (!empty($ownerId) && $personUuid && $personUuid === $ownerId),
-                'person_connection_ids' => !empty($personConnectionIds) ? implode(',', $personConnectionIds) : null, // All connection IDs for this org (like legacy)
+                'person_connection_ids_list' => array_values(array_unique(array_filter(array_map('strval', $personConnectionIds)))),
                 'person_membership_id'  => $member['id'] ?? null,
             ];
+
+            $personKey = is_string($personUuid) ? trim($personUuid) : '';
+            if ($personKey !== '') {
+                if (isset($membersByPerson[$personKey])) {
+                    $membersByPerson[$personKey] = $this->mergePreparedMemberRows($membersByPerson[$personKey], $memberRow);
+                } else {
+                    $membersByPerson[$personKey] = $memberRow;
+                }
+            } else {
+                $membersWithoutPerson[] = $memberRow;
+            }
+        }
+
+        $members = [];
+        foreach ($membersByPerson as $memberRow) {
+            $members[] = $this->finalizePreparedMemberRow($memberRow);
+        }
+        foreach ($membersWithoutPerson as $memberRow) {
+            $members[] = $this->finalizePreparedMemberRow($memberRow);
         }
 
         $totalItems = 0;
@@ -978,6 +1238,17 @@ class MemberService
      */
     public function getPersonCurrentRolesByOrgId($personUuid, $orgUuid)
     {
+        if (!empty($personUuid) && !empty($orgUuid)) {
+            try {
+                $permissionRoles = $this->permission_service()->get_person_current_roles_by_org_id((string) $personUuid, (string) $orgUuid);
+                if (is_array($permissionRoles) && !empty($permissionRoles)) {
+                    return $this->normalizeRoleList($permissionRoles);
+                }
+            } catch (\Throwable $e) {
+                // Fall through to legacy endpoint request.
+            }
+        }
+
         if (!function_exists('wicket_api_client')) {
             return [];
         }
@@ -1011,7 +1282,7 @@ class MemberService
                 }
             }
 
-            return $roles;
+            return $this->normalizeRoleList($roles);
         }
 
         return [];
@@ -1061,7 +1332,10 @@ class MemberService
             }
 
             // Check confirmation status using the same logic as member display
-            $confirmedAt = $person['data']['attributes']['user']['confirmed_at'] ?? null;
+            $attributes = (array) ($person['data']['attributes'] ?? []);
+            $confirmedAt = $attributes['user']['confirmed_at']
+                ?? ($person['data']['user']['confirmed_at']
+                    ?? ($attributes['confirmed_at'] ?? null));
 
             // User is confirmed if confirmed_at is not null and not empty
             return !empty($confirmedAt);

@@ -75,6 +75,37 @@ it('includes remove policy ui defaults for backward-compatible roster controls',
     expect($callout['email'] ?? null)->toBeString();
 });
 
+it('includes account-status ui defaults for member cards', function (): void {
+    $config = \OrgManagement\Config\get_config();
+    $member_list = $config['ui']['member_list'] ?? [];
+    $account_status = $member_list['account_status'] ?? [];
+
+    expect($account_status)->toHaveKeys([
+        'enabled',
+        'show_unconfirmed_label',
+        'confirmed_tooltip',
+        'unconfirmed_tooltip',
+        'unconfirmed_label',
+    ]);
+    expect($account_status['enabled'] ?? null)->toBeTrue();
+    expect($account_status['show_unconfirmed_label'] ?? null)->toBeTrue();
+    expect($account_status['confirmed_tooltip'] ?? null)->toBeString();
+    expect($account_status['unconfirmed_tooltip'] ?? null)->toBeString();
+    expect($account_status['unconfirmed_label'] ?? null)->toBeString();
+});
+
+it('includes role-display filter defaults for member cards', function (): void {
+    $config = \OrgManagement\Config\get_config();
+    $member_list = $config['ui']['member_list'] ?? [];
+
+    expect($member_list)->toHaveKeys([
+        'display_roles_allowlist',
+        'display_roles_exclude',
+    ]);
+    expect($member_list['display_roles_allowlist'] ?? null)->toBeArray();
+    expect($member_list['display_roles_exclude'] ?? null)->toBeArray();
+});
+
 it('includes member edit activity guard default as disabled for backward compatibility', function (): void {
     $config = \OrgManagement\Config\get_config();
 

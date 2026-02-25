@@ -80,6 +80,8 @@ All keys below are current defaults from `src/config/config.php`.
 | `relationships.exclude_relationship_types` | `[]` | array | Denylist of relationship type slugs removed from editing/selection; empty means none excluded. |
 | `relationships.member_card_active_only` | `false` | bool | When true, member cards only display active person-to-organization relationships for the current organization. |
 
+Relationship matching in member-card filtering is normalized before comparison (for example, casing/spacing variants, `affiliation` aliases, and `company admin`/`regular member` textual variants are normalized to canonical slugs).
+
 ### `groups`
 | Key | Default | Type | Description |
 |---|---|---|---|
@@ -151,6 +153,13 @@ All keys below are current defaults from `src/config/config.php`.
 | `ui.member_list.show_edit_permissions` | `true` | bool | Shows edit-permissions action in organization member list views. |
 | `ui.member_list.show_remove_button` | `true` | bool | Shows remove-member actions in organization member lists when user permissions also allow removal. |
 | `ui.member_list.show_bulk_upload` | `false` | bool | Enables CSV bulk-upload panel in organization member views (non-groups modes only) when the user can add members. |
+| `ui.member_list.display_roles_allowlist` | `[]` | array | Optional role-slug allowlist for role labels shown on member cards/lists; empty means all roles can display. |
+| `ui.member_list.display_roles_exclude` | `[]` | array | Optional role-slug denylist removed from role labels shown on member cards/lists. |
+| `ui.member_list.account_status.enabled` | `true` | bool | Toggles account-confirmation status indicators on member cards/lists. |
+| `ui.member_list.account_status.show_unconfirmed_label` | `true` | bool | Controls whether unconfirmed accounts display inline helper text beside the status dot. |
+| `ui.member_list.account_status.confirmed_tooltip` | `Account confirmed` | string | Tooltip text for confirmed account status indicators. |
+| `ui.member_list.account_status.unconfirmed_tooltip` | `Account not confirmed` | string | Tooltip text for unconfirmed account status indicators. |
+| `ui.member_list.account_status.unconfirmed_label` | `Account not confirmed` | string | Inline label text shown for unconfirmed accounts when `show_unconfirmed_label` is enabled. |
 | `ui.member_list.seat_limit_message` | `All seats have been assigned. Please purchase additional seats to add more members.` | string | Message shown in member-list views when seat capacity is full and add-member action is hidden. |
 | `ui.member_list.remove_policy_callout.enabled` | `false` | bool | Enables an informational callout shown when remove actions are disabled/hidden. |
 | `ui.member_list.remove_policy_callout.placement` | `above_members` | string | Controls callout placement when enabled and remove actions are hidden (`above_members` or `below_members`). |

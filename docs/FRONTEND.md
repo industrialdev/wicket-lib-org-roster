@@ -39,6 +39,9 @@ The Unified View is a search-centric interface for managing rosters.
 - **Cycle Scope Propagation**: In `membership_cycle` mode, `membership_uuid` is propagated through list/search/pagination/add/remove refresh requests to keep operations cycle-scoped.
 - **Pagination Controls**: `Previous` is hidden on page 1; `Next` is hidden on the last page; both are hidden when only one page exists.
 - **Shared Role Visibility Toggle**: Member-card role display is controlled globally via `ui.member_card_fields.roles.enabled` across strategies.
+- **Account Status Copy**: Unconfirmed/confirmed tooltips and inline unconfirmed labels are configurable via `ui.member_list.account_status.*`.
+- **Role Label Filtering**: Member-card displayed roles can be filtered with `ui.member_list.display_roles_allowlist` and `ui.member_list.display_roles_exclude`.
+- **Duplicate Member Rows**: Unified/legacy member lists render one card per person even when multiple eligible relationships exist for the same organization.
 
 ## 3.1 Organization Management List
 - Organization cards on `organization-management` are paginated with `ui.organization_list.page_size` (default `5`).

@@ -62,7 +62,15 @@ if ($mode === 'groups' && isset($groups_ui_config['show_edit_permissions'])) {
     $show_edit_permissions = (bool) $groups_ui_config['show_edit_permissions'];
 }
 
-$show_account_status = isset($show_account_status) ? (bool) $show_account_status : true;
+$account_status_config = is_array($ui_config['account_status'] ?? null)
+    ? $ui_config['account_status']
+    : [];
+$show_account_status_default = (bool) ($account_status_config['enabled'] ?? true);
+$show_account_status = isset($show_account_status) ? (bool) $show_account_status : $show_account_status_default;
+$show_unconfirmed_label = (bool) ($account_status_config['show_unconfirmed_label'] ?? true);
+$confirmed_tooltip = (string) ($account_status_config['confirmed_tooltip'] ?? __('Account confirmed', 'wicket-acc'));
+$unconfirmed_tooltip = (string) ($account_status_config['unconfirmed_tooltip'] ?? __('Account not confirmed', 'wicket-acc'));
+$unconfirmed_label = (string) ($account_status_config['unconfirmed_label'] ?? __('Account not confirmed', 'wicket-acc'));
 $show_add_member_button = isset($show_add_member_button) ? (bool) $show_add_member_button : true;
 $show_remove_button = isset($show_remove_button) ? (bool) $show_remove_button : $show_remove_button_default;
 $show_bulk_upload = isset($show_bulk_upload)
@@ -211,16 +219,18 @@ $show_remove_policy_callout = (
                                 </h3>
                                 <?php if ($show_account_status && $is_confirmed !== null) : ?>
                                     <?php if ($is_confirmed) : ?>
-                                        <span class="wt_text-content" title="<?php esc_attr_e('Account confirmed', 'wicket-acc'); ?>">
+                                        <span class="wt_text-content" title="<?php echo esc_attr($confirmed_tooltip); ?>">
                                             <span class="wt_inline-block wt_w-2 wt_h-2 wt_rounded-full wt_bg-green-500" aria-hidden="true"></span>
                                         </span>
                                     <?php else : ?>
-                                        <span class="wt_text-content" title="<?php esc_attr_e('Account not confirmed', 'wicket-acc'); ?>">
+                                        <span class="wt_text-content" title="<?php echo esc_attr($unconfirmed_tooltip); ?>">
                                             <span class="wt_inline-block wt_w-2 wt_h-2 wt_rounded-full wt_bg-gray-400" aria-hidden="true"></span>
                                         </span>
-                                        <span class="wt_text-warning wt_whitespace-nowrap" title="<?php esc_attr_e('Account not confirmed', 'wicket-acc'); ?>">
-                                            <?php esc_html_e('Account not confirmed', 'wicket-acc'); ?>
-                                        </span>
+                                        <?php if ($show_unconfirmed_label && $unconfirmed_label !== '') : ?>
+                                            <span class="wt_text-warning wt_whitespace-nowrap" title="<?php echo esc_attr($unconfirmed_tooltip); ?>">
+                                                <?php echo esc_html($unconfirmed_label); ?>
+                                            </span>
+                                        <?php endif; ?>
                                     <?php endif; ?>
                                 <?php endif; ?>
                             </div>

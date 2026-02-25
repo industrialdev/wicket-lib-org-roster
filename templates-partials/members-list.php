@@ -76,6 +76,14 @@ $remove_policy_callout = is_array($member_list_config['remove_policy_callout'] ?
     ? $member_list_config['remove_policy_callout']
     : [];
 $remove_policy_callout_placement = (string) ($remove_policy_callout['placement'] ?? 'above_members');
+$account_status_config = is_array($member_list_config['account_status'] ?? null)
+    ? $member_list_config['account_status']
+    : [];
+$show_account_status = (bool) ($account_status_config['enabled'] ?? true);
+$show_unconfirmed_label = (bool) ($account_status_config['show_unconfirmed_label'] ?? true);
+$confirmed_tooltip = (string) ($account_status_config['confirmed_tooltip'] ?? __('Account confirmed', 'wicket-acc'));
+$unconfirmed_tooltip = (string) ($account_status_config['unconfirmed_tooltip'] ?? __('Account not confirmed', 'wicket-acc'));
+$unconfirmed_label = (string) ($account_status_config['unconfirmed_label'] ?? __('Account not confirmed', 'wicket-acc'));
 $use_unified_member_list = (bool) ($orgman_config['ui']['member_list']['use_unified'] ?? false);
 
 if ((!isset($members) || !is_array($members)) && !empty($org_uuid)) {
@@ -274,17 +282,21 @@ $no_members_message = __('No members found.', 'wicket-acc');
             $member_service = new OrgManagement\Services\MemberService($config_service);
             $is_confirmed = $member_service->isUserConfirmed($member_uuid);
             ?>
-                            <?php if ($is_confirmed) : ?>
-                                <span class="wt_text-content" title="<?php esc_attr_e('Account confirmed', 'wicket-acc'); ?>">
-                                    <span class="wt_inline-block wt_w-2 wt_h-2 wt_rounded-full wt_bg-green-500" aria-hidden="true"></span>
-                                </span>
-                            <?php else : ?>
-                                <span class="wt_text-content" title="<?php esc_attr_e('Account not confirmed', 'wicket-acc'); ?>">
-                                    <span class="wt_inline-block wt_w-2 wt_h-2 wt_rounded-full wt_bg-gray-400" aria-hidden="true"></span>
-                                </span>
-                                <span class="wt_text-warning wt_whitespace-nowrap" title="<?php esc_attr_e('Account not confirmed', 'wicket-acc'); ?>">
-                                    <?php esc_html_e('Account not confirmed', 'wicket-acc'); ?>
-                                </span>
+                            <?php if ($show_account_status) : ?>
+                                <?php if ($is_confirmed) : ?>
+                                    <span class="wt_text-content" title="<?php echo esc_attr($confirmed_tooltip); ?>">
+                                        <span class="wt_inline-block wt_w-2 wt_h-2 wt_rounded-full wt_bg-green-500" aria-hidden="true"></span>
+                                    </span>
+                                <?php else : ?>
+                                    <span class="wt_text-content" title="<?php echo esc_attr($unconfirmed_tooltip); ?>">
+                                        <span class="wt_inline-block wt_w-2 wt_h-2 wt_rounded-full wt_bg-gray-400" aria-hidden="true"></span>
+                                    </span>
+                                    <?php if ($show_unconfirmed_label && $unconfirmed_label !== '') : ?>
+                                        <span class="wt_text-warning wt_whitespace-nowrap" title="<?php echo esc_attr($unconfirmed_tooltip); ?>">
+                                            <?php echo esc_html($unconfirmed_label); ?>
+                                        </span>
+                                    <?php endif; ?>
+                                <?php endif; ?>
                             <?php endif; ?>
                             </div>
                         </div>

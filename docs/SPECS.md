@@ -11,6 +11,11 @@
 
 ### 1.2 Base Roster Management
 - **View Roster**: List members with pagination and search.
+- **Member Card Semantics**:
+  - Account confirmation indicators and unconfirmed helper copy are configurable through `ui.member_list.account_status.*`.
+  - Displayed role labels can be constrained with `ui.member_list.display_roles_allowlist` and `ui.member_list.display_roles_exclude`.
+  - Multiple relationship rows for the same person are merged into a single roster card.
+  - Relationship include/exclude filtering is normalized before matching (for example, casing/spacing and common aliases like `affiliation` -> `affiliate`).
 - **Add Member**:
   - Add via email/name.
   - Automatically assign base roles and relationship types.
@@ -59,6 +64,11 @@
 - Cycle-scoped add/remove flows validate membership-to-organization scope.
 - Cycle-scoped remove path protects owner removal and end-dates targeted person memberships.
 - Unified list/view/process flows propagate `membership_uuid` to keep refresh/search/pagination cycle-safe.
+
+### 1.7 Organization Summary Card
+- Organization summary rendering includes Membership Tier, Membership Owner, Renewal Date, and seats.
+- Owner name resolution supports API payload variants (`data.attributes`, direct `attributes`, and included person entities).
+- Renewal date resolution checks common membership date fields (`ends_at`, `end_at`, `expires_at`, `renewal_date`, `next_renewal_at`) before formatting.
 
 ## 2. Configuration (`src/config/config.php`)
 

@@ -10,6 +10,8 @@ Default configuration values that affect released behavior must not be changed s
 
 Recent additive key:
 - `ui.member_list.show_bulk_upload` was introduced with default `false` to preserve existing behavior unless explicitly enabled via config filter.
+- `ui.member_list.account_status.*` was introduced with additive defaults so account-status copy/visibility can be customized without template changes.
+- `ui.member_list.display_roles_allowlist` and `ui.member_list.display_roles_exclude` were introduced with empty-array defaults to preserve existing role-display behavior unless configured.
 
 ## Deprecation
 

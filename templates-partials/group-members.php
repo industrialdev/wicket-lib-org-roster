@@ -158,7 +158,7 @@ if ($use_unified_view) {
     $query = $group_query;
     $membership_uuid = $membership_uuid;
     $show_edit_permissions = (bool) ($orgman_config['groups']['ui']['show_edit_permissions'] ?? false);
-    $show_account_status = true;
+    $show_account_status = (bool) (($orgman_config['ui']['member_list']['account_status']['enabled'] ?? true));
     $show_add_member_button = true;
     $show_remove_button = true;
     $members_list_endpoint = $group_members_list_endpoint;
@@ -173,7 +173,7 @@ if ($use_unified_view) {
         $query = $group_query;
         $membership_uuid = $membership_uuid;
         $show_edit_permissions = (bool) ($orgman_config['groups']['ui']['show_edit_permissions'] ?? false);
-        $show_account_status = true;
+        $show_account_status = (bool) (($orgman_config['ui']['member_list']['account_status']['enabled'] ?? true));
         $show_add_member_button = true;
         $show_remove_button = true;
         $members_list_endpoint = $group_members_list_endpoint;

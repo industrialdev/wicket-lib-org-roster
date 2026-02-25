@@ -167,10 +167,10 @@ $clear_action = '(' . '$membersLoading' . ' = true, ' . '$searchQuery' . " = '',
     <?php endif; ?>
 
     <?php
-    $members_list_endpoint = $members_list_endpoint;
+$members_list_endpoint = $members_list_endpoint;
 $members_list_target = $members_list_target;
 $show_edit_permissions = $show_edit_permissions;
-$show_account_status = true;
+$show_account_status = (bool) (($orgman_config['ui']['member_list']['account_status']['enabled'] ?? true));
 $show_add_member_button = $show_add_member_button;
 $show_remove_button = $show_remove_button;
 include __DIR__ . '/members-list-unified.php';

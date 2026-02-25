@@ -433,3 +433,307 @@ it('shows only active relationships on member cards when active-only filter is e
     expect($result['members'][0]['relationship_names'] ?? null)->toBe('Company Admin');
     expect($result['members'][0]['person_connection_ids'] ?? null)->toBe('conn-2');
 });
+
+it('merges duplicate raw roster rows for the same person into one member card', function (): void {
+    $service = new class(new ConfigService()) extends MemberService {
+        public function getMembershipMembers(string $membershipUuid, array $args = []): ?array
+        {
+            return [
+                'data' => [
+                    [
+                        'id' => 'pm-1',
+                        'type' => 'person_memberships',
+                        'attributes' => [
+                            'person_first_name' => 'Alex',
+                            'person_last_name' => 'Casey',
+                            'person_email' => 'alex@example.org',
+                        ],
+                        'relationships' => [
+                            'person' => [
+                                'data' => ['id' => 'person-1'],
+                            ],
+                        ],
+                    ],
+                    [
+                        'id' => 'pm-2',
+                        'type' => 'person_memberships',
+                        'attributes' => [
+                            'person_first_name' => 'Alex',
+                            'person_last_name' => 'Casey',
+                            'person_email' => 'alex@example.org',
+                        ],
+                        'relationships' => [
+                            'person' => [
+                                'data' => ['id' => 'person-1'],
+                            ],
+                        ],
+                    ],
+                ],
+                'included' => [
+                    [
+                        'id' => 'person-1',
+                        'type' => 'people',
+                        'attributes' => [
+                            'given_name' => 'Alex',
+                            'family_name' => 'Casey',
+                            'email' => 'alex@example.org',
+                        ],
+                    ],
+                ],
+                'meta' => [
+                    'page' => [
+                        'current_page' => 1,
+                        'total_pages' => 1,
+                        'total_count' => 2,
+                        'size' => 15,
+                    ],
+                ],
+            ];
+        }
+
+        public function getPersonCurrentRolesByOrgId($personUuid, $orgUuid)
+        {
+            return ['member'];
+        }
+    };
+
+    $connectionStub = new class extends OrgManagement\Services\ConnectionService {
+        public function getPersonConnectionsById($personUuid)
+        {
+            return [
+                'data' => [
+                    [
+                        'attributes' => [
+                            'type' => 'company_admin',
+                            'active' => true,
+                            'uuid' => 'conn-1',
+                        ],
+                        'relationships' => [
+                            'organization' => [
+                                'data' => ['id' => 'org-1'],
+                            ],
+                        ],
+                    ],
+                    [
+                        'attributes' => [
+                            'type' => 'regular_member',
+                            'active' => true,
+                            'uuid' => 'conn-2',
+                        ],
+                        'relationships' => [
+                            'organization' => [
+                                'data' => ['id' => 'org-1'],
+                            ],
+                        ],
+                    ],
+                ],
+            ];
+        }
+    };
+
+    $connectionProperty = new ReflectionProperty(MemberService::class, 'connectionService');
+    $connectionProperty->setValue($service, $connectionStub);
+
+    $result = $service->get_members('mem-1', 'org-1', [
+        'page' => 1,
+        'size' => 15,
+    ]);
+
+    expect($result['members'] ?? [])->toHaveCount(1);
+    expect($result['members'][0]['relationship_names'] ?? null)->toBe('Company Admin, Regular Member');
+    expect($result['members'][0]['person_connection_ids'] ?? null)->toBe('conn-1,conn-2');
+});
+
+it('normalizes affiliation aliases and excludes them from roster relationship display', function (): void {
+    $service = new class(new ConfigService()) extends MemberService {
+        public function getMembershipMembers(string $membershipUuid, array $args = []): ?array
+        {
+            return [
+                'data' => [
+                    [
+                        'id' => 'pm-1',
+                        'type' => 'person_memberships',
+                        'attributes' => [
+                            'person_first_name' => 'Meri',
+                            'person_last_name' => 'Tester',
+                            'person_email' => 'meri@example.org',
+                        ],
+                        'relationships' => [
+                            'person' => [
+                                'data' => ['id' => 'person-1'],
+                            ],
+                        ],
+                    ],
+                ],
+                'included' => [
+                    [
+                        'id' => 'person-1',
+                        'type' => 'people',
+                        'attributes' => [
+                            'given_name' => 'Meri',
+                            'family_name' => 'Tester',
+                            'email' => 'meri@example.org',
+                        ],
+                    ],
+                ],
+                'meta' => [
+                    'page' => [
+                        'current_page' => 1,
+                        'total_pages' => 1,
+                        'total_count' => 1,
+                        'size' => 15,
+                    ],
+                ],
+            ];
+        }
+
+        public function getPersonCurrentRolesByOrgId($personUuid, $orgUuid)
+        {
+            return ['member'];
+        }
+    };
+
+    $connectionStub = new class extends OrgManagement\Services\ConnectionService {
+        public function getPersonConnectionsById($personUuid)
+        {
+            return [
+                'data' => [
+                    [
+                        'attributes' => [
+                            'type' => 'Affiliation',
+                            'active' => true,
+                            'uuid' => 'conn-1',
+                        ],
+                        'relationships' => [
+                            'organization' => [
+                                'data' => ['id' => 'org-1'],
+                            ],
+                        ],
+                    ],
+                    [
+                        'attributes' => [
+                            'type' => 'regular_member',
+                            'active' => true,
+                            'uuid' => 'conn-2',
+                        ],
+                        'relationships' => [
+                            'organization' => [
+                                'data' => ['id' => 'org-1'],
+                            ],
+                        ],
+                    ],
+                ],
+            ];
+        }
+    };
+
+    $connectionProperty = new ReflectionProperty(MemberService::class, 'connectionService');
+    $connectionProperty->setValue($service, $connectionStub);
+
+    $configProperty = new ReflectionProperty(MemberService::class, 'config');
+    $config = $configProperty->getValue($service);
+    $config['relationships']['exclude_relationship_types'] = ['affiliate'];
+    $configProperty->setValue($service, $config);
+
+    $result = $service->get_members('mem-1', 'org-1', [
+        'page' => 1,
+        'size' => 15,
+    ]);
+
+    expect($result['members'] ?? [])->toHaveCount(1);
+    expect($result['members'][0]['relationship_names'] ?? null)->toBe('Regular Member');
+});
+
+it('filters displayed member roles using allowlist and exclude config', function (): void {
+    $service = new class(new ConfigService()) extends MemberService {
+        public function getMembershipMembers(string $membershipUuid, array $args = []): ?array
+        {
+            return [
+                'data' => [
+                    [
+                        'id' => 'pm-1',
+                        'type' => 'person_memberships',
+                        'attributes' => [
+                            'person_first_name' => 'Ari',
+                            'person_last_name' => 'Lane',
+                            'person_email' => 'ari@example.org',
+                            'roles' => [
+                                'supplemental_member',
+                                'member',
+                            ],
+                        ],
+                        'relationships' => [
+                            'person' => [
+                                'data' => ['id' => 'person-1'],
+                            ],
+                        ],
+                    ],
+                ],
+                'included' => [
+                    [
+                        'id' => 'person-1',
+                        'type' => 'people',
+                        'attributes' => [
+                            'given_name' => 'Ari',
+                            'family_name' => 'Lane',
+                            'email' => 'ari@example.org',
+                        ],
+                    ],
+                ],
+                'meta' => [
+                    'page' => [
+                        'current_page' => 1,
+                        'total_pages' => 1,
+                        'total_count' => 1,
+                        'size' => 15,
+                    ],
+                ],
+            ];
+        }
+
+        public function getPersonCurrentRolesByOrgId($personUuid, $orgUuid)
+        {
+            return ['membership_owner', 'supplemental_member', 'cchl_member_community', 'member'];
+        }
+    };
+
+    $connectionStub = new class extends OrgManagement\Services\ConnectionService {
+        public function getPersonConnectionsById($personUuid)
+        {
+            return [
+                'data' => [
+                    [
+                        'attributes' => [
+                            'type' => 'regular_member',
+                            'active' => true,
+                            'uuid' => 'conn-1',
+                        ],
+                        'relationships' => [
+                            'organization' => [
+                                'data' => ['id' => 'org-1'],
+                            ],
+                        ],
+                    ],
+                ],
+            ];
+        }
+    };
+
+    $connectionProperty = new ReflectionProperty(MemberService::class, 'connectionService');
+    $connectionProperty->setValue($service, $connectionStub);
+
+    $configProperty = new ReflectionProperty(MemberService::class, 'config');
+    $config = $configProperty->getValue($service);
+    $config['ui']['member_list']['display_roles_allowlist'] = ['membership_owner', 'membership_manager', 'org_editor', 'member'];
+    $config['ui']['member_list']['display_roles_exclude'] = ['supplemental_member', 'cchlmembercommunity', 'cchl_member_community'];
+    $configProperty->setValue($service, $config);
+
+    $result = $service->get_members('mem-1', 'org-1', [
+        'page' => 1,
+        'size' => 15,
+    ]);
+
+    expect($result['members'] ?? [])->toHaveCount(1);
+    expect($result['members'][0]['current_roles'] ?? [])->toBe(['membership_owner', 'member']);
+    expect($result['members'][0]['roles'] ?? [])->toBe(['member']);
+});
