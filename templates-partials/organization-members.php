@@ -434,11 +434,11 @@ $members_list_endpoint = $membersListEndpoint;
 
 		<?php if ($show_bulk_upload) : ?>
 		<?php
-            $bulk_upload_endpoint = \OrgManagement\Helpers\template_url() . 'process/bulk-upload-members';
-            $bulk_upload_messages_id = 'bulk-upload-messages-' . sanitize_html_class($org_uuid ?: 'default');
-            $membership_uuid = $membershipUuid;
-            $bulk_upload_wrapper_class = 'wt_rounded-md wt_border wt_border-color wt_bg-white wt_p-4';
-        ?>
+		    $bulk_upload_endpoint = \OrgManagement\Helpers\template_url() . 'process/bulk-upload-members';
+		    $bulk_upload_messages_id = 'bulk-upload-messages-' . sanitize_html_class($org_uuid ?: 'default');
+		    $membership_uuid = $membershipUuid;
+		    $bulk_upload_wrapper_class = 'wt_rounded-md wt_border wt_border-color wt_bg-white wt_p-4';
+		    ?>
 		<dialog id="membersBulkUploadModal"
 			class="modal wt_m-auto max_wt_3xl wt_rounded-md wt_shadow-md backdrop_wt_bg-black-50"
 			data-show="$bulkUploadModalOpen"

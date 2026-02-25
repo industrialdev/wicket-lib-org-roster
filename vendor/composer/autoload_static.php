@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInite95cec36c8ee6de8986cdca0b756d92f
+class ComposerStaticInit158689f6632e1f40a2c035b6ef061fff
 {
     public static $prefixLengthsPsr4 = array (
         's' =>
@@ -44,6 +44,7 @@ class ComposerStaticInite95cec36c8ee6de8986cdca0b756d92f
         'OrgManagement\\Helpers\\TemplateHelper' => __DIR__ . '/../..' . '/src/Helpers/TemplateHelper.php',
         'OrgManagement\\OrgMan' => __DIR__ . '/../..' . '/src/OrgMan.php',
         'OrgManagement\\Services\\AdditionalSeatsService' => __DIR__ . '/../..' . '/src/Services/AdditionalSeatsService.php',
+        'OrgManagement\\Services\\BulkMemberUploadService' => __DIR__ . '/../..' . '/src/Services/BulkMemberUploadService.php',
         'OrgManagement\\Services\\BusinessInfoService' => __DIR__ . '/../..' . '/src/Services/BusinessInfoService.php',
         'OrgManagement\\Services\\ConfigService' => __DIR__ . '/../..' . '/src/Services/ConfigService.php',
         'OrgManagement\\Services\\ConnectionService' => __DIR__ . '/../..' . '/src/Services/ConnectionService.php',
@@ -80,9 +81,9 @@ class ComposerStaticInite95cec36c8ee6de8986cdca0b756d92f
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInite95cec36c8ee6de8986cdca0b756d92f::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInite95cec36c8ee6de8986cdca0b756d92f::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInite95cec36c8ee6de8986cdca0b756d92f::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit158689f6632e1f40a2c035b6ef061fff::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit158689f6632e1f40a2c035b6ef061fff::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit158689f6632e1f40a2c035b6ef061fff::$classMap;
 
         }, null, ClassLoader::class);
     }

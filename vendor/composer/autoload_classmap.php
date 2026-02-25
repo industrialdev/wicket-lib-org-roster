@@ -21,6 +21,7 @@ return array(
     'OrgManagement\\Helpers\\TemplateHelper' => $baseDir . '/src/Helpers/TemplateHelper.php',
     'OrgManagement\\OrgMan' => $baseDir . '/src/OrgMan.php',
     'OrgManagement\\Services\\AdditionalSeatsService' => $baseDir . '/src/Services/AdditionalSeatsService.php',
+    'OrgManagement\\Services\\BulkMemberUploadService' => $baseDir . '/src/Services/BulkMemberUploadService.php',
     'OrgManagement\\Services\\BusinessInfoService' => $baseDir . '/src/Services/BusinessInfoService.php',
     'OrgManagement\\Services\\ConfigService' => $baseDir . '/src/Services/ConfigService.php',
     'OrgManagement\\Services\\ConnectionService' => $baseDir . '/src/Services/ConnectionService.php',

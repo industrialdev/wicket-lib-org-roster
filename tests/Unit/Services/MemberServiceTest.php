@@ -277,7 +277,7 @@ it('includes inactive relationships on member cards by default', function (): vo
         }
     };
 
-    $connectionStub = new class extends \OrgManagement\Services\ConnectionService {
+    $connectionStub = new class extends OrgManagement\Services\ConnectionService {
         public function getPersonConnectionsById($personUuid)
         {
             return [
@@ -378,7 +378,7 @@ it('shows only active relationships on member cards when active-only filter is e
         }
     };
 
-    $connectionStub = new class extends \OrgManagement\Services\ConnectionService {
+    $connectionStub = new class extends OrgManagement\Services\ConnectionService {
         public function getPersonConnectionsById($personUuid)
         {
             return [

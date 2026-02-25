@@ -3,3 +3,4 @@ legacy-reference-only/
 /.construct-clipboard
 /vendor/pestphp/pest/.temp
 *.cache
+composer.json.bak

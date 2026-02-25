@@ -1,7 +1,7 @@
 <div class="wt_w-full wt_rounded-card-accent wt_p-4 wt_mb-4 wt_hover_shadow-sm wt_transition-shadow wt_bg-card wt_border wt_border-color"
     role="listitem">
     <h2 class="wt_text-2xl wt_mb-3">
-        <a href="<?php echo esc_url(\OrgManagement\Helpers\Helper::get_my_account_page_url('organization-management', '/my-account/organization-management/') . '?org_uuid=' . urlencode($org_id)); ?>"
+        <a href="<?php echo esc_url(OrgManagement\Helpers\Helper::get_my_account_page_url('organization-management', '/my-account/organization-management/') . '?org_uuid=' . urlencode($org_id)); ?>"
             class="wt_text-content wt_hover_text-primary-600 wt_focus_outline-hidden wt_focus_ring-2 wt_focus_ring-primary-500 wt_focus_ring-offset-2 wt_decoration-none">
             <?php echo esc_html($org_name); ?>
         </a>
@@ -59,21 +59,21 @@
                         <span class="wt_font-semibold"><?php esc_html_e('Group(s):', 'wicket-acc'); ?></span>
                         <?php
                         $group_labels = [];
-                        foreach ($group_details as $group_detail) {
-                            $label = $group_detail['name'] ?? '';
-                            $type = $group_detail['type'] ?? '';
-                            $tags = $group_detail['tags'] ?? null;
-                            if ($label !== '' && $type !== '') {
-                                $label .= ' (' . ucwords(str_replace('_', ' ', $type)) . ')';
-                            }
-                            if (is_array($tags) && !empty($tags)) {
-                                $label .= ' [' . implode(', ', $tags) . ']';
-                            }
-                            if ($label !== '') {
-                                $group_labels[] = $label;
-                            }
+                    foreach ($group_details as $group_detail) {
+                        $label = $group_detail['name'] ?? '';
+                        $type = $group_detail['type'] ?? '';
+                        $tags = $group_detail['tags'] ?? null;
+                        if ($label !== '' && $type !== '') {
+                            $label .= ' (' . ucwords(str_replace('_', ' ', $type)) . ')';
                         }
-                        ?>
+                        if (is_array($tags) && !empty($tags)) {
+                            $label .= ' [' . implode(', ', $tags) . ']';
+                        }
+                        if ($label !== '') {
+                            $group_labels[] = $label;
+                        }
+                    }
+                    ?>
                         <?php echo esc_html(implode(', ', $group_labels)); ?>
                     </div>
                 <?php endif; ?>
@@ -81,7 +81,7 @@
                 <div class="wt_flex wt_items-center wt_gap-4 wt_mt-4">
                     <?php if ($can_edit_org): ?>
                         <?php
-                        $profile_url_base = \OrgManagement\Helpers\Helper::get_my_account_page_url('organization-profile', '/my-account/organization-profile/');
+                    $profile_url_base = OrgManagement\Helpers\Helper::get_my_account_page_url('organization-profile', '/my-account/organization-profile/');
                         $profile_params = ['org_uuid' => $org_id];
                         if ($roster_mode === 'membership_cycle' && $entry_membership_uuid !== '') {
                             $profile_params['membership_uuid'] = $entry_membership_uuid;
@@ -102,7 +102,7 @@
 
                     <?php if ($is_membership_manager): ?>
                         <?php
-                        $members_url_base = \OrgManagement\Helpers\Helper::get_my_account_page_url('organization-members', '/my-account/organization-members/');
+                        $members_url_base = OrgManagement\Helpers\Helper::get_my_account_page_url('organization-members', '/my-account/organization-members/');
                         $members_params = ['org_uuid' => $org_id];
                         if ($roster_mode === 'membership_cycle' && $entry_membership_uuid !== '') {
                             $members_params['membership_uuid'] = $entry_membership_uuid;

@@ -2,6 +2,44 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.3.3] - 2026-02-25
+
+### Added
+- Asynchronous bulk member upload processing with WP-Cron job batches:
+  - New service: `OrgManagement\Services\BulkMemberUploadService`.
+  - New cron hook: `wicket_orgman_process_bulk_upload_job`.
+  - Per-job option storage with isolated records for parallel execution:
+    - job index key: `wicket_orgman_bulk_upload_job_ids`
+    - job record key prefix: `wicket_orgman_bulk_upload_job_{job_id}`
+- Hash-based duplicate upload protection for active jobs:
+  - SHA-256 file fingerprinting on enqueue.
+  - Rejects enqueue if the same file is already `queued` or `processing`.
+- Bulk upload configuration expansion:
+  - New config key: `bulk_upload.batch_size` (default `25`, bounded in service).
+- New tests for async bulk pipeline:
+  - `tests/Unit/Services/BulkMemberUploadServiceTest.php`.
+
+### Changed
+- Refactored `templates-partials/process/bulk-upload-members.php` into a thin request handler:
+  - keeps nonce/permission/context checks and SSE response rendering.
+  - delegates CSV processing/enqueueing to `BulkMemberUploadService`.
+- Added background processing wiring in `OrgManagement\OrgMan`:
+  - service dependency loading/initialization.
+  - cron action registration and scheduled batch dispatch.
+- Updated bulk processor CSV parsing calls to explicit `fgetcsv(..., escape)` arguments for forward compatibility.
+
+### Fixed
+- Preserved groups and non-groups bulk-upload behavior via updated regression assertions after architecture split.
+- Prevented cross-job interference by moving from monolithic option payloads to per-job option records.
+
+### Logging
+- Added always-on bulk upload lifecycle logging (including production):
+  - enqueue accepted/rejected
+  - batch start/end
+  - row-level skip/fail/add outcomes
+  - schedule failures
+  - completion summaries
+
 ## [0.3.1] - 2026-02-19
 
 ### Added

@@ -30,6 +30,36 @@ if ($content_dir !== '' && strpos($library_base_path, $content_dir) === 0) {
 }
 $library_base_url = trailingslashit((string) apply_filters('wicket/acc/orgman/base_url', $library_base_url));
 $csv_template_url = $library_base_url . 'public/templates/roster_template.csv';
+$orgman_config = \OrgManagement\Config\get_config();
+$bulk_upload_config = is_array($orgman_config['bulk_upload'] ?? null)
+    ? $orgman_config['bulk_upload']
+    : [];
+$bulk_columns_config = is_array($bulk_upload_config['columns'] ?? null)
+    ? $bulk_upload_config['columns']
+    : [];
+$default_bulk_columns = [
+    'first_name' => ['enabled' => true, 'header' => __('First Name', 'wicket-acc')],
+    'last_name' => ['enabled' => true, 'header' => __('Last Name', 'wicket-acc')],
+    'email' => ['enabled' => true, 'header' => __('Email Address', 'wicket-acc')],
+    'relationship_type' => ['enabled' => true, 'header' => __('Relationship Type', 'wicket-acc')],
+    'roles' => ['enabled' => true, 'header' => __('Roles', 'wicket-acc')],
+];
+$expected_columns = [];
+foreach ($default_bulk_columns as $column_key => $defaults) {
+    $column_config = is_array($bulk_columns_config[$column_key] ?? null)
+        ? $bulk_columns_config[$column_key]
+        : [];
+    $enabled = (bool) ($column_config['enabled'] ?? $defaults['enabled']);
+    if (in_array($column_key, ['first_name', 'last_name', 'email'], true)) {
+        $enabled = true;
+    }
+    if (!$enabled) {
+        continue;
+    }
+
+    $expected_columns[] = (string) ($column_config['header'] ?? $defaults['header']);
+}
+$expected_columns_text = implode(', ', $expected_columns);
 ?>
 
 <div class="<?php echo esc_attr($bulk_upload_wrapper_class); ?>">
@@ -72,7 +102,18 @@ $csv_template_url = $library_base_url . 'public/templates/roster_template.csv';
             class="wt_block wt_w-full wt_text-sm wt_mb-3">
 
         <p class="wt_text-xs wt_text-content wt_mb-3">
-            <?php esc_html_e('Expected columns: First Name, Last Name, Email Address, Roles', 'wicket-acc'); ?>
+            <?php
+            echo esc_html(
+                sprintf(
+                    /* translators: %s list of configured CSV columns */
+                    __('Expected columns: %s', 'wicket-acc'),
+                    $expected_columns_text
+                )
+            );
+?>
+        </p>
+        <p class="wt_text-xs wt_text-content wt_mb-3">
+            <?php esc_html_e('For multiple roles, separate values with "|" only.', 'wicket-acc'); ?>
         </p>
 
         <button

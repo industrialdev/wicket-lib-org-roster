@@ -172,7 +172,7 @@ $members_list_target = $members_list_target;
 $show_edit_permissions = $show_edit_permissions;
 $show_account_status = true;
 $show_add_member_button = $show_add_member_button;
-    $show_remove_button = $show_remove_button;
+$show_remove_button = $show_remove_button;
 include __DIR__ . '/members-list-unified.php';
 ?>
 
@@ -662,7 +662,7 @@ $available_roles = OrgHelpers\PermissionHelper::filter_role_choices(
                 $remove_member_endpoint = ($mode === 'groups')
 ? OrgHelpers\template_url() . 'process/remove-group-member'
 : OrgHelpers\template_url() . 'process/remove-member';
-?>
+        ?>
 
                 <form method="POST"
                     data-on:submit="$removeMemberSubmitting = true; $membersLoading = true; @post('<?php echo esc_js($remove_member_endpoint); ?>', { contentType: 'form' })"

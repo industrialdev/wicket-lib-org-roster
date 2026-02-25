@@ -37,6 +37,6 @@ it('keeps organization label resolution fallback to organization lookup and iden
     expect($template)->toBeString()->not->toBeFalse();
     expect($template)->toContain("\$group_org_label = (string) (\$group_item['org_name'] ?? '');");
     expect($template)->toContain("if (!empty(\$group_org_candidates) && function_exists('wicket_get_organization')) {");
-    expect($template)->toContain("\$organization_response = wicket_get_organization(\$group_org_candidate);");
+    expect($template)->toContain('$organization_response = wicket_get_organization($group_org_candidate);');
     expect($template)->toContain("\$group_org_label = (string) (\$group_item['org_identifier'] ?? '');");
 });

@@ -480,26 +480,26 @@ if (empty($organizations)) {
 <div id="organization-list-container">
     <?php
     $orgman_config = \OrgManagement\Config\get_config();
-    $org_list_config = is_array($orgman_config['ui']['organization_list'] ?? null)
-        ? $orgman_config['ui']['organization_list']
-        : [];
-    $org_page_size = max(1, (int) ($org_list_config['page_size'] ?? 5));
-    $org_total_items = count($organizations);
-    $org_total_pages = max(1, (int) ceil($org_total_items / $org_page_size));
-    $org_page_raw = isset($_GET['org_page']) ? wp_unslash($_GET['org_page']) : 1;
-    if (!is_scalar($org_page_raw)) {
-        $org_page_raw = 1;
-    }
-    $org_page = max(1, absint((string) $org_page_raw));
-    if ($org_page > $org_total_pages) {
-        $org_page = $org_total_pages;
-    }
-    $org_offset = ($org_page - 1) * $org_page_size;
-    $organizations_page = array_slice($organizations, $org_offset, $org_page_size);
+$org_list_config = is_array($orgman_config['ui']['organization_list'] ?? null)
+    ? $orgman_config['ui']['organization_list']
+    : [];
+$org_page_size = max(1, (int) ($org_list_config['page_size'] ?? 5));
+$org_total_items = count($organizations);
+$org_total_pages = max(1, (int) ceil($org_total_items / $org_page_size));
+$org_page_raw = isset($_GET['org_page']) ? wp_unslash($_GET['org_page']) : 1;
+if (!is_scalar($org_page_raw)) {
+    $org_page_raw = 1;
+}
+$org_page = max(1, absint((string) $org_page_raw));
+if ($org_page > $org_total_pages) {
+    $org_page = $org_total_pages;
+}
+$org_offset = ($org_page - 1) * $org_page_size;
+$organizations_page = array_slice($organizations, $org_offset, $org_page_size);
 
-    // Display organization count
-    $count = $org_total_items;
-    echo "<p class='mb-2'>" . __('Organizations Found:', 'wicket-acc') . ' ' . (int) $count . '</p>';
+// Display organization count
+$count = $org_total_items;
+echo "<p class='mb-2'>" . __('Organizations Found:', 'wicket-acc') . ' ' . (int) $count . '</p>';
 
 // Start organization list
 echo '<div class="wt_w-full wt_flex wt_flex-col wt_gap-4" role="list">';
@@ -792,7 +792,7 @@ endforeach; ?>
                     (int) $last_item,
                     (int) $org_total_items
                 );
-                ?>
+        ?>
             </div>
             <div class="members-pagination__controls wt_w-full wt_flex wt_items-center wt_gap-2 wt_justify-end wt_self-end">
                 <?php if ($org_page > 1) : ?>

@@ -188,6 +188,7 @@ final class OrgMan
         orgman_require_once_compat('Services/NotificationService.php');
         orgman_require_once_compat('Services/AdditionalSeatsService.php');
         orgman_require_once_compat('Services/MembershipService.php');
+        orgman_require_once_compat('Services/BulkMemberUploadService.php');
         orgman_require_once_compat('Helpers/Helper.php');
         orgman_require_once_compat('Helpers/ConfigHelper.php');
         orgman_require_once_compat('Helpers/RelationshipHelper.php');
@@ -224,6 +225,7 @@ final class OrgMan
         $this->services['notification'] = new Services\NotificationService();
         $this->services['additional_seats'] = new Services\AdditionalSeatsService($this->services['config']);
         $this->services['membership'] = new Services\MembershipService();
+        $this->services['bulk_upload'] = new Services\BulkMemberUploadService($this->services['config']);
     }
 
     /**
@@ -258,6 +260,7 @@ final class OrgMan
         $this->register_additional_seats_hook('woocommerce_payment_complete');
 
         add_filter('woocommerce_get_return_url', [$this, 'filter_woocommerce_return_url'], 10, 2);
+        add_action(Services\BulkMemberUploadService::CRON_HOOK, [$this, 'process_bulk_upload_job'], 10, 1);
 
         // Add hooks to transfer user meta to order items
         add_action('woocommerce_checkout_create_order_line_item', [$this, 'add_additional_seats_data_to_order_item'], 10, 4);
@@ -283,6 +286,27 @@ final class OrgMan
 
             $this->handle_additional_seats_order_processing($order_id);
         }, 10, 1);
+    }
+
+    /**
+     * Process one scheduled bulk-upload batch.
+     *
+     * @param string $job_id
+     * @return void
+     */
+    public function process_bulk_upload_job($job_id)
+    {
+        $job_id = sanitize_key((string) $job_id);
+        if ($job_id === '') {
+            return;
+        }
+
+        $bulk_upload_service = $this->services['bulk_upload'] ?? null;
+        if (!$bulk_upload_service instanceof Services\BulkMemberUploadService) {
+            $bulk_upload_service = new Services\BulkMemberUploadService($this->services['config']);
+        }
+
+        $bulk_upload_service->process_scheduled_job($job_id);
     }
 
     /**

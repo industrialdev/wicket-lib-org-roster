@@ -2,7 +2,7 @@
     role="listitem">
     <?php
     $org_uuid_param = isset($org_uuid_for_links) ? (string) $org_uuid_for_links : (string) $org_id;
-    $title_url_base = \OrgManagement\Helpers\Helper::get_my_account_page_url('organization-management', '/my-account/organization-management/');
+    $title_url_base = OrgManagement\Helpers\Helper::get_my_account_page_url('organization-management', '/my-account/organization-management/');
     $title_params = [];
     if ($org_uuid_param !== '') {
         $title_params['org_uuid'] = $org_uuid_param;
@@ -106,7 +106,7 @@
                 <div class="wt_flex wt_items-center wt_gap-4 wt_mt-4">
                     <?php if ($can_edit_org): ?>
                         <?php
-                        $profile_url_base = \OrgManagement\Helpers\Helper::get_my_account_page_url('organization-profile', '/my-account/organization-profile/');
+                        $profile_url_base = OrgManagement\Helpers\Helper::get_my_account_page_url('organization-profile', '/my-account/organization-profile/');
                         $profile_params = [];
                         if ($org_uuid_param !== '') {
                             $profile_params['org_uuid'] = $org_uuid_param;
@@ -130,7 +130,7 @@
 
                     <?php if ($is_membership_manager): ?>
                         <?php
-                        $members_url_base = \OrgManagement\Helpers\Helper::get_my_account_page_url('organization-members', '/my-account/organization-members/');
+                        $members_url_base = OrgManagement\Helpers\Helper::get_my_account_page_url('organization-members', '/my-account/organization-members/');
                         $members_params = [];
                         if ($org_uuid_param !== '') {
                             $members_params['org_uuid'] = $org_uuid_param;

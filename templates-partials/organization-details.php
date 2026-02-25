@@ -184,9 +184,9 @@ if ($roster_mode === 'groups' && $group_uuid !== '') {
 
         <?php
         $member_list_config = \OrgManagement\Config\get_config()['ui']['member_list'] ?? [];
-        $show_bulk_upload = (bool) ($member_list_config['show_bulk_upload'] ?? false);
-        if ($show_bulk_upload && $can_bulk_upload):
-        ?>
+$show_bulk_upload = (bool) ($member_list_config['show_bulk_upload'] ?? false);
+if ($show_bulk_upload && $can_bulk_upload):
+    ?>
             <a href="<?php echo esc_url(add_query_arg($members_params, $members_bulk_url)); ?>"
                 class="org-details__action-link wt_text-primary-600 wt_hover_text-primary-700 underline underline-offset-4"><?php esc_html_e('Bulk Upload', 'wicket-acc'); ?></a>
         <?php endif; ?>
