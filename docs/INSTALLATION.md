@@ -124,7 +124,55 @@ add_action('after_setup_theme', static function (): void {
 }, 20);
 ```
 
-## 3) Include Bootstrap File From Theme `functions.php`
+## 3) Theme Styling Overrides (Recommended)
+
+OrgMan ships its own base stylesheet (`orgman-modern`).  
+To customize the UI safely from your theme, enqueue a second stylesheet that depends on `orgman-modern`.
+
+Recommended child-theme path (WordPress convention):
+- `assets/css/org-roster.css`
+
+If your theme already uses a different convention (for example `public/css/wicket-orgman.css`), use that path instead.
+
+Starter demo file (inside this library):
+- `public/css/org-roster-theme-overrides.demo.css`
+- Copy it into your theme and rename to `assets/css/org-roster.css` (or your preferred theme path).
+
+Example copy command (run from your child theme root):
+
+```bash
+cp vendor/industrialdev/wicket-lib-org-roster/public/css/org-roster-theme-overrides.demo.css assets/css/org-roster.css
+```
+
+Add this to `custom/org-roster.php`:
+
+```php
+<?php
+
+add_action('wp_enqueue_scripts', static function (): void {
+    // Only load overrides when OrgMan styles are present.
+    if (!wp_style_is('orgman-modern', 'enqueued') && !wp_style_is('orgman-modern', 'registered')) {
+        return;
+    }
+
+    $relative_path = 'assets/css/org-roster.css';
+    $file_path = trailingslashit(get_stylesheet_directory()) . $relative_path;
+    if (!file_exists($file_path)) {
+        return;
+    }
+
+    wp_enqueue_style(
+        'wicket-child-org-roster',
+        trailingslashit(get_stylesheet_directory_uri()) . $relative_path,
+        ['orgman-modern'],
+        (string) filemtime($file_path)
+    );
+}, 30);
+```
+
+The demo file uses native modern CSS nesting/cascade and is scoped to `.wicket-orgman`.
+
+## 4) Include Bootstrap File From Theme `functions.php`
 
 Example include list:
 
@@ -136,7 +184,7 @@ $wicket_child_includes = [
 ];
 ```
 
-## 4) Strategy/Behavior Configuration (Optional)
+## 5) Strategy/Behavior Configuration (Optional)
 
 Inside the bootstrap filter, set the strategy and client-specific config:
 
@@ -153,7 +201,7 @@ For complete membership-cycle options, see:
 - `docs/STRATEGIES.md`
 - `docs/strategy-membership-cycle/membership-cycle-specification.md`
 
-## 5) Verification Checklist
+## 6) Verification Checklist
 
 1. Child theme has `vendor/autoload.php`.
 2. `OrgMan::get_instance()` is called on `after_setup_theme`.

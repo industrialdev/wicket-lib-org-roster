@@ -171,11 +171,31 @@ class BulkMemberUploadService
         $file_sha256 = hash_file('sha256', $file_path);
         $file_sha256 = is_string($file_sha256) ? strtolower(trim($file_sha256)) : '';
         if ($file_sha256 !== '') {
-            $existing_job = $this->find_active_job_by_hash($file_sha256);
+            $existing_job = $this->find_job_by_hash($file_sha256);
             if (is_array($existing_job)) {
                 $existing_job_id = (string) ($existing_job['id'] ?? '');
                 $existing_status = (string) ($existing_job['status'] ?? 'queued');
-                $this->log_activity('warning', 'Bulk upload enqueue blocked: duplicate file already in progress', [
+                if (in_array($existing_status, ['queued', 'processing'], true)) {
+                    $this->log_activity('warning', 'Bulk upload enqueue blocked: duplicate file already in progress', [
+                        'existing_job_id' => $existing_job_id,
+                        'existing_status' => $existing_status,
+                        'file_name' => $file_name,
+                        'file_sha256' => $file_sha256,
+                        'org_uuid' => $org_uuid,
+                        'membership_uuid' => $membership_uuid,
+                    ]);
+
+                    return new WP_Error(
+                        'bulk_duplicate_active_job',
+                        sprintf(
+                            __('This exact same CSV is already in progress (matching file hash). Existing job: %1$s (status: %2$s).', 'wicket-acc'),
+                            $existing_job_id,
+                            $existing_status
+                        )
+                    );
+                }
+
+                $this->log_activity('warning', 'Bulk upload enqueue blocked: duplicate file already processed', [
                     'existing_job_id' => $existing_job_id,
                     'existing_status' => $existing_status,
                     'file_name' => $file_name,
@@ -185,9 +205,9 @@ class BulkMemberUploadService
                 ]);
 
                 return new WP_Error(
-                    'bulk_duplicate_active_job',
+                    'bulk_duplicate_finished_job',
                     sprintf(
-                        __('This file is already being processed (job %1$s, status: %2$s).', 'wicket-acc'),
+                        __('This exact same CSV was already processed before (matching file hash). Existing job: %1$s (status: %2$s). Please upload a different CSV with different users.', 'wicket-acc'),
                         $existing_job_id,
                         $existing_status
                     )
@@ -764,7 +784,7 @@ class BulkMemberUploadService
      * @param string $file_sha256
      * @return array<string, mixed>|null
      */
-    private function find_active_job_by_hash(string $file_sha256): ?array
+    private function find_job_by_hash(string $file_sha256): ?array
     {
         if ($file_sha256 === '') {
             return null;
@@ -783,11 +803,6 @@ class BulkMemberUploadService
 
             $job = get_option(self::JOB_OPTION_PREFIX . $job_id, null);
             if (!is_array($job)) {
-                continue;
-            }
-
-            $status = (string) ($job['status'] ?? '');
-            if (!in_array($status, ['queued', 'processing'], true)) {
                 continue;
             }
 

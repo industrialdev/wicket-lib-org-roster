@@ -1406,6 +1406,63 @@ input:where([type="button"], [type="reset"], [type="submit"]) {
   padding: 0.375rem 0.75rem;
   font-size: 0.875rem;
 }
+.wicket-orgman .orgman-bulk-upload__template-link {
+  color: var(--wicket-orgman-bg-interactive);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+.wicket-orgman .orgman-bulk-upload__template-link:hover,
+.wicket-orgman .orgman-bulk-upload__template-link:focus {
+  color: var(--wicket-orgman-primary-color);
+}
+.wicket-orgman .orgman-bulk-upload__template-link:focus-visible {
+  outline: 2px solid
+    color-mix(in srgb, var(--wicket-orgman-bg-interactive) 40%, transparent);
+  outline-offset: 2px;
+}
+.wicket-orgman .orgman-bulk-upload__file-input {
+  border: 1px solid var(--wicket-orgman-border-color);
+  border-radius: 0.5rem;
+  background-color: var(--wicket-orgman-bg-white);
+  color: var(--wicket-orgman-text-content);
+  padding: 0.5rem;
+}
+.wicket-orgman .orgman-bulk-upload__file-input:focus {
+  outline: 2px solid
+    color-mix(in srgb, var(--wicket-orgman-bg-interactive) 40%, transparent);
+  outline-offset: 2px;
+}
+.wicket-orgman .orgman-bulk-upload__file-input::file-selector-button {
+  margin-right: 0.75rem;
+  border: 1px solid var(--wicket-orgman-secondary-outline-color);
+  border-radius: 0.375rem;
+  background-color: var(--wicket-orgman-bg-white);
+  color: var(--wicket-orgman-primary-color);
+  padding: 0.375rem 0.75rem;
+  font: inherit;
+  cursor: pointer;
+}
+.wicket-orgman .orgman-bulk-upload__file-input::-webkit-file-upload-button {
+  margin-right: 0.75rem;
+  border: 1px solid var(--wicket-orgman-secondary-outline-color);
+  border-radius: 0.375rem;
+  background-color: var(--wicket-orgman-bg-white);
+  color: var(--wicket-orgman-primary-color);
+  padding: 0.375rem 0.75rem;
+  font: inherit;
+  cursor: pointer;
+}
+.wicket-orgman .orgman-bulk-upload__file-input:hover::file-selector-button,
+.wicket-orgman .orgman-bulk-upload__file-input:focus::file-selector-button {
+  background-color: var(--wicket-orgman-secondary-color);
+  color: var(--wicket-orgman-text-content-reversed);
+}
+.wicket-orgman .orgman-bulk-upload__file-input:hover::-webkit-file-upload-button,
+.wicket-orgman .orgman-bulk-upload__file-input:focus::-webkit-file-upload-button {
+  background-color: var(--wicket-orgman-secondary-color);
+  color: var(--wicket-orgman-text-content-reversed);
+}
 .wicket-orgman .member-card {
   border: 1px solid var(--wicket-orgman-border-color);
   background-color: var(--wicket-orgman-background-light);
@@ -1488,6 +1545,35 @@ input:where([type="button"], [type="reset"], [type="submit"]) {
 }
 .wicket-orgman dialog.modal.closing {
   animation: 0.2s ease-in forwards orgman-modal-slide-out;
+}
+.wicket-orgman .orgman-modal__close {
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--wicket-orgman-secondary-outline-color);
+  border-radius: 9999px;
+  background-color: var(--wicket-orgman-bg-white);
+  color: var(--wicket-orgman-primary-color);
+  padding: 0;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  transition:
+    background-color 0.15s ease-in-out,
+    color 0.15s ease-in-out,
+    border-color 0.15s ease-in-out;
+}
+.wicket-orgman .orgman-modal__close:hover,
+.wicket-orgman .orgman-modal__close:focus {
+  background-color: var(--wicket-orgman-secondary-color);
+  border-color: var(--wicket-orgman-secondary-color);
+  color: var(--wicket-orgman-text-content-reversed);
+}
+.wicket-orgman .orgman-modal__close:focus-visible {
+  outline: 2px solid
+    color-mix(in srgb, var(--wicket-orgman-bg-interactive) 40%, transparent);
+  outline-offset: 2px;
 }
 .wicket-orgman .business-info__header {
   border: 1px solid var(--wicket-orgman-border-color);

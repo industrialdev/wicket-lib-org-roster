@@ -2,6 +2,32 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.3.7] - 2026-02-26
+
+### Added
+- New bulk-upload duplicate-hash error path for previously processed files:
+  - error code: `bulk_duplicate_finished_job`
+  - message now indicates the matching CSV hash was already processed and advises uploading a different CSV payload.
+- New theme override starter stylesheet:
+  - `public/css/org-roster-theme-overrides.demo.css`
+- New unit coverage in `BulkMemberUploadServiceTest` for rejecting duplicate uploads when a matching file hash already exists on a completed job.
+
+### Changed
+- Bulk upload duplicate-hash lookup now checks all known jobs (`find_job_by_hash`) and branches behavior by job status:
+  - active jobs (`queued`/`processing`) keep the in-progress rejection path
+  - non-active matches now return the new finished-job rejection path.
+- Refined bulk-upload UI markup in `templates-partials/members-bulk-upload.php`:
+  - introduced scoped classes (`orgman-bulk-upload`, `orgman-bulk-upload__template-link`, `orgman-bulk-upload__file-input`)
+  - adjusted supporting helper-copy typography and submit button alignment.
+- Standardized modal close-button markup across member/group templates with `orgman-modal__close` for consistent styling hooks.
+- Expanded `public/css/modern-orgman-static.css` with new bulk-upload control styles and reusable modal close-button styles/focus states.
+
+### Documentation
+- Updated `docs/INSTALLATION.md` with a recommended theme-override workflow:
+  - enqueue a child-theme stylesheet that depends on `orgman-modern`
+  - copy-and-customize guidance for the demo override file
+  - example `wp_enqueue_scripts` implementation and revised section numbering.
+
 ## [0.3.6] - 2026-02-26
 
 ### Added

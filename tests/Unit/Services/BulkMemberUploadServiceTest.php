@@ -94,6 +94,30 @@ it('rejects duplicate active job when uploaded file hash already exists in queue
     @unlink($tmp);
 });
 
+it('rejects duplicate finished job when uploaded file hash was already processed', function (): void {
+    $tmp = tempnam(sys_get_temp_dir(), 'orgman-bulk-');
+    file_put_contents($tmp, "First Name,Last Name,Email Address,Relationship Type,Roles\nJane,Doe,jane@example.com,Employee,member\n");
+    $hash = hash_file('sha256', $tmp);
+
+    $existing_id = 'completedjob1';
+    $GLOBALS['__orgroster_bulk_options'][BulkMemberUploadService::OPTION_KEY] = [$existing_id];
+    $GLOBALS['__orgroster_bulk_options'][BulkMemberUploadService::JOB_OPTION_PREFIX . $existing_id] = [
+        'id' => $existing_id,
+        'status' => 'completed',
+        'file_sha256' => $hash,
+    ];
+
+    $service = new BulkMemberUploadService();
+    $result = $service->enqueue_upload($tmp, 'members.csv', 'org-1', 'membership-1', 'direct');
+
+    expect($result)->toBeInstanceOf(WP_Error::class);
+    expect($result->get_error_code())->toBe('bulk_duplicate_finished_job');
+    expect($result->get_error_message())->toContain('matching file hash');
+    expect($GLOBALS['__orgroster_bulk_scheduled'])->toHaveCount(0);
+
+    @unlink($tmp);
+});
+
 it('processes one scheduled batch and keeps job queued when more rows remain', function (): void {
     $job_id = 'jobbatch1';
     $job_key = BulkMemberUploadService::JOB_OPTION_PREFIX . $job_id;

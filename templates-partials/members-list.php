@@ -480,7 +480,7 @@ $no_members_message = __('No members found.', 'wicket-acc');
         data-effect="if ($editPermissionsModalOpen) el.showModal(); else el.close();"
         data-on:close="($membersLoading = false); $editPermissionsModalOpen = false">
         <div class="wt_bg-white wt_p-6 wt_relative">
-            <button type="button" class="wt_absolute wt_right-4 wt_top-4 wt_text-lg wt_font-semibold"
+            <button type="button" class="orgman-modal__close wt_absolute wt_right-4 wt_top-4 wt_text-lg wt_font-semibold"
                 data-on:click="$editPermissionsModalOpen = false" data-class_wt_hidden="$editPermissionsSuccess">
                 ×
             </button>
@@ -597,7 +597,7 @@ $no_members_message = __('No members found.', 'wicket-acc');
         data-effect="if ($removeMemberModalOpen) el.showModal(); else el.close();"
         data-on:close="($membersLoading = false); $removeMemberModalOpen = false">
         <div class="wt_bg-white wt_p-6 wt_relative">
-            <button type="button" class="wt_absolute wt_right-4 wt_top-4 wt_text-lg wt_font-semibold"
+            <button type="button" class="orgman-modal__close wt_absolute wt_right-4 wt_top-4 wt_text-lg wt_font-semibold"
                 data-on:click="$removeMemberModalOpen = false" data-class_wt_hidden="$removeMemberSuccess">
                 ×
             </button>

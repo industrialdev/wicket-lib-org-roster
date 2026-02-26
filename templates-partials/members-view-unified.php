@@ -254,7 +254,7 @@ $remove_member_error_actions = "console.error('Failed to remove member'); \$remo
                 data-effect="if ($editPermissionsModalOpen) el.showModal(); else el.close();"
                 data-on:close="($membersLoading = false); $editPermissionsModalOpen = false">
                 <div class="wt_bg-white wt_p-6 wt_relative">
-                    <button type="button" class="wt_absolute wt_right-4 wt_top-4 wt_text-lg wt_font-semibold"
+                    <button type="button" class="orgman-modal__close wt_absolute wt_right-4 wt_top-4 wt_text-lg wt_font-semibold"
                         data-on:click="$editPermissionsModalOpen = false" data-class_wt_hidden="$editPermissionsSuccess">
                         ×
                     </button>
@@ -386,7 +386,7 @@ $remove_member_error_actions = "console.error('Failed to remove member'); \$remo
         data-effect="if ($addMemberModalOpen) el.showModal(); else el.close();"
         data-on:close="($membersLoading = false); $addMemberModalOpen = false">
         <div class="wt_bg-white wt_p-6 wt_relative" data-on:click__outside__capture="$addMemberModalOpen = false">
-            <button type="button" class="wt_absolute wt_right-4 wt_top-4 wt_text-lg wt_font-semibold"
+            <button type="button" class="orgman-modal__close wt_absolute wt_right-4 wt_top-4 wt_text-lg wt_font-semibold"
                 data-on:click="$addMemberModalOpen = false" data-class:hidden="$addMemberSuccess">
                 ×
             </button>
@@ -624,7 +624,7 @@ $available_roles = OrgHelpers\PermissionHelper::filter_role_choices(
             data-effect="if ($bulkUploadModalOpen) el.showModal(); else el.close();"
             data-on:close="($membersLoading = false); $bulkUploadModalOpen = false">
             <div class="wt_bg-white wt_p-6 wt_relative" data-on:click__outside__capture="$bulkUploadModalOpen = false">
-                <button type="button" class="wt_absolute wt_right-4 wt_top-4 wt_text-lg wt_font-semibold"
+                <button type="button" class="orgman-modal__close wt_absolute wt_right-4 wt_top-4 wt_text-lg wt_font-semibold"
                     data-on:click="$bulkUploadModalOpen = false">
                     ×
                 </button>
@@ -639,7 +639,7 @@ $available_roles = OrgHelpers\PermissionHelper::filter_role_choices(
         data-effect="if ($removeMemberModalOpen) el.showModal(); else el.close();"
         data-on:close="($membersLoading = false); $removeMemberModalOpen = false">
         <div class="wt_bg-white wt_p-6 wt_relative">
-            <button type="button" class="wt_absolute wt_right-4 wt_top-4 wt_text-lg wt_font-semibold"
+            <button type="button" class="orgman-modal__close wt_absolute wt_right-4 wt_top-4 wt_text-lg wt_font-semibold"
                 data-on:click="$removeMemberModalOpen = false" data-class_wt_hidden="$removeMemberSuccess">×</button>
             <h2 class="wt_text-2xl wt_font-semibold wt_mb-4"><?php esc_html_e('Remove Member', 'wicket-acc'); ?></h2>
             <div id="remove-member-messages"></div>
