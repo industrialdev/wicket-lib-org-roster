@@ -6,6 +6,8 @@
 
 ### 1.1 Organization Management
 - List organizations associated with the current user.
+  - Default source is active/current membership entries.
+  - Optional fallback can include orgs derived from org-scoped roles when `permissions.role_only_management_access.enabled = true`.
 - View organization profile and business information.
 - Edit organization details (permissions permitting).
 
@@ -76,6 +78,10 @@ The library is highly configurable via the `wicket/acc/orgman/config` filter. Ke
 
 - `roster.strategy`: Selects the logic for member management (`direct`, `cascade`, `groups`, `membership_cycle`).
 - `permissions`: Fine-grained control over who can edit orgs, manage members, and buy seats.
+  - Includes optional role-only access override for org-management surfaces:
+    - `permissions.role_only_management_access.enabled` (default `false`)
+    - `permissions.role_only_management_access.allowed_roles` (default `['membership_owner']`)
+    - Covers org list visibility, organization profile access link, and bulk-upload entry points (when enabled), even without active membership.
 - `member_addition`: Configuration for auto-assigned roles and relationship types.
 - `groups`: Settings for group-based management (tags, managing roles, roster roles, seat limits, additional_info mapping, removal mode, UI edit fields).
 - `membership_cycle`: Strategy-specific permissions and member-management guards.

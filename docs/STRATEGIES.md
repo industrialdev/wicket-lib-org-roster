@@ -219,6 +219,8 @@ Current strategy keys:
 - `permissions.add_members`
 - `permissions.remove_members`
 - `permissions.purchase_seats`
+- `permissions.role_only_management_access.enabled` (default `false`)
+- `permissions.role_only_management_access.allowed_roles` (default `['membership_owner']`)
 
 ### Strategy-Specific Overrides
 - When `roster.strategy = membership_cycle`, helper methods support overrides from:
@@ -229,6 +231,7 @@ Current strategy keys:
 ### Expected Outcome
 - Existing strategies keep global permission behavior.
 - `membership_cycle` can use stricter role defaults without changing global defaults.
+- When role-only management access is enabled, allowed org roles can access org-management visibility surfaces without active membership (org list, organization profile link, and bulk-upload entry points when enabled), while mutation gates still honor required-role intersections.
 
 ## 6) Endpoint and Template Touchpoints
 

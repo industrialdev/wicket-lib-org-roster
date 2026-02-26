@@ -49,6 +49,8 @@ All keys below are current defaults from `src/config/config.php`.
 | `permissions.prevent_owner_removal` | `false` | bool | When true, blocks removing users with owner-level role assignments in non-cycle flows. |
 | `permissions.relationship_based_permissions` | `false` | bool | When true, role assignment is driven by relationship type mappings in `relationship_roles_map`. |
 | `permissions.prevent_owner_assignment` | `true` | bool | When true, hides/blocks assignment of the owner role from UI mutation flows. |
+| `permissions.role_only_management_access.enabled` | `false` | bool | When true, users with allowed org roles may access organization-management screens without an active org membership. |
+| `permissions.role_only_management_access.allowed_roles` | `['membership_owner']` | array | Role allowlist used by role-only management access. Allowed roles can access org-management visibility surfaces (org list, organization profile link, and bulk-upload entry points when bulk upload is enabled), and still use required-role intersections for mutation gates (add/remove/purchase). |
 | `permissions.relationship_roles_map.ceo` | `['org_editor','membership_manager']` | array | Roles auto-assigned when relationship type is `ceo` and relationship-based permissions are enabled. |
 | `permissions.relationship_roles_map.primary_hr_contact` | `['org_editor','membership_manager']` | array | Roles auto-assigned for `primary_hr_contact` relationship type. |
 | `permissions.relationship_roles_map.member_contact` | `['org_editor','membership_manager']` | array | Roles auto-assigned for `member_contact` relationship type. |
@@ -263,6 +265,20 @@ add_filter('wicket/acc/orgman/config', function (array $config): array {
     return $config;
 });
 ```
+
+### Optional: Role-Only Management Access (Site Override)
+
+```php
+add_filter('wicket/acc/orgman/config', function (array $config): array {
+    // Library default is disabled. Enable only when business rules require it.
+    $config['permissions']['role_only_management_access']['enabled'] = true;
+    $config['permissions']['role_only_management_access']['allowed_roles'] = ['membership_owner'];
+
+    return $config;
+});
+```
+
+When enabled, allowed roles can see organization-management surfaces even without active membership entries, including the organization profile link and bulk-upload navigation (when `ui.member_list.show_bulk_upload = true`).
 
 ### Cascade Strategy Baseline
 

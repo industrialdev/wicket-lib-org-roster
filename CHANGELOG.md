@@ -2,6 +2,19 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.3.6] - 2026-02-26
+
+### Added
+- New optional permission config for role-only organization management access:
+  - `permissions.role_only_management_access.enabled` (default `false`)
+  - `permissions.role_only_management_access.allowed_roles` (default `['membership_owner']`)
+
+### Changed
+- Organization list resolution can now include org-scoped role-derived organizations when role-only access is enabled.
+- Permission checks can now bypass active-membership requirement for configured role intersections when role-only access is enabled, and role-only allowlisted users can access organization-management visibility surfaces (including organization profile and bulk-upload entry points when enabled).
+- Role parsing for org-scoped permissions now tolerates API relationship shape variants (`resource`/`organization`, `organization`/`organizations`) and ignores global roles.
+- Updated documentation references and MSA baseline config example to include site-specific role-only access override guidance.
+
 ## [0.3.5] - 2026-02-25
 
 ### Fixed

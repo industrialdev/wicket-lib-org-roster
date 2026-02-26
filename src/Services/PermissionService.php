@@ -82,8 +82,22 @@ class PermissionService
 
             $roles = [];
             foreach ($response['data'] as $role) {
-                if (isset($role['relationships']['resource']['data']['id'])
-                    && $role['relationships']['resource']['data']['id'] === $org_id) {
+                $resource = $role['relationships']['resource']['data']
+                    ?? $role['relationships']['organization']['data']
+                    ?? null;
+                $resource_id = is_array($resource) ? (string) ($resource['id'] ?? '') : '';
+                $resource_type = strtolower((string) ($resource['type'] ?? ''));
+                if ($resource_id === '' || $resource_id !== $org_id) {
+                    continue;
+                }
+                if ($resource_type !== '' && !in_array($resource_type, ['organizations', 'organization'], true)) {
+                    continue;
+                }
+                if (!empty($role['attributes']['global'])) {
+                    continue;
+                }
+
+                if ($resource_id === $org_id) {
                     $roles[] = $role['attributes']['name'] ?? '';
                 }
             }
@@ -318,8 +332,22 @@ class PermissionService
             $roles = [];
             if (isset($response['data']) && is_array($response['data'])) {
                 foreach ($response['data'] as $role) {
-                    if (isset($role['relationships']['resource']['data']['id'])
-                        && $role['relationships']['resource']['data']['id'] === $orgId) {
+                    $resource = $role['relationships']['resource']['data']
+                        ?? $role['relationships']['organization']['data']
+                        ?? null;
+                    $resource_id = is_array($resource) ? (string) ($resource['id'] ?? '') : '';
+                    $resource_type = strtolower((string) ($resource['type'] ?? ''));
+                    if ($resource_id === '' || $resource_id !== $orgId) {
+                        continue;
+                    }
+                    if ($resource_type !== '' && !in_array($resource_type, ['organizations', 'organization'], true)) {
+                        continue;
+                    }
+                    if (!empty($role['attributes']['global'])) {
+                        continue;
+                    }
+
+                    if ($resource_id === $orgId) {
                         $roles[] = $role['attributes']['name'] ?? '';
                     }
                 }

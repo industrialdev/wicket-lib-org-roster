@@ -1,6 +1,6 @@
 # MSA Roster Configuration Baseline
 
-Date: 2026-02-18
+Date: 2026-02-26
 
 This document stores the finalized baseline configuration for the MSA roster requirement (cascading membership style).
 
@@ -18,6 +18,11 @@ add_filter('wicket/acc/orgman/config', function (array $config): array {
     $config['permissions']['manage_members'] = ['membership_manager', 'membership_owner'];
     $config['permissions']['add_members'] = ['membership_manager', 'membership_owner'];
     $config['permissions']['remove_members'] = []; // disables remove endpoint authorization
+    // Site-only override: allow membership owners/managers to access org-management surfaces
+    // without an active membership entry (org list, org profile link, and bulk-upload entry points when enabled).
+    // Library default remains disabled (`permissions.role_only_management_access.enabled = false`).
+    $config['permissions']['role_only_management_access']['enabled'] = true;
+    $config['permissions']['role_only_management_access']['allowed_roles'] = ['membership_owner', 'membership_manager'];
 
     // Prevent owner role assignment from roster UI
     $config['permissions']['prevent_owner_assignment'] = true;
@@ -89,6 +94,8 @@ add_filter('wicket/acc/orgman/config', function (array $config): array {
 
 - [x] Membership style is Cascading (`roster.strategy = cascade`).
 - [x] Membership Manager and Membership Owner can manage and add roster members.
+- [x] Site override enabled: `membership_owner` and `membership_manager` may access organization-management surfaces without an active membership entry.
+- [x] The same role-only override covers organization profile access and bulk-upload navigation (when `ui.member_list.show_bulk_upload = true`).
 - [x] Organization summary supports Organization Name, Membership Tier, Membership Owner, Renewal Date, and Seats assigned (# / max).
 - [x] Edit Team Roster can only assign/remove `org_editor` and blocks `membership_manager` assignment.
 - [x] Edit Team Roster role updates are blocked for inactive members (`member_edit.require_active_membership_for_role_updates = true`).

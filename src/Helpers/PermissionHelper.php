@@ -49,6 +49,99 @@ class PermissionHelper extends Helper
     }
 
     /**
+     * Get role-only management access config.
+     *
+     * @return array
+     */
+    private static function get_role_only_management_access_config(): array
+    {
+        $config = \OrgManagement\Config\get_config();
+        $permissions = is_array($config['permissions'] ?? null) ? $config['permissions'] : [];
+        $role_only = $permissions['role_only_management_access'] ?? [];
+
+        return is_array($role_only) ? $role_only : [];
+    }
+
+    /**
+     * Get configured allow-list roles for role-only management access.
+     *
+     * @return array
+     */
+    private static function get_role_only_management_allowed_roles(): array
+    {
+        $role_only = self::get_role_only_management_access_config();
+        $allowed_roles = is_array($role_only['allowed_roles'] ?? null)
+            ? $role_only['allowed_roles']
+            : [];
+
+        return array_values(array_unique(array_filter(array_map(static function ($role): string {
+            return self::normalize_role_name((string) $role);
+        }, $allowed_roles))));
+    }
+
+    /**
+     * Determine if active-membership requirement can be bypassed for configured roles.
+     *
+     * @param string|null $org_id Organization ID.
+     * @param array $required_roles Roles required by the target permission.
+     * @return bool
+     */
+    private static function can_bypass_active_membership_requirement($org_id, array $required_roles): bool
+    {
+        if (!$org_id || !is_user_logged_in()) {
+            return false;
+        }
+
+        $role_only = self::get_role_only_management_access_config();
+        if (empty($role_only['enabled'])) {
+            return false;
+        }
+
+        $allowed_roles = self::get_role_only_management_allowed_roles();
+        $allowed_lookup = self::build_role_lookup($allowed_roles);
+        if (empty($allowed_lookup)) {
+            return false;
+        }
+
+        $required_lookup = self::build_role_lookup($required_roles);
+        if (empty($required_lookup)) {
+            return false;
+        }
+
+        $roles_to_check = array_keys(array_intersect_key($required_lookup, $allowed_lookup));
+        if (empty($roles_to_check)) {
+            return false;
+        }
+
+        return self::role_check($roles_to_check, $org_id, false);
+    }
+
+    /**
+     * Determine if the user can access role-only organization-management surfaces.
+     *
+     * @param string|null $org_id Organization ID.
+     * @return bool
+     */
+    private static function can_access_role_only_management_surface($org_id): bool
+    {
+        if (!$org_id || !is_user_logged_in()) {
+            return false;
+        }
+
+        $role_only = self::get_role_only_management_access_config();
+        if (empty($role_only['enabled'])) {
+            return false;
+        }
+
+        $allowed_roles = self::get_role_only_management_allowed_roles();
+        if (empty($allowed_roles)) {
+            return false;
+        }
+
+        return self::role_check($allowed_roles, $org_id, false);
+    }
+
+    /**
      * Filter an associative array of role choices using allowed/excluded config.
      *
      * @param array $role_choices Associative array of slug => label.
@@ -261,13 +354,15 @@ class PermissionHelper extends Helper
      */
     public static function can_edit_members($org_id = null): bool
     {
-        if (!function_exists('\OrgManagement\Helpers\ConfigHelper::get_manage_members_roles')) {
-            return self::has_active_membership($org_id) && self::role_check(['membership_manager', 'membership_owner'], $org_id, false);
+        $manage_roles = function_exists('\OrgManagement\Helpers\ConfigHelper::get_manage_members_roles')
+            ? ConfigHelper::get_manage_members_roles()
+            : ['membership_manager', 'membership_owner'];
+
+        if (self::has_active_membership($org_id)) {
+            return self::role_check($manage_roles, $org_id, false);
         }
 
-        $manage_roles = ConfigHelper::get_manage_members_roles();
-
-        return self::has_active_membership($org_id) && self::role_check($manage_roles, $org_id, false);
+        return self::can_bypass_active_membership_requirement($org_id, $manage_roles);
     }
 
     /**
@@ -290,7 +385,11 @@ class PermissionHelper extends Helper
             }
         }
 
-        return self::has_active_membership($org_id) && self::role_check($add_roles, $org_id, false);
+        if (self::has_active_membership($org_id)) {
+            return self::role_check($add_roles, $org_id, false);
+        }
+
+        return self::can_bypass_active_membership_requirement($org_id, $add_roles);
     }
 
     /**
@@ -313,25 +412,35 @@ class PermissionHelper extends Helper
             }
         }
 
-        return self::has_active_membership($org_id) && self::role_check($remove_roles, $org_id, false);
+        if (self::has_active_membership($org_id)) {
+            return self::role_check($remove_roles, $org_id, false);
+        }
+
+        return self::can_bypass_active_membership_requirement($org_id, $remove_roles);
     }
 
     /**
      * Check if current user can edit the organization.
-     * Requires active membership + roles configured for editing organization.
+     * Requires active membership + edit roles, or role-only management access when enabled.
      *
      * @param string|null $org_id Organization ID
      * @return bool True if user can edit organization, false otherwise
      */
     public static function can_edit_organization($org_id = null): bool
     {
-        if (!function_exists('\OrgManagement\Helpers\ConfigHelper::get_edit_organization_roles')) {
-            return self::has_active_membership($org_id) && self::role_check(['org_editor'], $org_id);
+        $edit_roles = function_exists('\OrgManagement\Helpers\ConfigHelper::get_edit_organization_roles')
+            ? ConfigHelper::get_edit_organization_roles()
+            : ['org_editor'];
+
+        if (self::has_active_membership($org_id) && self::role_check($edit_roles, $org_id)) {
+            return true;
         }
 
-        $edit_roles = ConfigHelper::get_edit_organization_roles();
+        if (self::can_bypass_active_membership_requirement($org_id, $edit_roles)) {
+            return true;
+        }
 
-        return self::has_active_membership($org_id) && self::role_check($edit_roles, $org_id);
+        return self::can_access_role_only_management_surface($org_id);
     }
 
     /**
@@ -371,7 +480,11 @@ class PermissionHelper extends Helper
             }
         }
 
-        return self::has_active_membership($org_id) && self::role_check($purchase_roles, $org_id, false);
+        if (self::has_active_membership($org_id)) {
+            return self::role_check($purchase_roles, $org_id, false);
+        }
+
+        return self::can_bypass_active_membership_requirement($org_id, $purchase_roles);
     }
 
     /**
@@ -461,13 +574,15 @@ class PermissionHelper extends Helper
      */
     public static function is_membership_manager($org_id = null): bool
     {
-        if (!function_exists('\OrgManagement\Helpers\ConfigHelper::get_manage_members_roles')) {
-            return self::has_active_membership($org_id) && self::role_check(['membership_manager'], $org_id);
+        $manage_roles = function_exists('\OrgManagement\Helpers\ConfigHelper::get_manage_members_roles')
+            ? ConfigHelper::get_manage_members_roles()
+            : ['membership_manager'];
+
+        if (self::has_active_membership($org_id)) {
+            return self::role_check($manage_roles, $org_id, false);
         }
 
-        $manage_roles = ConfigHelper::get_manage_members_roles();
-
-        return self::has_active_membership($org_id) && self::role_check($manage_roles, $org_id, false);
+        return self::can_bypass_active_membership_requirement($org_id, $manage_roles);
     }
 
     /**

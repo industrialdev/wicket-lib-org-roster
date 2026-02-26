@@ -6,6 +6,8 @@
   - `permissions.add_members`
   - `permissions.remove_members`
   - `permissions.manage_members`
+- Active membership is required by default.
+- Optional override: `permissions.role_only_management_access` can allow configured roles (for example `membership_owner`) to access org-management visibility surfaces without active membership (including org profile and bulk-upload links when enabled).
 
 ## Role Assignment on Add
 - Base role from `member_addition.base_member_role` is assigned.

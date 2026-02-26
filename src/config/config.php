@@ -80,6 +80,12 @@ function get_config()
                 'advertising_sponsor_billing' => [],
             ],
             'prevent_owner_assignment' => true, // Whether membership_owner assignment should be prevented
+            'role_only_management_access' => [
+                'enabled' => false, // Allow configured org roles to access management screens without active membership.
+                'allowed_roles' => [
+                    'membership_owner',
+                ],
+            ],
         ],
         'member_addition' => [
             'auto_assign_roles' => [ // Roles automatically assigned to all new members

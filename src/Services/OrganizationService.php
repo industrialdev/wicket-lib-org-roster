@@ -60,6 +60,185 @@ class OrganizationService
     }
 
     /**
+     * Normalize role values for comparisons.
+     *
+     * @param string $role Role name.
+     * @return string
+     */
+    private function normalize_role_name(string $role): string
+    {
+        return strtolower(str_replace(' ', '_', trim($role)));
+    }
+
+    /**
+     * Get role-only management access configuration.
+     *
+     * @return array
+     */
+    private function get_role_only_access_config(): array
+    {
+        $permissions = $this->config['permissions'] ?? [];
+        $role_only = $permissions['role_only_management_access'] ?? [];
+
+        return is_array($role_only) ? $role_only : [];
+    }
+
+    /**
+     * Determine if role-only org management access is enabled.
+     *
+     * @return bool
+     */
+    private function is_role_only_access_enabled(): bool
+    {
+        $role_only = $this->get_role_only_access_config();
+
+        return !empty($role_only['enabled']);
+    }
+
+    /**
+     * Get normalized allow-list roles for role-only access.
+     *
+     * @return array
+     */
+    private function get_role_only_access_allowed_roles(): array
+    {
+        $role_only = $this->get_role_only_access_config();
+        $allowed_roles = $role_only['allowed_roles'] ?? [];
+
+        if (!is_array($allowed_roles)) {
+            return [];
+        }
+
+        $normalized_roles = [];
+        foreach ($allowed_roles as $role) {
+            $normalized = $this->normalize_role_name((string) $role);
+            if ($normalized === '') {
+                continue;
+            }
+            $normalized_roles[$normalized] = true;
+        }
+
+        return array_keys($normalized_roles);
+    }
+
+    /**
+     * Resolve organization rows from org-scoped roles when role-only access is enabled.
+     *
+     * @param string $person_uuid Person UUID.
+     * @return array
+     */
+    private function get_user_organizations_from_roles(string $person_uuid): array
+    {
+        if (!$this->is_role_only_access_enabled() || empty($person_uuid) || !function_exists('wicket_api_client')) {
+            return [];
+        }
+
+        $allowed_roles = $this->get_role_only_access_allowed_roles();
+        if (empty($allowed_roles)) {
+            return [];
+        }
+
+        $allowed_lookup = array_fill_keys($allowed_roles, true);
+        $client = wicket_api_client();
+        $organizations = [];
+        $page_number = 1;
+        $total_pages = 1;
+
+        try {
+            do {
+                $response = $client->get('/people/' . rawurlencode($person_uuid) . '/roles', [
+                    'page' => ['number' => $page_number, 'size' => 100],
+                    'include' => 'resource',
+                    'sort' => '-global,name',
+                ]);
+
+                $response_data = is_array($response['data'] ?? null) ? $response['data'] : [];
+                $included_data = is_array($response['included'] ?? null) ? $response['included'] : [];
+                $org_name_by_id = [];
+
+                foreach ($included_data as $included) {
+                    if (($included['type'] ?? '') !== 'organizations') {
+                        continue;
+                    }
+                    $org_id = (string) ($included['id'] ?? '');
+                    if ($org_id === '') {
+                        continue;
+                    }
+                    $org_attrs = (array) ($included['attributes'] ?? []);
+                    $org_name_by_id[$org_id] = (string) (
+                        $org_attrs['legal_name']
+                        ?? $org_attrs['legal_name_en']
+                        ?? $org_attrs['alternate_name']
+                        ?? $org_attrs['alternate_name_en']
+                        ?? 'Unknown Organization'
+                    );
+                }
+
+                foreach ($response_data as $role) {
+                    $role_name = $this->normalize_role_name((string) ($role['attributes']['name'] ?? ''));
+                    if ($role_name === '' || !isset($allowed_lookup[$role_name])) {
+                        continue;
+                    }
+
+                    $resource = $role['relationships']['resource']['data']
+                        ?? $role['relationships']['organization']['data']
+                        ?? null;
+                    $resource_type = strtolower((string) ($resource['type'] ?? ''));
+                    $is_global_role = !empty($role['attributes']['global']);
+                    if (!is_array($resource) || $is_global_role) {
+                        continue;
+                    }
+                    if ($resource_type !== '' && !in_array($resource_type, ['organizations', 'organization'], true)) {
+                        continue;
+                    }
+
+                    $org_id = (string) ($resource['id'] ?? '');
+                    if ($org_id === '') {
+                        continue;
+                    }
+
+                    if (!isset($organizations[$org_id])) {
+                        $organizations[$org_id] = [
+                            'id' => $org_id,
+                            'org_name' => $org_name_by_id[$org_id] ?? 'Unknown Organization',
+                            'user_role' => '',
+                            'roles' => [],
+                        ];
+                    }
+
+                    $organizations[$org_id]['roles'][$role_name] = true;
+
+                    if (empty($organizations[$org_id]['org_name']) && isset($org_name_by_id[$org_id])) {
+                        $organizations[$org_id]['org_name'] = $org_name_by_id[$org_id];
+                    }
+                }
+
+                $page_meta = $response['meta']['page'] ?? [];
+                $total_pages = max(1, (int) ($page_meta['total_pages'] ?? 1));
+                $page_number++;
+            } while ($page_number <= $total_pages);
+        } catch (\Throwable $e) {
+            wc_get_logger()->warning('[OrgMan] Failed resolving organizations from role-only access: ' . $e->getMessage(), [
+                'source' => 'wicket-orgman',
+                'person_uuid' => $person_uuid,
+            ]);
+
+            return [];
+        }
+
+        foreach ($organizations as $org_id => $org_data) {
+            $role_slugs = array_keys((array) ($org_data['roles'] ?? []));
+            $role_labels = array_map(static function (string $role): string {
+                return ucwords(str_replace('_', ' ', $role));
+            }, $role_slugs);
+            $organizations[$org_id]['roles'] = $role_slugs;
+            $organizations[$org_id]['user_role'] = implode(', ', $role_labels);
+        }
+
+        return array_values($organizations);
+    }
+
+    /**
      * Get all organizations a user is associated with.
      *
      * @param string $person_uuid The UUID of the person.
@@ -88,6 +267,8 @@ class OrganizationService
         }
 
         // Get user's individual memberships from person membership entries endpoint
+        $organizations = [];
+        $membership_error = null;
         $client = wicket_api_client();
         $user_uuid = wicket_current_person_uuid();
         $user_memberships_endpoint = "/people/{$user_uuid}/membership_entries?page[number]=1&page[size]=12&sort=-active,membership_category_weight,-ends_at&include=membership,organization_membership.organization,fusebill_subscription";
@@ -95,25 +276,18 @@ class OrganizationService
         try {
             $membership_response = $client->get($user_memberships_endpoint);
 
-            if (!isset($membership_response['data']) || empty($membership_response['data'])) {
-                $this->set_cached_data($cache_key, []);
-
-                return [];
-            }
-
             // Extract organizations from the included data where membership type = "organization"
-            $organizations = [];
             $org_membership_ids = [];
 
             // First, collect all organization membership IDs from user's entries
-            foreach ($membership_response['data'] as $entry) {
+            foreach (($membership_response['data'] ?? []) as $entry) {
                 if (isset($entry['relationships']['organization_membership']['data']['id'])) {
                     $org_membership_ids[] = $entry['relationships']['organization_membership']['data']['id'];
                 }
             }
 
             // Process included data to find organizations
-            if (isset($membership_response['included'])) {
+            if (isset($membership_response['included']) && is_array($membership_response['included'])) {
                 foreach ($membership_response['included'] as $included_item) {
                     // Find organization memberships that match the user's entries
                     if ($included_item['type'] === 'organization_memberships'
@@ -144,22 +318,67 @@ class OrganizationService
                     }
                 }
             }
-
-            // Remove duplicates and re-index
-            $organizations = array_values(array_unique($organizations, SORT_REGULAR));
-
-            // Cache and return the organizations directly (no need for batch API call)
-            $this->set_cached_data($cache_key, $organizations);
-
-            return $organizations;
-
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $logger->error('[OrgMan] Error fetching membership entries: ' . $e->getMessage(), ['source' => 'wicket-orgman']);
-            $error_data = ['error' => 'api_error', 'message' => 'Unable to fetch memberships. Please try again later.'];
-            $this->set_cached_data($cache_key, $error_data);
-
-            return $error_data;
+            $membership_error = ['error' => 'api_error', 'message' => 'Unable to fetch memberships. Please try again later.'];
         }
+
+        $role_organizations = $this->get_user_organizations_from_roles((string) $person_uuid);
+        if (!empty($role_organizations)) {
+            $organizations = array_merge($organizations, $role_organizations);
+        }
+
+        $organizations_by_id = [];
+        foreach ($organizations as $organization) {
+            $org_id = (string) ($organization['id'] ?? '');
+            if ($org_id === '') {
+                continue;
+            }
+
+            if (!isset($organizations_by_id[$org_id])) {
+                $organizations_by_id[$org_id] = [
+                    'id' => $org_id,
+                    'org_name' => (string) ($organization['org_name'] ?? 'Unknown Organization'),
+                    'user_role' => (string) ($organization['user_role'] ?? ''),
+                    'roles' => [],
+                ];
+            }
+
+            if ($organizations_by_id[$org_id]['org_name'] === 'Unknown Organization' && !empty($organization['org_name'])) {
+                $organizations_by_id[$org_id]['org_name'] = (string) $organization['org_name'];
+            }
+            if ($organizations_by_id[$org_id]['user_role'] === '' && !empty($organization['user_role'])) {
+                $organizations_by_id[$org_id]['user_role'] = (string) $organization['user_role'];
+            }
+            foreach ((array) ($organization['roles'] ?? []) as $role_slug) {
+                $normalized_role = $this->normalize_role_name((string) $role_slug);
+                if ($normalized_role === '') {
+                    continue;
+                }
+                $organizations_by_id[$org_id]['roles'][$normalized_role] = true;
+            }
+        }
+
+        foreach ($organizations_by_id as $org_id => $organization) {
+            $roles = array_keys((array) ($organization['roles'] ?? []));
+            $organizations_by_id[$org_id]['roles'] = $roles;
+            if ($organizations_by_id[$org_id]['user_role'] === '' && !empty($roles)) {
+                $organizations_by_id[$org_id]['user_role'] = implode(', ', array_map(static function (string $role): string {
+                    return ucwords(str_replace('_', ' ', $role));
+                }, $roles));
+            }
+        }
+
+        $organizations = array_values($organizations_by_id);
+        if ($membership_error !== null && empty($organizations)) {
+            $this->set_cached_data($cache_key, $membership_error);
+
+            return $membership_error;
+        }
+
+        $this->set_cached_data($cache_key, $organizations);
+
+        return $organizations;
     }
 
     /**
