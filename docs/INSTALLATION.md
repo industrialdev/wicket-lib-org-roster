@@ -24,20 +24,10 @@ Add this repository entry to `composer.json`:
 }
 ```
 
-```bash
-composer init -n \
-  && composer config repositories.wicket-lib-org-roster vcs git@github.com:industrialdev/wicket-lib-org-roster.git \
-  && composer config minimum-stability RC \
-  && composer config prefer-stable true \
-  && composer require industrialdev/wicket-lib-org-roster:^0@dev
-```
-
 Minimal `composer.json` example:
 
 ```json
 {
-  "minimum-stability": "RC",
-  "prefer-stable": true,
   "repositories": {
     "wicket-lib-org-roster": {
       "type": "vcs",
@@ -50,19 +40,9 @@ Minimal `composer.json` example:
 }
 ```
 
-Why pre-stable stability is required:
+Why @dev stability is required:
 - `industrialdev/wicket-lib-org-roster` depends on `starfederation/datastar-php:^1@dev` (currently resolved to `1.0.0-RC.5`).
 - Use `"industrialdev/wicket-lib-org-roster": "^0@dev"` while that dependency chain includes pre-stable Datastar releases.
-- Without `minimum-stability` set to `RC` (or lower, such as `dev`), Composer can reject that transitive dependency.
-
-If `composer.json` already exists, run only:
-
-```bash
-composer config repositories.wicket-lib-org-roster vcs git@github.com:industrialdev/wicket-lib-org-roster.git \
-  && composer config minimum-stability RC \
-  && composer config prefer-stable true \
-  && composer require industrialdev/wicket-lib-org-roster:^0@dev
-```
 
 ## 2) Bootstrap File (`custom/org-roster.php`)
 
