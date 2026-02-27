@@ -3,7 +3,7 @@
 This document is the canonical strategy reference for roster behavior in this library.
 
 Strategy selection uses:
-- `roster.strategy` in `\OrgManagement\Config\get_config()`
+- `roster.strategy` in `\OrgManagement\Config\OrgManConfig::get()`
 
 Current strategy keys:
 - `direct`

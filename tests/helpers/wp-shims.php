@@ -228,8 +228,16 @@ namespace {
     }
 
     if (!function_exists('apply_filters')) {
-        function apply_filters($tag, $value = null)
+        function apply_filters($tag, $value = null, ...$args)
         {
+            $callbacks = $GLOBALS['__orgroster_filters'][$tag] ?? [];
+
+            foreach ($callbacks as $callback) {
+                if (is_callable($callback)) {
+                    $value = $callback($value, ...$args);
+                }
+            }
+
             return $value;
         }
     }
@@ -310,6 +318,7 @@ namespace {
             $GLOBALS['__orgroster_post_meta'] = [];
             $GLOBALS['__orgroster_delete_attachment_results'] = [];
             $GLOBALS['__orgroster_current_person_uuid'] = 'person-1';
+            $GLOBALS['__orgroster_filters'] = [];
         }
     }
 }

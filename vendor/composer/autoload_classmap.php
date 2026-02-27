@@ -7,6 +7,7 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
+    'OrgManagement\\Config\\OrgManConfig' => $baseDir . '/src/Config/OrgManConfig.php',
     'OrgManagement\\Controllers\\ApiController' => $baseDir . '/src/Controllers/ApiController.php',
     'OrgManagement\\Controllers\\BusinessInfoController' => $baseDir . '/src/Controllers/BusinessInfoController.php',
     'OrgManagement\\Controllers\\ConfigurationController' => $baseDir . '/src/Controllers/ConfigurationController.php',

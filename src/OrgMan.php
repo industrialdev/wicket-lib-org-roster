@@ -11,89 +11,11 @@ if (!defined('ABSPATH') && !defined('WICKET_ORGROSTER_DOINGTESTS')) {
     exit;
 }
 
-if (!function_exists(__NAMESPACE__ . '\\orgman_require_once_compat')) {
-    /**
-     * Require a file from src/ with case-insensitive path resolution.
-     *
-     * @param string $relative_path Relative path from src/.
-     * @return void
-     */
-    function orgman_require_once_compat($relative_path)
-    {
-        static $included_paths = [];
-
-        $normalized_path = ltrim(str_replace('\\', '/', $relative_path), '/');
-        $direct_path = __DIR__ . '/' . $normalized_path;
-
-        if (is_file($direct_path)) {
-            $canonical_path = realpath($direct_path);
-            if ($canonical_path === false) {
-                throw new \RuntimeException("Unable to resolve dependency path: {$relative_path}");
-            }
-
-            $normalized_canonical_path = strtolower(str_replace('\\', '/', $canonical_path));
-            if (isset($included_paths[$normalized_canonical_path])) {
-                return;
-            }
-
-            require_once $canonical_path;
-            $included_paths[$normalized_canonical_path] = true;
-
-            return;
-        }
-
-        $segments = array_values(array_filter(explode('/', $normalized_path), 'strlen'));
-        $resolved_path = __DIR__;
-
-        foreach ($segments as $segment) {
-            $candidate = $resolved_path . '/' . $segment;
-
-            if (file_exists($candidate)) {
-                $resolved_path = $candidate;
-                continue;
-            }
-
-            $entries = @scandir($resolved_path);
-            if ($entries === false) {
-                throw new \RuntimeException("Unable to scan directory while loading dependency: {$relative_path}");
-            }
-
-            $match = null;
-            foreach ($entries as $entry) {
-                if (strcasecmp($entry, $segment) === 0) {
-                    $match = $entry;
-                    break;
-                }
-            }
-
-            if ($match === null) {
-                throw new \RuntimeException("Missing required dependency: {$relative_path}");
-            }
-
-            $resolved_path .= '/' . $match;
-        }
-
-        if (!is_file($resolved_path)) {
-            throw new \RuntimeException("Resolved dependency is not a file: {$relative_path}");
-        }
-
-        $canonical_path = realpath($resolved_path);
-        if ($canonical_path === false) {
-            throw new \RuntimeException("Unable to resolve dependency path: {$relative_path}");
-        }
-
-        $normalized_canonical_path = strtolower(str_replace('\\', '/', $canonical_path));
-        if (isset($included_paths[$normalized_canonical_path])) {
-            return;
-        }
-
-        require_once $canonical_path;
-        $included_paths[$normalized_canonical_path] = true;
-    }
+if (!class_exists(Config\OrgManConfig::class)) {
+    throw new \RuntimeException(
+        'OrgMan requires Composer autoload. Include vendor/autoload.php before loading OrgMan.php.'
+    );
 }
-
-// Load shared Datastar helpers for modal processing
-orgman_require_once_compat('Helpers/DatastarSSE.php');
 
 /**
  * Singleton class for managing the Organization Management feature.
@@ -157,7 +79,6 @@ final class OrgMan
      */
     public function init()
     {
-        $this->load_dependencies();
         $this->load_config();
         $this->init_services();
         $this->init_controllers();
@@ -165,49 +86,11 @@ final class OrgMan
     }
 
     /**
-     * Load required files.
-     */
-    private function load_dependencies()
-    {
-        orgman_require_once_compat('config/config.php');
-        orgman_require_once_compat('Services/ConfigService.php');
-        orgman_require_once_compat('Services/Strategies/RosterManagementStrategy.php');
-        orgman_require_once_compat('Services/Strategies/CascadeStrategy.php');
-        orgman_require_once_compat('Services/Strategies/DirectAssignmentStrategy.php');
-        orgman_require_once_compat('Services/Strategies/GroupsStrategy.php');
-        orgman_require_once_compat('Services/OrganizationService.php');
-        orgman_require_once_compat('Services/OrganizationBatchService.php');
-        orgman_require_once_compat('Services/MemberService.php');
-        orgman_require_once_compat('Services/PersonService.php');
-        orgman_require_once_compat('Services/PermissionService.php');
-        orgman_require_once_compat('Services/GroupService.php');
-        orgman_require_once_compat('Services/ConnectionService.php');
-        orgman_require_once_compat('Services/BusinessInfoService.php');
-        orgman_require_once_compat('Services/DocumentService.php');
-        orgman_require_once_compat('Services/SubsidiaryService.php');
-        orgman_require_once_compat('Services/NotificationService.php');
-        orgman_require_once_compat('Services/AdditionalSeatsService.php');
-        orgman_require_once_compat('Services/MembershipService.php');
-        orgman_require_once_compat('Services/BulkMemberUploadService.php');
-        orgman_require_once_compat('Helpers/Helper.php');
-        orgman_require_once_compat('Helpers/ConfigHelper.php');
-        orgman_require_once_compat('Helpers/RelationshipHelper.php');
-        orgman_require_once_compat('Helpers/TemplateHelper.php');
-        orgman_require_once_compat('Helpers/GravityFormsHelper.php');
-        orgman_require_once_compat('Helpers/PermissionHelper.php');
-        orgman_require_once_compat('Controllers/ApiController.php');
-        orgman_require_once_compat('Controllers/BusinessInfoController.php');
-        orgman_require_once_compat('Controllers/DocumentController.php');
-        orgman_require_once_compat('Controllers/SubsidiaryController.php');
-        orgman_require_once_compat('Controllers/ConfigurationController.php');
-    }
-
-    /**
      * Load the configuration files.
      */
     private function load_config()
     {
-        $this->config = \OrgManagement\Config\get_config();
+        $this->config = Config\OrgManConfig::get();
     }
 
     /**
@@ -952,16 +835,48 @@ final class OrgMan
      */
     private function get_base_uri(): string
     {
-        $base_path = $this->get_base_path();
-        $content_dir = defined('WP_CONTENT_DIR') ? WP_CONTENT_DIR : '';
+        $base_path = $this->normalize_path($this->get_base_path());
+        $content_dir = defined('WP_CONTENT_DIR') ? $this->normalize_path(WP_CONTENT_DIR) : '';
+        $abs_path = defined('ABSPATH') ? $this->normalize_path(ABSPATH) : '';
         $base_uri = trailingslashit(content_url(''));
 
-        if ($content_dir && strpos($base_path, $content_dir) === 0) {
-            $relative_path = ltrim(str_replace($content_dir, '', $base_path), '/');
+        if ($this->path_is_within($base_path, $content_dir)) {
+            $relative_path = $this->relative_path($base_path, $content_dir);
             $base_uri = trailingslashit(content_url($relative_path));
+        } elseif ($this->path_is_within($base_path, $abs_path)) {
+            $relative_path = $this->relative_path($base_path, $abs_path);
+            $base_uri = trailingslashit(site_url($relative_path));
         }
 
         return trailingslashit((string) apply_filters('wicket/acc/orgman/base_url', $base_uri));
+    }
+
+    /**
+     * Normalize filesystem paths for safe prefix comparisons.
+     */
+    private function normalize_path(string $path): string
+    {
+        return rtrim(str_replace('\\', '/', $path), '/');
+    }
+
+    /**
+     * Check whether a path is inside a root path.
+     */
+    private function path_is_within(string $path, string $root): bool
+    {
+        if ($path === '' || $root === '') {
+            return false;
+        }
+
+        return $path === $root || strpos($path, $root . '/') === 0;
+    }
+
+    /**
+     * Build a relative path from a root.
+     */
+    private function relative_path(string $path, string $root): string
+    {
+        return ltrim(substr($path, strlen($root)), '/');
     }
 
     /**

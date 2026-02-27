@@ -28,7 +28,7 @@ if (empty($org_uuid) && !empty($org_id_fallback)) {
     exit;
 }
 
-$member_list_config = \OrgManagement\Config\get_config()['ui']['member_list'] ?? [];
+$member_list_config = \OrgManagement\Config\OrgManConfig::get()['ui']['member_list'] ?? [];
 $show_bulk_upload = (bool) ($member_list_config['show_bulk_upload'] ?? false);
 
 $membership_service = new \OrgManagement\Services\MembershipService();

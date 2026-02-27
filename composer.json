@@ -1,13 +1,13 @@
 {
   "name": "industrialdev/wicket-lib-org-roster",
-  "version": "0.3.7",
+  "version": "0.4.0",
   "description": "Organization & Roster management library for Wicket Inc.",
   "type": "library",
   "license": "GPL-2.0-or-later",
   "require": {
     "php": ">=8.2",
     "ext-json": "*",
-    "starfederation/datastar-php": "^1.0.0-RC.5"
+    "starfederation/datastar-php": "^1@dev"
   },
   "require-dev": {
     "pestphp/pest": "^4",
@@ -26,7 +26,11 @@
     }
   },
   "scripts": {
-    "production": "[ -x vendor/bin/php-cs-fixer ] || composer install && composer cs:fix && rm -rf vendor && composer update --no-dev && composer install --no-dev --optimize-autoloader",
+    "production": [
+      "@check:case-collisions",
+      "[ -x vendor/bin/php-cs-fixer ] || composer install && composer cs:fix && rm -rf vendor && composer update --no-dev && composer install --no-dev --optimize-autoloader"
+    ],
+    "check:case-collisions": "@php .ci/check-case-collisions.php src",
     "setup-hooks": "mkdir -p .git/hooks && cp .ci/pre-push .git/hooks/pre-push && chmod +x .git/hooks/pre-push && echo 'Git hooks installed to .git/hooks/pre-push'",
     "test": "[ -x vendor/bin/pest ] || composer install && ./vendor/bin/pest --testsuite unit",
     "test:unit": "pest --testsuite unit",

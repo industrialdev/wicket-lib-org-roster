@@ -16,7 +16,7 @@ it('detects additional seats form id by slug when form id is zero', function ():
 });
 
 it('includes membership cycle strategy configuration defaults', function (): void {
-    $config = \OrgManagement\Config\get_config();
+    $config = OrgManagement\Config\OrgManConfig::get();
 
     expect($config['roster']['strategy'] ?? null)->toBeString();
     expect($config['membership_cycle'] ?? null)->toBeArray();
@@ -25,7 +25,7 @@ it('includes membership cycle strategy configuration defaults', function (): voi
 });
 
 it('keeps membership cycle config limited to active keys', function (): void {
-    $config = \OrgManagement\Config\get_config();
+    $config = OrgManagement\Config\OrgManConfig::get();
     $cycle = $config['membership_cycle'] ?? [];
 
     expect($cycle['permissions'] ?? [])->toHaveKeys([
@@ -55,7 +55,7 @@ it('keeps membership cycle config limited to active keys', function (): void {
 });
 
 it('includes remove policy ui defaults for backward-compatible roster controls', function (): void {
-    $config = \OrgManagement\Config\get_config();
+    $config = OrgManagement\Config\OrgManConfig::get();
     $member_list = $config['ui']['member_list'] ?? [];
     $callout = $member_list['remove_policy_callout'] ?? [];
 
@@ -76,7 +76,7 @@ it('includes remove policy ui defaults for backward-compatible roster controls',
 });
 
 it('includes account-status ui defaults for member cards', function (): void {
-    $config = \OrgManagement\Config\get_config();
+    $config = OrgManagement\Config\OrgManConfig::get();
     $member_list = $config['ui']['member_list'] ?? [];
     $account_status = $member_list['account_status'] ?? [];
 
@@ -95,7 +95,7 @@ it('includes account-status ui defaults for member cards', function (): void {
 });
 
 it('includes role-display filter defaults for member cards', function (): void {
-    $config = \OrgManagement\Config\get_config();
+    $config = OrgManagement\Config\OrgManConfig::get();
     $member_list = $config['ui']['member_list'] ?? [];
 
     expect($member_list)->toHaveKeys([
@@ -107,21 +107,21 @@ it('includes role-display filter defaults for member cards', function (): void {
 });
 
 it('includes member edit activity guard default as disabled for backward compatibility', function (): void {
-    $config = \OrgManagement\Config\get_config();
+    $config = OrgManagement\Config\OrgManConfig::get();
 
     expect($config['member_edit'] ?? [])->toHaveKey('require_active_membership_for_role_updates');
     expect($config['member_edit']['require_active_membership_for_role_updates'] ?? null)->toBeFalse();
 });
 
 it('keeps member card active-relationship filter disabled by default for backward compatibility', function (): void {
-    $config = \OrgManagement\Config\get_config();
+    $config = OrgManagement\Config\OrgManConfig::get();
 
     expect($config['relationships'] ?? [])->toHaveKey('member_card_active_only');
     expect($config['relationships']['member_card_active_only'] ?? null)->toBeFalse();
 });
 
 it('includes tier-based seat policy mapping defaults as opt-in only', function (): void {
-    $config = \OrgManagement\Config\get_config();
+    $config = OrgManagement\Config\OrgManConfig::get();
     $seatPolicy = $config['seat_policy'] ?? [];
 
     expect($seatPolicy)->toHaveKeys([

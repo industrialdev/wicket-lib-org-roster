@@ -10,10 +10,6 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-// Manually load dependencies and services as we are outside the main plugin flow.
-require_once dirname(__DIR__) . '/src/Services/ConfigService.php';
-require_once dirname(__DIR__) . '/src/Services/SubsidiaryService.php';
-
 use Datastar\Events\PatchElements;
 use Datastar\ServerSentEventGenerator;
 use OrgManagement\Services\ConfigService;

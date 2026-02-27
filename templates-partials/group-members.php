@@ -42,7 +42,7 @@ if (empty($org_uuid) && function_exists('wicket_get_group')) {
 $membership_service = new MembershipService();
 $config_service = new ConfigService();
 $additional_seats_service = new AdditionalSeatsService($config_service);
-$orgman_config = \OrgManagement\Config\get_config();
+$orgman_config = OrgManagement\Config\OrgManConfig::get();
 
 $membership_uuid = '';
 if ($org_uuid) {

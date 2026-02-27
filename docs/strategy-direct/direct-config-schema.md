@@ -8,7 +8,7 @@
 ## Required Strategy Switch
 - `roster.strategy`: `'direct'` (default)
 
-## Direct-Relevant Config Keys (`src/config/config.php`)
+## Direct-Relevant Configuration Keys (`src/Config/OrgManConfig.php`)
 - `permissions`:
   - `add_members`
   - `remove_members`

@@ -43,7 +43,7 @@ $members = isset($members) && is_array($members) ? $members : [];
 $total_pages = max(1, $total_pages);
 $page = min(max(1, $page), $total_pages);
 
-$orgman_config = \OrgManagement\Config\get_config();
+$orgman_config = OrgManagement\Config\OrgManConfig::get();
 $role_display_map = $orgman_config['role_labels'] ?? [];
 $ui_config = $orgman_config['ui']['member_list'] ?? [];
 $show_edit_permissions_default = (bool) ($ui_config['show_edit_permissions'] ?? true);

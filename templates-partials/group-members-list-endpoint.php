@@ -51,7 +51,7 @@ $group_query = $result['query'] ?? '';
 $group_members_list_endpoint = \OrgManagement\Helpers\template_url() . 'group-members-list';
 $group_members_list_target = 'group-members-list-container-' . sanitize_html_class($group_uuid);
 
-$orgman_config = \OrgManagement\Config\get_config();
+$orgman_config = OrgManagement\Config\OrgManConfig::get();
 $use_unified_member_list = (bool) ($orgman_config['groups']['ui']['use_unified_member_list'] ?? false);
 if ($use_unified_member_list) {
     $mode = 'groups';

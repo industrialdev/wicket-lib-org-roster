@@ -5,7 +5,7 @@
 - `groups` config applies when `roster.strategy = groups`.
 - Existing defaults for other strategies remain unchanged.
 
-## Current Default Config Block (`src/config/config.php`)
+## Current Default Configuration (`src/Config/OrgManConfig.php`)
 
 Global `ui` keys used by groups screens:
 - `ui.organization_list.page_size`: `5` (used by non-groups organization-card pagination; groups mode uses group-membership list behavior)

@@ -40,7 +40,7 @@ $permission_service = new \OrgManagement\Services\PermissionService();
 $additional_seats_service = new \OrgManagement\Services\AdditionalSeatsService($config_service);
 
 // Load org management configuration
-$orgman_config = \OrgManagement\Config\get_config();
+$orgman_config = \OrgManagement\Config\OrgManConfig::get();
 $requested_membership_uuid = isset($_GET['membership_uuid']) ? sanitize_text_field((string) wp_unslash($_GET['membership_uuid'])) : '';
 
 $membershipUuid = $requested_membership_uuid !== ''

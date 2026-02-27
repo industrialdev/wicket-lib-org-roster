@@ -65,7 +65,7 @@ class BulkMemberUploadService
         string $roster_mode,
         string $group_uuid = ''
     ) {
-        $config = \OrgManagement\Config\get_config();
+        $config = \OrgManagement\Config\OrgManConfig::get();
         $bulk_upload_config = is_array($config['bulk_upload'] ?? null)
             ? $config['bulk_upload']
             : [];
@@ -325,7 +325,7 @@ class BulkMemberUploadService
             return;
         }
 
-        $config = \OrgManagement\Config\get_config();
+        $config = \OrgManagement\Config\OrgManConfig::get();
         $bulk_upload_config = is_array($config['bulk_upload'] ?? null)
             ? $config['bulk_upload']
             : [];

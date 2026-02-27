@@ -54,7 +54,7 @@ class MemberService
     public function __construct(ConfigService $config_service)
     {
         $this->config_service = $config_service;
-        $this->config = \OrgManagement\Config\get_config();
+        $this->config = \OrgManagement\Config\OrgManConfig::get();
         $this->init_strategies();
     }
 
@@ -1592,7 +1592,7 @@ class MemberService
             }
 
             // Check if we should automatically update roles based on relationship type
-            $config = \OrgManagement\Config\get_config();
+            $config = \OrgManagement\Config\OrgManConfig::get();
             $relationship_based_permissions = $config['permissions']['relationship_based_permissions'] ?? false;
 
             if ($relationship_based_permissions) {

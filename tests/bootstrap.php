@@ -21,8 +21,4 @@ namespace {
         require_once $shimFile;
     }
 
-    $configFile = __DIR__ . '/../src/config/config.php';
-    if (file_exists($configFile)) {
-        require_once $configFile;
-    }
 }

@@ -8,7 +8,7 @@
 ## Strategy Switch
 - `roster.strategy`: `'cascade'`
 
-## Cascade-Relevant Config Keys (`src/config/config.php`)
+## Cascade-Relevant Configuration Keys (`src/Config/OrgManConfig.php`)
 - `permissions`:
   - `add_members`
   - `remove_members`

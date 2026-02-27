@@ -49,7 +49,7 @@ class PermissionService
      */
     private function get_available_roles_native(): array
     {
-        $config = \OrgManagement\Config\get_config();
+        $config = \OrgManagement\Config\OrgManConfig::get();
 
         return $config['role_labels'] ?? [];
     }

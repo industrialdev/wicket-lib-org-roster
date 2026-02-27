@@ -25,7 +25,7 @@ class MembershipService
 
     public function __construct()
     {
-        $this->config = \OrgManagement\Config\get_config();
+        $this->config = \OrgManagement\Config\OrgManConfig::get();
     }
 
     /**

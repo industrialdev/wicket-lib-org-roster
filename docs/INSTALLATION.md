@@ -1,6 +1,9 @@
 # Installation
 
-This guide shows the supported way to load `industrialdev/wicket-lib-org-roster` from a WordPress child theme.
+This guide shows the supported way to load `industrialdev/wicket-lib-org-roster` in a WordPress site.
+
+Supported install mode:
+- Site/root Composer install (same `composer.json` scope as WordPress core/plugins).
 
 ## Why `after_setup_theme`
 
@@ -8,16 +11,25 @@ Initialize OrgMan on `after_setup_theme` (priority `20`), not `plugins_loaded`.
 
 `after_setup_theme` is the reliable point where theme code, Composer autoloading, and my-account template behavior are consistently available for this library.
 
-## 1) Install With Composer (inside child theme)
+## 1) Install With Composer (site root, recommended)
 
-From your child theme root (example: `web/app/themes/wicket-child`):
+From your site root (directory containing WordPress and root `composer.json`):
+
+Add this repository entry to `composer.json`:
+
+```json
+{
+  "type": "vcs",
+  "url": "git@github.com:industrialdev/wicket-lib-org-roster.git"
+}
+```
 
 ```bash
 composer init -n \
-  && composer config repositories.wicket-lib-org-roster vcs https://github.com/industrialdev/wicket-lib-org-roster.git \
+  && composer config repositories.wicket-lib-org-roster vcs git@github.com:industrialdev/wicket-lib-org-roster.git \
   && composer config minimum-stability RC \
   && composer config prefer-stable true \
-  && composer require industrialdev/wicket-lib-org-roster:^0
+  && composer require industrialdev/wicket-lib-org-roster:^0@dev
 ```
 
 Minimal `composer.json` example:
@@ -29,26 +41,27 @@ Minimal `composer.json` example:
   "repositories": {
     "wicket-lib-org-roster": {
       "type": "vcs",
-      "url": "https://github.com/industrialdev/wicket-lib-org-roster.git"
+      "url": "git@github.com:industrialdev/wicket-lib-org-roster.git"
     }
   },
   "require": {
-    "industrialdev/wicket-lib-org-roster": "^0.2"
+    "industrialdev/wicket-lib-org-roster": "^0@dev"
   }
 }
 ```
 
 Why RC stability is required:
 - `industrialdev/wicket-lib-org-roster` currently depends on `starfederation/datastar-php:^1.0.0-RC.5`.
+- Use `"industrialdev/wicket-lib-org-roster": "^0@dev"` while that dependency chain includes Datastar RC packages.
 - Without `minimum-stability` set to `RC` (or lower), Composer will reject that transitive dependency.
 
 If `composer.json` already exists, run only:
 
 ```bash
-composer config repositories.wicket-lib-org-roster vcs https://github.com/industrialdev/wicket-lib-org-roster.git \
+composer config repositories.wicket-lib-org-roster vcs git@github.com:industrialdev/wicket-lib-org-roster.git \
   && composer config minimum-stability RC \
   && composer config prefer-stable true \
-  && composer require industrialdev/wicket-lib-org-roster:^0
+  && composer require industrialdev/wicket-lib-org-roster:^0@dev
 ```
 
 ## 2) Bootstrap File (`custom/org-roster.php`)
@@ -62,8 +75,8 @@ use OrgManagement\OrgMan;
 
 defined('ABSPATH') || exit;
 
-if (file_exists(get_stylesheet_directory() . '/vendor/autoload.php')) {
-    require_once get_stylesheet_directory() . '/vendor/autoload.php';
+if (file_exists(ABSPATH . 'vendor/autoload.php')) {
+    require_once ABSPATH . 'vendor/autoload.php';
 }
 
 add_action('after_setup_theme', static function (): void {
@@ -97,8 +110,8 @@ use OrgManagement\OrgMan;
 
 defined('ABSPATH') || exit;
 
-if (file_exists(get_stylesheet_directory() . '/vendor/autoload.php')) {
-    require_once get_stylesheet_directory() . '/vendor/autoload.php';
+if (file_exists(ABSPATH . 'vendor/autoload.php')) {
+    require_once ABSPATH . 'vendor/autoload.php';
 }
 
 function wicket_child_orgman_config(array $config): array
@@ -138,10 +151,10 @@ Starter demo file (inside this library):
 - `public/css/org-roster-theme-overrides.demo.css`
 - Copy it into your theme and rename to `assets/css/org-roster.css` (or your preferred theme path).
 
-Example copy command (run from your child theme root):
+Example copy command (run from site root):
 
 ```bash
-cp vendor/industrialdev/wicket-lib-org-roster/public/css/org-roster-theme-overrides.demo.css assets/css/org-roster.css
+cp vendor/industrialdev/wicket-lib-org-roster/public/css/org-roster-theme-overrides.demo.css wp-content/themes/your-theme/assets/css/org-roster.css
 ```
 
 Add this to `custom/org-roster.php`:
@@ -203,11 +216,15 @@ For complete membership-cycle options, see:
 
 ## 6) Verification Checklist
 
-1. Child theme has `vendor/autoload.php`.
+1. Composer autoloader exists and is loaded (`ABSPATH/vendor/autoload.php`).
 2. `OrgMan::get_instance()` is called on `after_setup_theme`.
 3. My Account CPT page slug exists: `organization-management`.
 4. User has relevant memberships/roles in Wicket.
 5. No fatal errors in PHP/WP logs.
+
+For root Composer installs:
+- Root `vendor/autoload.php` exists and is loaded before bootstrap.
+- OrgMan assets resolve from `/vendor/industrialdev/wicket-lib-org-roster/public/...` automatically.
 
 ## Common Failure Mode
 

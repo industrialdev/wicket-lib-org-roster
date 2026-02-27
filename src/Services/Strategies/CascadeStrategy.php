@@ -204,7 +204,7 @@ class CascadeStrategy implements RosterManagementStrategy
             $log_context['membership_uuid'] = $membership_uuid;
 
             $has_membership = $this->connectionService()->personHasMembership($person_uuid, $membership_uuid);
-            $config = \OrgManagement\Config\get_config();
+            $config = \OrgManagement\Config\OrgManConfig::get();
             if (is_wp_error($has_membership) || !$has_membership) {
                 $relationship_type = $context['relationship_type'] ?? $member_data['relationship_type'] ?? '';
                 $relationship_type = is_string($relationship_type) ? sanitize_key($relationship_type) : '';

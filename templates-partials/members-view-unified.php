@@ -13,7 +13,7 @@ $org_uuid = isset($org_uuid) ? (string) $org_uuid : '';
 $group_uuid = isset($group_uuid) ? (string) $group_uuid : '';
 $org_identifier = isset($org_identifier) ? (string) $org_identifier : '';
 
-$orgman_config = \OrgManagement\Config\get_config();
+$orgman_config = OrgManagement\Config\OrgManConfig::get();
 $view_config = $orgman_config['ui']['member_view'] ?? [];
 $groups_view_config = $orgman_config['groups']['ui'] ?? [];
 

@@ -19,7 +19,7 @@ it('shows member roles on cards by default', function (): void {
 });
 
 it('is aligned with shared config for member roles visibility', function (): void {
-    $config = \OrgManagement\Config\get_config();
+    $config = OrgManagement\Config\OrgManConfig::get();
 
     expect($config['ui']['member_card_fields']['roles']['enabled'] ?? null)->toBeTrue();
     expect(Helper::should_show_member_roles())->toBeTrue();

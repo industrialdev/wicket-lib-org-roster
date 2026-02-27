@@ -4,8 +4,8 @@ Date: 2026-02-26
 
 This document stores the finalized baseline configuration for the MSA roster requirement (cascading membership style).
 
-Library config source: `\OrgManagement\Config\get_config()` in `src/config/config.php`.
-Do not edit `src/config/config.php` directly on client sites. Configure through the centralized filter: `wicket/acc/orgman/config`.
+Library configuration defaults source: `\OrgManagement\Config\OrgManConfig::get()` in `src/Config/OrgManConfig.php`.
+Do not edit `src/Config/OrgManConfig.php` directly on client sites. Configure through the centralized filter: `wicket/acc/orgman/config`.
 
 ## Baseline Config (Copy/Paste)
 

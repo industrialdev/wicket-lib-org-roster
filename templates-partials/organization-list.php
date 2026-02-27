@@ -479,7 +479,7 @@ if (empty($organizations)) {
 
 <div id="organization-list-container">
     <?php
-    $orgman_config = \OrgManagement\Config\get_config();
+    $orgman_config = \OrgManagement\Config\OrgManConfig::get();
 $org_list_config = is_array($orgman_config['ui']['organization_list'] ?? null)
     ? $orgman_config['ui']['organization_list']
     : [];

@@ -65,7 +65,7 @@ if (!empty($membership_uuid)) {
 $update_permissions_success_actions = "console.log('Permissions updated successfully'); $editPermissionsSubmitting = false; $editPermissionsSuccess = true; $membersLoading = false; $editPermissionsModalOpen = false; @get('{$members_list_endpoint}{$members_list_separator}org_uuid={$encodedOrgUuid}{$membership_query_fragment}&page=1') >> select('#{$members_list_target}') | set(html); setTimeout(() => $editPermissionsSuccess = false, 3000);";
 $remove_member_success_actions = "console.log('Member removed successfully'); $removeMemberSubmitting = false; $removeMemberSuccess = true; $membersLoading = false; $removeMemberModalOpen = false; @get('{$members_list_endpoint}{$members_list_separator}org_uuid={$encodedOrgUuid}{$membership_query_fragment}&page=1') >> select('#{$members_list_target}') | set(html); setTimeout(() => $removeMemberSuccess = false, 3000);";
 
-$orgman_config = \OrgManagement\Config\get_config();
+$orgman_config = OrgManagement\Config\OrgManConfig::get();
 $member_list_config = is_array($orgman_config['ui']['member_list'] ?? null)
     ? $orgman_config['ui']['member_list']
     : [];

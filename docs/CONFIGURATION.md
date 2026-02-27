@@ -1,8 +1,8 @@
 # Configuration Reference
 
-This library is configured through `\OrgManagement\Config\get_config()` in `src/config/config.php`.
+This library is configured through `\OrgManagement\Config\OrgManConfig::get()` in `src/Config/OrgManConfig.php`.
 
-End-user developers should not update or modify `src/config/config.php` directly.  
+End-user developers should not update or modify `src/Config/OrgManConfig.php` directly.
 Use the centralized `wicket/acc/orgman/config` filter to configure behavior without changing library source files:
 
 ```php
@@ -14,7 +14,7 @@ add_filter('wicket/acc/orgman/config', function (array $config): array {
 
 ## Complete Configuration Map
 
-All keys below are current defaults from `src/config/config.php`.
+All keys below are current defaults from `src/Config/OrgManConfig.php`.
 
 ### `roster`
 | Key | Default | Type | Description |
@@ -243,8 +243,8 @@ These are not in the config array, but are used by runtime path/url resolution.
 
 | Filter | Description |
 |---|---|
-| `wicket/acc/orgman/base_path` | Overrides filesystem base path used to resolve plugin assets/templates at runtime. |
-| `wicket/acc/orgman/base_url` | Overrides base URL used to enqueue/access public assets at runtime. |
+| `wicket/acc/orgman/base_path` | Overrides filesystem base path used to resolve plugin assets/templates at runtime. Default auto-detects the package root. |
+| `wicket/acc/orgman/base_url` | Overrides base URL used to enqueue/access public assets at runtime. Default auto-resolves from either `WP_CONTENT_DIR` (content URL) or `ABSPATH` (site URL, including root `vendor/...` installs). |
 
 ## Strategy Setup Examples
 

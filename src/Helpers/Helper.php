@@ -170,7 +170,7 @@ abstract class Helper
      */
     protected static function get_config(): array
     {
-        return \OrgManagement\Config\get_config();
+        return \OrgManagement\Config\OrgManConfig::get();
     }
 
     /**

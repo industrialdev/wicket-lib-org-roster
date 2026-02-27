@@ -21,7 +21,7 @@ Exit Criteria:
 - [x] Add `MembershipCycleStrategy` implementing `RosterManagementStrategy`.
 - [x] Register strategy in `MemberService::init_strategies()`.
 - [x] Keep fallback unchanged (`cascade`) for unknown strategy keys.
-- [x] Add strategy-specific config block in `src/config/config.php` (additive only).
+- [x] Add strategy-specific configuration defaults in `src/Config/OrgManConfig.php` (additive only).
 
 Exit Criteria:
 - [x] Existing strategies still selected and functioning exactly as before.

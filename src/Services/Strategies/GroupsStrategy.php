@@ -117,7 +117,7 @@ class GroupsStrategy implements RosterManagementStrategy
 
             if (!empty($org_uuid)) {
                 $has_relationship = $this->connectionService()->personHasRelationship($person_uuid, $org_uuid);
-                $config = \OrgManagement\Config\get_config();
+                $config = \OrgManagement\Config\OrgManConfig::get();
                 if (is_wp_error($has_relationship) || !$has_relationship) {
                     $relationship_type = $context['relationship_type'] ?? $member_data['relationship_type'] ?? '';
                     $relationship_type = is_string($relationship_type) ? sanitize_key($relationship_type) : '';
@@ -151,7 +151,7 @@ class GroupsStrategy implements RosterManagementStrategy
                 }
             }
 
-            $orgman_config = \OrgManagement\Config\get_config();
+            $orgman_config = \OrgManagement\Config\OrgManConfig::get();
             $groups_config = is_array($orgman_config['groups'] ?? null) ? $orgman_config['groups'] : [];
             $seat_limited_roles = is_array($groups_config['seat_limited_roles'] ?? null)
                 ? $groups_config['seat_limited_roles']
@@ -267,7 +267,7 @@ class GroupsStrategy implements RosterManagementStrategy
                 }
             }
 
-            $orgman_config = \OrgManagement\Config\get_config();
+            $orgman_config = \OrgManagement\Config\OrgManConfig::get();
             $groups_config = is_array($orgman_config['groups'] ?? null) ? $orgman_config['groups'] : [];
             $manage_roles = is_array($groups_config['manage_roles'] ?? null) ? $groups_config['manage_roles'] : [];
             if ($role_slug && in_array($role_slug, $manage_roles, true)) {

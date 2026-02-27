@@ -237,7 +237,7 @@ if ($roster_mode === 'groups' && $group_uuid !== '') {
         <?php endif; ?>
 
         <?php
-        $member_list_config = \OrgManagement\Config\get_config()['ui']['member_list'] ?? [];
+        $member_list_config = \OrgManagement\Config\OrgManConfig::get()['ui']['member_list'] ?? [];
 $show_bulk_upload = (bool) ($member_list_config['show_bulk_upload'] ?? false);
 if ($show_bulk_upload && $can_bulk_upload):
     ?>

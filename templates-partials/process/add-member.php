@@ -13,9 +13,6 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-// Ensure the config is loaded
-require_once dirname(dirname(dirname(__FILE__))) . '/src/config/config.php';
-
 // Handle POST submissions
 $request_method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 if ('POST' === strtoupper($request_method)) {
@@ -117,7 +114,7 @@ if ('POST' === strtoupper($request_method)) {
         }, $_POST['roles']);
     }
 
-    $orgman_config = \OrgManagement\Config\get_config();
+    $orgman_config = OrgManagement\Config\OrgManConfig::get();
     $permissions_field_config = $orgman_config['member_addition_form']['fields']['permissions'] ?? [];
     $allowed_roles = is_array($permissions_field_config['allowed_roles'] ?? null)
         ? $permissions_field_config['allowed_roles']

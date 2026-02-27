@@ -93,7 +93,7 @@ class MembershipCycleStrategy implements RosterManagementStrategy
             return $scope_valid;
         }
 
-        $cycle_config = \OrgManagement\Config\get_config()['membership_cycle'] ?? [];
+        $cycle_config = \OrgManagement\Config\OrgManConfig::get()['membership_cycle'] ?? [];
         $prevent_owner_removal = (bool) ($cycle_config['permissions']['prevent_owner_removal'] ?? true);
         if ($prevent_owner_removal) {
             $org_owner = $this->organization_service()->get_organization_owner($org_id);

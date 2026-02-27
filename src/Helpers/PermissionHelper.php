@@ -55,7 +55,7 @@ class PermissionHelper extends Helper
      */
     private static function get_role_only_management_access_config(): array
     {
-        $config = \OrgManagement\Config\get_config();
+        $config = \OrgManagement\Config\OrgManConfig::get();
         $permissions = is_array($config['permissions'] ?? null) ? $config['permissions'] : [];
         $role_only = $permissions['role_only_management_access'] ?? [];
 
@@ -374,7 +374,7 @@ class PermissionHelper extends Helper
      */
     public static function can_add_members($org_id = null): bool
     {
-        $config = \OrgManagement\Config\get_config();
+        $config = \OrgManagement\Config\OrgManConfig::get();
         $add_roles = $config['permissions']['add_members'] ?? ['membership_manager', 'membership_owner'];
         $roster_strategy = $config['roster']['strategy'] ?? 'direct';
 
@@ -401,7 +401,7 @@ class PermissionHelper extends Helper
      */
     public static function can_remove_members($org_id = null): bool
     {
-        $config = \OrgManagement\Config\get_config();
+        $config = \OrgManagement\Config\OrgManConfig::get();
         $remove_roles = $config['permissions']['remove_members'] ?? ['membership_manager', 'membership_owner'];
         $roster_strategy = $config['roster']['strategy'] ?? 'direct';
 
@@ -469,7 +469,7 @@ class PermissionHelper extends Helper
      */
     public static function can_purchase_seats($org_id = null): bool
     {
-        $config = \OrgManagement\Config\get_config();
+        $config = \OrgManagement\Config\OrgManConfig::get();
         $purchase_roles = $config['permissions']['purchase_seats'] ?? ['membership_owner'];
         $roster_strategy = $config['roster']['strategy'] ?? 'direct';
 

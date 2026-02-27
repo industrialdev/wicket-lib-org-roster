@@ -5,7 +5,7 @@
 - `membership_cycle` config is additive and only applies when `roster.strategy = membership_cycle`.
 - Existing defaults remain unchanged for `direct`, `cascade`, and `groups`.
 
-## Current Default Config Block (`src/config/config.php`)
+## Current Default Configuration (`src/Config/OrgManConfig.php`)
 
 `membership_cycle`:
 - `strategy_key`: `'membership_cycle'`

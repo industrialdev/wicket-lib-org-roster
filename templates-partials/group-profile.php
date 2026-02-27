@@ -15,7 +15,7 @@ if (empty($group_uuid)) {
     return;
 }
 
-$orgman_config = \OrgManagement\Config\get_config();
+$orgman_config = OrgManagement\Config\OrgManConfig::get();
 $groups_config = is_array($orgman_config['groups'] ?? null) ? $orgman_config['groups'] : [];
 $ui_config = is_array($groups_config['ui'] ?? null) ? $groups_config['ui'] : [];
 $editable_fields = is_array($ui_config['editable_fields'] ?? null) ? $ui_config['editable_fields'] : [];

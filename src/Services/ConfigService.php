@@ -23,7 +23,7 @@ class ConfigService
      */
     public function get_roster_mode()
     {
-        $config = \OrgManagement\Config\get_config();
+        $config = \OrgManagement\Config\OrgManConfig::get();
         $default_strategy = $config['roster']['strategy'] ?? 'cascade';
 
         return $default_strategy;
@@ -36,7 +36,7 @@ class ConfigService
      */
     public function is_additional_seats_enabled()
     {
-        $config = \OrgManagement\Config\get_config();
+        $config = \OrgManagement\Config\OrgManConfig::get();
         $default_enabled = $config['additional_seats']['enabled'] ?? true;
 
         return apply_filters('wicket/acc/orgman/additional_seats_enabled', $default_enabled);
@@ -49,7 +49,7 @@ class ConfigService
      */
     public function get_additional_seats_sku()
     {
-        $config = \OrgManagement\Config\get_config();
+        $config = \OrgManagement\Config\OrgManConfig::get();
         $default_sku = $config['additional_seats']['sku'] ?? 'additional-seats';
 
         return apply_filters('wicket/acc/orgman/additional_seats_sku', $default_sku);
@@ -62,7 +62,7 @@ class ConfigService
      */
     public function get_additional_seats_form_id()
     {
-        $config = \OrgManagement\Config\get_config();
+        $config = \OrgManagement\Config\OrgManConfig::get();
         $default_form_id = $config['additional_seats']['form_id'] ?? 0;
 
         if ((int) $default_form_id === 0 && function_exists('wicket_gf_get_form_id_by_slug')) {
@@ -124,7 +124,7 @@ class ConfigService
      */
     public function get_additional_seats_min_quantity()
     {
-        $config = \OrgManagement\Config\get_config();
+        $config = \OrgManagement\Config\OrgManConfig::get();
         $default_min_quantity = $config['additional_seats']['min_quantity'] ?? 1;
 
         return apply_filters('wicket/acc/orgman/additional_seats_min_quantity', $default_min_quantity);
@@ -137,7 +137,7 @@ class ConfigService
      */
     public function get_additional_seats_max_quantity()
     {
-        $config = \OrgManagement\Config\get_config();
+        $config = \OrgManagement\Config\OrgManConfig::get();
         $default_max_quantity = $config['additional_seats']['max_quantity'] ?? 100;
 
         return apply_filters('wicket/acc/orgman/additional_seats_max_quantity', $default_max_quantity);
@@ -150,7 +150,7 @@ class ConfigService
      */
     public function get_allowed_document_types()
     {
-        $config = \OrgManagement\Config\get_config();
+        $config = \OrgManagement\Config\OrgManConfig::get();
         $default_types = $config['documents']['allowed_types'] ?? [
             'pdf', 'doc', 'docx', 'xls', 'xlsx', 'jpg', 'jpeg', 'png', 'gif',
         ];
@@ -165,7 +165,7 @@ class ConfigService
      */
     public function get_max_document_size()
     {
-        $config = \OrgManagement\Config\get_config();
+        $config = \OrgManagement\Config\OrgManConfig::get();
         $default_size = $config['documents']['max_size'] ?? (10 * 1024 * 1024); // 10MB default
 
         return apply_filters('wicket/acc/orgman/max_document_size', $default_size);
@@ -178,7 +178,7 @@ class ConfigService
      */
     public function get_business_info_seat_limit_info()
     {
-        $config = \OrgManagement\Config\get_config();
+        $config = \OrgManagement\Config\OrgManConfig::get();
         $default_info = $config['business_info']['seat_limit_info'] ?? null;
 
         return apply_filters('wicket/acc/orgman/business_info_seat_limit', $default_info);

@@ -38,8 +38,8 @@
   - if exactly one group is found, redirect directly to that group,
   - if multiple groups are found, show the group list.
 - Group list visibility is independent from organization membership/org roles; action links are role-gated.
-- Manage group members for specific organizations. 
-  - Organization membership is determined by matching the group role additional info (`custom_data_field`) between the managing user's role and the roster member's role. 
+- Manage group members for specific organizations.
+  - Organization membership is determined by matching the group role additional info (`custom_data_field`) between the managing user's role and the roster member's role.
   - Users cannot view or manage roster entries for other organizations within the same group.
 - Seat limits enforced per group:
   - Each organization may have exactly one "Member" per group. (The one-Member rule is enforced strictly per group, not globally across groups).
@@ -72,7 +72,7 @@
 - Owner name resolution supports API payload variants (`data.attributes`, direct `attributes`, and included person entities).
 - Renewal date resolution checks common membership date fields (`ends_at`, `end_at`, `expires_at`, `renewal_date`, `next_renewal_at`) before formatting.
 
-## 2. Configuration (`src/config/config.php`)
+## 2. Configuration (`src/Config/OrgManConfig.php`)
 
 The library is highly configurable via the `wicket/acc/orgman/config` filter. Key sections include:
 
@@ -111,7 +111,7 @@ The library automatically injects its UI into the following "My Account" page sl
 
 ### 3.2 Hooks & Filters
 - **Filter**: `wicket/acc/orgman/config` - Modify the entire library configuration.
-- **Filter**: `wicket/acc/orgman/base_path` / `base_url` - Change asset and template locations.
+- **Filter**: `wicket/acc/orgman/base_path` / `base_url` - Change asset and template locations. By default, base URL/path auto-resolve for both `wp-content` installs and root `vendor` installs.
 - **Action**: `rest_api_init` - Registers API routes under `org-management/v1`.
 
 ## 4. REST API & Internal Endpoints
@@ -151,7 +151,7 @@ The library registers several endpoints under the `org-management/v1` namespace:
 - Role-based access checks, tag filtering, and roster-role validation (member/observer seat limits in add flow).
 - Removal supports end-date and delete modes (configurable). End-dated roles are treated as removed (`active=true` queries).
 - Group org-scope matching now normalizes identifier/name/uuid tokens for member listing and removal lookups.
-- Groups config block added.
+- Groups configuration defaults added.
 - Unified members view (search + list + pagination + modals + seats callout) is the default. Legacy list preserved behind config flags.
 - Debug logging added across groups strategy via `wc_get_logger` (source: `wicket-orgroster`).
 
@@ -165,7 +165,7 @@ The library registers several endpoints under the `org-management/v1` namespace:
 
 **Completed (Membership Cycle):**
 - Strategy key `membership_cycle` is registered in `MemberService`.
-- Additive `membership_cycle` config block exists in `src/config/config.php`.
+- Additive `membership_cycle` configuration defaults exist in `src/Config/OrgManConfig.php`.
 - Direct strategy accepts explicit membership UUID override with org-scope validation.
 - Membership-cycle strategy class exists with explicit membership UUID guards.
 - Process add/remove handlers enforce membership UUID requirements in `membership_cycle` mode.

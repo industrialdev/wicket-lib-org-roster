@@ -11,9 +11,6 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-// Include our batch service
-require_once __DIR__ . '/OrganizationBatchService.php';
-
 /**
  * Handles data operations for organizations.
  */
@@ -26,7 +23,7 @@ class OrganizationService
 
     public function __construct()
     {
-        $this->config = \OrgManagement\Config\get_config();
+        $this->config = \OrgManagement\Config\OrgManConfig::get();
     }
 
     /**

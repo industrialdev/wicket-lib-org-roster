@@ -84,7 +84,7 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
             $logger->debug('[OrgMan] Person record ready for membership assignment', $log_context);
 
             // Get configuration for member addition settings
-            $config = \OrgManagement\Config\get_config();
+            $config = \OrgManagement\Config\OrgManConfig::get();
             $base_member_role = $config['member_addition']['base_member_role'] ?? 'member';
             $auto_assign_roles = $config['member_addition']['auto_assign_roles'] ?? [];
 
@@ -318,7 +318,7 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
         $roles = $this->normalize_roles($roles);
 
         // Filter out membership_owner if configured to prevent assignment
-        $config = \OrgManagement\Config\get_config();
+        $config = \OrgManagement\Config\OrgManConfig::get();
         if (!empty($config['permissions']['prevent_owner_assignment'])) {
             $roles = array_values(array_diff($roles, ['membership_owner']));
         }
@@ -720,7 +720,7 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
         $subject = sprintf('Welcome to %s', $organization_name);
 
         // Get configuration for email
-        $config = \OrgManagement\Config\get_config();
+        $config = \OrgManagement\Config\OrgManConfig::get();
         $confirmation_email_from = $config['notifications']['confirmation_email_from'] ?? 'no-reply@wicketcloud.com';
 
         $body = sprintf(
@@ -791,7 +791,7 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
             }
 
             // Check if membership_owner removal is prevented by configuration
-            $config = \OrgManagement\Config\get_config();
+            $config = \OrgManagement\Config\OrgManConfig::get();
             $prevent_owner_removal = $config['permissions']['prevent_owner_removal'] ?? false;
 
             if ($prevent_owner_removal) {

@@ -52,7 +52,7 @@ if ('POST' === strtoupper($request_method)) {
         $member_service = new MemberService($config_service);
 
         // First update relationship type if provided and enabled
-        $config = \OrgManagement\Config\get_config();
+        $config = OrgManagement\Config\OrgManConfig::get();
         $edit_permissions_config = $config['edit_permissions_modal'] ?? [];
         $edit_allowed_roles = is_array($edit_permissions_config['allowed_roles'] ?? null)
             ? $edit_permissions_config['allowed_roles']
