@@ -50,10 +50,10 @@ Minimal `composer.json` example:
 }
 ```
 
-Why RC stability is required:
-- `industrialdev/wicket-lib-org-roster` currently depends on `starfederation/datastar-php:^1.0.0-RC.5`.
-- Use `"industrialdev/wicket-lib-org-roster": "^0@dev"` while that dependency chain includes Datastar RC packages.
-- Without `minimum-stability` set to `RC` (or lower), Composer will reject that transitive dependency.
+Why pre-stable stability is required:
+- `industrialdev/wicket-lib-org-roster` depends on `starfederation/datastar-php:^1@dev` (currently resolved to `1.0.0-RC.5`).
+- Use `"industrialdev/wicket-lib-org-roster": "^0@dev"` while that dependency chain includes pre-stable Datastar releases.
+- Without `minimum-stability` set to `RC` (or lower, such as `dev`), Composer can reject that transitive dependency.
 
 If `composer.json` already exists, run only:
 

@@ -13,6 +13,7 @@ The `OrgManagement\OrgMan` class serves as the central orchestrator. It is a sin
 - Configuration management.
 - Hook registration (Actions/Filters).
 - Asset management.
+- Runtime base path/URL resolution for assets/templates across both `wp-content` and root `vendor/...` install layouts.
 
 ### 2.2 Strategy Pattern (Roster Management)
 The library decouples member management logic from the `MemberService` using the Strategy pattern. This allows the system to switch between different management modes without changing the service interface:

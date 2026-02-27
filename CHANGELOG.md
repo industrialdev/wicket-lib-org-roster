@@ -2,6 +2,24 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.4.0] - 2026-02-27
+
+### Added
+- New canonical configuration defaults class: `src/Config/OrgManConfig.php`.
+- New case-collision CI guard script: `.ci/check-case-collisions.php`.
+- New Composer script: `check:case-collisions` (also included in `production` workflow).
+- New unit coverage in `OrgManAssetBaseUrlTest` for base URL resolution when installed under root `vendor/...`.
+
+### Changed
+- Switched `OrgMan` runtime bootstrapping to Composer PSR-4 autoloading and removed manual case-insensitive dependency loading.
+- `OrgMan` now fails fast with a clear runtime error when Composer autoload is missing.
+- Base URL resolution now supports both `WP_CONTENT_DIR` and `ABSPATH` rooted installations, including root `vendor/...` package paths.
+- Updated dependency constraint to `starfederation/datastar-php:^1@dev` (currently resolving to `1.0.0-RC.5`).
+- Bumped package version in `composer.json` to `0.4.0`.
+
+### Documentation
+- Updated installation/configuration/spec docs to reference `src/Config/OrgManConfig.php` and root Composer install behavior.
+
 ## [0.3.7] - 2026-02-26
 
 ### Added
