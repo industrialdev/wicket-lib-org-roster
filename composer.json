@@ -7,7 +7,7 @@
   "require": {
     "php": ">=8.2",
     "ext-json": "*",
-    "starfederation/datastar-php": "^1@dev"
+    "starfederation/datastar-php": "^1@RC"
   },
   "require-dev": {
     "pestphp/pest": "^4",
