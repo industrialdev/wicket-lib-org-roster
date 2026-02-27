@@ -2,6 +2,27 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.4.1] - 2026-02-27
+
+### Added
+- New Bedrock sync script for public library deployment:
+  - `.ci/sync-orgman-lib.php`
+- New UI config keys for customizable non-groups management heading:
+  - `ui.organization_list.use_custom_title`
+  - `ui.organization_list.custom_title`
+
+### Changed
+- Updated WordPress bootstrap guidance and runtime loading flow:
+  - `wicket_orgman_*` naming in site bootstrap examples
+  - `wicket_orgman_load_autoloader()` execution inside `after_setup_theme`
+- Updated Bedrock installation guidance to run sync via:
+  - `@php vendor/industrialdev/wicket-lib-org-roster/.ci/sync-orgman-lib.php`
+- Organization management heading templates now read configurable title values in non-groups mode.
+- Bumped package version in `composer.json` to `0.4.1`.
+
+### Documentation
+- Updated `docs/INSTALLATION.md`, `docs/CONFIGURATION.md`, `docs/SPECS.md`, `docs/ARCHITECTURE.md`, and `docs/TESTING.md` for Bedrock + standard WordPress loading parity and current bootstrap naming.
+
 ## [0.4.0] - 2026-02-27
 
 ### Added

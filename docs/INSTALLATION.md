@@ -1,9 +1,10 @@
 # Installation
 
-This guide shows the supported way to load `industrialdev/wicket-lib-org-roster` in a WordPress site.
+This guide shows the supported way to load `industrialdev/wicket-lib-org-roster` in WordPress sites.
 
-Supported install mode:
-- Site/root Composer install (same `composer.json` scope as WordPress core/plugins).
+Supported install modes:
+- Standard WordPress (root Composer install).
+- Bedrock (root Composer install + sync to `web/app/libs/wicket-lib-org-roster`).
 
 ## Why `after_setup_theme`
 
@@ -11,11 +12,9 @@ Initialize OrgMan on `after_setup_theme` (priority `20`), not `plugins_loaded`.
 
 `after_setup_theme` is the reliable point where theme code, Composer autoloading, and my-account template behavior are consistently available for this library.
 
-## 1) Install With Composer (site root, recommended)
+## 1) Install With Composer
 
-From your site root (directory containing WordPress and root `composer.json`):
-
-Add this repository entry to `composer.json`:
+From your site root (directory containing WordPress and root `composer.json`), add this repository entry:
 
 ```json
 {
@@ -24,29 +23,51 @@ Add this repository entry to `composer.json`:
 }
 ```
 
-Minimal `composer.json` example:
+Minimal requirement example:
 
 ```json
 {
-  "repositories": {
-    "wicket-lib-org-roster": {
-      "type": "vcs",
-      "url": "git@github.com:industrialdev/wicket-lib-org-roster.git"
-    }
-  },
   "require": {
     "industrialdev/wicket-lib-org-roster": "^0@dev"
   }
 }
 ```
 
-Why @dev stability is required:
-- `industrialdev/wicket-lib-org-roster` depends on `starfederation/datastar-php:^1@dev` (currently resolved to `1.0.0-RC.5`).
-- Use `"industrialdev/wicket-lib-org-roster": "^0@dev"` while that dependency chain includes pre-stable Datastar releases.
+Why `@dev` stability is required:
+- `industrialdev/wicket-lib-org-roster` depends on `starfederation/datastar-php:^1@dev`.
+- Keep `"industrialdev/wicket-lib-org-roster": "^0@dev"` while that dependency chain includes pre-stable Datastar releases.
+
+## 1.1) Bedrock Only: Sync Library Into Public `libs`
+
+Bedrock installs this package to root `vendor/...` by default. To serve OrgMan assets from a public path, run the library sync script after install/update.
+
+In Bedrock `composer.json` scripts:
+
+```json
+{
+  "scripts": {
+    "orgman:sync-lib": [
+      "@php vendor/industrialdev/wicket-lib-org-roster/.ci/sync-orgman-lib.php"
+    ],
+    "post-install-cmd": [
+      "@orgman:sync-lib"
+    ],
+    "post-update-cmd": [
+      "@orgman:sync-lib"
+    ]
+  }
+}
+```
+
+This syncs from:
+- `vendor/industrialdev/wicket-lib-org-roster`
+
+to:
+- `web/app/libs/wicket-lib-org-roster`
 
 ## 2) Bootstrap File (`custom/org-roster.php`)
 
-Use this pattern:
+Use a layout-aware bootstrap that works for both Standard WordPress and Bedrock.
 
 ```php
 <?php
@@ -55,8 +76,100 @@ use OrgManagement\OrgMan;
 
 defined('ABSPATH') || exit;
 
-if (file_exists(ABSPATH . 'vendor/autoload.php')) {
-    require_once ABSPATH . 'vendor/autoload.php';
+function wicket_orgman_library_root(): ?string
+{
+    $bedrock_root = dirname(untrailingslashit(ABSPATH));
+
+    $candidates = [
+        trailingslashit(WP_CONTENT_DIR) . 'libs/wicket-lib-org-roster',
+        trailingslashit(ABSPATH) . 'app/libs/wicket-lib-org-roster',
+        trailingslashit(WP_CONTENT_DIR) . 'vendor/industrialdev/wicket-lib-org-roster',
+        trailingslashit(ABSPATH) . 'vendor/industrialdev/wicket-lib-org-roster',
+        trailingslashit($bedrock_root) . 'vendor/industrialdev/wicket-lib-org-roster',
+    ];
+
+    foreach ($candidates as $candidate) {
+        if (is_file(trailingslashit($candidate) . 'src/OrgMan.php')) {
+            return untrailingslashit($candidate);
+        }
+    }
+
+    return null;
+}
+
+function wicket_orgman_public_library_root(): ?string
+{
+    $library_root = wicket_orgman_library_root();
+    if (empty($library_root)) {
+        return null;
+    }
+
+    if (strpos($library_root, untrailingslashit(WP_CONTENT_DIR)) === 0 || strpos($library_root, untrailingslashit(ABSPATH)) === 0) {
+        return $library_root;
+    }
+
+    return null;
+}
+
+function wicket_orgman_load_autoloader(): void
+{
+    if (class_exists(OrgMan::class, false)) {
+        return;
+    }
+
+    $bedrock_root = dirname(untrailingslashit(ABSPATH));
+    $autoload_candidates = [];
+
+    $library_root = wicket_orgman_library_root();
+    if (!empty($library_root)) {
+        $autoload_candidates[] = trailingslashit($library_root) . 'vendor/autoload.php';
+    }
+
+    $autoload_candidates[] = trailingslashit(WP_CONTENT_DIR) . 'vendor/autoload.php';
+    $autoload_candidates[] = trailingslashit(ABSPATH) . 'vendor/autoload.php';
+    $autoload_candidates[] = trailingslashit($bedrock_root) . 'vendor/autoload.php';
+
+    foreach ($autoload_candidates as $autoload_file) {
+        if (is_readable($autoload_file)) {
+            require_once $autoload_file;
+            break;
+        }
+    }
+}
+
+function wicket_orgman_config(array $config): array
+{
+    // mutate config...
+    return $config;
+}
+
+function wicket_orgman_base_path(string $default): string
+{
+    $library_root = wicket_orgman_library_root();
+
+    return !empty($library_root) ? $library_root : $default;
+}
+
+function wicket_orgman_base_url(string $default): string
+{
+    $library_root = wicket_orgman_public_library_root();
+    if (empty($library_root)) {
+        return $default;
+    }
+
+    if (strpos($library_root, untrailingslashit(WP_CONTENT_DIR)) === 0) {
+        $relative = ltrim(substr($library_root, strlen(untrailingslashit(WP_CONTENT_DIR))), '/');
+
+        return trailingslashit(content_url($relative));
+    }
+
+    if (strpos($library_root, untrailingslashit(ABSPATH)) === 0) {
+        $relative = ltrim(substr($library_root, strlen(untrailingslashit(ABSPATH))), '/');
+
+        return trailingslashit(site_url($relative));
+    }
+
+    return $default;
 }
 
 add_action('after_setup_theme', static function (): void {
@@ -66,10 +179,17 @@ add_action('after_setup_theme', static function (): void {
     }
     $booted = true;
 
-    add_filter('wicket/acc/orgman/config', static function (array $config): array {
-        // mutate config...
-        return $config;
-    });
+    wicket_orgman_load_autoloader();
+
+    if (!has_filter('wicket/acc/orgman/config', 'wicket_orgman_config')) {
+        add_filter('wicket/acc/orgman/config', 'wicket_orgman_config');
+    }
+    if (!has_filter('wicket/acc/orgman/base_path', 'wicket_orgman_base_path')) {
+        add_filter('wicket/acc/orgman/base_path', 'wicket_orgman_base_path');
+    }
+    if (!has_filter('wicket/acc/orgman/base_url', 'wicket_orgman_base_url')) {
+        add_filter('wicket/acc/orgman/base_url', 'wicket_orgman_base_url');
+    }
 
     if (class_exists(OrgMan::class)) {
         OrgMan::get_instance();
@@ -79,62 +199,27 @@ add_action('after_setup_theme', static function (): void {
 
 Important: register `wicket/acc/orgman/config` before `OrgMan::get_instance()` so initial service/config boot uses your overrides.
 
-## 2.1) Hardening (Recommended)
-
-Use a named callback and register the filter only once:
-
-```php
-<?php
-
-use OrgManagement\OrgMan;
-
-defined('ABSPATH') || exit;
-
-if (file_exists(ABSPATH . 'vendor/autoload.php')) {
-    require_once ABSPATH . 'vendor/autoload.php';
-}
-
-function wicket_child_orgman_config(array $config): array
-{
-    // mutate config...
-    return $config;
-}
-
-add_action('after_setup_theme', static function (): void {
-    static $booted = false;
-    if ($booted) {
-        return;
-    }
-    $booted = true;
-
-    if (!has_filter('wicket/acc/orgman/config', 'wicket_child_orgman_config')) {
-        add_filter('wicket/acc/orgman/config', 'wicket_child_orgman_config');
-    }
-
-    if (class_exists(OrgMan::class)) {
-        OrgMan::get_instance();
-    }
-}, 20);
-```
-
 ## 3) Theme Styling Overrides (Recommended)
 
-OrgMan ships its own base stylesheet (`orgman-modern`).  
+OrgMan ships its own base stylesheet (`orgman-modern`).
 To customize the UI safely from your theme, enqueue a second stylesheet that depends on `orgman-modern`.
 
-Recommended child-theme path (WordPress convention):
+Recommended child-theme path:
 - `assets/css/org-roster.css`
-
-If your theme already uses a different convention (for example `public/css/wicket-orgman.css`), use that path instead.
 
 Starter demo file (inside this library):
 - `public/css/org-roster-theme-overrides.demo.css`
-- Copy it into your theme and rename to `assets/css/org-roster.css` (or your preferred theme path).
 
-Example copy command (run from site root):
+Example copy commands:
 
+Standard WordPress:
 ```bash
 cp vendor/industrialdev/wicket-lib-org-roster/public/css/org-roster-theme-overrides.demo.css wp-content/themes/your-theme/assets/css/org-roster.css
+```
+
+Bedrock (after sync to `web/app/libs`):
+```bash
+cp web/app/libs/wicket-lib-org-roster/public/css/org-roster-theme-overrides.demo.css web/app/themes/your-theme/assets/css/org-roster.css
 ```
 
 Add this to `custom/org-roster.php`:
@@ -143,7 +228,6 @@ Add this to `custom/org-roster.php`:
 <?php
 
 add_action('wp_enqueue_scripts', static function (): void {
-    // Only load overrides when OrgMan styles are present.
     if (!wp_style_is('orgman-modern', 'enqueued') && !wp_style_is('orgman-modern', 'registered')) {
         return;
     }
@@ -163,8 +247,6 @@ add_action('wp_enqueue_scripts', static function (): void {
 }, 30);
 ```
 
-The demo file uses native modern CSS nesting/cascade and is scoped to `.wicket-orgman`.
-
 ## 4) Include Bootstrap File From Theme `functions.php`
 
 Example include list:
@@ -179,32 +261,31 @@ $wicket_child_includes = [
 
 ## 5) Strategy/Behavior Configuration (Optional)
 
-Inside the bootstrap filter, set the strategy and client-specific config:
+Inside the bootstrap filter, set strategy and client-specific config:
 
 ```php
 add_filter('wicket/acc/orgman/config', static function (array $config): array {
     $config['roster']['strategy'] = 'membership_cycle';
-    $config['ui']['member_list']['show_bulk_upload'] = true; // default is false
+    $config['ui']['member_list']['show_bulk_upload'] = true; // default false
+
     return $config;
 });
 ```
 
-For complete membership-cycle options, see:
-- `docs/CONFIGURATION.md`
-- `docs/STRATEGIES.md`
-- `docs/strategy-membership-cycle/membership-cycle-specification.md`
-
 ## 6) Verification Checklist
 
-1. Composer autoloader exists and is loaded (`ABSPATH/vendor/autoload.php`).
-2. `OrgMan::get_instance()` is called on `after_setup_theme`.
-3. My Account CPT page slug exists: `organization-management`.
-4. User has relevant memberships/roles in Wicket.
-5. No fatal errors in PHP/WP logs.
+1. Library exists in at least one supported location:
+   - Standard WP: `vendor/industrialdev/wicket-lib-org-roster`
+   - Bedrock public copy: `web/app/libs/wicket-lib-org-roster`
+2. Composer autoloader is loaded from one of the bootstrap candidates.
+3. `OrgMan::get_instance()` runs on `after_setup_theme`.
+4. My Account CPT page slug exists: `organization-management`.
+5. User has relevant memberships/roles in Wicket.
+6. No fatal errors in PHP/WP logs.
 
-For root Composer installs:
-- Root `vendor/autoload.php` exists and is loaded before bootstrap.
-- OrgMan assets resolve from `/vendor/industrialdev/wicket-lib-org-roster/public/...` automatically.
+Bedrock-specific checks:
+- `composer run-script orgman:sync-lib` succeeds.
+- Assets resolve from `/app/libs/wicket-lib-org-roster/public/...`.
 
 ## Common Failure Mode
 

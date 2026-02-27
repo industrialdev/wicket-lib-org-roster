@@ -202,6 +202,8 @@ final class OrgManConfig
             'ui' => [
                 'organization_list' => [
                     'page_size' => 5,
+                    'use_custom_title' => false,
+                    'custom_title' => '',
                 ],
                 'hide_relationship_type' => true,
                 'show_special_relationships' => false,

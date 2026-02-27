@@ -149,6 +149,8 @@ Relationship matching in member-card filtering is normalized before comparison (
 | Key | Default | Type | Description |
 |---|---|---|---|
 | `ui.organization_list.page_size` | `5` | int | Number of organizations shown per page in non-groups organization index lists. |
+| `ui.organization_list.use_custom_title` | `false` | bool | When true, replaces the default non-groups page heading (`Manage Organizations`) with `ui.organization_list.custom_title` when provided. |
+| `ui.organization_list.custom_title` | `` | string | Custom non-groups page heading used when `ui.organization_list.use_custom_title = true`. Empty string falls back to the default heading. |
 | `ui.hide_relationship_type` | `true` | bool | Hides relationship type text in legacy/member card presentation. |
 | `ui.show_special_relationships` | `false` | bool | Shows special relationship types (e.g. exchange-defined) in member-facing UI. |
 | `ui.member_list.use_unified` | `true` | bool | Enables unified member list component instead of legacy list rendering. |
@@ -244,7 +246,7 @@ These are not in the config array, but are used by runtime path/url resolution.
 | Filter | Description |
 |---|---|
 | `wicket/acc/orgman/base_path` | Overrides filesystem base path used to resolve plugin assets/templates at runtime. Default auto-detects the package root. |
-| `wicket/acc/orgman/base_url` | Overrides base URL used to enqueue/access public assets at runtime. Default auto-resolves from either `WP_CONTENT_DIR` (content URL) or `ABSPATH` (site URL, including root `vendor/...` installs). |
+| `wicket/acc/orgman/base_url` | Overrides base URL used to enqueue/access public assets at runtime. Default auto-resolves from `WP_CONTENT_DIR` (content URL), `ABSPATH` (site URL, including Bedrock `app/libs`), or root `vendor/...` installs. |
 
 ## Strategy Setup Examples
 

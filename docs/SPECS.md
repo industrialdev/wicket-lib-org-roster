@@ -111,7 +111,7 @@ The library automatically injects its UI into the following "My Account" page sl
 
 ### 3.2 Hooks & Filters
 - **Filter**: `wicket/acc/orgman/config` - Modify the entire library configuration.
-- **Filter**: `wicket/acc/orgman/base_path` / `base_url` - Change asset and template locations. By default, base URL/path auto-resolve for both `wp-content` installs and root `vendor` installs.
+- **Filter**: `wicket/acc/orgman/base_path` / `base_url` - Change asset and template locations. By default, base URL/path auto-resolve for both public `wp-content`/`app` locations (including Bedrock `web/app/libs`) and root `vendor` installs.
 - **Action**: `rest_api_init` - Registers API routes under `org-management/v1`.
 
 ## 4. REST API & Internal Endpoints
