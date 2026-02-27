@@ -2,6 +2,15 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.4.2] - 2026-02-27
+
+### Fixed
+- Hardened Bedrock sync script (`.ci/sync-orgman-lib.php`) to avoid permission failures on shared hosts when replacing existing `web/app/libs/wicket-lib-org-roster` contents.
+- Sync now stages a full copy and performs an atomic directory swap instead of unlinking files in place.
+
+### Changed
+- Bumped package version in `composer.json` to `0.4.2`.
+
 ## [0.4.1] - 2026-02-27
 
 ### Added

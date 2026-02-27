@@ -113,9 +113,46 @@ $copyTree = static function (string $from, string $to) use (&$copyTree): void {
     }
 };
 
+$swapTarget = static function (string $stagedPath, string $targetPath) use (&$removeTree): void {
+    if (!file_exists($targetPath)) {
+        if (!rename($stagedPath, $targetPath)) {
+            throw new RuntimeException("Failed to move staged directory into place: {$stagedPath} -> {$targetPath}");
+        }
+
+        return;
+    }
+
+    $backupPath = $targetPath . '.bak-' . date('YmdHis') . '-' . bin2hex(random_bytes(3));
+    if (!rename($targetPath, $backupPath)) {
+        throw new RuntimeException(
+            "Failed to move existing target out of the way: {$targetPath}. " .
+            "Check ownership/permissions on web/app/libs and try again."
+        );
+    }
+
+    try {
+        if (!rename($stagedPath, $targetPath)) {
+            throw new RuntimeException("Failed to move staged directory into place: {$stagedPath} -> {$targetPath}");
+        }
+    } catch (Throwable $e) {
+        @rename($backupPath, $targetPath);
+        throw $e;
+    }
+
+    try {
+        $removeTree($backupPath);
+    } catch (Throwable $cleanupError) {
+        fwrite(
+            STDERR,
+            "[orgman-sync] Warning: unable to delete backup folder {$backupPath}: " . $cleanupError->getMessage() . "\n"
+        );
+    }
+};
+
 try {
-    $removeTree($target);
-    $copyTree($source, $target);
+    $staging = dirname($target) . '/.wicket-lib-org-roster-sync-' . date('YmdHis') . '-' . bin2hex(random_bytes(3));
+    $copyTree($source, $staging);
+    $swapTarget($staging, $target);
     fwrite(STDOUT, "[orgman-sync] Synced wicket-lib-org-roster to {$target}\n");
     exit(0);
 } catch (Throwable $e) {
