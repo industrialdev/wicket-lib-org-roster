@@ -40,7 +40,7 @@
   --wicket-orgman-bg-accent-light: #d2d2e4;
   --wicket-orgman-bg-callout-1: #d2d2e4;
   --wicket-orgman-bg-callout-2: #fde6cc;
-  --wicket-orgman-bg-summary-card: #cce4f3;
+  --wicket-orgman-bg-summary-card: #dbe5ff;
   --wicket-orgman-bg-disabled: #d3d4d6;
   --wicket-orgman-highlight-light: #d2d2e4;
   --wicket-orgman-highlight-dark: #4c4c92;
@@ -171,6 +171,11 @@
   --wicket-orgman-secondary-outline-color: var(--border-interactive, #005dab);
   --wicket-orgman-modal-overlay-color: var(--modal-bg-overlay, #00000080);
   --wicket-orgman-backdrop-grey: var(--backdrop-grey, #232a3180);
+  --wicket-orgman-account-banner-pad-y: var(--wicket-orgman-space-250, 20px);
+  --wicket-orgman-account-banner-pad-x-mobile: var(--wicket-orgman-space-250, 20px);
+  --wicket-orgman-account-banner-pad-x: calc(
+    var(--wicket-orgman-space-400, 32px) + var(--wicket-orgman-space-075, 6px)
+  );
 
   --wicket-orgman-text-content: var(--text-content, #232a31);
   --wicket-orgman-text-content-reversed: var(--text-content-reversed, #fff);
@@ -203,6 +208,7 @@
   --wicket-orgman-bg-image-overlay: var(--bg-image-overlay, #4c4c92d9);
   --wicket-orgman-bg-accent-dark: var(--bg-accent-dark, #262749);
   --wicket-orgman-bg-accent-light: var(--bg-accent-light, #d2d2e4);
+  --wicket-orgman-bg-summary-card: var(--bg-accent-light, #dbe5ff);
   --wicket-orgman-bg-callout-1: var(--bg-callout-1, #d2d2e4);
   --wicket-orgman-bg-callout-2: var(--bg-callout-2, #fde6cc);
   --wicket-orgman-bg-disabled: var(--bg-disabled, #d3d4d6);
@@ -210,6 +216,14 @@
   --wicket-orgman-highlight-dark: var(--highlight-dark, #4c4c92);
   --wicket-orgman-status-active: var(--status-active, #acdbc5);
   --wicket-orgman-status-inactive: var(--status-inactive, #7b7f83);
+  --wicket-orgman-loader-size: 48px;
+  --wicket-orgman-loader-button-size: 18px;
+  --wicket-orgman-loader-ring-width: 5px;
+  --wicket-orgman-loader-inner-inset: 6px;
+  --wicket-orgman-loader-button-ring-width: 2px;
+  --wicket-orgman-loader-button-inner-inset: 3px;
+  --wicket-orgman-loader-track: var(--wicket-orgman-text-button-label-reversed);
+  --wicket-orgman-loader-accent: var(--wicket-orgman-bg-interactive-reversed);
 
   --wicket-orgman-border-card: var(--border-card, #4c4c92);
   --wicket-orgman-border-dark: var(--border-dark, #262749);
@@ -348,6 +362,8 @@
   --wicket-orgman-color-yellow-800: #854d0e;
   --wicket-orgman-color-white: #fff;
   --wicket-orgman-spacing: 0.25rem;
+  --wicket-orgman-text-2xs: 0.8rem;
+  --wicket-orgman-text-2xs--line-height: calc(1.125 / 0.8);
   --wicket-orgman-text-xs: 0.75rem;
   --wicket-orgman-text-xs--line-height: calc(1 / 0.75);
   --wicket-orgman-text-sm: 0.875rem;
@@ -753,6 +769,9 @@ input:where([type="button"], [type="reset"], [type="submit"]) {
 .wt_ml-2 {
   margin-left: calc(var(--wicket-orgman-spacing) * 2);
 }
+.wt_ml-1 {
+  margin-left: calc(var(--wicket-orgman-spacing) * 1);
+}
 .wt_ml-6 {
   margin-left: calc(var(--wicket-orgman-spacing) * 6);
 }
@@ -1096,6 +1115,13 @@ input:where([type="button"], [type="reset"], [type="submit"]) {
     var(--wicket-orgman-text-xs--line-height)
   );
 }
+.wt_text-2xs {
+  font-size: var(--wicket-orgman-text-2xs);
+  line-height: var(
+    --wicket-tw-leading,
+    var(--wicket-orgman-text-2xs--line-height)
+  );
+}
 .wt_leading-none {
   --wicket-tw-leading: 1;
   line-height: 1;
@@ -1292,6 +1318,9 @@ input:where([type="button"], [type="reset"], [type="submit"]) {
 .wt_hover_underline:hover {
   text-decoration-line: underline;
 }
+.wt_hover_decoration_none:hover {
+  text-decoration-line: none;
+}
 .wt_hover_shadow-sm:hover {
   --wicket-tw-shadow:
     0 1px 3px 0 var(--wicket-tw-shadow-color, #0000001a),
@@ -1327,6 +1356,74 @@ input:where([type="button"], [type="reset"], [type="submit"]) {
 }
 .wt_decoration-none {
   text-decoration: none;
+}
+.wt_loader {
+  display: inline-block;
+  width: var(--wicket-orgman-loader-size);
+  height: var(--wicket-orgman-loader-size);
+  border-radius: 50%;
+  position: relative;
+  animation: wt_loader_rotate 1s linear infinite;
+}
+.wt_loader::before,
+.wt_loader::after {
+  content: "";
+  box-sizing: border-box;
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: var(--wicket-orgman-loader-ring-width) solid
+    var(--wicket-orgman-loader-track);
+  animation: wt_loader_clip_fix 2s linear infinite;
+}
+.wt_loader::after {
+  border-color: var(--wicket-orgman-loader-accent);
+  animation:
+    wt_loader_clip_fix 2s linear infinite,
+    wt_loader_rotate 0.5s linear infinite reverse;
+  inset: var(--wicket-orgman-loader-inner-inset);
+}
+.wt_loader_button {
+  width: var(--wicket-orgman-loader-button-size);
+  height: var(--wicket-orgman-loader-button-size);
+  --wicket-orgman-loader-ring-width: var(--wicket-orgman-loader-button-ring-width);
+  --wicket-orgman-loader-inner-inset: var(
+    --wicket-orgman-loader-button-inner-inset
+  );
+  flex-shrink: 0;
+  animation:
+    wt_loader_intro 160ms ease-out,
+    wt_loader_rotate 1s linear infinite;
+}
+.wt_button_submit_async {
+  position: relative;
+  transform-origin: center;
+  transition:
+    transform 180ms ease-out,
+    box-shadow var(--wicket-orgman-default-transition-duration)
+      var(--wicket-orgman-default-transition-timing-function);
+}
+.wt_button_submit_async.wt_is-loading {
+  transform: scale(1.015);
+}
+.wt_button_submit_async .wt_submit_label {
+  transition: opacity 140ms ease-out;
+}
+.wt_button_submit_async .wt_submit_loader {
+  display: none;
+  opacity: 0;
+  transform: scale(0.84);
+  transition:
+    opacity 140ms ease-out,
+    transform 160ms ease-out;
+}
+.wt_button_submit_async.wt_is-loading .wt_submit_label {
+  display: none;
+}
+.wt_button_submit_async.wt_is-loading .wt_submit_loader {
+  display: inline-block;
+  opacity: 1;
+  transform: scale(1);
 }
 
 @media (min-width: 640px) {
@@ -2261,6 +2358,57 @@ input:where([type="button"], [type="reset"], [type="submit"]) {
   margin: 0 0.25rem;
   display: inline-block;
 }
+#org-management-index-app[data-org-type='professional_association']
+  .partner_demographics {
+  display: none !important;
+}
+#org-management-index-app[data-org-type]:not([data-org-type='professional_association'])
+  .assoc_demographics {
+  display: none !important;
+}
+.wicket-orgman-supplemental .orgman-org-info {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 30px;
+}
+.wicket-orgman-supplemental .orgman-org-info h3 {
+  margin-top: 0;
+  color: #495057;
+}
+.wicket-orgman-supplemental .orgman-form-container {
+  margin-bottom: 30px;
+}
+.wicket-orgman-supplemental .orgman-back-link {
+  margin-top: 30px;
+  text-align: center;
+}
+.wicket-orgman-supplemental .gform_body label {
+  font-weight: 600;
+}
+.wicket-orgman-supplemental .gform_footer {
+  text-align: center;
+}
+.wicket-orgman-supplemental .ginput_container_number input[type='number'] {
+  border: 2px solid #ddd !important;
+  border-radius: 6px !important;
+  padding: 12px 16px !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  background-color: #fff !important;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease !important;
+  width: 100% !important;
+  max-width: 200px !important;
+}
+.wicket-orgman-supplemental .ginput_container_number input[type='number']:focus {
+  border-color: #0073aa !important;
+  box-shadow: 0 0 0 3px rgb(0 115 170 / 10%) !important;
+  outline: none !important;
+}
+.wicket-orgman-supplemental .ginput_container_number input[type='number']:hover {
+  border-color: #0073aa !important;
+}
 .wicket-orgman .woocommerce-wicket--account-centre {
   align-items: flex-start;
   gap: 2rem;
@@ -2315,6 +2463,24 @@ input:where([type="button"], [type="reset"], [type="submit"]) {
   #organization-list-container
   [role="listitem"] {
   width: 100%;
+}
+body.wicket-orgman-screen
+  .wicket-acc
+  .wp-block-cover__inner-container
+  .wp-block-group.mw-container.has-background {
+  padding-top: var(--wicket-orgman-account-banner-pad-y) !important;
+  padding-bottom: var(--wicket-orgman-account-banner-pad-y) !important;
+  padding-left: var(--wicket-orgman-account-banner-pad-x-mobile) !important;
+  padding-right: var(--wicket-orgman-account-banner-pad-x-mobile) !important;
+}
+@media (min-width: 768px) {
+  body.wicket-orgman-screen
+    .wicket-acc
+    .wp-block-cover__inner-container
+    .wp-block-group.mw-container.has-background {
+    padding-left: var(--wicket-orgman-account-banner-pad-x) !important;
+    padding-right: var(--wicket-orgman-account-banner-pad-x) !important;
+  }
 }
 .wicket-orgman .wt_inline-block {
   display: inline-block;
@@ -2533,6 +2699,48 @@ input:where([type="button"], [type="reset"], [type="submit"]) {
 @keyframes spin {
   to {
     transform: rotate(360deg);
+  }
+}
+@keyframes wt_loader_rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+@keyframes wt_loader_clip_fix {
+  0% {
+    clip-path: polygon(50% 50%, 0 0, 0 0, 0 0, 0 0, 0 0);
+  }
+  25% {
+    clip-path: polygon(50% 50%, 0 0, 100% 0, 100% 0, 100% 0, 100% 0);
+  }
+  50% {
+    clip-path: polygon(
+      50% 50%,
+      0 0,
+      100% 0,
+      100% 100%,
+      100% 100%,
+      100% 100%
+    );
+  }
+  75% {
+    clip-path: polygon(50% 50%, 0 0, 100% 0, 100% 100%, 0 100%, 0 100%);
+  }
+  100% {
+    clip-path: polygon(50% 50%, 0 0, 100% 0, 100% 100%, 0 100%, 0 0);
+  }
+}
+@keyframes wt_loader_intro {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
   }
 }
 @keyframes ping {

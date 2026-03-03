@@ -29,7 +29,7 @@ $nonce = isset($_POST['nonce']) ? sanitize_text_field(wp_unslash($_POST['nonce']
 if (!$nonce || !wp_verify_nonce($nonce, 'wicket-orgman-add-group-member')) {
     $logger->warning('[OrgRoster] Add group member invalid nonce', $log_context);
     status_header(200);
-    OrgManagement\Helpers\DatastarSSE::renderError(__('Invalid or missing security token. Please refresh and try again.', 'wicket-acc'), '#group-member-messages', ['membersLoading' => false]);
+    OrgManagement\Helpers\DatastarSSE::renderError(__('Invalid or missing security token. Please refresh and try again.', 'wicket-acc'), '#group-member-messages', ['addMemberSubmitting' => false, 'addMemberSuccess' => false, 'membersLoading' => false]);
 
     return;
 }
@@ -46,7 +46,7 @@ $logger->info('[OrgRoster] Add group member request received', $log_context);
 if (empty($group_uuid)) {
     $logger->error('[OrgRoster] Add group member missing group_uuid', $log_context);
     status_header(200);
-    OrgManagement\Helpers\DatastarSSE::renderError(__('Group identifier missing.', 'wicket-acc'), '#group-member-messages', ['membersLoading' => false]);
+    OrgManagement\Helpers\DatastarSSE::renderError(__('Group identifier missing.', 'wicket-acc'), '#group-member-messages', ['addMemberSubmitting' => false, 'addMemberSuccess' => false, 'membersLoading' => false]);
 
     return;
 }
@@ -65,7 +65,7 @@ $access = $group_service->can_manage_group($group_uuid, (string) $current_user->
 if (empty($access['allowed'])) {
     $logger->warning('[OrgRoster] Add group member access denied', $log_context);
     status_header(200);
-    OrgManagement\Helpers\DatastarSSE::renderError(__('You do not have permission to manage this group.', 'wicket-acc'), '#group-member-messages', ['membersLoading' => false]);
+    OrgManagement\Helpers\DatastarSSE::renderError(__('You do not have permission to manage this group.', 'wicket-acc'), '#group-member-messages', ['addMemberSubmitting' => false, 'addMemberSuccess' => false, 'membersLoading' => false]);
 
     return;
 }
@@ -85,7 +85,7 @@ if (!empty($org_uuid)) {
                     'active_seats' => $active_seats,
                 ]));
                 status_header(200);
-                OrgManagement\Helpers\DatastarSSE::renderError(__('No seats available for this organization.', 'wicket-acc'), '#group-member-messages', ['membersLoading' => false]);
+                OrgManagement\Helpers\DatastarSSE::renderError(__('No seats available for this organization.', 'wicket-acc'), '#group-member-messages', ['addMemberSubmitting' => false, 'addMemberSuccess' => false, 'membersLoading' => false]);
 
                 return;
             }
@@ -107,7 +107,7 @@ if (is_wp_error($result)) {
         'error' => $result->get_error_message(),
     ]));
     status_header(200);
-    OrgManagement\Helpers\DatastarSSE::renderError($result->get_error_message(), '#group-member-messages', ['membersLoading' => false]);
+    OrgManagement\Helpers\DatastarSSE::renderError($result->get_error_message(), '#group-member-messages', ['addMemberSubmitting' => false, 'addMemberSuccess' => false, 'membersLoading' => false]);
 
     return;
 }
@@ -123,6 +123,8 @@ $success_message = sprintf(
 
 status_header(200);
 OrgManagement\Helpers\DatastarSSE::renderSuccess($success_message, '#group-member-messages', [
+    'addMemberSubmitting' => false,
+    'addMemberSuccess' => true,
     'membersLoading' => false,
 ]);
 

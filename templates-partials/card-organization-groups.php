@@ -11,12 +11,17 @@
         $title_params['group_uuid'] = $primary_group_uuid;
     }
     $title_url = !empty($title_params) ? add_query_arg($title_params, $title_url_base) : $title_url_base;
+    $can_open_org = $can_edit_org || $is_membership_manager;
     ?>
     <h2 class="wt_text-2xl wt_mb-3">
-        <a href="<?php echo esc_url($title_url); ?>"
-            class="wt_text-content wt_hover_text-primary-600 wt_focus_outline-hidden wt_focus_ring-2 wt_focus_ring-primary-500 wt_focus_ring-offset-2 wt_decoration-none">
-            <?php echo esc_html($org_name); ?>
-        </a>
+        <?php if ($can_open_org): ?>
+            <a href="<?php echo esc_url($title_url); ?>"
+                class="wt_text-content wt_hover_text-primary-600 wt_focus_outline-hidden wt_focus_ring-2 wt_focus_ring-primary-500 wt_focus_ring-offset-2 wt_decoration-none">
+                <?php echo esc_html($org_name); ?>
+            </a>
+        <?php else: ?>
+            <span class="wt_text-content"><?php echo esc_html($org_name); ?></span>
+        <?php endif; ?>
     </h2>
     <div class="wt_flex wt_flex-col wt_gap-3">
         <?php foreach ($membership_entries as $entry_index => $membership_entry): ?>
@@ -24,9 +29,6 @@
             $entry_membership_uuid = (string) ($membership_entry['membership_uuid'] ?? '');
             $entry_membership_name = (string) ($membership_entry['membership_name'] ?? '');
             $entry_is_active = (bool) ($membership_entry['is_active'] ?? false);
-            if ($roster_mode !== 'membership_cycle') {
-                $entry_is_active = $has_active_membership;
-            }
             ?>
             <div class="wt_flex wt_flex-col wt_gap-2<?php echo $entry_index > 0 ? ' wt_pt-4 wt_mt-1 wt_border-t wt_border-color' : ''; ?>">
                 <div class="wt_flex wt_items-center wt_text-content">

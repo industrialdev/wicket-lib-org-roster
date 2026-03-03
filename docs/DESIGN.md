@@ -20,7 +20,7 @@ Controllers in `src/Controllers/` extend a base `ApiController`.
 The UI avoids full-page reloads by using Datastar signals and SSE.
 - **Signals**: Used for UI state (e.g., `show_modal`, `search_query`).
 - **Fragment Patching**: The `DatastarSSE` helper patches specific DOM elements using `Inner` or `Outer` patch modes.
-- **Script Execution**: The server can trigger client-side scripts (e.g., a 5-second countdown to reload) via the SSE stream.
+- **Script Execution**: Server-triggered scripts are used sparingly; modal flows now default to signal-driven completion states (no forced full-page reload countdown).
 
 ### 3.2 Template Structure
 - **Templates**: `templates/` contains top-level wrappers injected into the WordPress content area.

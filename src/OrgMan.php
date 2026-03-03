@@ -127,6 +127,7 @@ final class OrgMan
         add_action('rest_api_init', [$this, 'register_api_routes']);
         add_filter('the_content', [$this, 'inject_orgman_content']);
         add_filter('the_content', [$this, 'cleanup_orgman_autop_artifacts'], 9999);
+        add_filter('body_class', [$this, 'add_orgman_body_class']);
         add_action('wp_enqueue_scripts', [$this, 'enqueue_assets']);
 
         // Initialize helpers
@@ -778,6 +779,26 @@ final class OrgMan
             static function ($matches) {
                 $segment = (string) ($matches[1] ?? '');
 
+                // If wpautop touched script/style blocks, strip injected <p>/<br> from inside them.
+                $segment = preg_replace_callback(
+                    '/<(script|style)\b[^>]*>.*?<\/\1>/is',
+                    static function ($block_match) {
+                        $block = (string) ($block_match[0] ?? '');
+                        $block = preg_replace('/<\/?p\b[^>]*>/i', '', $block);
+                        $block = preg_replace('/<br\s*\/?>\s*/i', '', (string) $block);
+
+                        return (string) $block;
+                    },
+                    $segment
+                );
+
+                // Unwrap script/style tags that were wrapped by paragraph tags.
+                $segment = preg_replace(
+                    '/<p>\s*(<(?:script|style)\b[^>]*>.*?<\/(?:script|style)>)\s*<\/p>/is',
+                    '$1',
+                    (string) $segment
+                );
+
                 // Remove empty paragraphs and auto-inserted line breaks in injected component markup.
                 $segment = preg_replace('/<p>\s*<\/p>/i', '', $segment);
                 $segment = preg_replace('/<br\s*\/?>\s*/i', '', (string) $segment);
@@ -810,10 +831,37 @@ final class OrgMan
         $datastar_error_version = file_exists($datastar_error_path) ? filemtime($datastar_error_path) : '1.0.0';
         wp_enqueue_script('orgman-datastar-error-handler', $base_uri . 'public/js/datastar-error-handler.js', [], $datastar_error_version, false);
 
+        $notifications_js_path = $base_path . '/public/js/orgman-notifications.js';
+        $notifications_js_version = file_exists($notifications_js_path) ? filemtime($notifications_js_path) : '1.0.0';
+        wp_enqueue_script('orgman-notifications', $base_uri . 'public/js/orgman-notifications.js', [], $notifications_js_version, true);
+
+        $content_behaviors_js_path = $base_path . '/public/js/orgman-content-behaviors.js';
+        $content_behaviors_js_version = file_exists($content_behaviors_js_path) ? filemtime($content_behaviors_js_path) : '1.0.0';
+        wp_enqueue_script('orgman-content-behaviors', $base_uri . 'public/js/orgman-content-behaviors.js', [], $content_behaviors_js_version, true);
+
         // Load Datastar from CDN as module script
         $datastar_version = '1.0.0-RC.7';
         $datastar_src = 'https://cdn.jsdelivr.net/gh/starfederation/datastar@' . $datastar_version . '/bundles/datastar.js';
         wp_enqueue_script_module('wicket-datastar', $datastar_src, [], $datastar_version);
+    }
+
+    /**
+     * Add a body class for OrgMan-managed my-account pages.
+     *
+     * @param array $classes
+     * @return array
+     */
+    public function add_orgman_body_class($classes)
+    {
+        if (!is_array($classes)) {
+            $classes = [];
+        }
+
+        if ($this->is_orgman_screen()) {
+            $classes[] = 'wicket-orgman-screen';
+        }
+
+        return array_values(array_unique($classes));
     }
 
     /**

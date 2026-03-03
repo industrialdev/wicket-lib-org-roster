@@ -436,11 +436,6 @@ if (function_exists('wicket_get_current_person_memberships')) {
                         if ($membership['type'] === 'memberships' && $membership['id'] === $membership_id) {
                             $membership_name = $membership['attributes']['name'] ?? $membership['attributes']['name_en'] ?? 'Active Membership';
 
-                            // Add "(Inactive)" suffix if membership is not active
-                            if (!$is_active) {
-                                $membership_name .= ' (Inactive)';
-                            }
-
                             if ($roster_mode === 'membership_cycle') {
                                 if (!isset($membership_tiers[$org_id]) || !is_array($membership_tiers[$org_id])) {
                                     $membership_tiers[$org_id] = [];
@@ -688,12 +683,17 @@ foreach ($organizations_page as $org) :
         }
     }
     if (empty($membership_entries)) {
+        $membership_is_active = (bool) (
+            $membership_data['data']['attributes']['active']
+            ?? $membership_data['data']['attributes']['in_grace']
+            ?? false
+        );
         $membership_entries[] = [
             'membership_uuid' => (string) $membership_uuid,
             'membership_name' => (string) $membership_label,
             'is_active' => $roster_mode === 'groups'
                 ? true
-                : \OrgManagement\Helpers\PermissionHelper::has_active_membership($org_uuid_for_scope),
+                : $membership_is_active,
         ];
     }
 

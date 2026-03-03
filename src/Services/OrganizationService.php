@@ -27,6 +27,35 @@ class OrganizationService
     }
 
     /**
+     * Resolve organization display name from available attributes.
+     *
+     * @param array $attributes
+     * @return string
+     */
+    private function resolve_org_name_from_attributes(array $attributes): string
+    {
+        $candidates = [
+            $attributes['legal_name'] ?? null,
+            $attributes['legal_name_en'] ?? null,
+            $attributes['legal_name_fr'] ?? null,
+            $attributes['name'] ?? null,
+            $attributes['name_en'] ?? null,
+            $attributes['name_fr'] ?? null,
+            $attributes['alternate_name'] ?? null,
+            $attributes['alternate_name_en'] ?? null,
+            $attributes['alternate_name_fr'] ?? null,
+        ];
+
+        foreach ($candidates as $candidate) {
+            if (is_string($candidate) && trim($candidate) !== '') {
+                return trim($candidate);
+            }
+        }
+
+        return 'Unknown Organization';
+    }
+
+    /**
      * Helper method to get cached data if cache is enabled.
      *
      * @param string $cache_key The cache key.
@@ -162,13 +191,7 @@ class OrganizationService
                         continue;
                     }
                     $org_attrs = (array) ($included['attributes'] ?? []);
-                    $org_name_by_id[$org_id] = (string) (
-                        $org_attrs['legal_name']
-                        ?? $org_attrs['legal_name_en']
-                        ?? $org_attrs['alternate_name']
-                        ?? $org_attrs['alternate_name_en']
-                        ?? 'Unknown Organization'
-                    );
+                    $org_name_by_id[$org_id] = $this->resolve_org_name_from_attributes($org_attrs);
                 }
 
                 foreach ($response_data as $role) {
@@ -297,10 +320,7 @@ class OrganizationService
                             // Find the full organization data in included items
                             foreach ($membership_response['included'] as $org_item) {
                                 if ($org_item['type'] === 'organizations' && $org_item['id'] === $org_id) {
-                                    $org_name = $org_item['attributes']['legal_name_en']
-                                              ?? $org_item['attributes']['legal_name_fr']
-                                              ?? $org_item['attributes']['alternate_name_en']
-                                              ?? 'Unknown Organization';
+                                    $org_name = $this->resolve_org_name_from_attributes((array) ($org_item['attributes'] ?? []));
 
                                     $organizations[] = [
                                         'id' => $org_id,
@@ -363,6 +383,15 @@ class OrganizationService
                 $organizations_by_id[$org_id]['user_role'] = implode(', ', array_map(static function (string $role): string {
                     return ucwords(str_replace('_', ' ', $role));
                 }, $roles));
+            }
+            if ($organizations_by_id[$org_id]['org_name'] === 'Unknown Organization' && function_exists('wicket_get_organization')) {
+                $org_detail = wicket_get_organization($org_id);
+                $org_attrs = is_array($org_detail['attributes'] ?? null)
+                    ? $org_detail['attributes']
+                    : (is_array($org_detail['data']['attributes'] ?? null) ? $org_detail['data']['attributes'] : []);
+                if (!empty($org_attrs)) {
+                    $organizations_by_id[$org_id]['org_name'] = $this->resolve_org_name_from_attributes($org_attrs);
+                }
             }
         }
 

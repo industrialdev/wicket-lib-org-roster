@@ -1422,24 +1422,75 @@ class MemberService
 
         try {
             $client = wicket_api_client();
+            $logger = function_exists('wc_get_logger') ? wc_get_logger() : null;
+            $log_context = ['source' => 'wicket-orgman', 'action' => 'update_member_roles'];
 
-            // Get current person memberships
+            // Get current person memberships (paginate to avoid selecting stale/inactive records on partial pages)
             $memberships_endpoint = '/organization_memberships/' . rawurlencode($membershipUuid) . '/person_memberships';
-            $response = $client->get($memberships_endpoint . '?page[number]=1&page[size]=100&include=person');
+            $page = 1;
+            $totalPages = 1;
+            $person_memberships = [];
 
-            if (empty($response['data']) || !is_array($response['data'])) {
+            do {
+                $response = $client->get($memberships_endpoint . '?' . http_build_query([
+                    'page[number]' => $page,
+                    'page[size]' => 100,
+                    'include' => 'person',
+                ]));
+
+                $rows = is_array($response['data'] ?? null) ? $response['data'] : [];
+                foreach ($rows as $membership) {
+                    $currentPersonId = $membership['relationships']['person']['data']['id'] ?? null;
+                    if ($currentPersonId === $personUuid) {
+                        $person_memberships[] = $membership;
+                    }
+                }
+
+                $pageMeta = $response['meta']['page'] ?? [];
+                $totalPages = max(1, (int) ($pageMeta['total_pages'] ?? 1));
+                $page++;
+            } while ($page <= $totalPages);
+
+            if (empty($person_memberships)) {
                 return new \WP_Error('membership_not_found', 'Person membership not found in this organization.');
             }
 
-            // Find the person's membership
-            $person_membership = null;
-            foreach ($response['data'] as $membership) {
-                $currentPersonId = $membership['relationships']['person']['data']['id'] ?? null;
-                if ($currentPersonId === $personUuid) {
-                    $person_membership = $membership;
-                    break;
-                }
+            if ($logger) {
+                $logger->debug('[OrgMan] update_member_roles candidate person_memberships', $log_context + [
+                    'org_uuid' => $orgUuid,
+                    'membership_uuid' => $membershipUuid,
+                    'person_uuid' => $personUuid,
+                    'candidate_count' => count($person_memberships),
+                    'candidates' => array_map(static function (array $membership): array {
+                        return [
+                            'id' => (string) ($membership['id'] ?? ''),
+                            'active' => $membership['attributes']['active'] ?? null,
+                            'in_grace' => $membership['attributes']['in_grace'] ?? null,
+                            'starts_at' => $membership['attributes']['starts_at'] ?? null,
+                            'ends_at' => $membership['attributes']['ends_at'] ?? null,
+                        ];
+                    }, $person_memberships),
+                ]);
             }
+
+            // Prefer active/in_grace record when duplicates exist.
+            usort($person_memberships, static function (array $a, array $b): int {
+                $aActive = !empty($a['attributes']['active']) || !empty($a['attributes']['in_grace']);
+                $bActive = !empty($b['attributes']['active']) || !empty($b['attributes']['in_grace']);
+                if ($aActive !== $bActive) {
+                    return $aActive ? -1 : 1;
+                }
+
+                $aEndsAt = strtotime((string) ($a['attributes']['ends_at'] ?? '')) ?: PHP_INT_MAX;
+                $bEndsAt = strtotime((string) ($b['attributes']['ends_at'] ?? '')) ?: PHP_INT_MAX;
+                if ($aEndsAt === $bEndsAt) {
+                    return 0;
+                }
+
+                return ($aEndsAt > $bEndsAt) ? -1 : 1;
+            });
+
+            $person_membership = $person_memberships[0];
 
             if (!$person_membership) {
                 return new \WP_Error('membership_not_found', 'Person membership not found in this organization.');
@@ -1447,7 +1498,56 @@ class MemberService
 
             $require_active_membership = (bool) ($this->config['member_edit']['require_active_membership_for_role_updates'] ?? false);
             if ($require_active_membership) {
-                $is_active_membership = (bool) ($person_membership['attributes']['active'] ?? false);
+                $has_active_row = false;
+                foreach ($person_memberships as $membership) {
+                    if (!empty($membership['attributes']['active']) || !empty($membership['attributes']['in_grace'])) {
+                        $has_active_row = true;
+                        break;
+                    }
+                }
+
+                $is_active_membership = $has_active_row;
+                if (!$is_active_membership) {
+                    try {
+                        // Fallback: ask API for "active now" rows to avoid stale/incomplete attributes on list endpoints.
+                        $query_response = $client->post('/person_memberships/query', [
+                            'json' => [
+                                'filter' => [
+                                    'organization_membership_uuid_in' => [$membershipUuid],
+                                    'person_uuid_in' => [$personUuid],
+                                    'active_at' => 'now',
+                                ],
+                                'page' => [
+                                    'number' => 1,
+                                    'size' => 1,
+                                ],
+                            ],
+                        ]);
+
+                        $query_rows = is_array($query_response['data'] ?? null) ? $query_response['data'] : [];
+                        $is_active_membership = !empty($query_rows);
+                    } catch (\Throwable $active_lookup_exception) {
+                        if ($logger) {
+                            $logger->warning('[OrgMan] update_member_roles active_at fallback query failed', $log_context + [
+                                'org_uuid' => $orgUuid,
+                                'membership_uuid' => $membershipUuid,
+                                'person_uuid' => $personUuid,
+                                'error' => $active_lookup_exception->getMessage(),
+                            ]);
+                        }
+                    }
+                }
+
+                if ($logger) {
+                    $logger->debug('[OrgMan] update_member_roles active-membership guard result', $log_context + [
+                        'org_uuid' => $orgUuid,
+                        'membership_uuid' => $membershipUuid,
+                        'person_uuid' => $personUuid,
+                        'has_active_row' => $has_active_row,
+                        'is_active_membership' => $is_active_membership,
+                    ]);
+                }
+
                 if (!$is_active_membership) {
                     return new \WP_Error(
                         'inactive_member_role_update_forbidden',

@@ -21,6 +21,10 @@ final class OrgManConfig
             'roster' => [
                 'strategy' => 'direct',
             ],
+            'feature_flags' => [
+                // Keep disabled by default for backwards compatibility across sites.
+                'membership_resolution_prefer_current_cycle' => false,
+            ],
             'roles' => [
                 'owner' => 'membership_owner',
                 'manager' => 'membership_manager',
@@ -87,10 +91,7 @@ final class OrgManConfig
                 ],
             ],
             'member_addition' => [
-                'auto_assign_roles' => [
-                    'supplemental_member',
-                    'CCHL Member Community',
-                ],
+                'auto_assign_roles' => [],
                 'base_member_role' => 'member',
                 'auto_opt_in_communications' => [
                     'enabled' => true,

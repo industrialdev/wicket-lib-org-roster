@@ -32,6 +32,18 @@ To avoid conflicts with WordPress themes and other plugins, all scoped utility-s
 - **Primary stylesheet**: `public/css/modern-orgman-static.css`
 - **Build tooling**: None required at runtime (no Tailwind/NPM pipeline)
 
+### 2.3 Standard Loading UI
+- Use shared loader utilities from `modern-orgman-static.css` for in-flight submit states:
+  - `wt_loader`
+  - `wt_loader_button`
+- Loader colors must come from library palette variables, not hardcoded values:
+  - `--wicket-orgman-loader-track` (defaults to `--wicket-orgman-text-button-label-reversed`)
+  - `--wicket-orgman-loader-accent` (defaults to `--wicket-orgman-bg-interactive-reversed`)
+- In submit buttons (for example, Add Member / Save Permissions):
+  - hide label while submitting
+  - show `wt_loader wt_loader_button`
+  - disable both action and cancel controls while request is in flight
+
 ## 3. The "Unified View"
 The Unified View is a search-centric interface for managing rosters.
 - **Loading States**: Use the `searching` signal to show/hide loading indicators during API calls.

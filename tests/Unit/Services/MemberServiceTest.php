@@ -226,6 +226,242 @@ it('blocks role updates for inactive members when activity guard is enabled', fu
     unset($GLOBALS['__orgroster_api_client']);
 });
 
+it('allows role updates when an active membership row exists for the person in the same org membership', function (): void {
+    $GLOBALS['__orgroster_api_client'] = new class {
+        public function get(string $endpoint)
+        {
+            if (str_contains($endpoint, '/organization_memberships/')) {
+                return [
+                    'data' => [
+                        [
+                            'id' => 'pm-inactive',
+                            'type' => 'person_memberships',
+                            'attributes' => [
+                                'active' => false,
+                            ],
+                            'relationships' => [
+                                'person' => [
+                                    'data' => [
+                                        'id' => 'person-1',
+                                    ],
+                                ],
+                            ],
+                        ],
+                        [
+                            'id' => 'pm-active',
+                            'type' => 'person_memberships',
+                            'attributes' => [
+                                'active' => true,
+                            ],
+                            'relationships' => [
+                                'person' => [
+                                    'data' => [
+                                        'id' => 'person-1',
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ];
+            }
+
+            if (str_contains($endpoint, '/people/person-1')) {
+                return [
+                    'data' => [
+                        'attributes' => [
+                            'first_name' => 'Paul',
+                            'last_name' => 'Tester',
+                        ],
+                    ],
+                    'included' => [],
+                ];
+            }
+
+            return ['data' => []];
+        }
+
+        public function post(string $endpoint, array $options = [])
+        {
+            return ['data' => ['id' => 'role-assignment']];
+        }
+
+        public function delete(string $endpoint, array $options = [])
+        {
+            return ['data' => []];
+        }
+    };
+
+    $service = new MemberService(new ConfigService());
+    (function (): void {
+        $this->config['member_edit']['require_active_membership_for_role_updates'] = true;
+    })->call($service);
+
+    $result = $service->update_member_roles('person-1', 'org-1', 'mem-1', ['org_editor']);
+
+    expect(is_wp_error($result))->toBeFalse();
+    expect($result['success'] ?? null)->toBeTrue();
+
+    unset($GLOBALS['__orgroster_api_client']);
+});
+
+it('allows role updates when an in-grace membership row exists for the person in the same org membership', function (): void {
+    $GLOBALS['__orgroster_api_client'] = new class {
+        public function get(string $endpoint)
+        {
+            if (str_contains($endpoint, '/organization_memberships/')) {
+                return [
+                    'data' => [
+                        [
+                            'id' => 'pm-inactive',
+                            'type' => 'person_memberships',
+                            'attributes' => [
+                                'active' => false,
+                            ],
+                            'relationships' => [
+                                'person' => [
+                                    'data' => [
+                                        'id' => 'person-1',
+                                    ],
+                                ],
+                            ],
+                        ],
+                        [
+                            'id' => 'pm-in-grace',
+                            'type' => 'person_memberships',
+                            'attributes' => [
+                                'active' => false,
+                                'in_grace' => true,
+                            ],
+                            'relationships' => [
+                                'person' => [
+                                    'data' => [
+                                        'id' => 'person-1',
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ];
+            }
+
+            if (str_contains($endpoint, '/people/person-1')) {
+                return [
+                    'data' => [
+                        'attributes' => [
+                            'first_name' => 'Paul',
+                            'last_name' => 'Tester',
+                        ],
+                    ],
+                    'included' => [],
+                ];
+            }
+
+            return ['data' => []];
+        }
+
+        public function post(string $endpoint, array $options = [])
+        {
+            return ['data' => ['id' => 'role-assignment']];
+        }
+
+        public function delete(string $endpoint, array $options = [])
+        {
+            return ['data' => []];
+        }
+    };
+
+    $service = new MemberService(new ConfigService());
+    (function (): void {
+        $this->config['member_edit']['require_active_membership_for_role_updates'] = true;
+    })->call($service);
+
+    $result = $service->update_member_roles('person-1', 'org-1', 'mem-1', ['org_editor']);
+
+    expect(is_wp_error($result))->toBeFalse();
+    expect($result['success'] ?? null)->toBeTrue();
+
+    unset($GLOBALS['__orgroster_api_client']);
+});
+
+it('allows role updates when active_at query returns current active row despite inactive attributes in listed memberships', function (): void {
+    $GLOBALS['__orgroster_api_client'] = new class {
+        public function get(string $endpoint)
+        {
+            if (str_contains($endpoint, '/organization_memberships/')) {
+                return [
+                    'data' => [
+                        [
+                            'id' => 'pm-inactive-attr',
+                            'type' => 'person_memberships',
+                            'attributes' => [
+                                'active' => false,
+                                'in_grace' => false,
+                            ],
+                            'relationships' => [
+                                'person' => [
+                                    'data' => [
+                                        'id' => 'person-1',
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ];
+            }
+
+            if (str_contains($endpoint, '/people/person-1')) {
+                return [
+                    'data' => [
+                        'attributes' => [
+                            'first_name' => 'Paul',
+                            'last_name' => 'Tester',
+                        ],
+                    ],
+                    'included' => [],
+                ];
+            }
+
+            return ['data' => []];
+        }
+
+        public function post(string $endpoint, array $options = [])
+        {
+            if (str_contains($endpoint, '/person_memberships/query')) {
+                return [
+                    'data' => [
+                        [
+                            'id' => 'pm-active-now',
+                            'type' => 'person_memberships',
+                            'attributes' => [
+                                'active' => true,
+                            ],
+                        ],
+                    ],
+                ];
+            }
+
+            return ['data' => ['id' => 'role-assignment']];
+        }
+
+        public function delete(string $endpoint, array $options = [])
+        {
+            return ['data' => []];
+        }
+    };
+
+    $service = new MemberService(new ConfigService());
+    (function (): void {
+        $this->config['member_edit']['require_active_membership_for_role_updates'] = true;
+    })->call($service);
+
+    $result = $service->update_member_roles('person-1', 'org-1', 'mem-1', ['org_editor']);
+
+    expect(is_wp_error($result))->toBeFalse();
+    expect($result['success'] ?? null)->toBeTrue();
+
+    unset($GLOBALS['__orgroster_api_client']);
+});
+
 it('includes inactive relationships on member cards by default', function (): void {
     $service = new class(new ConfigService()) extends MemberService {
         public function getMembershipMembers(string $membershipUuid, array $args = []): ?array

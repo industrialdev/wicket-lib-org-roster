@@ -38,6 +38,7 @@
 - Use early returns and keep methods focused.
 - **Naming**: Classes in `src/` use PascalCase; methods and variables use snake_case (standard WP style) or camelCase depending on the context (Services often use camelCase for methods, while helpers use snake_case). *Strictly follow existing patterns in the file you are editing.*
 - **Datastar Signals**: Use descriptive signal names in templates (e.g., `signals.show_modal`).
+- **Utility classes (`wt_` prefixed)**: Do not assume Tailwind-like utilities exist. Any new `wt_` utility class added in templates must be declared in `public/css/modern-orgman-static.css` in the utility section (or reuse an existing declared utility).
 
 ## Testing Guidelines
 - Framework: **Pest** with **Brain Monkey** and **Mockery**.

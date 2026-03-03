@@ -8,6 +8,7 @@
 
 use OrgManagement\Services\ConfigService;
 use OrgManagement\Services\MemberService;
+use OrgManagement\Services\MembershipService;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -28,6 +29,7 @@ if ('POST' === strtoupper($request_method)) {
     $org_uuid = isset($_POST['org_uuid']) ? sanitize_text_field(wp_unslash($_POST['org_uuid'])) : '';
     $membership_uuid = isset($_POST['membership_uuid']) ? sanitize_text_field(wp_unslash($_POST['membership_uuid'])) : '';
     $person_uuid = isset($_POST['person_uuid']) ? sanitize_text_field(wp_unslash($_POST['person_uuid'])) : '';
+    $person_name = isset($_POST['person_name']) ? sanitize_text_field(wp_unslash($_POST['person_name'])) : '';
 
     if (empty($org_uuid) || empty($membership_uuid) || empty($person_uuid)) {
         status_header(200);
@@ -50,6 +52,9 @@ if ('POST' === strtoupper($request_method)) {
     try {
         $config_service = new ConfigService();
         $member_service = new MemberService($config_service);
+        $membership_service = new MembershipService();
+        $logger = function_exists('wc_get_logger') ? wc_get_logger() : null;
+        $log_context = ['source' => 'wicket-orgman', 'action' => 'update-permissions'];
 
         // First update relationship type if provided and enabled
         $config = OrgManagement\Config\OrgManConfig::get();
@@ -95,10 +100,33 @@ if ('POST' === strtoupper($request_method)) {
             }
         }
 
+        // Resolve current org membership UUID to avoid stale posted membership UUID on long-lived pages.
+        $resolved_membership_uuid = (string) $membership_service->getMembershipForOrganization($org_uuid);
+        $effective_membership_uuid = $resolved_membership_uuid !== '' ? $resolved_membership_uuid : $membership_uuid;
+
+        if ($logger) {
+            $logger->debug('[OrgMan] update-permissions membership UUID resolution', $log_context + [
+                'org_uuid' => $org_uuid,
+                'person_uuid' => $person_uuid,
+                'posted_membership_uuid' => $membership_uuid,
+                'resolved_membership_uuid' => $resolved_membership_uuid,
+                'effective_membership_uuid' => $effective_membership_uuid,
+            ]);
+        }
+
         // Then update roles
-        $result = $member_service->update_member_roles($person_uuid, $org_uuid, $membership_uuid, $roles);
+        $result = $member_service->update_member_roles($person_uuid, $org_uuid, $effective_membership_uuid, $roles);
 
         if (is_wp_error($result)) {
+            if ($logger) {
+                $logger->warning('[OrgMan] update-permissions role update failed', $log_context + [
+                    'org_uuid' => $org_uuid,
+                    'person_uuid' => $person_uuid,
+                    'membership_uuid' => $effective_membership_uuid,
+                    'error_code' => $result->get_error_code(),
+                    'error_message' => $result->get_error_message(),
+                ]);
+            }
             status_header(200);
             OrgManagement\Helpers\DatastarSSE::renderError($result->get_error_message(), '#update-permissions-messages', ['editPermissionsSubmitting' => false]);
 
@@ -107,6 +135,12 @@ if ('POST' === strtoupper($request_method)) {
 
         // Success message
         $full_name = trim(($result['first_name'] ?? '') . ' ' . ($result['last_name'] ?? ''));
+        if ($full_name === '') {
+            $full_name = trim($person_name);
+        }
+        if ($full_name === '') {
+            $full_name = (string) __('this member', 'wicket-acc');
+        }
         $success_message = sprintf(
             esc_html__('Successfully updated permissions for %1$s.', 'wicket-acc'),
             '<strong>' . esc_html($full_name) . '</strong>'

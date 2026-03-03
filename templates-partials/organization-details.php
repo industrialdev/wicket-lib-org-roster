@@ -176,7 +176,7 @@ if ($membership_data) {
 ?>
 <div id="organization-details-container" class="org-details wt_flex wt_flex-col wt_gap-3">
     <div class="org-details__summary-card wt_rounded-card-accent wt_p-4 wt_bg-summary-card">
-        <h2 class="org-details__title wt_text-heading-sm wt_mb-2 wt_text-heading-color wt_font-extrabold"><?php echo esc_html($org_name); ?></h2>
+        <h2 class="org-details__title wt_text-lg wt_mb-2 wt_text-heading-color wt_font-bold"><?php echo esc_html($org_name); ?></h2>
         <?php if ($group_name): ?>
             <p class="org-details__summary-item wt_leading-normal wt_text-content mb-1">
                 <?php echo esc_html($group_name); ?>
@@ -185,10 +185,10 @@ if ($membership_data) {
         <div class="org-details__summary-list wt_flex wt_flex-col wt_gap-0">
             <p class="org-details__summary-heading wt_font-bold wt_mb-1"><?php esc_html_e('Summary', 'wicket-acc'); ?></p>
             <?php if ($membership_name): ?>
-                <p class="org-details__summary-item wt_leading-normal wt_text-content mb-1"><?php echo esc_html__('Membership Tier-', 'wicket-acc') . ' ' . esc_html($membership_name); ?></p>
+                <p class="org-details__summary-item wt_leading-normal wt_text-content mb-1"><?php echo esc_html__('Membership Tier:', 'wicket-acc') . ' ' . esc_html($membership_name); ?></p>
             <?php endif; ?>
-            <p class="org-details__summary-item wt_leading-normal wt_text-content mb-1"><?php echo esc_html__('Membership Owner-', 'wicket-acc') . ' ' . esc_html($owner_name !== '' ? $owner_name : '—'); ?></p>
-            <p class="org-details__summary-item wt_leading-normal wt_text-content mb-1"><?php echo esc_html__('Renewal Date-', 'wicket-acc') . ' ' . esc_html($renewal_date !== '' ? $renewal_date : '—'); ?></p>
+            <p class="org-details__summary-item wt_leading-normal wt_text-content mb-1"><?php echo esc_html__('Membership Owner:', 'wicket-acc') . ' ' . esc_html($owner_name !== '' ? $owner_name : '—'); ?></p>
+            <p class="org-details__summary-item wt_leading-normal wt_text-content mb-1"><?php echo esc_html__('Renewal Date:', 'wicket-acc') . ' ' . esc_html($renewal_date !== '' ? $renewal_date : __('Not set.', 'wicket-acc')); ?></p>
             <?php if ($seats_label): ?>
                 <p class="org-details__summary-item wt_leading-normal wt_text-content mb-1"><?php echo esc_html($seats_label); ?></p>
             <?php endif; ?>

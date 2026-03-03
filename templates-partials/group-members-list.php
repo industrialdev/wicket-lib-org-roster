@@ -87,7 +87,7 @@ $refresh_action = "@get('" . $build_url(1) . "') >> select('#" . $members_list_t
 ?>
 <div
     id="<?php echo esc_attr($members_list_target); ?>"
-    class="wt_mt-6 wt_flex wt_flex-col wt_gap-4 wt_relative"
+    class="wt_mt-6 wt_flex wt_flex-col wt_gap-1 wt_relative"
     data-page="<?php echo esc_attr((string) $page); ?>"
     data-attr:aria-busy="$membersLoading">
     <div id="group-member-messages" class="wt_mb-3"></div>
@@ -197,50 +197,52 @@ $refresh_action = "@get('" . $build_url(1) . "') >> select('#" . $members_list_t
                 }
 ?>
         </div>
-        <div class="members-pagination__controls wt_w-full wt_flex wt_items-center wt_gap-2 wt_justify-end wt_self-end">
-            <?php $prev_disabled = $page <= 1; ?>
-            <button type="button"
-                class="members-pagination__btn members-pagination__btn--prev button button--secondary wt_px-3 wt_py-2 wt_text-sm component-button"
-                <?php if ($prev_disabled) : ?>disabled<?php endif; ?>
-                <?php if (!$prev_disabled) : ?>data-on:click="<?php echo esc_attr($build_action($page - 1)); ?>" <?php endif; ?>
-                data-on:success="<?php echo esc_attr(wp_sprintf("select('#%s') | set(html)", $members_list_target)); ?>"
-                data-indicator:members-loading
-                data-attr:disabled="$membersLoading">
-                <?php esc_html_e('Previous', 'wicket-acc'); ?>
-            </button>
-            <div class="members-pagination__pages wt_flex wt_items-center wt_gap-1">
-                <?php for ($i = 1; $i <= $total_pages; $i++) :
-                    $is_current = ($i === $page);
-                    ?>
-                    <button type="button"
-                        class="members-pagination__btn members-pagination__btn--page button wt_px-3 wt_py-2 wt_text-sm <?php echo $is_current ? 'button--primary' : 'button--secondary'; ?> component-button"
-                        <?php if ($is_current) : ?>disabled<?php endif; ?>
-                        <?php if (!$is_current) : ?>data-on:click="<?php echo esc_attr($build_action($i)); ?>" <?php endif; ?>
-                        data-on:success="<?php echo esc_attr(wp_sprintf("select('#%s') | set(html)", $members_list_target)); ?>"
-                        data-indicator:members-loading
-                        data-attr:disabled="$membersLoading">
-                        <?php echo esc_html((string) $i); ?>
-                    </button>
-                <?php endfor; ?>
+        <?php if ($total_pages > 1) : ?>
+            <div class="members-pagination__controls wt_w-full wt_flex wt_items-center wt_gap-2 wt_justify-end wt_self-end">
+                <?php $prev_disabled = $page <= 1; ?>
+                <button type="button"
+                    class="members-pagination__btn members-pagination__btn--prev button button--secondary wt_px-3 wt_py-2 wt_text-sm component-button"
+                    <?php if ($prev_disabled) : ?>disabled<?php endif; ?>
+                    <?php if (!$prev_disabled) : ?>data-on:click="<?php echo esc_attr($build_action($page - 1)); ?>" <?php endif; ?>
+                    data-on:success="<?php echo esc_attr(wp_sprintf("select('#%s') | set(html)", $members_list_target)); ?>"
+                    data-indicator:members-loading
+                    data-attr:disabled="$membersLoading">
+                    <?php esc_html_e('Previous', 'wicket-acc'); ?>
+                </button>
+                <div class="members-pagination__pages wt_flex wt_items-center wt_gap-1">
+                    <?php for ($i = 1; $i <= $total_pages; $i++) :
+                        $is_current = ($i === $page);
+                        ?>
+                        <button type="button"
+                            class="members-pagination__btn members-pagination__btn--page button wt_px-3 wt_py-2 wt_text-sm <?php echo $is_current ? 'button--primary' : 'button--secondary'; ?> component-button"
+                            <?php if ($is_current) : ?>disabled<?php endif; ?>
+                            <?php if (!$is_current) : ?>data-on:click="<?php echo esc_attr($build_action($i)); ?>" <?php endif; ?>
+                            data-on:success="<?php echo esc_attr(wp_sprintf("select('#%s') | set(html)", $members_list_target)); ?>"
+                            data-indicator:members-loading
+                            data-attr:disabled="$membersLoading">
+                            <?php echo esc_html((string) $i); ?>
+                        </button>
+                    <?php endfor; ?>
+                </div>
+                <?php $next_disabled = $page >= $total_pages; ?>
+                <button type="button"
+                    class="members-pagination__btn members-pagination__btn--next button button--secondary wt_px-3 wt_py-2 wt_text-sm component-button"
+                    <?php if ($next_disabled) : ?>disabled<?php endif; ?>
+                    <?php if (!$next_disabled) : ?>data-on:click="<?php echo esc_attr($build_action($page + 1)); ?>" <?php endif; ?>
+                    data-on:success="<?php echo esc_attr(wp_sprintf("select('#%s') | set(html)", $members_list_target)); ?>"
+                    data-indicator:members-loading
+                    data-attr:disabled="$membersLoading">
+                    <?php esc_html_e('Next', 'wicket-acc'); ?>
+                </button>
             </div>
-            <?php $next_disabled = $page >= $total_pages; ?>
-            <button type="button"
-                class="members-pagination__btn members-pagination__btn--next button button--secondary wt_px-3 wt_py-2 wt_text-sm component-button"
-                <?php if ($next_disabled) : ?>disabled<?php endif; ?>
-                <?php if (!$next_disabled) : ?>data-on:click="<?php echo esc_attr($build_action($page + 1)); ?>" <?php endif; ?>
-                data-on:success="<?php echo esc_attr(wp_sprintf("select('#%s') | set(html)", $members_list_target)); ?>"
-                data-indicator:members-loading
-                data-attr:disabled="$membersLoading">
-                <?php esc_html_e('Next', 'wicket-acc'); ?>
-            </button>
-        </div>
+        <?php endif; ?>
     </nav>
 
     <div class="wt_mt-6">
         <?php if ($has_seats_available) : ?>
             <button type="button"
                 class="button button--primary add-member-button wt_w-full wt_py-2 component-button"
-                data-on:click="$addMemberModalOpen = true"><?php esc_html_e('Add Member', 'wicket-acc'); ?></button>
+                data-on:click="$addMemberSuccess = false; $addMemberSubmitting = false; (() => { const modal = document.getElementById('groupMembersAddModal'); if (!modal) return; const form = modal.querySelector('form'); if (form) form.reset(); })(); $addMemberModalOpen = true"><?php esc_html_e('Add Member', 'wicket-acc'); ?></button>
         <?php endif; ?>
         <?php if (!$has_seats_available) : ?>
             <div class="wt_mt-2 wt_p-3 wt_bg-yellow-50 wt_border wt_border-yellow-200 wt_rounded-md wt_text-yellow-800 wt_text-sm">

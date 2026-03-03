@@ -36,18 +36,41 @@ class ConnectionService
         try {
             $client = wicket_api_client();
             $endpoint = '/organization_memberships/' . rawurlencode($membershipUuid) . '/person_memberships';
-            $response = $client->get($endpoint . '?page[number]=1&page[size]=100&include=person');
+            $page = 1;
+            $totalPages = 1;
 
-            if (empty($response['data']) || !is_array($response['data'])) {
-                return false;
-            }
+            do {
+                $response = $client->get($endpoint . '?' . http_build_query([
+                    'page[number]' => $page,
+                    'page[size]' => 100,
+                    'include' => 'person',
+                ]));
 
-            foreach ($response['data'] as $member) {
-                $currentId = $member['relationships']['person']['data']['id'] ?? null;
-                if ($currentId === $personUuid) {
+                if (empty($response['data']) || !is_array($response['data'])) {
+                    return false;
+                }
+
+                foreach ($response['data'] as $member) {
+                    $currentId = $member['relationships']['person']['data']['id'] ?? null;
+                    if ($currentId !== $personUuid) {
+                        continue;
+                    }
+
+                    $isActive = (bool) ($member['attributes']['active'] ?? false);
+                    $inGrace = (bool) ($member['attributes']['in_grace'] ?? false);
+                    $endsAt = $member['attributes']['ends_at'] ?? null;
+                    if ($isActive || $inGrace || empty($endsAt)) {
+                        return true;
+                    }
+
+                    // Keep idempotency for legacy memberships even when not active.
                     return true;
                 }
-            }
+
+                $pageMeta = $response['meta']['page'] ?? [];
+                $totalPages = max(1, (int) ($pageMeta['total_pages'] ?? 1));
+                $page++;
+            } while ($page <= $totalPages);
         } catch (\Throwable $e) {
             return new WP_Error('membership_lookup_failed', $e->getMessage());
         }

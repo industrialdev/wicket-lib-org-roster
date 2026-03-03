@@ -19,23 +19,35 @@ if (!defined('ABSPATH') && !defined('WICKET_ORGROSTER_DOINGTESTS')) {
 class DatastarSSE
 {
     /**
-     * Render a success message with countdown timer using Datastar SSE.
+     * Render a success message using Datastar SSE.
      *
      * @param string $message        The success message to display.
      * @param string $targetSelector The CSS selector for the target element.
      * @param array  $signalsToSet   Associative array of signal names and values to set (optional).
-     * @param string $countdownId    The HTML element ID for the countdown timer (optional).
+     * @param int    $reloadSeconds  Optional countdown in seconds before reloading page (0 disables reload).
+     * @param string $countdownId    The HTML element ID for the countdown timer (used when reload is enabled).
      * @return void
      */
-    public static function renderSuccess(string $message, string $targetSelector, array $signalsToSet = [], string $countdownId = 'countdown'): void
-    {
+    public static function renderSuccess(
+        string $message,
+        string $targetSelector,
+        array $signalsToSet = [],
+        int $reloadSeconds = 0,
+        string $countdownId = 'countdown'
+    ): void {
         $html = sprintf(
-            '<div class="wt_bg-green-100 wt_border wt_border-green-400 wt_text-green-700 wt_px-4 wt_py-3 wt_rounded-sm wt_mb-4"><p><strong>%1$s</strong></p><p>%2$s</p><p class="wt_mt-2 wt_text-sm">%3$s <span id="%5$s">5</span> %4$s</p></div>',
+            '<div class="wt_bg-green-100 wt_border wt_border-green-400 wt_text-green-700 wt_px-4 wt_py-3 wt_rounded-sm wt_mb-4"><p><strong>%1$s</strong></p><p>%2$s</p>%3$s</div>',
             esc_html__('Success!', 'wicket-acc'),
             wp_kses_post($message),
-            esc_html__('This page will reload in', 'wicket-acc'),
-            esc_html__('seconds...', 'wicket-acc'),
-            esc_attr($countdownId)
+            $reloadSeconds > 0
+                ? sprintf(
+                    '<p class="wt_mt-2 wt_text-sm">%1$s <span id="%2$s">%3$d</span> %4$s</p>',
+                    esc_html__('This page will reload in', 'wicket-acc'),
+                    esc_attr($countdownId),
+                    (int) $reloadSeconds,
+                    esc_html__('seconds...', 'wicket-acc')
+                )
+                : ''
         );
 
         $generator = new ServerSentEventGenerator();
@@ -52,23 +64,24 @@ class DatastarSSE
             'mode' => ElementPatchMode::Inner,
         ]);
 
-        // Add countdown timer script
-        $countdown_script = "
-            let countdown = 5;
-            const countdownEl = document.getElementById('" . esc_js($countdownId) . "');
-            const timer = setInterval(() => {
-                countdown--;
-                if (countdownEl) {
-                    countdownEl.textContent = countdown;
-                }
-                if (countdown <= 0) {
-                    clearInterval(timer);
-                    window.location.reload();
-                }
-            }, 1000);
-        ";
+        if ($reloadSeconds > 0) {
+            $countdown_script = '
+                let countdown = ' . (int) $reloadSeconds . ";
+                const countdownEl = document.getElementById('" . esc_js($countdownId) . "');
+                const timer = setInterval(() => {
+                    countdown--;
+                    if (countdownEl) {
+                        countdownEl.textContent = countdown;
+                    }
+                    if (countdown <= 0) {
+                        clearInterval(timer);
+                        window.location.reload();
+                    }
+                }, 1000);
+            ";
 
-        $generator->executeScript($countdown_script);
+            $generator->executeScript($countdown_script);
+        }
     }
 
     /**

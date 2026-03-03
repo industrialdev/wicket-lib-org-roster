@@ -12,6 +12,6 @@ it('keeps organization summary owner and renewal fallback rendering logic in tem
     expect($template)->toContain("\$membership_data['data']['attributes']['ends_at'] ?? ''");
     expect($template)->toContain("\$membership_data['data']['attributes']['renewal_date'] ?? ''");
     expect($template)->toContain("\$membership_data['data']['attributes']['next_renewal_at'] ?? ''");
-    expect($template)->toContain("Membership Owner-', 'wicket-acc') . ' ' . esc_html(\$owner_name !== '' ? \$owner_name : '—')");
-    expect($template)->toContain("Renewal Date-', 'wicket-acc') . ' ' . esc_html(\$renewal_date !== '' ? \$renewal_date : '—')");
+    expect($template)->toContain("Membership Owner:', 'wicket-acc') . ' ' . esc_html(\$owner_name !== '' ? \$owner_name : '—')");
+    expect($template)->toContain("Renewal Date:', 'wicket-acc') . ' ' . esc_html(\$renewal_date !== '' ? \$renewal_date : __('Not set.', 'wicket-acc'))");
 });

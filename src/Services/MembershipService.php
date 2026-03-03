@@ -67,6 +67,14 @@ class MembershipService
             return null;
         }
 
+        $preferCurrentCycle = (bool) ($this->config['feature_flags']['membership_resolution_prefer_current_cycle'] ?? false);
+        if ($preferCurrentCycle) {
+            $currentCycleUuid = $this->resolveCurrentCycleMembershipUuid($memberships);
+            if ($currentCycleUuid !== null) {
+                return $currentCycleUuid;
+            }
+        }
+
         $fallback = null;
         foreach ($memberships as $membership) {
             $uuid = $membership['membership']['attributes']['uuid']
@@ -90,6 +98,118 @@ class MembershipService
         }
 
         return $fallback;
+    }
+
+    /**
+     * Resolve organization membership UUID for the current cycle when feature-flagged.
+     *
+     * @param array<int,array> $memberships
+     * @return string|null
+     */
+    private function resolveCurrentCycleMembershipUuid(array $memberships): ?string
+    {
+        $now = new \DateTimeImmutable('now', wp_timezone());
+        $activeCurrent = [];
+        $activeNonCurrent = [];
+        $fallback = [];
+
+        foreach ($memberships as $membership) {
+            $attrs = (array) ($membership['membership']['attributes'] ?? []);
+            $uuid = $attrs['uuid'] ?? ($membership['membership']['id'] ?? null);
+            if (!is_string($uuid) || trim($uuid) === '') {
+                continue;
+            }
+
+            $row = [
+                'uuid' => trim($uuid),
+                'starts_at' => (string) ($attrs['starts_at'] ?? ''),
+                'ends_at' => (string) ($attrs['ends_at'] ?? ''),
+            ];
+
+            $isActive = (bool) ($attrs['active'] ?? false);
+            $inGrace = (bool) ($attrs['in_grace'] ?? false);
+            $inCurrentCycle = $this->isMembershipInCurrentCycle($row['starts_at'], $row['ends_at'], $now);
+
+            if ($isActive || $inGrace) {
+                if ($inCurrentCycle) {
+                    $activeCurrent[] = $row;
+                } else {
+                    $activeNonCurrent[] = $row;
+                }
+            } else {
+                $fallback[] = $row;
+            }
+        }
+
+        $sortByStartDesc = static function (array $a, array $b): int {
+            $aTs = strtotime($a['starts_at'] ?? '') ?: PHP_INT_MIN;
+            $bTs = strtotime($b['starts_at'] ?? '') ?: PHP_INT_MIN;
+            if ($aTs === $bTs) {
+                return 0;
+            }
+
+            return ($aTs > $bTs) ? -1 : 1;
+        };
+
+        if (!empty($activeCurrent)) {
+            usort($activeCurrent, $sortByStartDesc);
+
+            return (string) $activeCurrent[0]['uuid'];
+        }
+
+        if (!empty($activeNonCurrent)) {
+            usort($activeNonCurrent, $sortByStartDesc);
+
+            return (string) $activeNonCurrent[0]['uuid'];
+        }
+
+        if (!empty($fallback)) {
+            usort($fallback, $sortByStartDesc);
+
+            return (string) $fallback[0]['uuid'];
+        }
+
+        return null;
+    }
+
+    /**
+     * Check if a membership date window includes the current date.
+     *
+     * @param string $startsAt
+     * @param string $endsAt
+     * @param \DateTimeImmutable $now
+     * @return bool
+     */
+    private function isMembershipInCurrentCycle(string $startsAt, string $endsAt, \DateTimeImmutable $now): bool
+    {
+        $start = null;
+        $end = null;
+
+        if ($startsAt !== '') {
+            try {
+                $start = new \DateTimeImmutable($startsAt);
+            } catch (\Throwable $e) {
+                $start = null;
+            }
+        }
+
+        if ($endsAt !== '') {
+            try {
+                $end = new \DateTimeImmutable($endsAt);
+            } catch (\Throwable $e) {
+                $end = null;
+            }
+        }
+
+        if ($start !== null && $start > $now) {
+            return false;
+        }
+
+        if ($end !== null && $end < $now) {
+            return false;
+        }
+
+        return true;
     }
 
     /**

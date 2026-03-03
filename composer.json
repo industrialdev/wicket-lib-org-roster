@@ -1,13 +1,13 @@
 {
   "name": "industrialdev/wicket-lib-org-roster",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "Organization & Roster management library for Wicket Inc.",
   "type": "library",
   "license": "GPL-2.0-or-later",
   "require": {
     "php": ">=8.2",
     "ext-json": "*",
-    "starfederation/datastar-php": "^1@RC"
+    "starfederation/datastar-php": "^1@dev"
   },
   "require-dev": {
     "pestphp/pest": "^4",

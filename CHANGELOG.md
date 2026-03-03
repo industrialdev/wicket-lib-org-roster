@@ -2,14 +2,77 @@
 
 All notable changes to this project are documented in this file.
 
-## [0.4.2] - 2026-02-27
+## [0.4.3] - 2026-03-03
 
 ### Fixed
-- Hardened Bedrock sync script (`.ci/sync-orgman-lib.php`) to avoid permission failures on shared hosts when replacing existing `web/app/libs/wicket-lib-org-roster` contents.
-- Sync now stages a full copy and performs an atomic directory swap instead of unlinking files in place.
+- Prevented duplicate cascade seat/member assignment behavior:
+  - Cascade add-member now aborts on membership lookup errors instead of treating errors as "not found".
+  - Membership-seat assignment now re-checks existing membership assignment and short-circuits when already assigned.
+  - Membership lookup now paginates through person-membership rows.
+- Improved role-update behavior when duplicate person-membership rows exist:
+  - `MemberService::update_member_roles()` now prefers active/in-grace rows and falls back deterministically.
+  - Added regression test coverage in `tests/Unit/Services/MemberServiceTest.php`.
+- Fixed active-membership guard in role updates to treat `in_grace` memberships as eligible when `member_edit.require_active_membership_for_role_updates` is enabled.
+- Fixed edit-permissions role update requests to resolve and use the current organization membership UUID server-side (prevents stale posted membership UUIDs from causing false inactive-member errors).
+- Strengthened role-update active-membership validation with an `active_at=now` API fallback when listed person-membership attributes appear inactive, and added detailed role-update debug logging in wc logs.
+- Fixed organization-management card status to reflect organization membership status (not only current user active-membership gate), and removed inactive suffix from tier labels.
+- Fixed organization title click behavior: titles are only links when user can edit org or manage members.
+- Fixed Edit Permissions modal title duplication by using one computed title string.
+- Fixed org card organization-name fallback by broadening attribute name resolution and organization detail fallback.
+- Fixed OrgMan notification script rendering on account pages by moving inline notification JS to an enqueued asset (prevents `wpautop` from injecting `<p>` tags into script blocks).
+- Fixed Add Member modal stale state across opens by resetting form values/messages/submitting/success state on open, close, and successful submit in unified and legacy member flows.
+- Hardened OrgMan injected-content cleanup against `wpautop` corruption by stripping paragraph/line-break artifacts inside and around `<script>/<style>` blocks.
+- Fixed modal/process success responses to avoid automatic full-page reloads by default (`DatastarSSE::renderSuccess` now reloads only when explicitly requested).
+- Improved Add Member modal success UX using Datastar signals/expressions only: on successful add, the modal stays open in a completed state, hides the form/actions, and keeps only an explicit close action while error flows remain in-place.
+- Fixed Edit Permissions modal submit UX to guard against repeat submits and apply disabled styling/interaction lock to Cancel/Save while submitting.
+- Fixed Edit Permissions success toast copy fallback to include member name from modal state when API response does not include first/last name.
 
 ### Changed
-- Bumped package version in `composer.json` to `0.4.2`.
+- Updated organization summary card text/typography:
+  - Label separators now use colons (`Membership Tier:`, `Membership Owner:`, `Renewal Date:`).
+  - Organization name typography now uses rem-based `wt_text-lg` and `wt_font-bold`.
+  - Missing renewal dates now render as `Renewal Date: Not set.`
+- Updated organization summary card background token to use the requested color:
+  - `--wicket-orgman-bg-summary-card: #DBE5FF`
+- Wired summary card background to host theme accent-light token in the variable bridge:
+  - `--wicket-orgman-bg-summary-card: var(--bg-accent-light, #DBE5FF)`
+- Updated remove-policy callout email link affordance:
+  - interactive link color
+  - underline by default
+  - no underline on hover
+- Refined OrgMan account banner title spacing with scoped CSS variables and exact wrapper selector for account-center banner markup.
+- Pagination controls in member/group results now render only when there is more than one page (no standalone `1` button on single-page result sets).
+- Added explicit spacing between account-status icon and unconfirmed-status label in member cards.
+- Reduced unconfirmed account-status label size to `0.8rem` using the new `wt_text-2xs` utility, and added missing utility declarations (`wt_ml-1`, `wt_text-2xs`) to the main stylesheet.
+- Reduced member-card stack spacing in list views for denser roster scanning (`wt_gap-4` -> `wt_gap-1`).
+- Reset Edit Permissions modal state on open/close (roles/success/submitting/message container) to prevent previous-user state and stale success/error messages from persisting.
+- Updated Add Member and Edit Permissions success states to avoid auto-close and present a single `Close modal` action after success (form and primary/cancel actions hidden until modal is closed/reset).
+- Fixed modal completion action visibility on initial open by using Datastar class toggles that keep `Close modal` hidden until success state is true.
+- Applied the same completion-state UX to Remove Member confirmation modals (org/group): no auto-close on success, destructive form/actions hidden after success, and a single `Close modal` action.
+- Switched modal completion visibility bindings to Datastar `data-show` (from underscore class toggles) to ensure `Close` buttons are hidden on initial load and only shown after success; button label updated from `Close modal` to `Close`.
+- Hardened Edit Permissions role rehydration across modal opens by resetting member signals before assignment and binding checkbox checked-state to both member identity and role signals (prevents stale checkmarks when switching users or reopening).
+- Fixed Edit Permissions Datastar click-expression parsing by safely hydrating `currentMemberRoles` with escaped JSON (`JSON.parse(...)`) instead of raw inline array literals.
+- Updated Edit Permissions post-save client state to sync row-level role payloads for the edited member, so reopening the same modal reflects newly saved roles immediately.
+- Improved Add Member submit button UX across org/group/unified modals with consistent disabled states while requests are in flight.
+- Standardized modal submit loaders with new prefixed utilities (`wt_loader`, `wt_loader_button`) in library CSS, using OrgMan palette tokens; applied to `Add Member` and `Save Permissions` submitting states.
+- Fixed standardized button-loader visibility by tuning button-specific loader geometry (ring width + inner inset) and explicit inline-block display for reliable rendering in submit buttons.
+- Added subtle submit-state micro-animation for modal action buttons (`wt_button_submit_async`), with smooth label fade and centered loader entrance.
+- Hardened modal retry/error paths so submit state always resets (spinner hidden, actions re-enabled) without forcing modal close; includes group add-member SSE signal patches.
+- Fixed initial modal render state so submit loaders are hidden by default and only displayed when the submit button enters `wt_is-loading`.
+- Moved remaining inline behavior/style from injected OrgMan templates into enqueued assets:
+  - `content-organization-profile.php` demographics toggle logic now uses data attributes + `orgman-content-behaviors.js`.
+  - `content-supplemental-members.php` GF seat-validation logic now uses data attributes + `orgman-content-behaviors.js`.
+  - Supplemental-members visual styles now live in `modern-orgman-static.css` (scoped to `.wicket-orgman-supplemental`).
+
+### Documentation
+- Added `docs/configs/CCHL.md` to document CCHL-only role overrides (`supplemental_member`, `CCHL Member Community`).
+- Updated `docs/configs/MSA.md` with:
+  - cascade feature-flag usage (`feature_flags.membership_resolution_prefer_current_cycle = true`)
+  - explicit neutral auto-roles override (`member_addition.auto_assign_roles = []`)
+  - hidden description field in add-member form.
+- Updated `docs/CONFIGURATION.md` defaults/reference:
+  - `member_addition.auto_assign_roles` default is `[]`
+  - documented `feature_flags.membership_resolution_prefer_current_cycle`.
 
 ## [0.4.1] - 2026-02-27
 

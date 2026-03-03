@@ -205,7 +205,15 @@ class CascadeStrategy implements RosterManagementStrategy
 
             $has_membership = $this->connectionService()->personHasMembership($person_uuid, $membership_uuid);
             $config = \OrgManagement\Config\OrgManConfig::get();
-            if (is_wp_error($has_membership) || !$has_membership) {
+            if (is_wp_error($has_membership)) {
+                $logger->error('[OrgMan] Cascade membership lookup failed', array_merge($log_context, [
+                    'error' => $has_membership->get_error_message(),
+                ]));
+
+                return $has_membership;
+            }
+
+            if (!$has_membership) {
                 $relationship_type = $context['relationship_type'] ?? $member_data['relationship_type'] ?? '';
                 $relationship_type = is_string($relationship_type) ? sanitize_key($relationship_type) : '';
                 $relationship_description = $context['relationship_description'] ?? $member_data['relationship_description'] ?? '';
@@ -419,6 +427,15 @@ class CascadeStrategy implements RosterManagementStrategy
         }
 
         try {
+            $already_assigned = $this->connectionService()->personHasMembership($person_uuid, $membership_uuid);
+            if (is_wp_error($already_assigned)) {
+                return $already_assigned;
+            }
+
+            if ($already_assigned) {
+                return true;
+            }
+
             // Get organization membership data to pass to the assignment function
             $membership_data = $this->membership_service()->getOrgMembershipData($membership_uuid);
             if (is_wp_error($membership_data)) {

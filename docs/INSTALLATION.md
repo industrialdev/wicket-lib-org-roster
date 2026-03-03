@@ -23,12 +23,10 @@ From your site root (directory containing WordPress and root `composer.json`), a
 }
 ```
 
-Required root `composer.json` baseline:
+Minimal requirement example:
 
 ```json
 {
-  "minimum-stability": "RC",
-  "prefer-stable": true,
   "require": {
     "industrialdev/wicket-lib-org-roster": "^0@dev"
   }

@@ -22,10 +22,12 @@
   - Add via email/name.
   - Automatically assign base roles and relationship types.
   - Check seat limits before adding.
+  - Submit-state UX uses Datastar signals to disable actions and show the standardized `wt_loader` button spinner.
 - **Remove Member**:
   - Remove connection/role or end-date membership.
   - Supports "end-date" removal mode for soft deletes.
 - **Edit Permissions**: Modify roles and relationship types for existing members.
+  - Submit-state UX uses Datastar signals to disable actions and show the standardized `wt_loader` button spinner.
 - **Bulk Upload Members (CSV)**:
   - Config-gated by `ui.member_list.show_bulk_upload` (default `false`).
   - Available in non-groups member views for users who can add members.

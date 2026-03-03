@@ -51,7 +51,9 @@ $status = isset($_REQUEST['status']) ? sanitize_text_field(wp_unslash($_REQUEST[
 
 ?>
 
-<div id="org-management-index-app" class="org-management-app wicket-orgman wt_w-full wt_mt-6 wt_mb-6">
+<div id="org-management-index-app"
+    class="org-management-app wicket-orgman wt_w-full wt_mt-6 wt_mb-6"
+    data-org-type="<?php echo esc_attr($org_type); ?>">
     <h1 class="wt_text-2xl wt_font-bold wt_mb-4"><?php echo esc_html($management_title); ?></h1>
 
     <?php if ($status === 'success') : ?>
@@ -86,43 +88,4 @@ $status = isset($_REQUEST['status']) ? sanitize_text_field(wp_unslash($_REQUEST[
         </div>
     <?php endif; ?>
 
-    <?php if (!empty($org_type)) : ?>
-        <?php if ($org_type === 'professional_association') : ?>
-            <style>
-                .assoc_demographics {
-                    display: block;
-                }
-
-                .partner_demographics {
-                    display: none !important;
-                }
-            </style>
-            <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    var partner = document.querySelector('.partner_demographics');
-                    if (partner) {
-                        partner.remove();
-                    }
-                });
-            </script>
-        <?php else : ?>
-            <style>
-                .partner_demographics {
-                    display: block;
-                }
-
-                .assoc_demographics {
-                    display: none !important;
-                }
-            </style>
-            <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    var assoc = document.querySelector('.assoc_demographics');
-                    if (assoc) {
-                        assoc.remove();
-                    }
-                });
-            </script>
-        <?php endif; ?>
-    <?php endif; ?>
 </div>
