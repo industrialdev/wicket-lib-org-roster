@@ -56,7 +56,7 @@ class GroupsStrategy implements RosterManagementStrategy
     {
         $logger = $this->get_logger();
         $log_context = [
-            'source' => 'wicket-orgroster',
+            'source' => 'wicket-orgman',
             'strategy' => 'groups',
             'org_id' => $org_id,
             'member_email' => $member_data['email'] ?? null,
@@ -225,7 +225,7 @@ class GroupsStrategy implements RosterManagementStrategy
     {
         $logger = $this->get_logger();
         $log_context = [
-            'source' => 'wicket-orgroster',
+            'source' => 'wicket-orgman',
             'strategy' => 'groups',
             'org_id' => $org_id,
             'person_uuid' => $person_uuid,

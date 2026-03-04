@@ -83,13 +83,13 @@ $group_service = new \OrgManagement\Services\GroupService();
 $group_page = 1;
 $group_total_pages = 1;
 $logger->info('[OrgRoster] Organization list group mapping start', [
-    'source' => 'wicket-orgroster',
+    'source' => 'wicket-orgman',
     'user_uuid' => $user_uuid,
     'page_size' => $group_service->get_group_list_page_size(),
 ]);
 do {
     $logger->debug('[OrgRoster] Fetching manageable groups page', [
-        'source' => 'wicket-orgroster',
+        'source' => 'wicket-orgman',
         'user_uuid' => $user_uuid,
         'page' => $group_page,
     ]);
@@ -102,7 +102,7 @@ do {
     ]);
 
     $logger->debug('[OrgRoster] Manageable groups response', [
-        'source' => 'wicket-orgroster',
+        'source' => 'wicket-orgman',
         'page' => $group_page,
         'has_data' => is_array($groups_result),
         'data_count' => is_array($groups_result) ? count($groups_result['data'] ?? []) : 0,
@@ -115,7 +115,7 @@ do {
         $group_id = (string) ($group['id'] ?? '');
         if ($group_id === '') {
             $logger->debug('[OrgRoster] Skipping group item missing group id', [
-                'source' => 'wicket-orgroster',
+                'source' => 'wicket-orgman',
                 'group_item' => $group_item,
             ]);
             continue;
@@ -128,7 +128,7 @@ do {
             : ($org_identifier !== '' ? 'org-scope-' . md5($org_identifier) : 'group-scope-' . md5($group_id));
         if ($org_map_key === '') {
             $logger->debug('[OrgRoster] Skipping group item missing organization scope', [
-                'source' => 'wicket-orgroster',
+                'source' => 'wicket-orgman',
                 'group_item' => $group_item,
             ]);
             continue;
@@ -139,7 +139,7 @@ do {
         $group_tags = is_array($attrs) ? ($attrs['tags'] ?? null) : null;
         if ($group_name === '' && $group_type === '') {
             $logger->debug('[OrgRoster] Skipping group item missing name/type', [
-                'source' => 'wicket-orgroster',
+                'source' => 'wicket-orgman',
                 'org_uuid' => $org_uuid,
                 'group_id' => $group['id'] ?? '',
             ]);
@@ -160,7 +160,7 @@ do {
             'can_manage' => !empty($group_item['can_manage']),
         ];
         $logger->debug('[OrgRoster] Group mapped to org', [
-            'source' => 'wicket-orgroster',
+            'source' => 'wicket-orgman',
             'org_uuid' => $org_uuid,
             'org_map_key' => $org_map_key,
             'org_identifier' => $org_identifier,
@@ -176,7 +176,7 @@ do {
     $group_page++;
 } while ($group_page <= $group_total_pages);
 $logger->info('[OrgRoster] Organization list group mapping complete', [
-    'source' => 'wicket-orgroster',
+    'source' => 'wicket-orgman',
     'org_count' => count($organizations),
     'group_org_count' => count($groups_by_org),
     'group_total_pages' => $group_total_pages,
@@ -548,7 +548,7 @@ foreach ($organizations_page as $org) :
                 ];
             }
             $logger->debug('[OrgRoster] Org groups tags via /groups', [
-                'source' => 'wicket-orgroster',
+                'source' => 'wicket-orgman',
                 'org_uuid' => $org_uuid_for_scope,
                 'tag' => $tag_name,
                 'count' => count($groups_data),
@@ -576,7 +576,7 @@ foreach ($organizations_page as $org) :
             ]);
             $groups_all = is_array($groups_response_all) ? ($groups_response_all['data'] ?? []) : [];
             $logger->debug('[OrgRoster] Org groups tags via /groups (no tag filter)', [
-                'source' => 'wicket-orgroster',
+                'source' => 'wicket-orgman',
                 'org_uuid' => $org_uuid_for_scope,
                 'count' => count($groups_all),
                 'group_ids' => array_map(static function ($group_item) {
@@ -591,7 +591,7 @@ foreach ($organizations_page as $org) :
         }
     } catch (\Throwable $e) {
         $logger->error('[OrgRoster] Org groups tags fetch failed', [
-            'source' => 'wicket-orgroster',
+            'source' => 'wicket-orgman',
             'org_uuid' => $org_uuid_for_scope,
             'error' => $e->getMessage(),
         ]);
@@ -735,7 +735,7 @@ foreach ($organizations_page as $org) :
         : \OrgManagement\Helpers\PermissionHelper::has_management_roles($org_uuid_for_scope);
     $org_uuid_for_links = $org_uuid_for_scope;
     $logger->debug('[OrgRoster] Org list manage members link context', [
-        'source' => 'wicket-orgroster',
+        'source' => 'wicket-orgman',
         'org_uuid' => $org_id,
         'roster_mode' => $roster_mode,
         'primary_group_uuid' => $primary_group_uuid,

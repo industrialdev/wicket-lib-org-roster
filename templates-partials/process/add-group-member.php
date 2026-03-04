@@ -20,7 +20,7 @@ if ('POST' !== strtoupper($request_method)) {
 
 $logger = wc_get_logger();
 $log_context = [
-    'source' => 'wicket-orgroster',
+    'source' => 'wicket-orgman',
     'action' => 'add_group_member',
     'user_id' => get_current_user_id(),
 ];

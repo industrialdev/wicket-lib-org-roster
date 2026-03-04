@@ -222,7 +222,7 @@
   --wicket-orgman-loader-inner-inset: 6px;
   --wicket-orgman-loader-button-ring-width: 2px;
   --wicket-orgman-loader-button-inner-inset: 3px;
-  --wicket-orgman-loader-track: var(--wicket-orgman-text-button-label-reversed);
+  --wicket-orgman-loader-track: var(--wicket-orgman-border-disabled);
   --wicket-orgman-loader-accent: var(--wicket-orgman-bg-interactive-reversed);
 
   --wicket-orgman-border-card: var(--border-card, #4c4c92);

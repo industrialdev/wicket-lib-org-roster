@@ -155,7 +155,7 @@ The library registers several endpoints under the `org-management/v1` namespace:
 - Group org-scope matching now normalizes identifier/name/uuid tokens for member listing and removal lookups.
 - Groups configuration defaults added.
 - Unified members view (search + list + pagination + modals + seats callout) is the default. Legacy list preserved behind config flags.
-- Debug logging added across groups strategy via `wc_get_logger` (source: `wicket-orgroster`).
+- Debug logging added across groups strategy via `wc_get_logger` (source: `wicket-orgman`).
 
 **Open / Needs Confirmation (Groups):**
 - Org identifier key/format in `custom_data_field` must be confirmed and aligned with MDP data.

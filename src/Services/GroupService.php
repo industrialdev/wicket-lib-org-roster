@@ -53,7 +53,7 @@ class GroupService
         }
         $roles = array_values(array_filter(array_map('sanitize_key', $roles)));
         $this->get_logger()->debug('[OrgRoster] Manage roles resolved', [
-            'source' => 'wicket-orgroster',
+            'source' => 'wicket-orgman',
             'roles' => $roles,
         ]);
 
@@ -73,7 +73,7 @@ class GroupService
         }
         $roles = array_values(array_filter(array_map('sanitize_key', $roles)));
         $this->get_logger()->debug('[OrgRoster] Roster roles resolved', [
-            'source' => 'wicket-orgroster',
+            'source' => 'wicket-orgman',
             'roles' => $roles,
         ]);
 
@@ -90,7 +90,7 @@ class GroupService
         $tag = (string) ($this->get_groups_config()['tag_name'] ?? '');
         $tag = trim($tag);
         $this->get_logger()->debug('[OrgRoster] Roster tag name', [
-            'source' => 'wicket-orgroster',
+            'source' => 'wicket-orgman',
             'tag' => $tag,
         ]);
 
@@ -182,7 +182,7 @@ class GroupService
             }
         } catch (\Throwable $e) {
             $this->get_logger()->error('[OrgRoster] Group detail tag fetch failed', [
-                'source' => 'wicket-orgroster',
+                'source' => 'wicket-orgman',
                 'group_id' => $group_id,
                 'error' => $e->getMessage(),
             ]);
@@ -250,7 +250,7 @@ class GroupService
         try {
             $client = wicket_api_client();
             $this->get_logger()->info('[OrgRoster] Fetching group memberships', [
-                'source' => 'wicket-orgroster',
+                'source' => 'wicket-orgman',
                 'person_uuid' => $person_uuid,
                 'endpoint' => $endpoint,
                 'page' => $page,
@@ -261,7 +261,7 @@ class GroupService
             return $client->get($endpoint, ['query' => $query]);
         } catch (\Throwable $e) {
             $this->get_logger()->error('[OrgRoster] Failed fetching group memberships', [
-                'source' => 'wicket-orgroster',
+                'source' => 'wicket-orgman',
                 'person_uuid' => $person_uuid,
                 'error' => $e->getMessage(),
             ]);
@@ -525,7 +525,7 @@ class GroupService
 
         if (!is_array($response) || empty($response['data'])) {
             $this->get_logger()->debug('[OrgRoster] No group memberships found', [
-                'source' => 'wicket-orgroster',
+                'source' => 'wicket-orgman',
                 'person_uuid' => $person_uuid,
             ]);
 
@@ -543,7 +543,7 @@ class GroupService
             }
             if ($include_all_roles && !$can_manage) {
                 $this->get_logger()->debug('[OrgRoster] Including non-manage group role for groups landing list', [
-                    'source' => 'wicket-orgroster',
+                    'source' => 'wicket-orgman',
                     'person_uuid' => $person_uuid,
                     'role_slug' => $role_slug,
                     'group_id' => $membership['relationships']['group']['data']['id'] ?? '',
@@ -559,14 +559,14 @@ class GroupService
             $group_attrs = is_array($group) ? ($group['attributes'] ?? []) : [];
             $group_tags = is_array($group_attrs) ? ($group_attrs['tags'] ?? null) : null;
             $this->get_logger()->debug('[OrgRoster] Group membership included group tags', [
-                'source' => 'wicket-orgroster',
+                'source' => 'wicket-orgman',
                 'group_id' => $group_id,
                 'tags_present' => is_array($group_tags),
                 'tags' => is_array($group_tags) ? $group_tags : null,
             ]);
             if (!$this->group_has_roster_tag($group)) {
                 $this->get_logger()->debug('[OrgRoster] Group skipped by tag filter', [
-                    'source' => 'wicket-orgroster',
+                    'source' => 'wicket-orgman',
                     'group_id' => $group_id,
                     'tags' => is_array($group_tags) ? $group_tags : null,
                 ]);
@@ -580,7 +580,7 @@ class GroupService
             $org_identifier = $this->extract_org_identifier($membership, $org_id);
             if (empty($org_id) && empty($org_identifier)) {
                 $this->get_logger()->debug('[OrgRoster] Group has no organization scope metadata; keeping as manageable group', [
-                    'source' => 'wicket-orgroster',
+                    'source' => 'wicket-orgman',
                     'group_id' => $group_id,
                     'membership_id' => $membership['id'] ?? '',
                 ]);
@@ -663,7 +663,7 @@ class GroupService
         $meta['page']['total_items'] ??= count($groups);
 
         $this->get_logger()->info('[OrgRoster] Manageable groups resolved', [
-            'source' => 'wicket-orgroster',
+            'source' => 'wicket-orgman',
             'person_uuid' => $person_uuid,
             'count' => count($groups),
             'page' => $page,
@@ -705,7 +705,7 @@ class GroupService
 
         if (!is_array($memberships) || empty($memberships['data'])) {
             $this->get_logger()->debug('[OrgRoster] No memberships for group access check', [
-                'source' => 'wicket-orgroster',
+                'source' => 'wicket-orgman',
                 'group_uuid' => $group_uuid,
                 'person_uuid' => $person_uuid,
             ]);
@@ -743,7 +743,7 @@ class GroupService
         }
 
         $this->get_logger()->info('[OrgRoster] Group access evaluated', [
-            'source' => 'wicket-orgroster',
+            'source' => 'wicket-orgman',
             'group_uuid' => $group_uuid,
             'person_uuid' => $person_uuid,
             'allowed' => $result['allowed'],
@@ -790,7 +790,7 @@ class GroupService
         }
 
         $this->get_logger()->debug('[OrgRoster] Group members fetch', [
-            'source' => 'wicket-orgroster',
+            'source' => 'wicket-orgman',
             'group_uuid' => $group_uuid,
             'page' => $page,
             'size' => $size,
@@ -885,7 +885,7 @@ class GroupService
 
         if (is_wp_error($response) || !is_array($response)) {
             $this->get_logger()->warning('[OrgRoster] Group members response error', [
-                'source' => 'wicket-orgroster',
+                'source' => 'wicket-orgman',
                 'error' => is_wp_error($response) ? $response->get_error_message() : 'invalid_response',
             ]);
 
@@ -941,7 +941,7 @@ class GroupService
         }
 
         $this->get_logger()->info('[OrgRoster] Group members normalized', [
-            'source' => 'wicket-orgroster',
+            'source' => 'wicket-orgman',
             'count' => count($members),
             'page' => $pagination['currentPage'],
             'total_pages' => $pagination['totalPages'],
@@ -995,7 +995,7 @@ class GroupService
         try {
             $client = wicket_api_client();
             $this->get_logger()->info('[OrgRoster] Creating group member', [
-                'source' => 'wicket-orgroster',
+                'source' => 'wicket-orgman',
                 'group_uuid' => $group_uuid,
                 'person_uuid' => $person_uuid,
                 'role' => $role_slug,
@@ -1024,7 +1024,7 @@ class GroupService
             $deleted = wicket_remove_group_member($group_member_id);
             if ($deleted) {
                 $this->get_logger()->info('[OrgRoster] Deleted group member', [
-                    'source' => 'wicket-orgroster',
+                    'source' => 'wicket-orgman',
                     'group_member_id' => $group_member_id,
                 ]);
 
@@ -1054,7 +1054,7 @@ class GroupService
         try {
             $client = wicket_api_client();
             $this->get_logger()->info('[OrgRoster] End-dating group member', [
-                'source' => 'wicket-orgroster',
+                'source' => 'wicket-orgman',
                 'group_member_id' => $group_member_id,
                 'end_date' => $end_date,
             ]);

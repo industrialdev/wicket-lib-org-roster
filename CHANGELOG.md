@@ -2,7 +2,7 @@
 
 All notable changes to this project are documented in this file.
 
-## [0.4.4] - 2026-03-04
+## [0.4.5] - 2026-03-04
 
 ### Fixed
 - Prevented duplicate cascade seat/member assignment behavior:
