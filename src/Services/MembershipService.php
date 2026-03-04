@@ -634,8 +634,14 @@ class MembershipService
             $person_membership_data = $person_membership['data'];
             $attributes = $person_membership_data['attributes'];
 
-            // Set ends_at to today in site timezone
-            $ends_at = (new \DateTime('@' . strtotime(date('Y-m-d H:i:s', current_time('timestamp'))), wp_timezone()))->format('Y-m-d\T00:00:00-05:01');
+            // End-date at MDP day start in UTC to avoid fixed-offset drift.
+            if (function_exists('wicket_time_get_mdp_day_start_iso8601_utc')) {
+                $ends_at = wicket_time_get_mdp_day_start_iso8601_utc();
+            } else {
+                $ends_at = (new \DateTimeImmutable('now', new \DateTimeZone('UTC')))
+                    ->setTime(0, 0, 0)
+                    ->format('Y-m-d\TH:i:s\Z');
+            }
 
             $update_payload = [
                 'data' => [

@@ -1168,7 +1168,7 @@ input:where([type="button"], [type="reset"], [type="submit"]) {
   color: var(--wicket-orgman-text-content);
 }
 .wt_text-interactive {
-  color: var(--wicket-orgman-text-interactive);
+  color: var(--wicket-orgman-interactive);
 }
 .wt_text-warning {
   color: var(--wicket-orgman-text-warning);
@@ -2813,7 +2813,7 @@ body.wicket-orgman-screen
     color: var(--wicket-orgman-text-content);
   }
   .wt_text-interactive {
-    color: var(--wicket-orgman-text-interactive);
+    color: var(--wicket-orgman-interactive);
   }
   .wt_text-warning {
     color: var(--wicket-orgman-text-warning);

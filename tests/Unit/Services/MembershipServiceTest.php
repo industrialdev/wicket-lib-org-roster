@@ -12,6 +12,13 @@ if (!function_exists('wicket_api_client')) {
     }
 }
 
+if (!function_exists('wicket_time_get_mdp_day_start_iso8601_utc')) {
+    function wicket_time_get_mdp_day_start_iso8601_utc(string $date_string = 'now'): string
+    {
+        return '2026-03-04T00:00:00Z';
+    }
+}
+
 it('returns active membership uuid when available', function (): void {
     Functions\when('wicket_get_org_memberships')->alias(fn (string $orgUuid): array => [
         [
@@ -199,4 +206,34 @@ it('falls back to api max assignments when tier mapping does not match', functio
     ];
 
     expect($service->getEffectiveMaxAssignments($membershipData))->toBe(4);
+});
+
+it('uses standardized helper timestamp when ending a person membership', function (): void {
+    $GLOBALS['__orgroster_api_client'] = new class {
+        public array $patchPayload = [];
+
+        public function get(string $path): array
+        {
+            return [
+                'data' => [
+                    'id' => 'pm-1',
+                    'type' => 'person_memberships',
+                    'attributes' => [],
+                ],
+            ];
+        }
+
+        public function patch(string $path, array $args): array
+        {
+            $this->patchPayload = $args['json'] ?? [];
+
+            return ['data' => ['id' => 'pm-1']];
+        }
+    };
+
+    $service = new MembershipService();
+    $service->endPersonMembershipToday('pm-1');
+
+    expect($GLOBALS['__orgroster_api_client']->patchPayload['data']['attributes']['ends_at'] ?? null)
+        ->toBe('2026-03-04T00:00:00Z');
 });

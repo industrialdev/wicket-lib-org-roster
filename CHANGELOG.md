@@ -2,7 +2,7 @@
 
 All notable changes to this project are documented in this file.
 
-## [0.4.3] - 2026-03-03
+## [0.4.4] - 2026-03-04
 
 ### Fixed
 - Prevented duplicate cascade seat/member assignment behavior:
@@ -26,6 +26,12 @@ All notable changes to this project are documented in this file.
 - Improved Add Member modal success UX using Datastar signals/expressions only: on successful add, the modal stays open in a completed state, hides the form/actions, and keeps only an explicit close action while error flows remain in-place.
 - Fixed Edit Permissions modal submit UX to guard against repeat submits and apply disabled styling/interaction lock to Cancel/Save while submitting.
 - Fixed Edit Permissions success toast copy fallback to include member name from modal state when API response does not include first/last name.
+- Fixed cascade add-member connection start timestamp generation in OrgMan `ConnectionService` to use point-in-time UTC (instead of local midnight), preventing day-off start-date drift in downstream MDP displays.
+- Fixed additional legacy date generators in roster services to remove hardcoded timezone offsets and align to standardized time helpers:
+  - `MembershipService::endPersonMembershipToday()` now uses MDP day-start UTC helper.
+  - `ConnectionService::endRelationshipToday()` now uses MDP day-start UTC helper.
+  - `GroupService::create_group_member()` now uses MDP day-start UTC helper for `start_date`.
+  - `GroupService::remove_group_member()` now uses MDP day-start UTC helper when default end-date format is configured.
 
 ### Changed
 - Updated organization summary card text/typography:
@@ -59,6 +65,10 @@ All notable changes to this project are documented in this file.
 - Added subtle submit-state micro-animation for modal action buttons (`wt_button_submit_async`), with smooth label fade and centered loader entrance.
 - Hardened modal retry/error paths so submit state always resets (spinner hidden, actions re-enabled) without forcing modal close; includes group add-member SSE signal patches.
 - Fixed initial modal render state so submit loaders are hidden by default and only displayed when the submit button enters `wt_is-loading`.
+- Fixed interactive text utility token reference: `.wt_text-interactive` now uses `--wicket-orgman-interactive` (removes undefined `--wicket-orgman-text-interactive` usage).
+- Added regression coverage for standardized helper-backed group/member date payloads:
+  - `GroupServiceTest` now asserts helper-based `start_date`/`end_date` payloads.
+  - `MembershipServiceTest` now asserts helper-based membership `ends_at` payload.
 - Moved remaining inline behavior/style from injected OrgMan templates into enqueued assets:
   - `content-organization-profile.php` demographics toggle logic now uses data attributes + `orgman-content-behaviors.js`.
   - `content-supplemental-members.php` GF seat-validation logic now uses data attributes + `orgman-content-behaviors.js`.

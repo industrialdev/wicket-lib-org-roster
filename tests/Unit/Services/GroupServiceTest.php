@@ -11,6 +11,13 @@ if (!function_exists('wicket_api_client')) {
     }
 }
 
+if (!function_exists('wicket_time_get_mdp_day_start_iso8601_utc')) {
+    function wicket_time_get_mdp_day_start_iso8601_utc(string $date_string = 'now'): string
+    {
+        return '2026-03-04T00:00:00Z';
+    }
+}
+
 if (!function_exists('wicket_get_group_members')) {
     function wicket_get_group_members(string $group_uuid, array $args = [])
     {
@@ -593,4 +600,42 @@ it('matches group members by normalized org scope tokens for listing and remove 
     expect($members['members'][0]['person_uuid'] ?? null)->toBe('person-1');
     expect($matchId)->toBe('gm-1');
     expect($GLOBALS['__orgroster_wicket_get_organization_calls'] ?? [])->toContain('ab89ceb6-a1cf-4e95-9471-e637d6fd7cc2');
+});
+
+it('uses standardized helper start_date when creating a group member', function (): void {
+    $GLOBALS['__orgroster_api_client'] = new class {
+        public array $lastPayload = [];
+
+        public function post(string $path, array $args): array
+        {
+            $this->lastPayload = $args['json'] ?? [];
+
+            return ['data' => ['id' => 'gm-1']];
+        }
+    };
+
+    $service = new GroupService();
+    $service->create_group_member('person-1', 'group-1', 'member');
+
+    expect($GLOBALS['__orgroster_api_client']->lastPayload['data']['attributes']['start_date'] ?? null)
+        ->toBe('2026-03-04T00:00:00Z');
+});
+
+it('uses standardized helper end_date when removing a group member with default format', function (): void {
+    $GLOBALS['__orgroster_api_client'] = new class {
+        public array $lastPayload = [];
+
+        public function patch(string $path, array $args): array
+        {
+            $this->lastPayload = $args['json'] ?? [];
+
+            return ['data' => ['id' => 'gm-1']];
+        }
+    };
+
+    $service = new GroupService();
+    $service->remove_group_member('gm-1');
+
+    expect($GLOBALS['__orgroster_api_client']->lastPayload['data']['attributes']['end_date'] ?? null)
+        ->toBe('2026-03-04T00:00:00Z');
 });

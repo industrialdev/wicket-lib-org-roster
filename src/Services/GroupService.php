@@ -974,7 +974,9 @@ class GroupService
                 'type' => 'group_members',
                 'attributes' => [
                     'type' => $role_slug,
-                    'start_date' => (new \DateTime('@' . strtotime(date('Y-m-d H:i:s', current_time('timestamp'))), wp_timezone()))->format('Y-m-d\T00:00:00P'),
+                    'start_date' => function_exists('wicket_time_get_mdp_day_start_iso8601_utc')
+                        ? wicket_time_get_mdp_day_start_iso8601_utc()
+                        : (new \DateTimeImmutable('now', new \DateTimeZone('UTC')))->setTime(0, 0, 0)->format('Y-m-d\TH:i:s\Z'),
                     'end_date' => null,
                     'custom_data_field' => $custom_data_field,
                     'person_id' => $person_uuid,
@@ -1033,7 +1035,11 @@ class GroupService
         }
 
         $format = (string) ($this->get_groups_config()['removal']['end_date_format'] ?? 'Y-m-d\T00:00:00P');
-        $end_date = (new \DateTime('@' . strtotime(date('Y-m-d H:i:s', current_time('timestamp'))), wp_timezone()))->format($format);
+        if ($format === 'Y-m-d\T00:00:00P' && function_exists('wicket_time_get_mdp_day_start_iso8601_utc')) {
+            $end_date = wicket_time_get_mdp_day_start_iso8601_utc();
+        } else {
+            $end_date = (new \DateTimeImmutable('now', wp_timezone()))->format($format);
+        }
 
         $payload = [
             'data' => [

@@ -128,10 +128,11 @@ class ConnectionService
      */
     private function currentStartDate(): string
     {
-        $timezone = wp_timezone();
-        $now = new DateTimeImmutable('now', $timezone);
+        if (function_exists('wicket_time_get_current_iso8601_utc')) {
+            return wicket_time_get_current_iso8601_utc();
+        }
 
-        return $now->setTime(0, 0)->format('c');
+        return (new DateTimeImmutable('now', new \DateTimeZone('UTC')))->format('Y-m-d\TH:i:s\Z');
     }
 
     /**
@@ -189,8 +190,14 @@ class ConnectionService
             $connection_data = $connection['data'];
             $attributes = $connection_data['attributes'];
 
-            // Legacy date format logic
-            $ends_at = (new \DateTime('@' . strtotime(date('Y-m-d H:i:s', current_time('timestamp'))), wp_timezone()))->format('Y-m-d\T00:00:00-05:01');
+            // End-date at MDP day start in UTC to avoid fixed-offset drift.
+            if (function_exists('wicket_time_get_mdp_day_start_iso8601_utc')) {
+                $ends_at = wicket_time_get_mdp_day_start_iso8601_utc();
+            } else {
+                $ends_at = (new DateTimeImmutable('now', new \DateTimeZone('UTC')))
+                    ->setTime(0, 0, 0)
+                    ->format('Y-m-d\TH:i:s\Z');
+            }
 
             // Fix tags, if empty or null, make it an empty array
             $attributes['tags'] = !empty($attributes['tags']) ? $attributes['tags'] : [];
@@ -272,7 +279,7 @@ class ConnectionService
         }
 
         try {
-            $now_date = (new \DateTime('@' . strtotime(date('Y-m-d H:i:s', current_time('timestamp'))), wp_timezone()))->format('Y-m-d\T00:00:00-05:00');
+            $now_date = $this->currentStartDate();
 
             $description = is_string($description) ? sanitize_textarea_field($description) : '';
             $payload = [
