@@ -106,6 +106,15 @@ it('includes role-display filter defaults for member cards', function (): void {
     expect($member_list['display_roles_exclude'] ?? null)->toBeArray();
 });
 
+it('includes role alias defaults for role slug normalization', function (): void {
+    $config = OrgManagement\Config\OrgManConfig::get();
+    $roles = $config['roles'] ?? [];
+
+    expect($roles)->toHaveKey('aliases');
+    expect($roles['aliases'] ?? null)->toBeArray();
+    expect($roles['aliases'] ?? null)->toBe([]);
+});
+
 it('includes member edit activity guard default as disabled for backward compatibility', function (): void {
     $config = OrgManagement\Config\OrgManConfig::get();
 

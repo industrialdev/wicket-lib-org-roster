@@ -29,13 +29,12 @@ final class OrgManConfig
                 'owner' => 'membership_owner',
                 'manager' => 'membership_manager',
                 'editor' => 'org_editor',
+                'aliases' => [],
             ],
             'role_labels' => [
                 'membership_manager' => __('Membership Manager', 'wicket-acc'),
-                'org_editor'         => __('Org Editor', 'wicket-acc'),
+                'org_editor'         => __('Org. Editor', 'wicket-acc'),
                 'membership_owner'   => __('Membership Owner', 'wicket-acc'),
-                'Cchlmembercommunity' => __('CCHL Member Community', 'wicket-acc'),
-                'cchlmembercommunity' => __('CCHL Member Community', 'wicket-acc'),
             ],
             'permissions' => [
                 'edit_organization' => [
@@ -297,10 +296,7 @@ final class OrgManConfig
                         'required' => true,
                         'label' => __('Permissions', 'wicket-acc'),
                         'allowed_roles' => [],
-                        'excluded_roles' => [
-                            'Cchlmembercommunity',
-                            'cchlmembercommunity',
-                        ],
+                        'excluded_roles' => [],
                     ],
                 ],
                 'allow_relationship_type_editing' => false,
@@ -354,16 +350,13 @@ final class OrgManConfig
             ],
             'edit_permissions_modal' => [
                 'allowed_roles' => [],
-                'excluded_roles' => [
-                    'Cchlmembercommunity',
-                    'cchlmembercommunity',
-                ],
+                'excluded_roles' => [],
             ],
             'member_edit' => [
                 'require_active_membership_for_role_updates' => false,
             ],
             'notifications' => [
-                'confirmation_email_from' => 'cchl@wicketcloud.com',
+                'confirmation_email_from' => 'no-reply@wicketcloud.com',
             ],
             'relationship_types' => [
                 'custom_types' => [

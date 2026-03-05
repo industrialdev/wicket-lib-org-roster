@@ -21,6 +21,11 @@ add_filter('wicket/acc/orgman/config', function (array $config): array {
         'CCHL Member Community',
     ];
 
+    // Normalize CCHL community role variants to a canonical slug.
+    $config['roles']['aliases'] = [
+        'cchl_member_community' => 'cchlmembercommunity',
+    ];
+
     // Keep CCHL community roles out of assignable role controls.
     $config['member_addition_form']['fields']['permissions']['excluded_roles'] = [
         'Cchlmembercommunity',

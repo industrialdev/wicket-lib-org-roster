@@ -15,7 +15,6 @@ if (!defined('ABSPATH')) {
  * This template displays the list of organization members with search and filter functionality.
  * It uses Datastar for dynamic updates.
  *
- * @package CCHL
  * @since 1.0.0
  */
 

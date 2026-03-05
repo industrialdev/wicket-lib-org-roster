@@ -589,7 +589,7 @@ class MemberService
      * @param string $role
      * @return string
      */
-    private function normalizeRoleSlug(string $role): string
+    private function normalizeRoleSlugValue(string $role): string
     {
         $normalized = strtolower(trim($role));
         if ($normalized === '') {
@@ -598,11 +598,48 @@ class MemberService
 
         $normalized = str_replace(['-', ' '], '_', $normalized);
         $normalized = (string) preg_replace('/_+/', '_', $normalized);
-        $normalized = sanitize_key($normalized);
 
-        $aliases = [
-            'cchl_member_community' => 'cchlmembercommunity',
-        ];
+        return sanitize_key($normalized);
+    }
+
+    /**
+     * Resolve role slug aliases from config.
+     *
+     * @return array<string, string>
+     */
+    private function getRoleSlugAliases(): array
+    {
+        $configuredAliases = (array) ($this->config['roles']['aliases'] ?? []);
+
+        $aliases = [];
+        foreach ($configuredAliases as $sourceRole => $targetRole) {
+            $sourceSlug = $this->normalizeRoleSlugValue((string) $sourceRole);
+            $targetSlug = $this->normalizeRoleSlugValue((string) $targetRole);
+
+            if ($sourceSlug === '' || $targetSlug === '') {
+                continue;
+            }
+
+            $aliases[$sourceSlug] = $targetSlug;
+        }
+
+        return $aliases;
+    }
+
+    /**
+     * Normalize role value into canonical slug for filtering/display.
+     *
+     * @param string $role
+     * @return string
+     */
+    private function normalizeRoleSlug(string $role): string
+    {
+        $normalized = $this->normalizeRoleSlugValue($role);
+        if ($normalized === '') {
+            return '';
+        }
+
+        $aliases = $this->getRoleSlugAliases();
 
         return $aliases[$normalized] ?? $normalized;
     }

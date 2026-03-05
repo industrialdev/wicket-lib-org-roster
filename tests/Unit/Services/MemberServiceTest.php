@@ -929,7 +929,7 @@ it('filters displayed member roles using allowlist and exclude config', function
 
         public function getPersonCurrentRolesByOrgId($personUuid, $orgUuid)
         {
-            return ['membership_owner', 'supplemental_member', 'cchl_member_community', 'member'];
+            return ['membership_owner', 'supplemental_member', 'member'];
         }
     };
 
@@ -961,7 +961,7 @@ it('filters displayed member roles using allowlist and exclude config', function
     $configProperty = new ReflectionProperty(MemberService::class, 'config');
     $config = $configProperty->getValue($service);
     $config['ui']['member_list']['display_roles_allowlist'] = ['membership_owner', 'membership_manager', 'org_editor', 'member'];
-    $config['ui']['member_list']['display_roles_exclude'] = ['supplemental_member', 'cchlmembercommunity', 'cchl_member_community'];
+    $config['ui']['member_list']['display_roles_exclude'] = ['supplemental_member'];
     $configProperty->setValue($service, $config);
 
     $result = $service->get_members('mem-1', 'org-1', [

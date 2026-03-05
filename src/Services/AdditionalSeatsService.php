@@ -385,7 +385,6 @@ class AdditionalSeatsService
             // Construct the MDP API payload
             $org_uuid = $membership_data['organization']['id'];
             $membership_id = $membership_data['membership']['id'];
-            $api_url = "https://cchl-admin.staging.wicketcloud.com/api/organization_memberships/{$membership_id}?include=previous_membership_entry";
 
             $payload = [
                 'data' => [
@@ -401,7 +400,6 @@ class AdditionalSeatsService
                 'source' => 'wicket-orgman',
                 'subscription_id' => $subscription->get_id(),
                 'order_id' => $order_id,
-                'api_url' => $api_url,
                 'current_seats' => $current_seats,
                 'additional_seats' => $additional_seats,
                 'new_limit' => $new_calculated_limit,
