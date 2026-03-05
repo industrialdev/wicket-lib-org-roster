@@ -43,7 +43,7 @@ class MembershipService
         try {
             $memberships = wicket_get_org_memberships($organizationUuid);
         } catch (\Throwable $e) {
-            wc_get_logger()->error(
+            wc_getLogger()->error(
                 '[OrgMan] Failed fetching organization memberships: ' . $e->getMessage(),
                 ['source' => 'wicket-orgman', 'org_uuid' => $organizationUuid]
             );
@@ -489,7 +489,7 @@ class MembershipService
      * @param string $organization_uuid The organization UUID.
      * @return string|WP_Error The membership UUID or WP_Error on failure.
      */
-    public function get_current_person_memberships_by_organization($organization_uuid)
+    public function getCurrentPersonMembershipsByOrganization($organization_uuid)
     {
         if (empty($organization_uuid)) {
             return new \WP_Error('invalid_params', 'Organization UUID is required.');
@@ -521,7 +521,7 @@ class MembershipService
      * @param array $args Optional arguments containing page and size for pagination, and query for search.
      * @return array|WP_Error The search results or WP_Error on failure.
      */
-    public function membership_search_members($membership_uuid = '', $args = [])
+    public function membershipSearchMembers($membership_uuid = '', $args = [])
     {
         if (empty($membership_uuid) || empty($args)) {
             return new \WP_Error('invalid_params', 'Membership UUID and arguments are required.');
@@ -578,7 +578,7 @@ class MembershipService
      * @param array $args Optional arguments containing page and size for pagination.
      * @return array|WP_Error The membership members or WP_Error on failure.
      */
-    public function get_org_membership_members($membership_uuid = '', $args = [])
+    public function getOrgMembershipMembers($membership_uuid = '', $args = [])
     {
         if (empty($membership_uuid)) {
             return new \WP_Error('invalid_params', 'Membership UUID is required.');

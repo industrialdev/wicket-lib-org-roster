@@ -28,7 +28,7 @@ if (empty($membership_id) && isset($_GET['membership_uuid'])) {
 if (!function_exists('OrgManagement\Templates\get_my_account_page_url')) {
     function get_my_account_page_url($slug)
     {
-        return \OrgManagement\Helpers\Helper::get_my_account_page_url($slug, "/my-account/{$slug}/");
+        return \OrgManagement\Helpers\Helper::getMyAccountPageUrl($slug, "/my-account/{$slug}/");
     }
 }
 

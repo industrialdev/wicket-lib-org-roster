@@ -22,7 +22,7 @@ class PermissionHelper extends Helper
      * @param string $role The role name to normalize
      * @return string Normalized role name
      */
-    private static function normalize_role_name(string $role): string
+    private static function normalizeRoleName(string $role): string
     {
         return strtolower(str_replace(' ', '_', trim($role)));
     }
@@ -38,7 +38,7 @@ class PermissionHelper extends Helper
         $lookup = [];
 
         foreach ($roles as $role) {
-            $normalized = self::normalize_role_name((string) $role);
+            $normalized = self::normalizeRoleName((string) $role);
             if ('' === $normalized) {
                 continue;
             }
@@ -75,7 +75,7 @@ class PermissionHelper extends Helper
             : [];
 
         return array_values(array_unique(array_filter(array_map(static function ($role): string {
-            return self::normalize_role_name((string) $role);
+            return self::normalizeRoleName((string) $role);
         }, $allowed_roles))));
     }
 
@@ -160,7 +160,7 @@ class PermissionHelper extends Helper
 
         $filtered = [];
         foreach ($role_choices as $slug => $label) {
-            $normalized = self::normalize_role_name((string) $slug);
+            $normalized = self::normalizeRoleName((string) $slug);
 
             if (!empty($allowed_lookup) && !isset($allowed_lookup[$normalized])) {
                 continue;
@@ -195,7 +195,7 @@ class PermissionHelper extends Helper
 
         $filtered = [];
         foreach ($roles as $role) {
-            $normalized = self::normalize_role_name((string) $role);
+            $normalized = self::normalizeRoleName((string) $role);
 
             if ('' === $normalized) {
                 continue;
@@ -237,7 +237,7 @@ class PermissionHelper extends Helper
         if (!is_array($roles)) {
             $roles = [$roles];
         }
-        $normalized_roles = array_map([self::class, 'normalize_role_name'], $roles);
+        $normalized_roles = array_map([self::class, 'normalizeRoleName'], $roles);
 
         // Get current user
         $user = wp_get_current_user();
@@ -255,8 +255,8 @@ class PermissionHelper extends Helper
         $org_roles = [];
         if ($org_id) {
             if (class_exists('\OrgManagement\Services\PermissionService')) {
-                $permission_service = new \OrgManagement\Services\PermissionService();
-                $org_roles = (array) $permission_service->getOrgRolesForPerson($user->user_login, $org_id);
+                $permissionService = new \OrgManagement\Services\PermissionService();
+                $org_roles = (array) $permissionService->getOrgRolesForPerson($user->user_login, $org_id);
             }
         }
 
@@ -264,7 +264,7 @@ class PermissionHelper extends Helper
         $check_roles = !empty($org_roles) ? $org_roles : $wp_roles;
 
         // Normalize all check roles for comparison
-        $normalized_check_roles = array_map([self::class, 'normalize_role_name'], $check_roles);
+        $normalized_check_roles = array_map([self::class, 'normalizeRoleName'], $check_roles);
 
         // Check if user has required roles
         if ($all_true) {
@@ -309,7 +309,7 @@ class PermissionHelper extends Helper
 
         // Use wicket_get_person_active_memberships to support impersonation
         if (!function_exists('wicket_get_person_active_memberships')) {
-            wc_get_logger()->warning('[PermissionHelper] wicket_get_person_active_memberships function not available', [
+            wc_getLogger()->warning('[PermissionHelper] wicket_get_person_active_memberships function not available', [
                 'source' => 'wicket-orgman',
                 'org_id' => $org_id,
             ]);
@@ -335,7 +335,7 @@ class PermissionHelper extends Helper
             }
         } catch (\Throwable $e) {
             // Log error but return false
-            wc_get_logger()->error('[PermissionHelper] Error checking active membership: ' . $e->getMessage(), [
+            wc_getLogger()->error('[PermissionHelper] Error checking active membership: ' . $e->getMessage(), [
                 'source' => 'wicket-orgman',
                 'org_id' => $org_id,
                 'person_uuid' => $person_uuid ?? 'unknown',
@@ -528,7 +528,7 @@ class PermissionHelper extends Helper
         try {
             // Get the organization membership to find the owner
             if (!class_exists('\OrgManagement\Services\MembershipService')) {
-                wc_get_logger()->warning('[PermissionHelper] MembershipService class not available', [
+                wc_getLogger()->warning('[PermissionHelper] MembershipService class not available', [
                     'source' => 'wicket-orgman',
                     'org_id' => $org_id,
                 ]);
@@ -536,15 +536,15 @@ class PermissionHelper extends Helper
                 return false;
             }
 
-            $membership_service = new \OrgManagement\Services\MembershipService();
-            $membership_uuid = $membership_service->getMembershipForOrganization($org_id);
+            $membershipService = new \OrgManagement\Services\MembershipService();
+            $membership_uuid = $membershipService->getMembershipForOrganization($org_id);
 
             if (empty($membership_uuid)) {
                 return false;
             }
 
             // Get the membership data to find the owner
-            $membership_data = $membership_service->getOrgMembershipData($membership_uuid);
+            $membership_data = $membershipService->getOrgMembershipData($membership_uuid);
 
             if (!is_array($membership_data) || !isset($membership_data['data']['relationships']['owner']['data']['id'])) {
                 return false;
@@ -555,7 +555,7 @@ class PermissionHelper extends Helper
             return $person_uuid === $owner_id;
 
         } catch (\Throwable $e) {
-            wc_get_logger()->error('[PermissionHelper] Error checking membership owner: ' . $e->getMessage(), [
+            wc_getLogger()->error('[PermissionHelper] Error checking membership owner: ' . $e->getMessage(), [
                 'source' => 'wicket-orgman',
                 'org_id' => $org_id,
                 'person_uuid' => $person_uuid ?? 'unknown',
@@ -598,8 +598,8 @@ class PermissionHelper extends Helper
         }
 
         if (class_exists('\OrgManagement\Services\PermissionService')) {
-            $permission_service = new \OrgManagement\Services\PermissionService();
-            $roles = $permission_service->getOrgRolesForPerson(wp_get_current_user()->user_login, $org_id);
+            $permissionService = new \OrgManagement\Services\PermissionService();
+            $roles = $permissionService->getOrgRolesForPerson(wp_get_current_user()->user_login, $org_id);
 
             return is_array($roles) ? $roles : [];
         }

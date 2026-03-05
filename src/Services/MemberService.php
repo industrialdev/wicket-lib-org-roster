@@ -34,7 +34,7 @@ class MemberService
     /**
      * @var ConfigService
      */
-    private $config_service;
+    private $configService;
 
     /**
      * @var RosterManagementStrategy[]
@@ -49,13 +49,13 @@ class MemberService
     /**
      * Constructor.
      *
-     * @param ConfigService $config_service
+     * @param ConfigService $configService
      */
-    public function __construct(ConfigService $config_service)
+    public function __construct(ConfigService $configService)
     {
-        $this->config_service = $config_service;
+        $this->configService = $configService;
         $this->config = \OrgManagement\Config\OrgManConfig::get();
-        $this->init_strategies();
+        $this->initStrategies();
     }
 
     /**
@@ -64,7 +64,7 @@ class MemberService
      * @param string $cache_key The cache key.
      * @return mixed|false Cached data or false if not found/disabled.
      */
-    private function get_cached_data($cache_key)
+    private function getCachedData($cache_key)
     {
         if (!\OrgManagement\Helpers\ConfigHelper::is_cache_enabled()) {
             return false;
@@ -80,7 +80,7 @@ class MemberService
      * @param mixed $data The data to cache.
      * @return void
      */
-    private function set_cached_data($cache_key, $data)
+    private function setCachedData($cache_key, $data)
     {
         if (\OrgManagement\Helpers\ConfigHelper::is_cache_enabled()) {
             $cache_duration = \OrgManagement\Helpers\ConfigHelper::get_cache_duration();
@@ -91,7 +91,7 @@ class MemberService
     /**
      * Initialize the available strategies.
      */
-    private function init_strategies()
+    private function initStrategies()
     {
         $this->strategies['cascade'] = new Strategies\CascadeStrategy();
         $this->strategies['direct'] = new Strategies\DirectAssignmentStrategy();
@@ -104,9 +104,9 @@ class MemberService
      *
      * @return RosterManagementStrategy
      */
-    private function get_strategy()
+    private function getStrategy()
     {
-        $mode = $this->config_service->get_roster_mode();
+        $mode = $this->configService->getRosterMode();
 
         return $this->strategies[$mode] ?? $this->strategies['cascade'];
     }
@@ -118,9 +118,9 @@ class MemberService
      * @param array  $member_data Data for the new member.
      * @return array|\WP_Error
      */
-    public function add_member($org_id, $member_data, $context = [])
+    public function addMember($org_id, $member_data, $context = [])
     {
-        return $this->get_strategy()->add_member($org_id, $member_data, $context);
+        return $this->getStrategy()->addMember($org_id, $member_data, $context);
     }
 
     /**
@@ -131,9 +131,9 @@ class MemberService
      * @param array  $context Additional context for the operation.
      * @return array|\WP_Error
      */
-    public function remove_member($org_id, $person_uuid, $context = [])
+    public function removeMember($org_id, $person_uuid, $context = [])
     {
-        return $this->get_strategy()->remove_member($org_id, $person_uuid, $context);
+        return $this->getStrategy()->removeMember($org_id, $person_uuid, $context);
     }
 
     /**
@@ -144,9 +144,9 @@ class MemberService
      * @param array  $roles The roles to check for.
      * @return bool True if the user has at least one of the roles, false otherwise.
      */
-    public function has_role($person_uuid, $org_id, $roles)
+    public function hasRole($person_uuid, $org_id, $roles)
     {
-        return $this->person_has_org_roles($person_uuid, $roles, $org_id, false);
+        return $this->personHasOrgRoles($person_uuid, $roles, $org_id, false);
     }
 
     /**
@@ -158,14 +158,14 @@ class MemberService
      * @param bool         $all_true Default: false. If true, all roles must be in the user's roles. If false, at least one role must be in the user's roles.
      * @return bool True if condition met, false if not.
      */
-    public function person_has_org_roles($person_uuid, $roles, $org_id, $all_true = false)
+    public function personHasOrgRoles($person_uuid, $roles, $org_id, $all_true = false)
     {
         if (empty($person_uuid) || empty($roles) || empty($org_id)) {
             return false;
         }
 
         // Get current person roles for the organization
-        $current_roles = $this->permission_service()->get_person_current_roles_by_org_id($person_uuid, $org_id);
+        $current_roles = $this->permissionService()->getPersonCurrentRolesByOrgId($person_uuid, $org_id);
 
         if (!is_array($current_roles) || empty($current_roles)) {
             return false;
@@ -213,7 +213,7 @@ class MemberService
      *
      * @return PermissionService
      */
-    private function permission_service(): PermissionService
+    private function permissionService(): PermissionService
     {
         if (!isset($this->permissionService)) {
             $this->permissionService = new PermissionService();
@@ -241,7 +241,7 @@ class MemberService
      *
      * @return MembershipService
      */
-    private function membership_service(): MembershipService
+    private function membershipService(): MembershipService
     {
         if (!isset($this->membershipService)) {
             $this->membershipService = new MembershipService();
@@ -269,12 +269,12 @@ class MemberService
         $size = max(1, (int) ($args['size'] ?? $defaultPageSize));
         $searchTerm = isset($args['query']) ? sanitize_text_field((string) $args['query']) : '';
 
-        $logger = wc_get_logger();
+        $logger = wc_getLogger();
 
         // Cache initial load only (no search term)
         if (empty($searchTerm)) {
             $cache_key = 'orgman_members_initial_' . md5($membershipUuid . '_' . $page . '_' . $size);
-            $cached_data = $this->get_cached_data($cache_key);
+            $cached_data = $this->getCachedData($cache_key);
 
             if (false !== $cached_data) {
                 return $cached_data;
@@ -283,7 +283,7 @@ class MemberService
 
         if ('' !== $searchTerm) {
             try {
-                $searchResult = $this->membership_service()->membership_search_members(
+                $searchResult = $this->membershipService()->membershipSearchMembers(
                     $membershipUuid,
                     [
                         'page'  => $page,
@@ -372,7 +372,7 @@ class MemberService
                     // Cache initial load only (no search term)
                     if (empty($searchTerm)) {
                         $cache_key = 'orgman_members_initial_' . md5($membershipUuid . '_' . $page . '_' . $size);
-                        $this->set_cached_data($cache_key, $normalized);
+                        $this->setCachedData($cache_key, $normalized);
                     }
 
                     return $normalized;
@@ -402,7 +402,7 @@ class MemberService
 
                 $normalizedFallback = $this->normalizeMembershipResponse($fallbackResponse);
                 if (is_array($normalizedFallback) && isset($normalizedFallback['data']) && is_array($normalizedFallback['data'])) {
-                    $locallyFiltered = $this->filter_membership_response_by_query($normalizedFallback, $searchTerm);
+                    $locallyFiltered = $this->filterMembershipResponseByQuery($normalizedFallback, $searchTerm);
 
                     return $locallyFiltered;
                 }
@@ -418,12 +418,12 @@ class MemberService
             }
         }
 
-        $response = $this->membership_service()->get_org_membership_members($membershipUuid, $args);
+        $response = $this->membershipService()->getOrgMembershipMembers($membershipUuid, $args);
         if (is_wp_error($response)) {
             /** @var \WP_Error $response */
             $error_message = $response->get_error_message();
-            wc_get_logger()->error(
-                '[OrgMan] MembershipService::get_org_membership_members() returned error',
+            wc_getLogger()->error(
+                '[OrgMan] MembershipService::getOrgMembershipMembers() returned error',
                 [
                     'source'          => 'wicket-orgman',
                     'membership_uuid' => $membershipUuid,
@@ -438,7 +438,7 @@ class MemberService
         // Cache initial load only (no search term)
         if (empty($searchTerm) && null !== $final_response) {
             $cache_key = 'orgman_members_initial_' . md5($membershipUuid . '_' . $page . '_' . $size);
-            $this->set_cached_data($cache_key, $final_response);
+            $this->setCachedData($cache_key, $final_response);
         }
 
         return $final_response;
@@ -451,7 +451,7 @@ class MemberService
      * @param string $query
      * @return array
      */
-    private function filter_membership_response_by_query(array $response, string $query): array
+    private function filterMembershipResponseByQuery(array $response, string $query): array
     {
         $query = strtolower(trim($query));
         if ($query === '') {
@@ -790,7 +790,7 @@ class MemberService
      * @param string $membershipUuid The membership UUID.
      * @return void
      */
-    public function clear_members_cache(string $membershipUuid): void
+    public function clearMembersCache(string $membershipUuid): void
     {
         if (empty($membershipUuid)) {
             return;
@@ -818,7 +818,7 @@ class MemberService
      *     query: string
      * }
      */
-    public function get_members(string $membershipUuid, string $orgUuid, array $args = []): array
+    public function getMembers(string $membershipUuid, string $orgUuid, array $args = []): array
     {
         $page = max(1, (int) ($args['page'] ?? 1));
         $size = max(1, (int) ($args['size'] ?? 15));
@@ -853,7 +853,7 @@ class MemberService
      * @param array $args Optional args (page, size, query).
      * @return array
      */
-    public function get_group_members(string $group_uuid, string $org_identifier, array $args = []): array
+    public function getGroupMembers(string $group_uuid, string $org_identifier, array $args = []): array
     {
         $page = max(1, (int) ($args['page'] ?? 1));
         $size = max(1, (int) ($args['size'] ?? 15));
@@ -862,7 +862,7 @@ class MemberService
 
         $group_service = new GroupService();
 
-        return $group_service->get_group_members($group_uuid, $org_identifier, [
+        return $group_service->getGroupMembers($group_uuid, $org_identifier, [
             'page' => $page,
             'size' => $size,
             'query' => $query,
@@ -879,11 +879,11 @@ class MemberService
      * @param array  $args           Optional arguments (page, size).
      * @return array
      */
-    public function search_members(string $membershipUuid, string $orgUuid, string $search, array $args = []): array
+    public function searchMembers(string $membershipUuid, string $orgUuid, string $search, array $args = []): array
     {
         $args['query'] = $search;
 
-        return $this->get_members($membershipUuid, $orgUuid, $args);
+        return $this->getMembers($membershipUuid, $orgUuid, $args);
     }
 
     /**
@@ -895,7 +895,7 @@ class MemberService
      */
     private function prepareMembersResult(?array $membersResponse, array $context): array
     {
-        $logger = wc_get_logger();
+        $logger = wc_getLogger();
 
         $page = max(1, (int) ($context['page'] ?? 1));
         $size = max(1, (int) ($context['size'] ?? 15));
@@ -984,7 +984,7 @@ class MemberService
 
             if (!$personData && $personUuid) {
                 try {
-                    $person = $this->get_person_by_id($personUuid);
+                    $person = $this->getPersonById($personUuid);
                     if (is_array($person) && isset($person['data']['attributes'])) {
                         $personData = $person;
                         $personAttributes = $person['data']['attributes'];
@@ -1239,7 +1239,7 @@ class MemberService
         }
 
         if (null === $body) {
-            wc_get_logger()->debug(
+            wc_getLogger()->debug(
                 '[OrgMan] Membership response had no body to decode',
                 [
                     'source'   => 'wicket-orgman',
@@ -1252,7 +1252,7 @@ class MemberService
 
         $decoded = json_decode($body, true);
         if (json_last_error() !== JSON_ERROR_NONE) {
-            wc_get_logger()->warning(
+            wc_getLogger()->warning(
                 '[OrgMan] Unable to decode membership response JSON',
                 [
                     'source' => 'wicket-orgman',
@@ -1277,7 +1277,7 @@ class MemberService
     {
         if (!empty($personUuid) && !empty($orgUuid)) {
             try {
-                $permissionRoles = $this->permission_service()->get_person_current_roles_by_org_id((string) $personUuid, (string) $orgUuid);
+                $permissionRoles = $this->permissionService()->getPersonCurrentRolesByOrgId((string) $personUuid, (string) $orgUuid);
                 if (is_array($permissionRoles) && !empty($permissionRoles)) {
                     return $this->normalizeRoleList($permissionRoles);
                 }
@@ -1361,8 +1361,7 @@ class MemberService
         }
 
         try {
-            // Get person data directly from API
-            $person = $this->get_person_by_id($personUuid);
+            $person = $this->getPersonById($personUuid);
 
             if (!is_array($person) || !isset($person['data']['attributes'])) {
                 return false;
@@ -1379,7 +1378,7 @@ class MemberService
 
         } catch (\Throwable $e) {
             // Log error for debugging but return false for safety
-            $logger = wc_get_logger();
+            $logger = wc_getLogger();
             $logger->warning(
                 '[OrgMan] Failed to check user confirmation status',
                 [
@@ -1420,7 +1419,7 @@ class MemberService
      * @param string $personUuid The person UUID
      * @return array|null Person data or null on failure
      */
-    public function get_person_by_id($personUuid)
+    public function getPersonById($personUuid)
     {
         if (!function_exists('wicket_api_client')) {
             return null;
@@ -1447,7 +1446,7 @@ class MemberService
      * @param array $roles Array of role slugs to assign
      * @return array|WP_ERROR Updated member data or WP_Error on failure
      */
-    public function update_member_roles($personUuid, $orgUuid, $membershipUuid, $roles)
+    public function updateMemberRoles($personUuid, $orgUuid, $membershipUuid, $roles)
     {
         if (!function_exists('wicket_api_client')) {
             return new \WP_Error('api_unavailable', 'Wicket API client is not available.');
@@ -1459,7 +1458,7 @@ class MemberService
 
         try {
             $client = wicket_api_client();
-            $logger = function_exists('wc_get_logger') ? wc_get_logger() : null;
+            $logger = function_exists('wc_getLogger') ? wc_getLogger() : null;
             $log_context = ['source' => 'wicket-orgman', 'action' => 'update_member_roles'];
 
             // Get current person memberships (paginate to avoid selecting stale/inactive records on partial pages)
@@ -1606,10 +1605,10 @@ class MemberService
             ];
 
             // Update roles using the correct API approach
-            // Based on legacy wicket_assign_role and wicket_remove_role functions
+            // Based on legacy wicket_assignRole and wicket_remove_role functions
 
             // Get current person data to find existing role IDs
-            $person_data = $this->get_person_by_id($personUuid);
+            $person_data = $this->getPersonById($personUuid);
             if (is_wp_error($person_data)) {
                 return new \WP_Error('person_not_found', 'Unable to retrieve person data');
             }
@@ -1688,7 +1687,7 @@ class MemberService
             }
 
             // Get person data for response
-            $person_data = $this->get_person_by_id($personUuid);
+            $person_data = $this->getPersonById($personUuid);
 
             return [
                 'success' => true,
@@ -1710,7 +1709,7 @@ class MemberService
      * @param string $relationshipType The new relationship type
      * @return array|WP_Error Updated member data or WP_Error on failure
      */
-    public function update_member_relationship($personUuid, $orgUuid, $relationshipType)
+    public function updateMemberRelationship($personUuid, $orgUuid, $relationshipType)
     {
         if (!function_exists('wicket_api_client')) {
             return new \WP_Error('api_unavailable', 'Wicket API client is not available.');
@@ -1765,15 +1764,15 @@ class MemberService
                 // Add new relationship-based roles
                 if (!empty($roles_to_add)) {
                     foreach ($roles_to_add as $role) {
-                        if (function_exists('wicket_assign_role')) {
-                            wicket_assign_role($personUuid, $role, $orgUuid);
+                        if (function_exists('wicket_assignRole')) {
+                            wicket_assignRole($personUuid, $role, $orgUuid);
                         }
                     }
                 }
             }
 
             // Get person data for response
-            $person_data = $this->get_person_by_id($personUuid);
+            $person_data = $this->getPersonById($personUuid);
 
             return [
                 'success' => true,
@@ -1795,7 +1794,7 @@ class MemberService
      * @param string $description The relationship description
      * @return true|WP_Error True on success, WP_Error on failure
      */
-    public function update_member_description($personUuid, $orgUuid, $description)
+    public function updateMemberDescription($personUuid, $orgUuid, $description)
     {
         if (!function_exists('wicket_api_client')) {
             return new \WP_Error('api_unavailable', 'Wicket API client is not available.');

@@ -192,12 +192,12 @@ add_action('after_setup_theme', static function (): void {
     }
 
     if (class_exists(OrgMan::class)) {
-        OrgMan::get_instance();
+        OrgMan::getInstance();
     }
 }, 20);
 ```
 
-Important: register `wicket/acc/orgman/config` before `OrgMan::get_instance()` so initial service/config boot uses your overrides.
+Important: register `wicket/acc/orgman/config` before `OrgMan::getInstance()` so initial service/config boot uses your overrides.
 
 ## 3) Theme Styling Overrides (Recommended)
 
@@ -278,7 +278,7 @@ add_filter('wicket/acc/orgman/config', static function (array $config): array {
    - Standard WP: `vendor/industrialdev/wicket-lib-org-roster`
    - Bedrock public copy: `web/app/libs/wicket-lib-org-roster`
 2. Composer autoloader is loaded from one of the bootstrap candidates.
-3. `OrgMan::get_instance()` runs on `after_setup_theme`.
+3. `OrgMan::getInstance()` runs on `after_setup_theme`.
 4. My Account CPT page slug exists: `organization-management`.
 5. User has relevant memberships/roles in Wicket.
 6. No fatal errors in PHP/WP logs.

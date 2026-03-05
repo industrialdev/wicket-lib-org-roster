@@ -26,7 +26,7 @@ abstract class ApiController
     /**
      * Register the routes for this controller.
      */
-    abstract public function register_routes();
+    abstract public function registerRoutes();
 
     /**
      * Check if a user has the required capability.
@@ -34,12 +34,12 @@ abstract class ApiController
      * @param \WP_REST_Request $request The request object.
      * @return bool|\WP_Error True if the user has the capability, WP_Error otherwise.
      */
-    public function check_permission(\WP_REST_Request $request)
+    public function checkPermission(\WP_REST_Request $request)
     {
         $org_id = sanitize_text_field($request->get_param('org_id'));
 
         // Check if user has permission to manage this specific organization
-        $has_permission = $this->user_can_manage_organization($org_id);
+        $has_permission = $this->userCanManageOrganization($org_id);
 
         if (!$has_permission) {
             return new \WP_Error(
@@ -59,7 +59,7 @@ abstract class ApiController
      * @param \WP_REST_Request $request The request object.
      * @return bool|\WP_Error True if the user has the capability, WP_Error otherwise.
      */
-    public function check_logged_in(\WP_REST_Request $request)
+    public function checkLoggedIn(\WP_REST_Request $request)
     {
         // Use the string callback approach for cleaner implementation
         return is_user_logged_in();
@@ -71,7 +71,7 @@ abstract class ApiController
      * @param string $org_id The organization ID to check.
      * @return bool True if user can manage the organization, false otherwise.
      */
-    protected function user_can_manage_organization($org_id)
+    protected function userCanManageOrganization($org_id)
     {
         if (empty($org_id)) {
             return false;
@@ -89,7 +89,7 @@ abstract class ApiController
         }
 
         // Check if user has organization-specific roles
-        $org_roles = $this->get_org_roles_for_person($user->user_login, $org_id);
+        $org_roles = $this->getOrgRolesForPerson($user->user_login, $org_id);
 
         if (!empty($org_roles)) {
             // Define the roles that allow business information management
@@ -118,7 +118,7 @@ abstract class ApiController
      * @param string $org_id The organization ID.
      * @return array Array of role names.
      */
-    protected function get_org_roles_for_person($person_uuid, $org_id)
+    protected function getOrgRolesForPerson($person_uuid, $org_id)
     {
         if (empty($person_uuid) || empty($org_id)) {
             return [];
@@ -126,8 +126,8 @@ abstract class ApiController
 
         // Use PermissionService directly
         if (class_exists('\OrgManagement\Services\PermissionService')) {
-            $permission_service = new \OrgManagement\Services\PermissionService();
-            $org_roles = $permission_service->getOrgRolesForPerson($person_uuid, $org_id);
+            $permissionService = new \OrgManagement\Services\PermissionService();
+            $org_roles = $permissionService->getOrgRolesForPerson($person_uuid, $org_id);
 
             return is_array($org_roles) ? $org_roles : [];
         }
@@ -143,9 +143,9 @@ abstract class ApiController
      * @param int   $status The HTTP status code.
      * @return \WP_REST_Response
      */
-    protected function success($data, $status = 200)
+    protected function successResponse($data, $status = 200)
     {
-        return new \WP_REST_Response(['success' => true, 'data' => $data], $status);
+        return $this->htmlResponse(['success' => true, 'data' => $data], $status);
     }
 
     /**
@@ -158,6 +158,6 @@ abstract class ApiController
      */
     protected function error($error_code, $error_message, $status = 400)
     {
-        return new \WP_REST_Response(['success' => false, 'error' => ['code' => $error_code, 'message' => $error_message]], $status);
+        return $this->htmlResponse(['success' => false, 'error' => ['code' => $error_code, 'message' => $error_message]], $status);
     }
 }

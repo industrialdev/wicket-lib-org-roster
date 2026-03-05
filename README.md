@@ -26,7 +26,7 @@ add_action('after_setup_theme', static function (): void {
     });
 
     if (class_exists(OrgMan::class)) {
-        OrgMan::get_instance();
+        OrgMan::getInstance();
     }
 }, 20);
 ```
@@ -41,7 +41,21 @@ Supported strategy keys:
 - `groups`
 - `membership_cycle`
 
-Strategy resolution is runtime-configured via `ConfigService::get_roster_mode()`.
+Strategy resolution is runtime-configured via `ConfigService::getRosterMode()`.
+
+## Coding Conventions
+
+- PHP code follows PSR-12.
+- Class names use PascalCase.
+- Method and property names use camelCase across services, strategies, and helpers.
+- Internal snake_case compatibility wrappers are not maintained, except `OrgMan::get_instance()` for theme compatibility.
+- External WordPress/WooCommerce/Wicket API names remain unchanged when upstream uses underscores.
+
+## Debug Markup Notes
+
+- Injected OrgMan content includes debug comments inside the `ORGMAN:BEGIN/END` block:
+  - library path
+  - library version from `Helper::getLibraryVersion()`
 
 ## Documentation
 

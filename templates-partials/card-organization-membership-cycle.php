@@ -2,7 +2,7 @@
     role="listitem">
     <?php
     $can_open_org = $can_edit_org || $is_membership_manager;
-    $title_url = OrgManagement\Helpers\Helper::get_my_account_page_url('organization-management', '/my-account/organization-management/') . '?org_uuid=' . urlencode($org_id);
+    $title_url = OrgManagement\Helpers\Helper::getMyAccountPageUrl('organization-management', '/my-account/organization-management/') . '?org_uuid=' . urlencode($org_id);
     ?>
     <h2 class="wt_text-2xl wt_mb-3">
         <?php if ($can_open_org): ?>
@@ -86,7 +86,7 @@
                 <div class="wt_flex wt_items-center wt_gap-4 wt_mt-4">
                     <?php if ($can_edit_org): ?>
                         <?php
-                    $profile_url_base = OrgManagement\Helpers\Helper::get_my_account_page_url('organization-profile', '/my-account/organization-profile/');
+                    $profile_url_base = OrgManagement\Helpers\Helper::getMyAccountPageUrl('organization-profile', '/my-account/organization-profile/');
                         $profile_params = ['org_uuid' => $org_id];
                         if ($roster_mode === 'membership_cycle' && $entry_membership_uuid !== '') {
                             $profile_params['membership_uuid'] = $entry_membership_uuid;
@@ -107,7 +107,7 @@
 
                     <?php if ($is_membership_manager): ?>
                         <?php
-                        $members_url_base = OrgManagement\Helpers\Helper::get_my_account_page_url('organization-members', '/my-account/organization-members/');
+                        $members_url_base = OrgManagement\Helpers\Helper::getMyAccountPageUrl('organization-members', '/my-account/organization-members/');
                         $members_params = ['org_uuid' => $org_id];
                         if ($roster_mode === 'membership_cycle' && $entry_membership_uuid !== '') {
                             $members_params['membership_uuid'] = $entry_membership_uuid;

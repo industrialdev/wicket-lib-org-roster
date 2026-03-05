@@ -20,16 +20,16 @@ class SubsidiaryService
     /**
      * @var ConfigService
      */
-    private $config_service;
+    private $configService;
 
     /**
      * Constructor.
      *
-     * @param ConfigService $config_service
+     * @param ConfigService $configService
      */
-    public function __construct(ConfigService $config_service)
+    public function __construct(ConfigService $configService)
     {
-        $this->config_service = $config_service;
+        $this->configService = $configService;
     }
 
     /**
@@ -38,7 +38,7 @@ class SubsidiaryService
      * @param string $org_id Organization UUID.
      * @return array|WP_Error Array of subsidiaries or WP_Error on failure.
      */
-    public function get_subsidiaries($org_id)
+    public function getSubsidiaries($org_id)
     {
         if (empty($org_id)) {
             return new WP_Error('missing_org_id', __('Organization ID is required.', 'wicket-acc'));
@@ -56,7 +56,7 @@ class SubsidiaryService
                     if ($subsidiary['type'] === 'organizations') {
                         $subsidiary_info = wicket_get_organization($subsidiary['id']);
                         if ($subsidiary_info && !is_wp_error($subsidiary_info)) {
-                            $subsidiaries[] = $this->format_subsidiary_data($subsidiary_info);
+                            $subsidiaries[] = $this->formatSubsidiaryData($subsidiary_info);
                         }
                     }
                 }
@@ -73,7 +73,7 @@ class SubsidiaryService
      * @param string $subsidiary_org_id Subsidiary organization UUID.
      * @return array|WP_Error Result data or WP_Error on failure.
      */
-    public function add_subsidiary($parent_org_id, $subsidiary_org_id)
+    public function addSubsidiary($parent_org_id, $subsidiary_org_id)
     {
         if (empty($parent_org_id)) {
             return new WP_Error('missing_parent_org_id', __('Parent organization ID is required.', 'wicket-acc'));
@@ -84,16 +84,16 @@ class SubsidiaryService
         }
 
         // Validate that both organizations exist
-        if (!$this->validate_organization_exists($parent_org_id)) {
+        if (!$this->validateOrganizationExists($parent_org_id)) {
             return new WP_Error('parent_org_not_found', __('Parent organization not found.', 'wicket-acc'));
         }
 
-        if (!$this->validate_organization_exists($subsidiary_org_id)) {
+        if (!$this->validateOrganizationExists($subsidiary_org_id)) {
             return new WP_Error('subsidiary_org_not_found', __('Subsidiary organization not found.', 'wicket-acc'));
         }
 
         // Check if relationship already exists
-        if ($this->is_subsidiary_relationship($parent_org_id, $subsidiary_org_id)) {
+        if ($this->isSubsidiaryRelationship($parent_org_id, $subsidiary_org_id)) {
             return new WP_Error('relationship_exists', __('This subsidiary relationship already exists.', 'wicket-acc'));
         }
 
@@ -127,7 +127,7 @@ class SubsidiaryService
      * @param string $subsidiary_org_id Subsidiary organization UUID.
      * @return array|WP_Error Result data or WP_Error on failure.
      */
-    public function remove_subsidiary($parent_org_id, $subsidiary_org_id)
+    public function removeSubsidiary($parent_org_id, $subsidiary_org_id)
     {
         if (empty($parent_org_id)) {
             return new WP_Error('missing_parent_org_id', __('Parent organization ID is required.', 'wicket-acc'));
@@ -138,7 +138,7 @@ class SubsidiaryService
         }
 
         // Check if relationship exists
-        if (!$this->is_subsidiary_relationship($parent_org_id, $subsidiary_org_id)) {
+        if (!$this->isSubsidiaryRelationship($parent_org_id, $subsidiary_org_id)) {
             return new WP_Error('relationship_not_found', __('Subsidiary relationship not found.', 'wicket-acc'));
         }
 
@@ -172,7 +172,7 @@ class SubsidiaryService
      * @param string $current_org_id Current organization ID to exclude from results.
      * @return array Array of searchable organizations.
      */
-    public function search_subsidiary_candidates($search_term, $current_org_id)
+    public function searchSubsidiaryCandidates($search_term, $current_org_id)
     {
         $candidates = [];
 
@@ -183,8 +183,8 @@ class SubsidiaryService
             if (!is_wp_error($search_results) && isset($search_results['data'])) {
                 foreach ($search_results['data'] as $org) {
                     // Exclude the current organization and its existing subsidiaries
-                    if ($org['id'] !== $current_org_id && !$this->is_subsidiary_relationship($current_org_id, $org['id'])) {
-                        $candidates[] = $this->format_subsidiary_data(['data' => $org]);
+                    if ($org['id'] !== $current_org_id && !$this->isSubsidiaryRelationship($current_org_id, $org['id'])) {
+                        $candidates[] = $this->formatSubsidiaryData(['data' => $org]);
                     }
                 }
             }
@@ -199,7 +199,7 @@ class SubsidiaryService
      * @param string $org_id Organization UUID.
      * @return bool True if organization exists.
      */
-    private function validate_organization_exists($org_id)
+    private function validateOrganizationExists($org_id)
     {
         if (!function_exists('wicket_get_organization')) {
             return false;
@@ -217,9 +217,9 @@ class SubsidiaryService
      * @param string $subsidiary_org_id Subsidiary organization UUID.
      * @return bool True if relationship exists.
      */
-    private function is_subsidiary_relationship($parent_org_id, $subsidiary_org_id)
+    private function isSubsidiaryRelationship($parent_org_id, $subsidiary_org_id)
     {
-        $subsidiaries = $this->get_subsidiaries($parent_org_id);
+        $subsidiaries = $this->getSubsidiaries($parent_org_id);
 
         foreach ($subsidiaries as $subsidiary) {
             if ($subsidiary['id'] === $subsidiary_org_id) {
@@ -236,7 +236,7 @@ class SubsidiaryService
      * @param array $org_data Raw organization data from MDP.
      * @return array Formatted subsidiary data.
      */
-    private function format_subsidiary_data($org_data)
+    private function formatSubsidiaryData($org_data)
     {
         if (!isset($org_data['data'])) {
             return [];
@@ -261,7 +261,7 @@ class SubsidiaryService
      * @param array  $file_data Uploaded file data.
      * @return array|WP_Error Result data or WP_Error on failure.
      */
-    public function process_bulk_subsidiary_upload($parent_org_id, $file_data)
+    public function processBulkSubsidiaryUpload($parent_org_id, $file_data)
     {
         if (empty($parent_org_id)) {
             return new WP_Error('missing_org_id', __('Organization ID is required.', 'wicket-acc'));

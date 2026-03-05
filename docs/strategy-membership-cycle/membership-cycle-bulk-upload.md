@@ -6,7 +6,7 @@
   - `ui.member_list.show_bulk_upload = true` (default `false`)
   - current user can add members under membership-cycle permissions
 - Endpoint: `templates-partials/process/bulk-upload-members.php`
-- The process path uses cycle-aware add behavior by passing `membership_uuid` into `MemberService->add_member()`.
+- The process path uses cycle-aware add behavior by passing `membership_uuid` into `MemberService->addMember()`.
 
 ## Current CSV Contract
 - Required columns:

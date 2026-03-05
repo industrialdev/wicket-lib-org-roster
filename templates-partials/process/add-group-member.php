@@ -18,7 +18,7 @@ if ('POST' !== strtoupper($request_method)) {
     return;
 }
 
-$logger = wc_get_logger();
+$logger = wc_getLogger();
 $log_context = [
     'source' => 'wicket-orgman',
     'action' => 'add_group_member',
@@ -61,7 +61,7 @@ $log_context['member_email'] = $member_data['email'];
 
 $group_service = new GroupService();
 $current_user = wp_get_current_user();
-$access = $group_service->can_manage_group($group_uuid, (string) $current_user->user_login);
+$access = $group_service->canManageGroup($group_uuid, (string) $current_user->user_login);
 if (empty($access['allowed'])) {
     $logger->warning('[OrgRoster] Add group member access denied', $log_context);
     status_header(200);
@@ -72,12 +72,12 @@ if (empty($access['allowed'])) {
 
 // Enforce seat availability when org membership is available.
 if (!empty($org_uuid)) {
-    $membership_service = new MembershipService();
-    $membership_uuid = $membership_service->getMembershipForOrganization($org_uuid);
+    $membershipService = new MembershipService();
+    $membership_uuid = $membershipService->getMembershipForOrganization($org_uuid);
     if ($membership_uuid) {
-        $membership_data = $membership_service->getOrgMembershipData($membership_uuid);
+        $membership_data = $membershipService->getOrgMembershipData($membership_uuid);
         if ($membership_data && isset($membership_data['data']['attributes'])) {
-            $max_seats = $membership_service->getEffectiveMaxAssignments($membership_data);
+            $max_seats = $membershipService->getEffectiveMaxAssignments($membership_data);
             $active_seats = (int) ($membership_data['data']['attributes']['active_assignments_count'] ?? 0);
             if ($max_seats !== null && $active_seats >= (int) $max_seats) {
                 $logger->info('[OrgRoster] Add group member blocked by seat limit', array_merge($log_context, [
@@ -93,15 +93,15 @@ if (!empty($org_uuid)) {
     }
 }
 
-$config_service = new ConfigService();
-$member_service = new MemberService($config_service);
+$configService = new ConfigService();
+$member_service = new MemberService($configService);
 
 $context = [
     'group_uuid' => $group_uuid,
     'role' => $role,
 ];
 
-$result = $member_service->add_member($org_uuid, $member_data, $context);
+$result = $member_service->addMember($org_uuid, $member_data, $context);
 if (is_wp_error($result)) {
     $logger->error('[OrgRoster] Add group member failed', array_merge($log_context, [
         'error' => $result->get_error_message(),

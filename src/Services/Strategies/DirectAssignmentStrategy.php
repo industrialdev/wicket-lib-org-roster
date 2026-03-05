@@ -59,9 +59,9 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
      */
     private $logger = null;
 
-    public function add_member($org_id, $member_data, $context = [])
+    public function addMember($org_id, $member_data, $context = [])
     {
-        $logger = $this->get_logger();
+        $logger = $this->getLogger();
         $log_context = [
             'source' => 'wicket-orgman',
             'strategy' => 'direct',
@@ -72,7 +72,7 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
         try {
             $logger->info('[OrgMan] Direct strategy add_member invoked', $log_context);
 
-            $person_uuid = $this->person_service()->createOrUpdatePerson($member_data);
+            $person_uuid = $this->personService()->createOrUpdatePerson($member_data);
             if (is_wp_error($person_uuid)) {
                 $logger->error('[OrgMan] Failed to create/update person for member addition', array_merge($log_context, [
                     'error' => $person_uuid->get_error_message(),
@@ -86,7 +86,7 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
             // Get configuration for member addition settings
             $config = \OrgManagement\Config\OrgManConfig::get();
             $base_member_role = $config['member_addition']['base_member_role'] ?? 'member';
-            $auto_assign_roles = $config['member_addition']['auto_assign_roles'] ?? [];
+            $auto_assignRoles = $config['member_addition']['auto_assignRoles'] ?? [];
 
             // Use relationship type from context if provided, otherwise use config default
             $relationship_type = !empty($context['relationship_type'])
@@ -102,7 +102,7 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
                 // Future enhancement: map to actual Wicket relationship types if needed
             }
 
-            $membership_uuid = $this->resolve_membership_uuid($org_id, $context);
+            $membership_uuid = $this->resolveMembershipUuid($org_id, $context);
             if (is_wp_error($membership_uuid)) {
                 $logger->error('[OrgMan] Unable to resolve membership UUID for organization', array_merge($log_context, [
                     'error' => $membership_uuid->get_error_message(),
@@ -118,24 +118,34 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
             }
 
             if (!$has_membership) {
-                $connection_payload = $this->connectionService()->buildConnectionPayload(
-                    $person_uuid,
-                    $org_id,
-                    'person_to_organization',
-                    $relationship_type,
-                    $relationship_description
-                );
+                $has_relationship = $this->connectionService()->personHasRelationship($person_uuid, $org_id);
+                if (is_wp_error($has_relationship)) {
+                    return $has_relationship;
+                }
 
-                $response_connection = $this->connectionService()->createConnection($connection_payload);
+                if (!$has_relationship) {
+                    $connection_payload = $this->connectionService()->buildConnectionPayload(
+                        $person_uuid,
+                        $org_id,
+                        'person_to_organization',
+                        $relationship_type,
+                        $relationship_description
+                    );
 
-                if (isset($response_connection['error']) && $response_connection['error'] === true) {
-                    return new WP_Error('connection_creation_failed', $response_connection['message'] ?? 'Failed to add employee connection');
+                    $response_connection = $this->connectionService()->createConnection($connection_payload);
+
+                    if (is_wp_error($response_connection)) {
+                        return new WP_Error(
+                            'connection_creation_failed',
+                            $response_connection->get_error_message() ?? 'Failed to add employee connection'
+                        );
+                    }
                 }
             }
 
             // Assign person to membership seat to give them active membership
 
-            $membership_assignment_result = $this->assign_person_to_membership_seat($person_uuid, $membership_uuid);
+            $membership_assignment_result = $this->assignPersonToMembershipSeat($person_uuid, $membership_uuid);
             if (is_wp_error($membership_assignment_result)) {
                 $logger->error('[OrgMan] Membership assignment failed', array_merge($log_context, [
                     'error' => $membership_assignment_result->get_error_message(),
@@ -146,7 +156,7 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
             $logger->info('[OrgMan] Assigned person to membership seat', $log_context);
 
             // Assign base member role from config
-            $role_result = $this->assign_role($person_uuid, $base_member_role, $org_id);
+            $role_result = $this->assignRole($person_uuid, $base_member_role, $org_id);
             if (is_wp_error($role_result)) {
                 $logger->error('[OrgMan] Base member role assignment failed', array_merge($log_context, [
                     'role' => $base_member_role,
@@ -160,15 +170,15 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
             ]));
 
             // Assign site-specific auto-roles from config
-            if (!empty($auto_assign_roles)) {
+            if (!empty($auto_assignRoles)) {
                 $logger->debug('[OrgMan] Assigning configured auto roles', array_merge($log_context, [
-                    'auto_roles' => $auto_assign_roles,
+                    'auto_roles' => $auto_assignRoles,
                 ]));
 
-                $auto_roles_result = $this->assign_additional_roles($person_uuid, $org_id, $auto_assign_roles);
+                $auto_roles_result = $this->assignAdditionalRoles($person_uuid, $org_id, $auto_assignRoles);
                 if (is_wp_error($auto_roles_result)) {
                     $logger->error('[OrgMan] Auto-role assignment failed', array_merge($log_context, [
-                        'roles' => $auto_assign_roles,
+                        'roles' => $auto_assignRoles,
                         'error' => $auto_roles_result->get_error_message(),
                     ]));
 
@@ -178,7 +188,7 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
 
             // Assign any additional roles from the form
             $additional_roles = $context['roles'] ?? $member_data['roles'] ?? [];
-            $additional_result = $this->assign_additional_roles($person_uuid, $org_id, $additional_roles);
+            $additional_result = $this->assignAdditionalRoles($person_uuid, $org_id, $additional_roles);
             if (is_wp_error($additional_result)) {
                 $logger->error('[OrgMan] Additional role assignment failed', array_merge($log_context, [
                     'roles' => $additional_roles,
@@ -193,10 +203,10 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
                 ]));
             }
 
-            $this->log_touchpoint($person_uuid, $org_id, $member_data, $context);
+            $this->logTouchpoint($person_uuid, $org_id, $member_data, $context);
             $logger->debug('[OrgMan] Touchpoint logged for member addition', $log_context);
 
-            $email_result = $this->send_assignment_email($person_uuid, $org_id, [
+            $email_result = $this->sendAssignmentEmail($person_uuid, $org_id, [
                 'fallback_email' => $member_data['email'] ?? null,
             ]);
             if (is_wp_error($email_result)) {
@@ -230,7 +240,7 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
      *
      * @return MembershipService
      */
-    private function membership_service(): MembershipService
+    private function membershipService(): MembershipService
     {
         if (!isset($this->membershipService)) {
             $this->membershipService = new MembershipService();
@@ -244,7 +254,7 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
      *
      * @return PersonService
      */
-    private function person_service(): PersonService
+    private function personService(): PersonService
     {
         if (!isset($this->personService)) {
             $this->personService = new PersonService();
@@ -274,7 +284,7 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
      * @param array  $context
      * @return string|WP_Error
      */
-    private function resolve_membership_uuid($org_id, array $context = [])
+    private function resolveMembershipUuid($org_id, array $context = [])
     {
         $org_id = sanitize_text_field((string) $org_id);
         if ('' === $org_id) {
@@ -283,7 +293,7 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
 
         $context_membership_uuid = sanitize_text_field((string) ($context['membership_uuid'] ?? $context['membership_id'] ?? ''));
         if ('' !== $context_membership_uuid) {
-            $membership_data = $this->membership_service()->getOrgMembershipData($context_membership_uuid);
+            $membership_data = $this->membershipService()->getOrgMembershipData($context_membership_uuid);
             if (empty($membership_data) || !is_array($membership_data)) {
                 return new WP_Error('invalid_membership_uuid', 'Membership UUID is invalid or unavailable.');
             }
@@ -296,7 +306,7 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
             return $context_membership_uuid;
         }
 
-        $membership_uuid = $this->membership_service()->getOrganizationMembershipUuid($org_id);
+        $membership_uuid = $this->membershipService()->getOrganizationMembershipUuid($org_id);
 
         if (empty($membership_uuid)) {
             return new WP_Error('no_membership', 'Could not find a valid corporate membership for this organization.');
@@ -313,9 +323,9 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
      * @param array|string $roles
      * @return true|WP_Error
      */
-    private function assign_additional_roles(string $person_uuid, string $org_id, $roles)
+    private function assignAdditionalRoles(string $person_uuid, string $org_id, $roles)
     {
-        $roles = $this->normalize_roles($roles);
+        $roles = $this->normalizeRoles($roles);
 
         // Filter out membership_owner if configured to prevent assignment
         $config = \OrgManagement\Config\OrgManConfig::get();
@@ -328,9 +338,9 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
         }
 
         foreach ($roles as $role) {
-            $result = $this->assign_role($person_uuid, $role, $org_id);
+            $result = $this->assignRole($person_uuid, $role, $org_id);
             if (is_wp_error($result)) {
-                $this->get_logger()->error('[OrgMan] Additional role assignment failed', [
+                $this->getLogger()->error('[OrgMan] Additional role assignment failed', [
                     'source' => 'wicket-orgman',
                     'strategy' => 'direct',
                     'person_uuid' => $person_uuid,
@@ -352,7 +362,7 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
      * @param array|string $roles
      * @return array
      */
-    private function normalize_roles($roles): array
+    private function normalizeRoles($roles): array
     {
         if (is_string($roles)) {
             $roles = array_map('trim', explode(',', $roles));
@@ -380,9 +390,9 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
      * @param string $membership_uuid
      * @return true|WP_Error
      */
-    private function assign_person_to_membership_seat(string $person_uuid, string $membership_uuid)
+    private function assignPersonToMembershipSeat(string $person_uuid, string $membership_uuid)
     {
-        $logger = $this->get_logger();
+        $logger = $this->getLogger();
         $context = [
             'source' => 'wicket-orgman',
             'strategy' => 'direct',
@@ -398,7 +408,7 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
 
         try {
             // Get organization membership data to pass to the assignment function
-            $membership_data = $this->membership_service()->getOrgMembershipData($membership_uuid);
+            $membership_data = $this->membershipService()->getOrgMembershipData($membership_uuid);
             if (is_wp_error($membership_data)) {
                 $logger->error('[OrgMan] Membership data lookup returned WP_Error', array_merge($context, [
                     'error' => $membership_data->get_error_message(),
@@ -490,14 +500,14 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
      * @param string $org_id
      * @return true|WP_Error
      */
-    private function assign_role(string $person_uuid, string $role, string $org_id)
+    private function assignRole(string $person_uuid, string $role, string $org_id)
     {
-        if (!function_exists('wicket_assign_role')) {
+        if (!function_exists('wicket_assignRole')) {
             return new WP_Error('missing_dependency', 'Role assignment helper is unavailable.');
         }
 
         try {
-            $result = wicket_assign_role($person_uuid, $role, $org_id);
+            $result = wicket_assignRole($person_uuid, $role, $org_id);
         } catch (\Throwable $e) {
             return new WP_Error('role_assignment_failed', $e->getMessage());
         }
@@ -514,7 +524,7 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
      *
      * @return PermissionService|null
      */
-    private function permission_service(): ?PermissionService
+    private function permissionService(): ?PermissionService
     {
         if (isset($this->permissionService)) {
             return $this->permissionService;
@@ -532,7 +542,7 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
      *
      * @return OrganizationService
      */
-    private function organization_service(): OrganizationService
+    private function organizationService(): OrganizationService
     {
         if (!isset($this->organizationService)) {
             $this->organizationService = new OrganizationService();
@@ -546,7 +556,7 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
      *
      * @return ConfigService
      */
-    private function config_service(): ConfigService
+    private function configService(): ConfigService
     {
         if (!isset($this->configService)) {
             $this->configService = new ConfigService();
@@ -564,7 +574,7 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
      * @param array  $context
      * @return void
      */
-    private function log_touchpoint(string $person_uuid, string $org_id, array $member_data, array $context): void
+    private function logTouchpoint(string $person_uuid, string $org_id, array $member_data, array $context): void
     {
         if (!function_exists('write_touchpoint') || !function_exists('get_create_touchpoint_service_id')) {
             return;
@@ -604,7 +614,7 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
      * @param array  $context
      * @return void
      */
-    private function log_removal_touchpoint(string $person_uuid, string $org_id, array $context): void
+    private function logRemovalTouchpoint(string $person_uuid, string $org_id, array $context): void
     {
         if (!function_exists('write_touchpoint') || !function_exists('get_create_touchpoint_service_id')) {
             return;
@@ -660,9 +670,9 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
      * }
      * @return true|WP_Error
      */
-    private function send_assignment_email(string $person_uuid, string $org_id, array $options = [])
+    private function sendAssignmentEmail(string $person_uuid, string $org_id, array $options = [])
     {
-        $logger = $this->get_logger();
+        $logger = $this->getLogger();
         $context = [
             'source' => 'wicket-orgman',
             'strategy' => 'direct',
@@ -771,16 +781,16 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
      *
      * @return \WC_Logger
      */
-    private function get_logger()
+    private function getLogger()
     {
         if (null === $this->logger) {
-            $this->logger = wc_get_logger();
+            $this->logger = wc_getLogger();
         }
 
         return $this->logger;
     }
 
-    public function remove_member($org_id, $person_uuid, $context = [])
+    public function removeMember($org_id, $person_uuid, $context = [])
     {
         try {
             $required_functions = [];
@@ -790,18 +800,6 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
                 }
             }
 
-            // Check if membership_owner removal is prevented by configuration
-            $config = \OrgManagement\Config\OrgManConfig::get();
-            $prevent_owner_removal = $config['permissions']['prevent_owner_removal'] ?? false;
-
-            if ($prevent_owner_removal) {
-                $org_owner = $this->organization_service()->get_organization_owner($org_id);
-                if (!is_wp_error($org_owner) && $org_owner && $org_owner->uuid === $person_uuid) {
-                    return new WP_Error('owner_removal_forbidden', 'The organization owner (Primary Member) cannot be removed.');
-                }
-            }
-
-            // Get person membership ID from context
             $person_membership_id = $context['person_membership_id'] ?? null;
 
             if (empty($person_membership_id)) {
@@ -812,14 +810,14 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
             // Only remove org-scoped roles
 
             // Remove all org-scoped roles
-            $roles_to_remove = $this->permission_service()->get_person_current_roles_by_org_id($person_uuid, $org_id);
+            $roles_to_remove = $this->permissionService()->getPersonCurrentRolesByOrgId($person_uuid, $org_id);
             if (!empty($roles_to_remove)) {
                 foreach ($roles_to_remove as $role) {
                     wicket_remove_role($person_uuid, $role, $org_id);
                 }
             }
 
-            $this->log_removal_touchpoint($person_uuid, $org_id, $context);
+            $this->logRemovalTouchpoint($person_uuid, $org_id, $context);
 
             return ['status' => 'success', 'message' => 'Member removed successfully.'];
 

@@ -50,10 +50,10 @@ if ('POST' === strtoupper($request_method)) {
     $description = array_key_exists('description', $_POST) ? sanitize_textarea_field(wp_unslash($_POST['description'])) : null;
 
     try {
-        $config_service = new ConfigService();
-        $member_service = new MemberService($config_service);
-        $membership_service = new MembershipService();
-        $logger = function_exists('wc_get_logger') ? wc_get_logger() : null;
+        $configService = new ConfigService();
+        $member_service = new MemberService($configService);
+        $membershipService = new MembershipService();
+        $logger = function_exists('wc_getLogger') ? wc_getLogger() : null;
         $log_context = ['source' => 'wicket-orgman', 'action' => 'update-permissions'];
 
         // First update relationship type if provided and enabled
@@ -79,7 +79,7 @@ if ('POST' === strtoupper($request_method)) {
         $allow_description_editing = $form_fields['description']['enabled'] ?? false;
 
         if ($allow_relationship_editing && !empty($relationship_type)) {
-            $relationship_result = $member_service->update_member_relationship($person_uuid, $org_uuid, $relationship_type);
+            $relationship_result = $member_service->updateMemberRelationship($person_uuid, $org_uuid, $relationship_type);
 
             if (is_wp_error($relationship_result)) {
                 status_header(200);
@@ -90,7 +90,7 @@ if ('POST' === strtoupper($request_method)) {
         }
 
         if ($allow_description_editing && $description !== null) {
-            $description_result = $member_service->update_member_description($person_uuid, $org_uuid, $description);
+            $description_result = $member_service->updateMemberDescription($person_uuid, $org_uuid, $description);
 
             if (is_wp_error($description_result)) {
                 status_header(200);
@@ -101,7 +101,7 @@ if ('POST' === strtoupper($request_method)) {
         }
 
         // Resolve current org membership UUID to avoid stale posted membership UUID on long-lived pages.
-        $resolved_membership_uuid = (string) $membership_service->getMembershipForOrganization($org_uuid);
+        $resolved_membership_uuid = (string) $membershipService->getMembershipForOrganization($org_uuid);
         $effective_membership_uuid = $resolved_membership_uuid !== '' ? $resolved_membership_uuid : $membership_uuid;
 
         if ($logger) {
@@ -115,7 +115,7 @@ if ('POST' === strtoupper($request_method)) {
         }
 
         // Then update roles
-        $result = $member_service->update_member_roles($person_uuid, $org_uuid, $effective_membership_uuid, $roles);
+        $result = $member_service->updateMemberRoles($person_uuid, $org_uuid, $effective_membership_uuid, $roles);
 
         if (is_wp_error($result)) {
             if ($logger) {

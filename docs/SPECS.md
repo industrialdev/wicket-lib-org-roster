@@ -148,14 +148,14 @@ The library registers several endpoints under the `org-management/v1` namespace:
 **Completed (Groups):**
 - Groups strategy wiring, `GroupService`, templates, and process endpoints (no longer stubby).
 - Organization-management groups landing now lists active tagged group memberships and auto-redirects only when one group exists.
-- Group list now includes non-manage roles for visibility, while management links are role-gated (`can_manage_group` / `groups.manage_roles`).
+- Group list now includes non-manage roles for visibility, while management links are role-gated (`canManageGroup` / `groups.manage_roles`).
 - Group cards resolve organization display names via included org data with `wicket_get_organization` fallback.
 - Role-based access checks, tag filtering, and roster-role validation (member/observer seat limits in add flow).
 - Removal supports end-date and delete modes (configurable). End-dated roles are treated as removed (`active=true` queries).
 - Group org-scope matching now normalizes identifier/name/uuid tokens for member listing and removal lookups.
 - Groups configuration defaults added.
 - Unified members view (search + list + pagination + modals + seats callout) is the default. Legacy list preserved behind config flags.
-- Debug logging added across groups strategy via `wc_get_logger` (source: `wicket-orgman`).
+- Debug logging added across groups strategy via `wc_getLogger` (source: `wicket-orgman`).
 
 **Open / Needs Confirmation (Groups):**
 - Org identifier key/format in `custom_data_field` must be confirmed and aligned with MDP data.

@@ -10,7 +10,7 @@ Services in `src/Services/` are designed for high cohesion and low coupling.
 
 ## 2. API & Controller Design
 Controllers in `src/Controllers/` extend a base `ApiController`.
-- **Permission Checking**: Every request is validated through `check_permission()`, which uses `PermissionService` to verify the user's role against the target organization.
+- **Permission Checking**: Every request is validated through `checkPermission()`, which uses `PermissionService` to verify the user's role against the target organization.
 - **Response Handling**: Controllers use `success()` and `error()` methods to ensure standardized JSON structures.
 - **SSE Integration**: For reactive updates, controllers utilize the `DatastarSSE` helper to stream HTML fragments back to the client.
 

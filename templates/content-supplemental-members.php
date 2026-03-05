@@ -25,15 +25,15 @@ $gf_id = isset($_GET['gf_id']) ? absint($_GET['gf_id']) : 0;
 if (!function_exists('OrgManagement\Templates\get_my_account_page_url')) {
     function get_my_account_page_url($slug)
     {
-        return \OrgManagement\Helpers\Helper::get_my_account_page_url($slug, "/my-account/{$slug}/");
+        return \OrgManagement\Helpers\Helper::getMyAccountPageUrl($slug, "/my-account/{$slug}/");
     }
 }
 
 // Check if user can purchase additional seats
-$config_service = new \OrgManagement\Services\ConfigService();
-$additional_seats_service = new \OrgManagement\Services\AdditionalSeatsService($config_service);
+$configService = new \OrgManagement\Services\ConfigService();
+$additional_seats_service = new \OrgManagement\Services\AdditionalSeatsService($configService);
 
-if (!$additional_seats_service->can_purchase_additional_seats($org_uuid)) {
+if (!$additional_seats_service->canPurchaseAdditionalSeats($org_uuid)) {
     ?>
 <div class="woocommerce">
     <div class="woocommerce-notices-wrapper">
@@ -53,8 +53,8 @@ if (!$additional_seats_service->can_purchase_additional_seats($org_uuid)) {
 }
 
 // Get organization information
-$organization_service = new \OrgManagement\Services\OrganizationService();
-$organizations = $organization_service->get_user_organizations(wp_get_current_user()->user_login);
+$organizationService = new \OrgManagement\Services\OrganizationService();
+$organizations = $organizationService->getUserOrganizations(wp_get_current_user()->user_login);
 $current_organization = null;
 $form_id = $gf_id > 0 ? $gf_id : 59;
 $number_input_id = 'input_' . $form_id . '_3';

@@ -45,7 +45,7 @@
 
 ### 3.4 Roles and Assignment Rules
 - Base role: `member_addition.base_member_role`.
-- Auto roles: `member_addition.auto_assign_roles`.
+- Auto roles: `member_addition.auto_assignRoles`.
 - Additional submitted roles are merged with relationship-mapped roles (if enabled).
 - `membership_owner` assignment can be filtered when `permissions.prevent_owner_assignment = true`.
 

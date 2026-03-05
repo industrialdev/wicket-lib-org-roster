@@ -71,13 +71,13 @@ class CascadeStrategy implements RosterManagementStrategy
      * @param string $org_id The ID of the organization
      * @return array An array of current role slugs
      */
-    private function get_person_current_roles_by_org_id($person_uuid, $org_id): array
+    private function getPersonCurrentRolesByOrgId($person_uuid, $org_id): array
     {
         if (!isset($this->permissionService)) {
             $this->permissionService = new PermissionService();
         }
 
-        return $this->permissionService->get_person_current_roles_by_org_id($person_uuid, $org_id);
+        return $this->permissionService->getPersonCurrentRolesByOrgId($person_uuid, $org_id);
     }
 
     /**
@@ -99,7 +99,7 @@ class CascadeStrategy implements RosterManagementStrategy
      *
      * @return OrganizationService
      */
-    private function organization_service(): OrganizationService
+    private function organizationService(): OrganizationService
     {
         if (!isset($this->organizationService)) {
             $this->organizationService = new OrganizationService();
@@ -113,7 +113,7 @@ class CascadeStrategy implements RosterManagementStrategy
      *
      * @return PersonService
      */
-    private function person_service(): PersonService
+    private function personService(): PersonService
     {
         if (!isset($this->personService)) {
             $this->personService = new PersonService();
@@ -127,7 +127,7 @@ class CascadeStrategy implements RosterManagementStrategy
      *
      * @return MembershipService
      */
-    private function membership_service(): MembershipService
+    private function membershipService(): MembershipService
     {
         if (!isset($this->membershipService)) {
             $this->membershipService = new MembershipService();
@@ -143,9 +143,9 @@ class CascadeStrategy implements RosterManagementStrategy
      * @param array  $member_data Data for the new member.
      * @return array|\WP_Error
      */
-    public function add_member($org_id, $member_data, $context = [])
+    public function addMember($org_id, $member_data, $context = [])
     {
-        $logger = $this->get_logger();
+        $logger = $this->getLogger();
         $log_context = [
             'source' => 'wicket-orgman',
             'strategy' => 'cascade',
@@ -157,7 +157,7 @@ class CascadeStrategy implements RosterManagementStrategy
             $logger->info('[OrgMan] Cascade strategy add_member invoked', $log_context);
 
             $required_functions = [
-                'wicket_assign_role',
+                'wicket_assignRole',
             ];
             foreach ($required_functions as $func) {
                 if (!function_exists($func)) {
@@ -169,7 +169,7 @@ class CascadeStrategy implements RosterManagementStrategy
                 }
             }
 
-            $person_uuid = $this->person_service()->createOrGetPerson(
+            $person_uuid = $this->personService()->createOrGetPerson(
                 $member_data['first_name'],
                 $member_data['last_name'],
                 $member_data['email'],
@@ -186,7 +186,7 @@ class CascadeStrategy implements RosterManagementStrategy
             $log_context['person_uuid'] = $person_uuid;
             $logger->debug('[OrgMan] Cascade strategy person resolved', $log_context);
 
-            $membership_uuid = $this->membership_service()->get_current_person_memberships_by_organization($org_id);
+            $membership_uuid = $this->membershipService()->getCurrentPersonMembershipsByOrganization($org_id);
 
             if (is_wp_error($membership_uuid)) {
                 $logger->error('[OrgMan] Cascade strategy failed to locate membership uuid', array_merge($log_context, [
@@ -226,27 +226,34 @@ class CascadeStrategy implements RosterManagementStrategy
                     $relationship_type = \OrgManagement\Helpers\RelationshipHelper::get_default_relationship_type();
                 }
 
-                // Create person-to-organization connection
-                $connection_payload = $this->connectionService()->buildConnectionPayload(
-                    $person_uuid,
-                    $org_id,
-                    'person_to_organization',
-                    $relationship_type,
-                    $relationship_description
-                );
-                $connection_response = $this->connectionService()->createConnection($connection_payload);
-
-                if (is_wp_error($connection_response)) {
-                    $logger->error('[OrgMan] Cascade strategy failed to create connection', array_merge($log_context, [
-                        'error' => $connection_response->get_error_message(),
-                    ]));
-
-                    return new \WP_Error('connection_failed', $connection_response->get_error_message() ?? 'Failed to create organization connection.');
+                $has_relationship = $this->connectionService()->personHasRelationship($person_uuid, $org_id);
+                if (is_wp_error($has_relationship)) {
+                    return $has_relationship;
                 }
-                $logger->debug('[OrgMan] Cascade strategy created org connection', $log_context);
+
+                if (!$has_relationship) {
+                    // Create person-to-organization connection
+                    $connection_payload = $this->connectionService()->buildConnectionPayload(
+                        $person_uuid,
+                        $org_id,
+                        'person_to_organization',
+                        $relationship_type,
+                        $relationship_description
+                    );
+                    $connection_response = $this->connectionService()->createConnection($connection_payload);
+
+                    if (is_wp_error($connection_response)) {
+                        $logger->error('[OrgMan] Cascade strategy failed to create connection', array_merge($log_context, [
+                            'error' => $connection_response->get_error_message(),
+                        ]));
+
+                        return new \WP_Error('connection_failed', $connection_response->get_error_message() ?? 'Failed to create organization connection.');
+                    }
+                    $logger->debug('[OrgMan] Cascade strategy created org connection', $log_context);
+                }
 
                 // Assign person to membership seat (CRITICAL STEP)
-                $membership_assignment_result = $this->assign_person_to_membership_seat($person_uuid, $membership_uuid);
+                $membership_assignment_result = $this->assignPersonToMembershipSeat($person_uuid, $membership_uuid);
                 if (is_wp_error($membership_assignment_result)) {
                     $logger->error('[OrgMan] Cascade membership assignment failed', array_merge($log_context, [
                         'error' => $membership_assignment_result->get_error_message(),
@@ -259,21 +266,21 @@ class CascadeStrategy implements RosterManagementStrategy
 
             // Get configuration for member addition settings
             $base_member_role = $config['member_addition']['base_member_role'] ?? 'member';
-            $auto_assign_roles = $config['member_addition']['auto_assign_roles'] ?? [];
+            $auto_assignRoles = $config['member_addition']['auto_assignRoles'] ?? [];
 
             // Assign base member role
-            wicket_assign_role($person_uuid, $base_member_role, $org_id);
+            wicket_assignRole($person_uuid, $base_member_role, $org_id);
             $logger->debug('[OrgMan] Cascade base role assigned', array_merge($log_context, [
                 'role' => $base_member_role,
             ]));
 
             // Assign auto-roles from config
-            foreach ($auto_assign_roles as $role) {
-                wicket_assign_role($person_uuid, $role, $org_id);
+            foreach ($auto_assignRoles as $role) {
+                wicket_assignRole($person_uuid, $role, $org_id);
             }
-            if (!empty($auto_assign_roles)) {
+            if (!empty($auto_assignRoles)) {
                 $logger->debug('[OrgMan] Cascade auto roles assigned', array_merge($log_context, [
-                    'roles' => $auto_assign_roles,
+                    'roles' => $auto_assignRoles,
                 ]));
             }
 
@@ -300,14 +307,11 @@ class CascadeStrategy implements RosterManagementStrategy
 
             if (!empty($additional_roles)) {
                 foreach ($additional_roles as $role) {
-                    wicket_assign_role($person_uuid, $role, $org_id);
+                    wicket_assignRole($person_uuid, $role, $org_id);
                 }
-                $logger->debug('[OrgMan] Cascade context roles assigned', array_merge($log_context, [
-                    'roles' => $additional_roles,
-                ]));
             }
 
-            $notification_result = $this->notification_service()->send_person_to_org_assignment_email($person_uuid, $org_id);
+            $notification_result = $this->notificationService()->sendPersonToOrgAssignmentEmail($person_uuid, $org_id);
             if (is_wp_error($notification_result)) {
                 $logger->error('[OrgMan] Cascade notification email failed', array_merge($log_context, [
                     'error' => $notification_result->get_error_message(),
@@ -333,17 +337,9 @@ class CascadeStrategy implements RosterManagementStrategy
         }
     }
 
-    /**
-     * Remove a member from an organization using the cascade method.
-     *
-     * @param string $org_id The organization ID.
-     * @param string $person_uuid The UUID of the person to remove.
-     * @param array  $context Additional context for the operation.
-     * @return array|\WP_Error
-     */
-    public function remove_member($org_id, $person_uuid, $context = [])
+    public function removeMember($org_id, $person_uuid, $context = [])
     {
-        $logger = $this->get_logger();
+        $logger = $this->getLogger();
         $log_context = [
             'source' => 'wicket-orgman',
             'strategy' => 'cascade',
@@ -352,58 +348,39 @@ class CascadeStrategy implements RosterManagementStrategy
         ];
 
         try {
-            $logger->info('[OrgMan] Cascade strategy remove_member invoked', $log_context);
+            $person_membership_id = sanitize_text_field((string) ($context['person_membership_id'] ?? ''));
 
-            $required_functions = [];
-            foreach ($required_functions as $func) {
-                if (!function_exists($func)) {
-                    $logger->error('[OrgMan] Cascade remove_member missing legacy dependency', array_merge($log_context, [
-                        'function' => $func,
-                    ]));
-
-                    return new \WP_Error('missing_function', "Legacy function {$func} not found.");
-                }
-            }
-
-            $org_owner = $this->organization_service()->get_organization_owner($org_id);
-            if (!is_wp_error($org_owner) && $org_owner && $org_owner->uuid === $person_uuid) {
-                $logger->warning('[OrgMan] Cascade remove_member attempted to remove owner', $log_context);
-
-                return new \WP_Error('owner_removal_forbidden', 'The organization owner (Primary Member) cannot be removed.');
-            }
-
-            // Get person membership ID from context
-            $person_membership_id = $context['person_membership_id'] ?? null;
-
-            if (empty($person_membership_id)) {
-                $logger->error('[OrgMan] Cascade remove_member missing person membership id', $log_context);
-
+            if ('' === $person_membership_id) {
                 return new \WP_Error('missing_person_membership_id', 'Person membership ID is required to remove a member.');
             }
 
-            // End-date the person membership
-            $result = $this->membership_service()->endPersonMembershipToday($person_membership_id);
-            if (is_wp_error($result)) {
-                $logger->error('[OrgMan] Cascade remove_member failed to end person membership', array_merge($log_context, [
-                    'error' => $result->get_error_message(),
-                ]));
-
-                return $result;
+            if (!empty($org_id)) {
+                $org_owner = $this->organizationService()->getOrganizationOwner($org_id);
+                if (!is_wp_error($org_owner) && $org_owner && $org_owner->uuid === $person_uuid) {
+                    return new \WP_Error('owner_removal_forbidden', 'The organization owner (Primary Member) cannot be removed.');
+                }
             }
 
-            // Remove all org-scoped roles
-            $roles_to_remove = $this->get_person_current_roles_by_org_id($person_uuid, $org_id);
+            $remove_result = $this->membershipService()->endPersonMembershipToday($person_membership_id);
+            if (is_wp_error($remove_result)) {
+                $logger->error('[OrgMan] Cascade strategy failed to end person membership', array_merge($log_context, [
+                    'error' => $remove_result->get_error_message(),
+                ]));
+
+                return $remove_result;
+            }
+
+            $roles_to_remove = $this->permissionService()->getPersonCurrentRolesByOrgId($person_uuid, $org_id);
             if (!empty($roles_to_remove)) {
-                $this->permission_service()->remove_person_roles_from_org($person_uuid, $roles_to_remove, $org_id);
-                $logger->debug('[OrgMan] Cascade remove_member removed roles', array_merge($log_context, [
-                    'roles_removed' => $roles_to_remove,
-                ]));
+                $roles_result = $this->permissionService()->removePersonRolesFromOrg($person_uuid, $roles_to_remove, $org_id);
+                if (is_wp_error($roles_result)) {
+                    return $roles_result;
+                }
             }
 
-            $logger->info('[OrgMan] Cascade remove_member completed', $log_context);
+            $logger->info('[OrgMan] Cascade strategy removed member successfully', $log_context);
 
             return ['status' => 'success', 'message' => 'Member removed successfully.'];
-
         } catch (\Exception $e) {
             $logger->error('[OrgMan] Cascade strategy remove_member exception', array_merge($log_context, [
                 'exception' => $e->getMessage(),
@@ -420,8 +397,16 @@ class CascadeStrategy implements RosterManagementStrategy
      * @param string $membership_uuid
      * @return true|WP_Error
      */
-    private function assign_person_to_membership_seat(string $person_uuid, string $membership_uuid)
+    private function assignPersonToMembershipSeat(string $person_uuid, string $membership_uuid)
     {
+        $logger = $this->getLogger();
+        $log_context = [
+            'source' => 'wicket-orgman',
+            'strategy' => 'cascade',
+            'person_uuid' => $person_uuid,
+            'membership_uuid' => $membership_uuid,
+        ];
+
         if (!function_exists('wicket_assign_person_to_org_membership')) {
             return new \WP_Error('missing_dependency', 'Membership assignment helper is unavailable.');
         }
@@ -437,13 +422,29 @@ class CascadeStrategy implements RosterManagementStrategy
             }
 
             // Get organization membership data to pass to the assignment function
-            $membership_data = $this->membership_service()->getOrgMembershipData($membership_uuid);
+            $membership_data = $this->membershipService()->getOrgMembershipData($membership_uuid);
             if (is_wp_error($membership_data)) {
                 return $membership_data;
             }
 
+            if (empty($membership_data) || empty($membership_data['data'])) {
+                return new \WP_Error('membership_data_missing', 'Membership details unavailable.');
+            }
+
             // Extract Membership Type ID
             $membership_type_id = $membership_data['data']['relationships']['membership']['data']['id'] ?? '';
+            if (empty($membership_type_id) && !empty($membership_data['included']) && is_array($membership_data['included'])) {
+                foreach ($membership_data['included'] as $included) {
+                    $included_type = $included['type'] ?? '';
+                    if (in_array($included_type, ['memberships', 'membership', 'membership_types'], true)) {
+                        $membership_type_id = $included['id'] ?? '';
+                        if (!empty($membership_type_id)) {
+                            break;
+                        }
+                    }
+                }
+            }
+
             if (empty($membership_type_id)) {
                 return new \WP_Error('membership_type_missing', 'Could not find membership type ID.');
             }
@@ -456,8 +457,27 @@ class CascadeStrategy implements RosterManagementStrategy
                 $membership_data        // organization membership data
             );
 
-            if (!$result) {
-                return new \WP_Error('membership_assignment_failed', 'Failed to assign person to membership seat.');
+            if (empty($result) || isset($result['errors'])) {
+                $error_message = $result['errors'][0]['detail'] ?? 'Failed to assign person to membership seat.';
+                $logger->warning('[OrgMan] Cascade membership assignment API returned error, verifying existing membership', array_merge($log_context, [
+                    'membership_type_id' => $membership_type_id,
+                    'api_error' => $error_message,
+                ]));
+
+                $post_check = $this->connectionService()->personHasMembership($person_uuid, $membership_uuid);
+                if (true === $post_check) {
+                    $logger->info('[OrgMan] Cascade membership assignment already present after API error', $log_context);
+
+                    return true;
+                }
+
+                if (is_wp_error($post_check)) {
+                    $logger->error('[OrgMan] Cascade membership verification after API error failed', array_merge($log_context, [
+                        'verification_error' => $post_check->get_error_message(),
+                    ]));
+                }
+
+                return new \WP_Error('membership_assignment_failed', $error_message);
             }
 
             return true;
@@ -472,7 +492,7 @@ class CascadeStrategy implements RosterManagementStrategy
      *
      * @return NotificationService
      */
-    private function notification_service(): NotificationService
+    private function notificationService(): NotificationService
     {
         if (!isset($this->notificationService)) {
             $this->notificationService = new NotificationService();
@@ -486,7 +506,7 @@ class CascadeStrategy implements RosterManagementStrategy
      *
      * @return ConfigService
      */
-    private function config_service(): ConfigService
+    private function configService(): ConfigService
     {
         if (!isset($this->configService)) {
             $this->configService = new ConfigService();
@@ -500,7 +520,7 @@ class CascadeStrategy implements RosterManagementStrategy
      *
      * @return PermissionService
      */
-    private function permission_service(): PermissionService
+    private function permissionService(): PermissionService
     {
         if (!isset($this->permissionService)) {
             $this->permissionService = new PermissionService();
@@ -514,10 +534,10 @@ class CascadeStrategy implements RosterManagementStrategy
      *
      * @return \WC_Logger
      */
-    private function get_logger()
+    private function getLogger()
     {
         if (null === $this->logger) {
-            $this->logger = wc_get_logger();
+            $this->logger = wc_getLogger();
         }
 
         return $this->logger;

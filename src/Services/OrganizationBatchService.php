@@ -33,13 +33,13 @@ class OrganizationBatchService
      * @param array $uuids Array of organization UUIDs.
      * @return array Array of organization data in the same format as wicket_get_organization().
      */
-    public function get_organizations_batch($uuids)
+    public function getOrganizationsBatch($uuids)
     {
         if (empty($uuids)) {
             return [];
         }
 
-        $logger = wc_get_logger();
+        $logger = wc_getLogger();
 
         // Get the same API client that wicket_get_organization uses
         $client = wicket_api_client();
@@ -95,7 +95,7 @@ class OrganizationBatchService
      * @param string $uuid Organization UUID.
      * @return array|false Organization data or false if not found.
      */
-    public function get_organization_individual($uuid)
+    public function getOrganizationIndividual($uuid)
     {
         if (!function_exists('wicket_get_organization')) {
             return false;
@@ -104,7 +104,7 @@ class OrganizationBatchService
         try {
             return wicket_get_organization($uuid);
         } catch (\Exception $e) {
-            $logger = wc_get_logger();
+            $logger = wc_getLogger();
             $logger->error('[OrgMan Batch] Individual call failed for ' . $uuid . ': ' . $e->getMessage(), ['source' => 'wicket-orgman']);
 
             return false;

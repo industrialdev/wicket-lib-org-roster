@@ -6,7 +6,7 @@
   - `ui.member_list.show_bulk_upload = true`
   - current user can add members
 - Endpoint: `templates-partials/process/bulk-upload-members.php`
-- Cascade behavior is preserved by routing each row through `MemberService->add_member()`.
+- Cascade behavior is preserved by routing each row through `MemberService->addMember()`.
 
 ## Current Behavior
 - CSV columns expected: first name, last name, email, optional roles.

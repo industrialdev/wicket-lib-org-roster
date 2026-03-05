@@ -39,14 +39,14 @@ class SubsidiaryController extends ApiController
     /**
      * Register REST routes handled by this controller.
      */
-    public function register_routes()
+    public function registerRoutes()
     {
         // Route for getting subsidiary list
         register_rest_route($this->namespace, '/list', [
             [
                 'methods'             => WP_REST_Server::READABLE,
-                'callback'            => [$this, 'get_subsidiary_list'],
-                'permission_callback' => [$this, 'check_logged_in'],
+                'callback'            => [$this, 'getSubsidiaryList'],
+                'permission_callback' => [$this, 'checkLoggedIn'],
             ],
         ]);
 
@@ -54,8 +54,8 @@ class SubsidiaryController extends ApiController
         register_rest_route($this->namespace, '/add', [
             [
                 'methods'             => WP_REST_Server::CREATABLE,
-                'callback'            => [$this, 'add_subsidiary'],
-                'permission_callback' => [$this, 'check_logged_in'],
+                'callback'            => [$this, 'addSubsidiary'],
+                'permission_callback' => [$this, 'checkLoggedIn'],
             ],
         ]);
 
@@ -63,8 +63,8 @@ class SubsidiaryController extends ApiController
         register_rest_route($this->namespace, '/remove', [
             [
                 'methods'             => WP_REST_Server::CREATABLE,
-                'callback'            => [$this, 'remove_subsidiary'],
-                'permission_callback' => [$this, 'check_logged_in'],
+                'callback'            => [$this, 'removeSubsidiary'],
+                'permission_callback' => [$this, 'checkLoggedIn'],
             ],
         ]);
 
@@ -72,8 +72,8 @@ class SubsidiaryController extends ApiController
         register_rest_route($this->namespace, '/search', [
             [
                 'methods'             => WP_REST_Server::READABLE,
-                'callback'            => [$this, 'search_subsidiary_candidates'],
-                'permission_callback' => [$this, 'check_logged_in'],
+                'callback'            => [$this, 'searchSubsidiaryCandidates'],
+                'permission_callback' => [$this, 'checkLoggedIn'],
             ],
         ]);
 
@@ -81,8 +81,8 @@ class SubsidiaryController extends ApiController
         register_rest_route($this->namespace, '/bulk-upload', [
             [
                 'methods'             => WP_REST_Server::CREATABLE,
-                'callback'            => [$this, 'bulk_upload_subsidiaries'],
-                'permission_callback' => [$this, 'check_logged_in'],
+                'callback'            => [$this, 'bulkUploadSubsidiaries'],
+                'permission_callback' => [$this, 'checkLoggedIn'],
             ],
         ]);
     }
@@ -93,12 +93,12 @@ class SubsidiaryController extends ApiController
      * @param WP_REST_Request $request Request object.
      * @return WP_REST_Response
      */
-    public function get_subsidiary_list(WP_REST_Request $request)
+    public function getSubsidiaryList(WP_REST_Request $request)
     {
         $org_id = sanitize_text_field($request->get_param('org_id'));
 
         if (empty($org_id)) {
-            return $this->html_response('subsidiaries-list', [
+            return $this->htmlResponse('subsidiaries-list', [
                 'org_id' => '',
                 'subsidiaries' => [],
                 'notice' => [
@@ -108,10 +108,10 @@ class SubsidiaryController extends ApiController
             ]);
         }
 
-        $subsidiaries = $this->subsidiary_service->get_subsidiaries($org_id);
+        $subsidiaries = $this->subsidiary_service->getSubsidiaries($org_id);
 
         if (is_wp_error($subsidiaries)) {
-            return $this->html_response('subsidiaries-list', [
+            return $this->htmlResponse('subsidiaries-list', [
                 'org_id' => $org_id,
                 'subsidiaries' => [],
                 'notice' => [
@@ -126,7 +126,7 @@ class SubsidiaryController extends ApiController
             'subsidiaries' => $subsidiaries,
         ];
 
-        return $this->html_response('subsidiaries-list', $view_model);
+        return $this->htmlResponse('subsidiaries-list', $view_model);
     }
 
     /**
@@ -135,13 +135,13 @@ class SubsidiaryController extends ApiController
      * @param WP_REST_Request $request Request object.
      * @return WP_REST_Response
      */
-    public function add_subsidiary(WP_REST_Request $request)
+    public function addSubsidiary(WP_REST_Request $request)
     {
         $org_id = sanitize_text_field($request->get_param('org_id'));
         $subsidiary_org_id = sanitize_text_field($request->get_param('subsidiary_org_id'));
 
         if (empty($org_id) || empty($subsidiary_org_id)) {
-            return $this->html_response('subsidiaries-list', [
+            return $this->htmlResponse('subsidiaries-list', [
                 'notice' => [
                     'type'    => 'error',
                     'message' => __('Organization ID and Subsidiary Organization ID are required.', 'wicket-acc'),
@@ -152,7 +152,7 @@ class SubsidiaryController extends ApiController
         // Verify nonce for security
         $nonce = $request->get_param('_wpnonce');
         if (!$nonce || !wp_verify_nonce($nonce, 'org_management_subsidiary_add_' . $org_id)) {
-            return $this->html_response('subsidiaries-list', [
+            return $this->htmlResponse('subsidiaries-list', [
                 'notice' => [
                     'type'    => 'error',
                     'message' => __('Security verification failed. Please try again.', 'wicket-acc'),
@@ -160,10 +160,10 @@ class SubsidiaryController extends ApiController
             ]);
         }
 
-        $result = $this->subsidiary_service->add_subsidiary($org_id, $subsidiary_org_id);
+        $result = $this->subsidiary_service->addSubsidiary($org_id, $subsidiary_org_id);
 
         if (is_wp_error($result)) {
-            return $this->html_response('subsidiaries-list', [
+            return $this->htmlResponse('subsidiaries-list', [
                 'notice' => [
                     'type'    => 'error',
                     'message' => $result->get_error_message(),
@@ -172,7 +172,7 @@ class SubsidiaryController extends ApiController
         }
 
         // Refresh the subsidiary list after successful addition
-        $subsidiaries = $this->subsidiary_service->get_subsidiaries($org_id);
+        $subsidiaries = $this->subsidiary_service->getSubsidiaries($org_id);
 
         $view_model = [
             'org_id' => $org_id,
@@ -183,7 +183,7 @@ class SubsidiaryController extends ApiController
             ],
         ];
 
-        return $this->html_response('subsidiaries-list', $view_model);
+        return $this->htmlResponse('subsidiaries-list', $view_model);
     }
 
     /**
@@ -192,13 +192,13 @@ class SubsidiaryController extends ApiController
      * @param WP_REST_Request $request Request object.
      * @return WP_REST_Response
      */
-    public function remove_subsidiary(WP_REST_Request $request)
+    public function removeSubsidiary(WP_REST_Request $request)
     {
         $org_id = sanitize_text_field($request->get_param('org_id'));
         $subsidiary_org_id = sanitize_text_field($request->get_param('subsidiary_org_id'));
 
         if (empty($org_id) || empty($subsidiary_org_id)) {
-            return $this->html_response('subsidiaries-list', [
+            return $this->htmlResponse('subsidiaries-list', [
                 'notice' => [
                     'type'    => 'error',
                     'message' => __('Organization ID and Subsidiary Organization ID are required.', 'wicket-acc'),
@@ -209,7 +209,7 @@ class SubsidiaryController extends ApiController
         // Verify nonce for security
         $nonce = $request->get_param('_wpnonce');
         if (!$nonce || !wp_verify_nonce($nonce, 'org_management_subsidiary_remove_' . $org_id)) {
-            return $this->html_response('subsidiaries-list', [
+            return $this->htmlResponse('subsidiaries-list', [
                 'notice' => [
                     'type'    => 'error',
                     'message' => __('Security verification failed. Please try again.', 'wicket-acc'),
@@ -217,10 +217,10 @@ class SubsidiaryController extends ApiController
             ]);
         }
 
-        $result = $this->subsidiary_service->remove_subsidiary($org_id, $subsidiary_org_id);
+        $result = $this->subsidiary_service->removeSubsidiary($org_id, $subsidiary_org_id);
 
         if (is_wp_error($result)) {
-            return $this->html_response('subsidiaries-list', [
+            return $this->htmlResponse('subsidiaries-list', [
                 'notice' => [
                     'type'    => 'error',
                     'message' => $result->get_error_message(),
@@ -229,7 +229,7 @@ class SubsidiaryController extends ApiController
         }
 
         // Refresh the subsidiary list after successful removal
-        $subsidiaries = $this->subsidiary_service->get_subsidiaries($org_id);
+        $subsidiaries = $this->subsidiary_service->getSubsidiaries($org_id);
 
         $view_model = [
             'org_id' => $org_id,
@@ -240,7 +240,7 @@ class SubsidiaryController extends ApiController
             ],
         ];
 
-        return $this->html_response('subsidiaries-list', $view_model);
+        return $this->htmlResponse('subsidiaries-list', $view_model);
     }
 
     /**
@@ -249,21 +249,21 @@ class SubsidiaryController extends ApiController
      * @param WP_REST_Request $request Request object.
      * @return WP_REST_Response
      */
-    public function search_subsidiary_candidates(WP_REST_Request $request)
+    public function searchSubsidiaryCandidates(WP_REST_Request $request)
     {
         $org_id = sanitize_text_field($request->get_param('org_id'));
         $search_term = sanitize_text_field($request->get_param('search'));
 
         if (empty($org_id)) {
-            return $this->success([
+            return $this->successResponse([
                 'candidates' => [],
                 'error' => __('Organization ID is required.', 'wicket-acc'),
             ]);
         }
 
-        $candidates = $this->subsidiary_service->search_subsidiary_candidates($search_term, $org_id);
+        $candidates = $this->subsidiary_service->searchSubsidiaryCandidates($search_term, $org_id);
 
-        return $this->success([
+        return $this->successResponse([
             'candidates' => $candidates,
             'search_term' => $search_term,
         ]);
@@ -275,12 +275,12 @@ class SubsidiaryController extends ApiController
      * @param WP_REST_Request $request Request object.
      * @return WP_REST_Response
      */
-    public function bulk_upload_subsidiaries(WP_REST_Request $request)
+    public function bulkUploadSubsidiaries(WP_REST_Request $request)
     {
         $org_id = sanitize_text_field($request->get_param('org_id'));
 
         if (empty($org_id)) {
-            return $this->html_response('subsidiaries-list', [
+            return $this->htmlResponse('subsidiaries-list', [
                 'notice' => [
                     'type'    => 'error',
                     'message' => __('Organization ID is required.', 'wicket-acc'),
@@ -291,7 +291,7 @@ class SubsidiaryController extends ApiController
         // Verify nonce for security
         $nonce = $request->get_param('_wpnonce');
         if (!$nonce || !wp_verify_nonce($nonce, 'org_management_subsidiary_bulk_upload_' . $org_id)) {
-            return $this->html_response('subsidiaries-list', [
+            return $this->htmlResponse('subsidiaries-list', [
                 'notice' => [
                     'type'    => 'error',
                     'message' => __('Security verification failed. Please try again.', 'wicket-acc'),
@@ -329,7 +329,7 @@ class SubsidiaryController extends ApiController
                 }
             }
 
-            return $this->html_response('subsidiaries-list', [
+            return $this->htmlResponse('subsidiaries-list', [
                 'notice' => [
                     'type'    => 'error',
                     'message' => $error_message,
@@ -337,10 +337,10 @@ class SubsidiaryController extends ApiController
             ]);
         }
 
-        $result = $this->subsidiary_service->process_bulk_subsidiary_upload($org_id, $uploaded_file);
+        $result = $this->subsidiary_service->processBulkSubsidiaryUpload($org_id, $uploaded_file);
 
         if (is_wp_error($result)) {
-            return $this->html_response('subsidiaries-list', [
+            return $this->htmlResponse('subsidiaries-list', [
                 'notice' => [
                     'type'    => 'error',
                     'message' => $result->get_error_message(),
@@ -349,7 +349,7 @@ class SubsidiaryController extends ApiController
         }
 
         // Refresh the subsidiary list after bulk upload
-        $subsidiaries = $this->subsidiary_service->get_subsidiaries($org_id);
+        $subsidiaries = $this->subsidiary_service->getSubsidiaries($org_id);
 
         $view_model = [
             'org_id' => $org_id,
@@ -360,7 +360,7 @@ class SubsidiaryController extends ApiController
             ],
         ];
 
-        return $this->html_response('subsidiaries-list', $view_model);
+        return $this->htmlResponse('subsidiaries-list', $view_model);
     }
 
     /**
@@ -370,7 +370,7 @@ class SubsidiaryController extends ApiController
      * @param array  $data     Data for the template.
      * @return WP_REST_Response
      */
-    private function html_response($template, array $data)
+    private function htmlResponse($template, array $data)
     {
         ob_start();
         if (!empty($data)) {

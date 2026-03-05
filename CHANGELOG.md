@@ -73,6 +73,10 @@ All notable changes to this project are documented in this file.
   - `content-organization-profile.php` demographics toggle logic now uses data attributes + `orgman-content-behaviors.js`.
   - `content-supplemental-members.php` GF seat-validation logic now uses data attributes + `orgman-content-behaviors.js`.
   - Supplemental-members visual styles now live in `modern-orgman-static.css` (scoped to `.wicket-orgman-supplemental`).
+- Completed PSR-12 naming migration across internal class APIs:
+  - service/strategy/helper/controller class methods now use camelCase.
+  - snake_case compatibility wrappers were removed for internal APIs.
+  - retained `OrgMan::get_instance()` as the only supported theme bridge alias.
 
 ### Documentation
 - Added `docs/configs/CCHL.md` to document CCHL-only role overrides (`supplemental_member`, `CCHL Member Community`).
@@ -83,6 +87,7 @@ All notable changes to this project are documented in this file.
 - Updated `docs/CONFIGURATION.md` defaults/reference:
   - `member_addition.auto_assign_roles` default is `[]`
   - documented `feature_flags.membership_resolution_prefer_current_cycle`.
+- Updated naming guidance docs (`AGENTS.md`, `README.md`, `docs/ARCHITECTURE.md`, `docs/BACKWARDS-COMPATIBILITY.md`) to document PSR-12 camelCase policy and the single `OrgMan::get_instance()` exception.
 
 ## [0.4.1] - 2026-02-27
 
@@ -215,7 +220,8 @@ All notable changes to this project are documented in this file.
   - New config key: `ui.member_list.show_bulk_upload` (default `false`).
   - New process handler: `templates-partials/process/bulk-upload-members.php`.
   - New reusable UI partial: `templates-partials/members-bulk-upload.php`.
-- Strategy-aware CSV processing via `MemberService->add_member(...)` per row, with additive-only behavior and duplicate-skip handling.
+- Strategy-aware CSV processing via `MemberService->addMember(...)` per row, with additive-only behavior and duplicate-skip handling.
+- Strategy-aware CSV processing via `MemberService->addMember(...)` per row, with additive-only behavior and duplicate-skip handling.
 
 ### Changed
 - Positioned bulk upload control in the member-management CTA region to match legacy flow intent.

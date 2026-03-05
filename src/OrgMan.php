@@ -34,13 +34,23 @@ final class OrgMan
      *
      * @return OrgMan
      */
-    public static function get_instance()
+    public static function getInstance()
     {
         if (is_null(self::$instance)) {
             self::$instance = new self();
         }
 
         return self::$instance;
+    }
+
+    /**
+     * Backward-compatible alias for singleton accessor.
+     *
+     * @return OrgMan
+     */
+    public static function get_instance()
+    {
+        return self::getInstance();
     }
 
     /**
@@ -79,16 +89,16 @@ final class OrgMan
      */
     public function init()
     {
-        $this->load_config();
-        $this->init_services();
-        $this->init_controllers();
-        $this->add_hooks();
+        $this->loadConfig();
+        $this->initServices();
+        $this->initControllers();
+        $this->addHooks();
     }
 
     /**
      * Load the configuration files.
      */
-    private function load_config()
+    private function loadConfig()
     {
         $this->config = Config\OrgManConfig::get();
     }
@@ -96,7 +106,7 @@ final class OrgMan
     /**
      * Initialize the services.
      */
-    private function init_services()
+    private function initServices()
     {
         $this->services['config'] = new Services\ConfigService();
         $this->services['organization'] = new Services\OrganizationService();
@@ -114,7 +124,7 @@ final class OrgMan
     /**
      * Initialize the API controllers.
      */
-    private function init_controllers()
+    private function initControllers()
     {
         $this->controllers['business_info'] = new Controllers\BusinessInfoController($this->services['business_info']);
         $this->controllers['document'] = new Controllers\DocumentController($this->services['document']);
@@ -122,13 +132,13 @@ final class OrgMan
         $this->controllers['configuration'] = new Controllers\ConfigurationController();
     }
 
-    private function add_hooks()
+    private function addHooks()
     {
-        add_action('rest_api_init', [$this, 'register_api_routes']);
-        add_filter('the_content', [$this, 'inject_orgman_content']);
-        add_filter('the_content', [$this, 'cleanup_orgman_autop_artifacts'], 9999);
-        add_filter('body_class', [$this, 'add_orgman_body_class']);
-        add_action('wp_enqueue_scripts', [$this, 'enqueue_assets']);
+        add_action('rest_api_init', [$this, 'registerApiRoutes']);
+        add_filter('the_content', [$this, 'injectOrgmanContent']);
+        add_filter('the_content', [$this, 'cleanupOrgmanAutopArtifacts'], 9999);
+        add_filter('body_class', [$this, 'addOrgmanBodyClass']);
+        add_action('wp_enqueue_scripts', [$this, 'enqueueAssets']);
 
         // Initialize helpers
         add_action('init', [Helpers\GravityFormsHelper::class, 'init']);
@@ -138,16 +148,16 @@ final class OrgMan
         add_action('init', [$this->controllers['configuration'], 'init']);
 
         // Add WooCommerce order processing hooks
-        $this->register_additional_seats_hook('woocommerce_order_status_processing');
-        $this->register_additional_seats_hook('woocommerce_order_status_completed');
-        $this->register_additional_seats_hook('woocommerce_order_status_on-hold');
-        $this->register_additional_seats_hook('woocommerce_payment_complete');
+        $this->registerAdditionalSeatsHook('woocommerce_order_status_processing');
+        $this->registerAdditionalSeatsHook('woocommerce_order_status_completed');
+        $this->registerAdditionalSeatsHook('woocommerce_order_status_on-hold');
+        $this->registerAdditionalSeatsHook('woocommerce_payment_complete');
 
-        add_filter('woocommerce_get_return_url', [$this, 'filter_woocommerce_return_url'], 10, 2);
-        add_action(Services\BulkMemberUploadService::CRON_HOOK, [$this, 'process_bulk_upload_job'], 10, 1);
+        add_filter('woocommerce_get_return_url', [$this, 'filterWoocommerceReturnUrl'], 10, 2);
+        add_action(Services\BulkMemberUploadService::CRON_HOOK, [$this, 'processBulkUploadJob'], 10, 1);
 
         // Add hooks to transfer user meta to order items
-        add_action('woocommerce_checkout_create_order_line_item', [$this, 'add_additional_seats_data_to_order_item'], 10, 4);
+        add_action('woocommerce_checkout_create_order_line_item', [$this, 'addAdditionalSeatsDataToOrderItem'], 10, 4);
     }
 
     /**
@@ -156,10 +166,10 @@ final class OrgMan
      * @param string $hook Hook name.
      * @return void
      */
-    private function register_additional_seats_hook($hook)
+    private function registerAdditionalSeatsHook($hook)
     {
         add_action($hook, function ($order_id) use ($hook) {
-            $logger = wc_get_logger();
+            $logger = wc_getLogger();
             $context = [
                 'source' => 'wicket-orgman',
                 'hook' => $hook,
@@ -168,7 +178,7 @@ final class OrgMan
 
             $logger->info('[OrgMan] WooCommerce hook fired for additional seats order processing', $context);
 
-            $this->handle_additional_seats_order_processing($order_id);
+            $this->handleAdditionalSeatsOrderProcessing($order_id);
         }, 10, 1);
     }
 
@@ -178,7 +188,7 @@ final class OrgMan
      * @param string $job_id
      * @return void
      */
-    public function process_bulk_upload_job($job_id)
+    public function processBulkUploadJob($job_id)
     {
         $job_id = sanitize_key((string) $job_id);
         if ($job_id === '') {
@@ -190,13 +200,13 @@ final class OrgMan
             $bulk_upload_service = new Services\BulkMemberUploadService($this->services['config']);
         }
 
-        $bulk_upload_service->process_scheduled_job($job_id);
+        $bulk_upload_service->processScheduledJob($job_id);
     }
 
     /**
      * Register all API routes.
      */
-    public function register_api_routes()
+    public function registerApiRoutes()
     {
         foreach ($this->controllers as $controller) {
             if (method_exists($controller, 'register_routes')) {
@@ -210,11 +220,11 @@ final class OrgMan
      *
      * @param int $order_id The order ID.
      */
-    public function handle_additional_seats_order_processing($order_id)
+    public function handleAdditionalSeatsOrderProcessing($order_id)
     {
         $order = wc_get_order($order_id);
 
-        $logger = wc_get_logger();
+        $logger = wc_getLogger();
         $context = ['source' => 'wicket-orgman'];
 
         $logger->info('[OrgMan] Additional seats handler invoked', array_merge($context, [
@@ -247,7 +257,7 @@ final class OrgMan
 
         // Check if this is an additional seats order
         $additional_seats_service = $this->services['additional_seats'];
-        $additional_seats_product_id = $additional_seats_service->get_additional_seats_product();
+        $additional_seats_product_id = $additional_seats_service->getAdditionalSeatsProduct();
 
         if (!$additional_seats_product_id) {
             $logger->error('[OrgMan] Additional seats product not found by SKU', array_merge($context, [
@@ -271,7 +281,7 @@ final class OrgMan
 
         // First, try to get user meta data if available
         $user_id = $order->get_customer_id();
-        $user_meta_data = $additional_seats_service->get_purchase_user_meta($user_id);
+        $user_meta_data = $additional_seats_service->getPurchaseUserMeta($user_id);
         if ($user_meta_data) {
             $org_uuid = $user_meta_data['org_uuid'];
             $membership_id = $user_meta_data['membership_id'];
@@ -438,7 +448,7 @@ final class OrgMan
                 'org_uuid_present' => $org_uuid !== '',
                 'membership_id_present' => $membership_id !== '',
             ]));
-            $membership_data = $additional_seats_service->get_membership_data_for_mdp($org_uuid, $membership_id);
+            $membership_data = $additional_seats_service->getMembershipDataForMdp($org_uuid, $membership_id);
         }
 
         // Store comprehensive data in order meta for MDP processing
@@ -552,7 +562,7 @@ final class OrgMan
                 'new_max_assignments' => (int) $new_seats,
             ]));
 
-            $mdp_updated = $additional_seats_service->update_mdp_membership_max_assignments($mdp_membership_id, $new_seats);
+            $mdp_updated = $additional_seats_service->updateMdpMembershipMaxAssignments($mdp_membership_id, $new_seats);
             $logger->info('[OrgMan] MDP update result', array_merge($context, [
                 'order_id' => $order_id,
                 'mdp_membership_id' => $mdp_membership_id,
@@ -584,7 +594,7 @@ final class OrgMan
         ]));
 
         // Clear user meta data after successful processing
-        $additional_seats_service->clear_purchase_user_meta($user_id);
+        $additional_seats_service->clearPurchaseUserMeta($user_id);
 
         $logger->debug('[OrgMan] Cleared purchase user meta', array_merge($context, [
             'order_id' => $order_id,
@@ -604,9 +614,9 @@ final class OrgMan
         ]);
     }
 
-    public function filter_woocommerce_return_url($return_url, $order)
+    public function filterWoocommerceReturnUrl($return_url, $order)
     {
-        $logger = wc_get_logger();
+        $logger = wc_getLogger();
         $context = ['source' => 'wicket-orgman'];
 
         if (!$order || !is_object($order)) {
@@ -620,7 +630,7 @@ final class OrgMan
         ]));
 
         if ($order->get_meta('additional_seats_processed', true)) {
-            $target_url = $this->get_organization_members_url_from_order($order) ?: $return_url;
+            $target_url = $this->getOrganizationMembersUrlFromOrder($order) ?: $return_url;
             $logger->info('[OrgMan] Return URL overridden (already processed additional seats)', array_merge($context, [
                 'order_id' => (int) $order->get_id(),
                 'target_url' => (string) $target_url,
@@ -629,11 +639,11 @@ final class OrgMan
             return $target_url;
         }
 
-        if (!$this->order_has_additional_seats($order)) {
+        if (!$this->orderHasAdditionalSeats($order)) {
             return $return_url;
         }
 
-        $target_url = $this->get_organization_members_url_from_order($order) ?: $return_url;
+        $target_url = $this->getOrganizationMembersUrlFromOrder($order) ?: $return_url;
         $logger->info('[OrgMan] Return URL overridden (additional seats order)', array_merge($context, [
             'order_id' => (int) $order->get_id(),
             'target_url' => (string) $target_url,
@@ -642,9 +652,9 @@ final class OrgMan
         return $target_url;
     }
 
-    private function order_has_additional_seats($order)
+    private function orderHasAdditionalSeats($order)
     {
-        $logger = wc_get_logger();
+        $logger = wc_getLogger();
         $context = ['source' => 'wicket-orgman'];
 
         $additional_seats_service = $this->services['additional_seats'] ?? null;
@@ -656,7 +666,7 @@ final class OrgMan
             return false;
         }
 
-        $product_id = $additional_seats_service->get_additional_seats_product();
+        $product_id = $additional_seats_service->getAdditionalSeatsProduct();
         if (!$product_id) {
             $logger->error('[OrgMan] Additional seats product not found; cannot detect additional seats order', array_merge($context, [
                 'order_id' => is_callable([$order, 'get_id']) ? (int) $order->get_id() : null,
@@ -681,9 +691,9 @@ final class OrgMan
         return false;
     }
 
-    private function get_organization_members_url_from_order($order)
+    private function getOrganizationMembersUrlFromOrder($order)
     {
-        $logger = wc_get_logger();
+        $logger = wc_getLogger();
         $context = ['source' => 'wicket-orgman'];
 
         $org_uuid = (string) $order->get_meta('org_uuid', true);
@@ -702,7 +712,7 @@ final class OrgMan
         ]));
 
         // Get WPML-aware URL for organization-members page
-        $base_url = Helpers\Helper::get_my_account_page_url('organization-members', '/my-account/organization-members/');
+        $base_url = Helpers\Helper::getMyAccountPageUrl('organization-members', '/my-account/organization-members/');
 
         $logger->debug('[OrgMan] Resolved base organization-members URL', array_merge($context, [
             'order_id' => is_callable([$order, 'get_id']) ? (int) $order->get_id() : null,
@@ -728,14 +738,14 @@ final class OrgMan
      * @param string $content The original content.
      * @return string Modified content with OrgMan content appended.
      */
-    public function inject_orgman_content($content)
+    public function injectOrgmanContent($content)
     {
-        if (!$this->is_orgman_screen() || !in_the_loop() || is_admin()) {
+        if (!$this->isOrgmanScreen() || !in_the_loop() || is_admin()) {
             return $content;
         }
 
-        $slug = $this->get_current_page_slug();
-        $content_map = $this->get_content_map();
+        $slug = $this->getCurrentPageSlug();
+        $content_map = $this->getContentMap();
 
         if (isset($content_map[$slug])) {
             // Include notifications container
@@ -748,7 +758,13 @@ final class OrgMan
             include $content_map[$slug];
             $orgman_content = ob_get_clean();
 
-            $orgman_markup = '<!-- ORGMAN:BEGIN -->' . $notifications . $orgman_content . '<!-- ORGMAN:END -->';
+            $debug_comments = sprintf(
+                "\n<!-- Wicket Roster Library Path: %s -->\n<!-- Wicket Roster Library Version: %s -->\n",
+                esc_html(dirname(__DIR__)),
+                esc_html(Helpers\Helper::getLibraryVersion())
+            );
+
+            $orgman_markup = '<!-- ORGMAN:BEGIN -->' . $debug_comments . $notifications . $orgman_content . '<!-- ORGMAN:END -->';
 
             if ($slug === 'organization-profile' || $slug === 'supplemental-members') {
                 // For organization-profile and supplemental-members we need the OrgMan content
@@ -768,7 +784,7 @@ final class OrgMan
      * @param string $content The filtered content.
      * @return string
      */
-    public function cleanup_orgman_autop_artifacts($content)
+    public function cleanupOrgmanAutopArtifacts($content)
     {
         if (!is_string($content) || strpos($content, '<!-- ORGMAN:BEGIN -->') === false) {
             return $content;
@@ -812,16 +828,16 @@ final class OrgMan
     /**
      * Enqueue shared assets for OrgMan pages.
      */
-    public function enqueue_assets()
+    public function enqueueAssets()
     {
-        $is_orgman = $this->is_orgman_screen();
+        $is_orgman = $this->isOrgmanScreen();
 
         if (!$is_orgman) {
             return;
         }
 
-        $base_uri = $this->get_base_uri();
-        $base_path = $this->get_base_path();
+        $base_uri = $this->getBaseUri();
+        $base_path = $this->getBasePath();
 
         $css_file_path = $base_path . '/public/css/modern-orgman-static.css';
         $css_version = file_exists($css_file_path) ? filemtime($css_file_path) : '1.0.0';
@@ -851,13 +867,13 @@ final class OrgMan
      * @param array $classes
      * @return array
      */
-    public function add_orgman_body_class($classes)
+    public function addOrgmanBodyClass($classes)
     {
         if (!is_array($classes)) {
             $classes = [];
         }
 
-        if ($this->is_orgman_screen()) {
+        if ($this->isOrgmanScreen()) {
             $classes[] = 'wicket-orgman-screen';
         }
 
@@ -869,7 +885,7 @@ final class OrgMan
      *
      * @return string
      */
-    private function get_base_path(): string
+    private function getBasePath(): string
     {
         $base_path = dirname(__DIR__);
 
@@ -881,18 +897,18 @@ final class OrgMan
      *
      * @return string
      */
-    private function get_base_uri(): string
+    private function getBaseUri(): string
     {
-        $base_path = $this->normalize_path($this->get_base_path());
-        $content_dir = defined('WP_CONTENT_DIR') ? $this->normalize_path(WP_CONTENT_DIR) : '';
-        $abs_path = defined('ABSPATH') ? $this->normalize_path(ABSPATH) : '';
+        $base_path = $this->normalizePath($this->getBasePath());
+        $content_dir = defined('WP_CONTENT_DIR') ? $this->normalizePath(WP_CONTENT_DIR) : '';
+        $abs_path = defined('ABSPATH') ? $this->normalizePath(ABSPATH) : '';
         $base_uri = trailingslashit(content_url(''));
 
-        if ($this->path_is_within($base_path, $content_dir)) {
-            $relative_path = $this->relative_path($base_path, $content_dir);
+        if ($this->pathIsWithin($base_path, $content_dir)) {
+            $relative_path = $this->relativePath($base_path, $content_dir);
             $base_uri = trailingslashit(content_url($relative_path));
-        } elseif ($this->path_is_within($base_path, $abs_path)) {
-            $relative_path = $this->relative_path($base_path, $abs_path);
+        } elseif ($this->pathIsWithin($base_path, $abs_path)) {
+            $relative_path = $this->relativePath($base_path, $abs_path);
             $base_uri = trailingslashit(site_url($relative_path));
         }
 
@@ -902,7 +918,7 @@ final class OrgMan
     /**
      * Normalize filesystem paths for safe prefix comparisons.
      */
-    private function normalize_path(string $path): string
+    private function normalizePath(string $path): string
     {
         return rtrim(str_replace('\\', '/', $path), '/');
     }
@@ -910,7 +926,7 @@ final class OrgMan
     /**
      * Check whether a path is inside a root path.
      */
-    private function path_is_within(string $path, string $root): bool
+    private function pathIsWithin(string $path, string $root): bool
     {
         if ($path === '' || $root === '') {
             return false;
@@ -922,7 +938,7 @@ final class OrgMan
     /**
      * Build a relative path from a root.
      */
-    private function relative_path(string $path, string $root): string
+    private function relativePath(string $path, string $root): string
     {
         return ltrim(substr($path, strlen($root)), '/');
     }
@@ -932,15 +948,15 @@ final class OrgMan
      *
      * @return bool
      */
-    private function is_orgman_screen()
+    private function isOrgmanScreen()
     {
         if (!is_singular('my-account')) {
             return false;
         }
 
-        $slug = $this->get_current_page_slug();
+        $slug = $this->getCurrentPageSlug();
 
-        return isset($this->get_content_map()[$slug]);
+        return isset($this->getContentMap()[$slug]);
     }
 
     /**
@@ -948,7 +964,7 @@ final class OrgMan
      *
      * @return string
      */
-    private function get_current_page_slug()
+    private function getCurrentPageSlug()
     {
         $post = get_queried_object();
 
@@ -964,7 +980,7 @@ final class OrgMan
      *
      * @return array
      */
-    private function get_content_map()
+    private function getContentMap()
     {
         if (!empty($this->content_map)) {
             return $this->content_map;
@@ -991,10 +1007,10 @@ final class OrgMan
      * @param array $values The cart item values.
      * @param \WC_Order $order The order object.
      */
-    public function add_additional_seats_data_to_order_item($item, $cart_item_key, $values, $order)
+    public function addAdditionalSeatsDataToOrderItem($item, $cart_item_key, $values, $order)
     {
         $additional_seats_service = $this->services['additional_seats'];
-        $additional_seats_product_id = $additional_seats_service->get_additional_seats_product();
+        $additional_seats_product_id = $additional_seats_service->getAdditionalSeatsProduct();
 
         if (!$additional_seats_product_id) {
             return;
@@ -1008,10 +1024,10 @@ final class OrgMan
 
         // Get user meta data
         $user_id = $order->get_customer_id();
-        $user_meta_data = $additional_seats_service->get_purchase_user_meta($user_id);
+        $user_meta_data = $additional_seats_service->getPurchaseUserMeta($user_id);
 
         if (!$user_meta_data) {
-            $logger = wc_get_logger();
+            $logger = wc_getLogger();
             $logger->warning('[OrgMan] No user meta data found for additional seats order item', [
                 'source' => 'wicket-orgman',
                 'user_id' => $user_id,
@@ -1033,7 +1049,7 @@ final class OrgMan
             $item->update_meta_data('_membership_post_id_renew', (int) $values['membership_post_id_renew']);
         }
 
-        $logger = wc_get_logger();
+        $logger = wc_getLogger();
         $logger->info('[OrgMan] Added additional seats data to order item', [
             'source' => 'wicket-orgman',
             'user_id' => $user_id,
@@ -1050,7 +1066,7 @@ final class OrgMan
      * @param string $user_uuid The user UUID to clear cache for.
      * @return void
      */
-    public function clear_user_org_cache($user_uuid)
+    public function clearUserOrgCache($user_uuid)
     {
         if (empty($user_uuid)) {
             return;
@@ -1086,13 +1102,13 @@ final class OrgMan
      * @param string $membership_uuid The membership UUID to clear cache for.
      * @return void
      */
-    public function clear_members_cache($membership_uuid)
+    public function clearMembersCache($membership_uuid)
     {
         if (empty($membership_uuid)) {
             return;
         }
 
-        $this->services['member']->clear_members_cache($membership_uuid);
+        $this->services['member']->clearMembersCache($membership_uuid);
     }
 
     /**
@@ -1100,7 +1116,7 @@ final class OrgMan
      *
      * @return void
      */
-    public function clear_all_org_cache()
+    public function clearAllOrgCache()
     {
         global $wpdb;
 
@@ -1114,6 +1130,6 @@ final class OrgMan
             )
         );
 
-        wc_get_logger()->info('[OrgMan] Cleared all organization management cache', ['source' => 'wicket-orgman']);
+        wc_getLogger()->info('[OrgMan] Cleared all organization management cache', ['source' => 'wicket-orgman']);
     }
 }

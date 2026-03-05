@@ -24,7 +24,7 @@ interface RosterManagementStrategy
      * @param array  $context Additional context for the operation (e.g., group_uuid).
      * @return array|\WP_Error Success or error response.
      */
-    public function add_member($org_id, $member_data, $context = []);
+    public function addMember($org_id, $member_data, $context = []);
 
     /**
      * Remove a member from an organization.
@@ -34,5 +34,5 @@ interface RosterManagementStrategy
      * @param array  $context Additional context for the operation.
      * @return array|\WP_Error Success or error response.
      */
-    public function remove_member($org_id, $person_uuid, $context = []);
+    public function removeMember($org_id, $person_uuid, $context = []);
 }

@@ -21,14 +21,14 @@ class ConfigurationController
     /**
      * @var \OrgManagement\Services\ConfigService
      */
-    private $config_service;
+    private $configService;
 
     /**
      * Constructor.
      */
     public function __construct()
     {
-        $this->config_service = new \OrgManagement\Services\ConfigService();
+        $this->configService = new \OrgManagement\Services\ConfigService();
     }
 
     /**
@@ -36,16 +36,16 @@ class ConfigurationController
      */
     public function init(): void
     {
-        $this->configure_additional_seats();
+        $this->configureAdditionalSeats();
     }
 
     /**
      * Configure Additional Seats feature using config values.
      */
-    private function configure_additional_seats(): void
+    private function configureAdditionalSeats(): void
     {
         // Get configuration values to use as defaults
-        $config = $this->config_service;
+        $config = $this->configService;
 
         // Enable/disable additional seats functionality
         add_filter('wicket/acc/orgman/additional_seats_enabled', function ($enabled) use ($config) {
@@ -99,14 +99,14 @@ class ConfigurationController
     /**
      * Add additional seats notice on organization members page.
      */
-    public function add_additional_seats_notice(): void
+    public function addAdditionalSeatsNotice(): void
     {
-        if (!$this->config_service->is_additional_seats_enabled()) {
+        if (!$this->configService->isAdditionalSeatsEnabled()) {
             return;
         }
 
         // Only show on organization members page
-        if (!$this->is_page('organization-members')) {
+        if (!$this->isPage('organization-members')) {
             return;
         }
 
@@ -116,9 +116,9 @@ class ConfigurationController
             return;
         }
 
-        $additional_seats_service = new \OrgManagement\Services\AdditionalSeatsService($this->config_service);
+        $additional_seats_service = new \OrgManagement\Services\AdditionalSeatsService($this->configService);
 
-        if ($additional_seats_service->can_purchase_additional_seats($org_uuid)) {
+        if ($additional_seats_service->canPurchaseAdditionalSeats($org_uuid)) {
             ?>
             <div class="orgman-notice orgman-additional-seats-notice" style="background: #e7f3ff; border: 1px solid #b3d9ff; padding: 15px; margin: 20px 0; border-radius: 4px;">
                 <p><strong><?php esc_html_e('Need more seats?', 'wicket-acc'); ?></strong></p>
@@ -131,9 +131,9 @@ class ConfigurationController
     /**
      * Add custom CSS for additional seats styling.
      */
-    public function add_additional_seats_css(): void
+    public function addAdditionalSeatsCss(): void
     {
-        if (!$this->is_page('organization-members') && !$this->is_page('supplemental-members')) {
+        if (!$this->isPage('organization-members') && !$this->isPage('supplemental-members')) {
             return;
         }
         ?>
@@ -159,9 +159,9 @@ class ConfigurationController
     /**
      * Add custom JavaScript for additional seats functionality.
      */
-    public function add_additional_seats_js(): void
+    public function addAdditionalSeatsJs(): void
     {
-        if (!$this->is_page('organization-members') && !$this->is_page('supplemental-members')) {
+        if (!$this->isPage('organization-members') && !$this->isPage('supplemental-members')) {
             return;
         }
         ?>
@@ -184,25 +184,25 @@ class ConfigurationController
     /**
      * Enable the additional seats notice.
      */
-    public function enable_additional_seats_notice(): void
+    public function enableAdditionalSeatsNotice(): void
     {
-        add_action('wp_footer', [$this, 'add_additional_seats_notice']);
+        add_action('wp_footer', [$this, 'addAdditionalSeatsNotice']);
     }
 
     /**
      * Enable the additional seats CSS.
      */
-    public function enable_additional_seats_css(): void
+    public function enableAdditionalSeatsCss(): void
     {
-        add_action('wp_head', [$this, 'add_additional_seats_css']);
+        add_action('wp_head', [$this, 'addAdditionalSeatsCss']);
     }
 
     /**
      * Enable the additional seats JavaScript.
      */
-    public function enable_additional_seats_js(): void
+    public function enableAdditionalSeatsJs(): void
     {
-        add_action('wp_footer', [$this, 'add_additional_seats_js']);
+        add_action('wp_footer', [$this, 'addAdditionalSeatsJs']);
     }
 
     /**
@@ -212,7 +212,7 @@ class ConfigurationController
      * @param string $page_slug The page slug to check.
      * @return bool True if on the specified page, false otherwise.
      */
-    private function is_page(string $page_slug): bool
+    private function isPage(string $page_slug): bool
     {
         global $wp;
 
@@ -231,7 +231,7 @@ class ConfigurationController
      *
      * @return array Additional seats configuration.
      */
-    public function get_additional_seats_config(): array
+    public function getAdditionalSeatsConfig(): array
     {
         return [
             'enabled' => apply_filters('wicket/acc/orgman/additional_seats_enabled', true),
@@ -247,7 +247,7 @@ class ConfigurationController
      *
      * @return bool True if enabled, false otherwise.
      */
-    public function is_additional_seats_enabled(): bool
+    public function isAdditionalSeatsEnabled(): bool
     {
         return (bool) apply_filters('wicket/acc/orgman/additional_seats_enabled', true);
     }
@@ -257,7 +257,7 @@ class ConfigurationController
      *
      * @return string The SKU.
      */
-    public function get_additional_seats_sku(): string
+    public function getAdditionalSeatsSku(): string
     {
         return (string) apply_filters('wicket/acc/orgman/additional_seats_sku', 'additional-seats');
     }
@@ -267,7 +267,7 @@ class ConfigurationController
      *
      * @return int The form ID.
      */
-    public function get_additional_seats_form_id(): int
+    public function getAdditionalSeatsFormId(): int
     {
         return (int) apply_filters('wicket/acc/orgman/additional_seats_form_id', 0);
     }
@@ -277,7 +277,7 @@ class ConfigurationController
      *
      * @return int The minimum quantity.
      */
-    public function get_additional_seats_min_quantity(): int
+    public function getAdditionalSeatsMinQuantity(): int
     {
         return (int) apply_filters('wicket/acc/orgman/additional_seats_min_quantity', 1);
     }
@@ -287,7 +287,7 @@ class ConfigurationController
      *
      * @return int The maximum quantity.
      */
-    public function get_additional_seats_max_quantity(): int
+    public function getAdditionalSeatsMaxQuantity(): int
     {
         return (int) apply_filters('wicket/acc/orgman/additional_seats_max_quantity', 100);
     }

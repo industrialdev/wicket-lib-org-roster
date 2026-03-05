@@ -50,8 +50,8 @@ $notice ??= null;
 
 	<?php
     // Check for seat limits or other informational banners using config
-    $config_service = new OrgManagement\Services\ConfigService();
-$seat_limit_info = $config_service->get_business_info_seat_limit_info();
+    $configService = new OrgManagement\Services\ConfigService();
+$seat_limit_info = $configService->getBusinessInfoSeatLimitInfo();
 if ($seat_limit_info) : ?>
 		<div class="seat-limit-notice">
 			<?php echo wp_kses_post($seat_limit_info); ?>

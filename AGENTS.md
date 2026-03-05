@@ -36,7 +36,9 @@
 ## Coding Style & Naming Conventions
 - PHP 8.2+ required; follow PSR-12.
 - Use early returns and keep methods focused.
-- **Naming**: Classes in `src/` use PascalCase; methods and variables use snake_case (standard WP style) or camelCase depending on the context (Services often use camelCase for methods, while helpers use snake_case). *Strictly follow existing patterns in the file you are editing.*
+- **Naming**: Classes in `src/` use PascalCase; class methods/properties use camelCase (PSR-12 aligned). Variables may use snake_case in WordPress-oriented template/process files where that pattern is already established. *Strictly follow existing patterns in the file you are editing.*
+- **Compatibility policy**: Do not add broad snake_case compatibility wrappers for internal library methods. Keep only the `OrgMan::get_instance()` theme bridge alias.
+- **External API exceptions**: Keep upstream WordPress/WooCommerce/Wicket API function and method names exactly as provided, even when they use underscores.
 - **Datastar Signals**: Use descriptive signal names in templates (e.g., `signals.show_modal`).
 - **Utility classes (`wt_` prefixed)**: Do not assume Tailwind-like utilities exist. Any new `wt_` utility class added in templates must be declared in `public/css/modern-orgman-static.css` in the utility section (or reuse an existing declared utility).
 

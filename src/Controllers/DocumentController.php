@@ -39,13 +39,13 @@ class DocumentController extends ApiController
     /**
      * Register REST routes handled by this controller.
      */
-    public function register_routes()
+    public function registerRoutes()
     {
         // Route for getting document list
         register_rest_route($this->namespace, '/list', [
             [
                 'methods'             => WP_REST_Server::READABLE,
-                'callback'            => [$this, 'get_document_list'],
+                'callback'            => [$this, 'getDocumentList'],
                 'permission_callback' => [$this, 'check_logged_in'],
             ],
         ]);
@@ -54,7 +54,7 @@ class DocumentController extends ApiController
         register_rest_route($this->namespace, '/upload', [
             [
                 'methods'             => WP_REST_Server::CREATABLE,
-                'callback'            => [$this, 'upload_document'],
+                'callback'            => [$this, 'uploadDocument'],
                 'permission_callback' => [$this, 'check_logged_in'],
             ],
         ]);
@@ -63,7 +63,7 @@ class DocumentController extends ApiController
         register_rest_route($this->namespace, '/delete/(?P<document_id>[\d]+)', [
             [
                 'methods'             => WP_REST_Server::DELETABLE,
-                'callback'            => [$this, 'delete_document'],
+                'callback'            => [$this, 'deleteDocument'],
                 'permission_callback' => [$this, 'check_logged_in'],
             ],
         ]);
@@ -75,13 +75,13 @@ class DocumentController extends ApiController
      * @param WP_REST_Request $request Request object.
      * @return WP_REST_Response
      */
-    public function get_document_list(WP_REST_Request $request)
+    public function getDocumentList(WP_REST_Request $request)
     {
         $org_id = sanitize_text_field($request->get_param('org_id'));
         $category = sanitize_text_field($request->get_param('category'));
 
         if (empty($org_id)) {
-            return $this->html_response('documents-list', [
+            return $this->htmlResponse('documents-list', [
                 'org_id' => '',
                 'documents' => [],
                 'notice' => [
@@ -91,7 +91,7 @@ class DocumentController extends ApiController
             ]);
         }
 
-        $documents = $this->document_service->get_documents_by_org($org_id, $category);
+        $documents = $this->document_service->getDocumentsByOrg($org_id, $category);
 
         $view_model = [
             'org_id' => $org_id,
@@ -99,7 +99,7 @@ class DocumentController extends ApiController
             'category' => $category,
         ];
 
-        return $this->html_response('documents-list', $view_model);
+        return $this->htmlResponse('documents-list', $view_model);
     }
 
     /**
@@ -108,7 +108,7 @@ class DocumentController extends ApiController
      * @param WP_REST_Request $request Request object.
      * @return WP_REST_Response
      */
-    public function upload_document(WP_REST_Request $request)
+    public function uploadDocument(WP_REST_Request $request)
     {
         $org_id = sanitize_text_field($request->get_param('org_id'));
         $category = sanitize_text_field($request->get_param('category'));
@@ -116,7 +116,7 @@ class DocumentController extends ApiController
         $description = sanitize_textarea_field($request->get_param('description'));
 
         if (empty($org_id)) {
-            return $this->html_response('documents-list', [
+            return $this->htmlResponse('documents-list', [
                 'notice' => [
                     'type'    => 'error',
                     'message' => __('Organization ID is required.', 'wicket-acc'),
@@ -127,7 +127,7 @@ class DocumentController extends ApiController
         // Verify nonce for security
         $nonce = $request->get_param('_wpnonce');
         if (!$nonce || !wp_verify_nonce($nonce, 'org_management_document_upload_' . $org_id)) {
-            return $this->html_response('documents-list', [
+            return $this->htmlResponse('documents-list', [
                 'notice' => [
                     'type'    => 'error',
                     'message' => __('Security verification failed. Please try again.', 'wicket-acc'),
@@ -165,7 +165,7 @@ class DocumentController extends ApiController
                 }
             }
 
-            return $this->html_response('documents-list', [
+            return $this->htmlResponse('documents-list', [
                 'notice' => [
                     'type'    => 'error',
                     'message' => $error_message,
@@ -180,10 +180,10 @@ class DocumentController extends ApiController
             'category'    => $category,
         ];
 
-        $result = $this->document_service->upload_document($org_id, $uploaded_file, $metadata);
+        $result = $this->document_service->uploadDocument($org_id, $uploaded_file, $metadata);
 
         if (is_wp_error($result)) {
-            return $this->html_response('documents-list', [
+            return $this->htmlResponse('documents-list', [
                 'notice' => [
                     'type'    => 'error',
                     'message' => $result->get_error_message(),
@@ -192,7 +192,7 @@ class DocumentController extends ApiController
         }
 
         // Refresh the document list after successful upload
-        $documents = $this->document_service->get_documents_by_org($org_id, $category);
+        $documents = $this->document_service->getDocumentsByOrg($org_id, $category);
 
         $view_model = [
             'org_id' => $org_id,
@@ -207,7 +207,7 @@ class DocumentController extends ApiController
             ],
         ];
 
-        return $this->html_response('documents-list', $view_model);
+        return $this->htmlResponse('documents-list', $view_model);
     }
 
     /**
@@ -216,13 +216,13 @@ class DocumentController extends ApiController
      * @param WP_REST_Request $request Request object.
      * @return WP_REST_Response
      */
-    public function delete_document(WP_REST_Request $request)
+    public function deleteDocument(WP_REST_Request $request)
     {
         $org_id = sanitize_text_field($request->get_param('org_id'));
         $document_id = absint($request->get_param('document_id'));
 
         if (empty($org_id) || empty($document_id)) {
-            return $this->html_response('documents-list', [
+            return $this->htmlResponse('documents-list', [
                 'notice' => [
                     'type'    => 'error',
                     'message' => __('Organization ID and Document ID are required.', 'wicket-acc'),
@@ -233,7 +233,7 @@ class DocumentController extends ApiController
         // Verify nonce for security
         $nonce = $request->get_param('_wpnonce');
         if (!$nonce || !wp_verify_nonce($nonce, 'org_management_document_delete_' . $document_id)) {
-            return $this->html_response('documents-list', [
+            return $this->htmlResponse('documents-list', [
                 'notice' => [
                     'type'    => 'error',
                     'message' => __('Security verification failed. Please try again.', 'wicket-acc'),
@@ -241,10 +241,10 @@ class DocumentController extends ApiController
             ]);
         }
 
-        $result = $this->document_service->delete_document($document_id);
+        $result = $this->document_service->deleteDocument($document_id);
 
         if (is_wp_error($result)) {
-            return $this->html_response('documents-list', [
+            return $this->htmlResponse('documents-list', [
                 'notice' => [
                     'type'    => 'error',
                     'message' => $result->get_error_message(),
@@ -254,7 +254,7 @@ class DocumentController extends ApiController
 
         // Refresh the document list after successful deletion
         $category = sanitize_text_field($request->get_param('category'));
-        $documents = $this->document_service->get_documents_by_org($org_id, $category);
+        $documents = $this->document_service->getDocumentsByOrg($org_id, $category);
 
         $view_model = [
             'org_id' => $org_id,
@@ -266,7 +266,7 @@ class DocumentController extends ApiController
             ],
         ];
 
-        return $this->html_response('documents-list', $view_model);
+        return $this->htmlResponse('documents-list', $view_model);
     }
 
     /**
@@ -276,7 +276,7 @@ class DocumentController extends ApiController
      * @param array  $data     Data for the template.
      * @return WP_REST_Response
      */
-    private function html_response($template, array $data)
+    private function htmlResponse($template, array $data)
     {
         ob_start();
         if (!empty($data)) {

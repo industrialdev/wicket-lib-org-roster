@@ -52,7 +52,7 @@ it('queues bulk upload job with isolated option record and schedules first batch
     file_put_contents($tmp, "First Name,Last Name,Email Address,Relationship Type,Roles\nJane,Doe,jane@example.com,Employee,member\nJohn,Smith,john@example.com,Employee,member\n");
 
     $service = new BulkMemberUploadService();
-    $result = $service->enqueue_upload($tmp, 'members.csv', 'org-1', 'membership-1', 'direct');
+    $result = $service->enqueueUpload($tmp, 'members.csv', 'org-1', 'membership-1', 'direct');
 
     expect($result)->toBeArray();
     expect($result['job_id'] ?? null)->toBe('11111111222233334444555555555555');
@@ -85,7 +85,7 @@ it('rejects duplicate active job when uploaded file hash already exists in queue
     ];
 
     $service = new BulkMemberUploadService();
-    $result = $service->enqueue_upload($tmp, 'members.csv', 'org-1', 'membership-1', 'direct');
+    $result = $service->enqueueUpload($tmp, 'members.csv', 'org-1', 'membership-1', 'direct');
 
     expect($result)->toBeInstanceOf(WP_Error::class);
     expect($result->get_error_code())->toBe('bulk_duplicate_active_job');
@@ -108,7 +108,7 @@ it('rejects duplicate finished job when uploaded file hash was already processed
     ];
 
     $service = new BulkMemberUploadService();
-    $result = $service->enqueue_upload($tmp, 'members.csv', 'org-1', 'membership-1', 'direct');
+    $result = $service->enqueueUpload($tmp, 'members.csv', 'org-1', 'membership-1', 'direct');
 
     expect($result)->toBeInstanceOf(WP_Error::class);
     expect($result->get_error_code())->toBe('bulk_duplicate_finished_job');
@@ -149,7 +149,7 @@ it('processes one scheduled batch and keeps job queued when more rows remain', f
     ];
 
     $service = new BulkMemberUploadService();
-    $service->process_scheduled_job($job_id);
+    $service->processScheduledJob($job_id);
 
     $updated = $GLOBALS['__orgroster_bulk_options'][$job_key] ?? [];
     expect($updated['status'] ?? null)->toBe('queued');
@@ -189,7 +189,7 @@ it('marks job completed and clears heavy payload fields at the end', function ()
     ];
 
     $service = new BulkMemberUploadService();
-    $service->process_scheduled_job($job_id);
+    $service->processScheduledJob($job_id);
 
     $updated = $GLOBALS['__orgroster_bulk_options'][$job_key] ?? [];
     expect($updated['status'] ?? null)->toBe('completed');
@@ -249,7 +249,7 @@ it('keeps parallel jobs isolated in independent option rows', function (): void 
     ]);
 
     $service = new BulkMemberUploadService();
-    $service->process_scheduled_job($job_a_id);
+    $service->processScheduledJob($job_a_id);
 
     $updated_a = $GLOBALS['__orgroster_bulk_options'][$job_a_key] ?? [];
     $updated_b = $GLOBALS['__orgroster_bulk_options'][$job_b_key] ?? [];
@@ -262,7 +262,7 @@ it('keeps parallel jobs isolated in independent option rows', function (): void 
 it('bounds batch size to supported min and max limits', function (): void {
     $service = new BulkMemberUploadService();
     $call_get_batch_size = Closure::bind(static function (BulkMemberUploadService $svc, array $config): int {
-        return $svc->get_batch_size($config);
+        return $svc->getBatchSize($config);
     }, null, BulkMemberUploadService::class);
 
     expect($call_get_batch_size($service, ['batch_size' => 0]))->toBe(1);
@@ -276,7 +276,7 @@ it('detects existing active group membership for a person email within group/org
     });
 
     $group_service = new class extends GroupService {
-        public function get_person_group_memberships(string $person_uuid, array $args = [])
+        public function getPersonGroupMemberships(string $person_uuid, array $args = [])
         {
             if ($person_uuid !== 'person-1') {
                 return ['data' => []];
@@ -309,7 +309,7 @@ it('detects existing active group membership for a person email within group/org
             string $email,
             GroupService $group_svc
         ): bool {
-            return $svc->active_group_membership_exists($group_uuid, $org_uuid, $email, $group_svc);
+            return $svc->activeGroupMembershipExists($group_uuid, $org_uuid, $email, $group_svc);
         },
         null,
         BulkMemberUploadService::class

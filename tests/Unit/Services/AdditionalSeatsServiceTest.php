@@ -29,7 +29,7 @@ it('returns purchasable additional seats product id', function (): void {
 
     $service = new AdditionalSeatsService(new ConfigService());
 
-    expect($service->get_additional_seats_product())->toBe(99);
+    expect($service->getAdditionalSeatsProduct())->toBe(99);
 });
 
 it('returns null when additional seats product is not purchasable', function (): void {
@@ -48,13 +48,13 @@ it('returns null when additional seats product is not purchasable', function ():
 
     $service = new AdditionalSeatsService(new ConfigService());
 
-    expect($service->get_additional_seats_product())->toBeNull();
+    expect($service->getAdditionalSeatsProduct())->toBeNull();
 });
 
 it('returns false when membership id is empty for MDP update', function (): void {
     $service = new AdditionalSeatsService(new ConfigService());
 
-    expect($service->update_mdp_membership_max_assignments('', 5))->toBeFalse();
+    expect($service->updateMdpMembershipMaxAssignments('', 5))->toBeFalse();
 });
 
 it('updates MDP max assignments when API responds with data', function (): void {
@@ -82,7 +82,7 @@ it('updates MDP max assignments when API responds with data', function (): void 
 
     $service = new AdditionalSeatsService(new ConfigService());
 
-    expect($service->update_mdp_membership_max_assignments('mem-1', 42))->toBeTrue()
+    expect($service->updateMdpMembershipMaxAssignments('mem-1', 42))->toBeTrue()
         ->and($GLOBALS['__orgroster_api_client']->patchCalls)->toHaveCount(1)
         ->and($GLOBALS['__orgroster_api_client']->patchCalls[0]['path'])->toBe('organization_memberships/mem-1')
         ->and($GLOBALS['__orgroster_api_client']->patchCalls[0]['options']['json']['data']['attributes']['max_assignments'])->toBe(42);
@@ -103,5 +103,5 @@ it('returns false when MDP patch response is invalid', function (): void {
 
     $service = new AdditionalSeatsService(new ConfigService());
 
-    expect($service->update_mdp_membership_max_assignments('mem-1', 7))->toBeFalse();
+    expect($service->updateMdpMembershipMaxAssignments('mem-1', 7))->toBeFalse();
 });

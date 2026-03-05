@@ -106,7 +106,7 @@ Current implementation note:
 
 ### 6.1 Strategy Wiring
 - Add new strategy class implementing `RosterManagementStrategy`.
-- Register strategy in `MemberService::init_strategies()`.
+- Register strategy in `MemberService::initStrategies()`.
 - Keep fallback behavior unchanged.
 
 ### 6.2 Membership Cycle Resolver

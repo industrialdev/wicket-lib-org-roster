@@ -29,7 +29,7 @@ it('resolves base URI from ABSPATH when package is installed in root vendor dire
     $getBaseUri = Closure::bind(
         function (): string {
             /* @var OrgMan $this */
-            return $this->get_base_uri();
+            return $this->getBaseUri();
         },
         $orgman,
         OrgMan::class

@@ -23,7 +23,7 @@ if (empty($group_uuid)) {
 
 $group_service = new GroupService();
 $current_user = wp_get_current_user();
-$access = $group_service->can_manage_group($group_uuid, (string) $current_user->user_login);
+$access = $group_service->canManageGroup($group_uuid, (string) $current_user->user_login);
 if (empty($access['allowed'])) {
     echo '<p class="wt_text-gray-500">' . esc_html__('You do not have permission to manage this group.', 'wicket-acc') . '</p>';
 
@@ -39,19 +39,19 @@ if (empty($org_uuid) && function_exists('wicket_get_group')) {
     }
 }
 
-$membership_service = new MembershipService();
-$config_service = new ConfigService();
-$additional_seats_service = new AdditionalSeatsService($config_service);
+$membershipService = new MembershipService();
+$configService = new ConfigService();
+$additional_seats_service = new AdditionalSeatsService($configService);
 $orgman_config = OrgManagement\Config\OrgManConfig::get();
 
 $membership_uuid = '';
 if ($org_uuid) {
-    $membership_uuid = $membership_service->getMembershipForOrganization($org_uuid);
+    $membership_uuid = $membershipService->getMembershipForOrganization($org_uuid);
 }
 
-$result = $group_service->get_group_members($group_uuid, $org_identifier, [
+$result = $group_service->getGroupMembers($group_uuid, $org_identifier, [
     'page' => 1,
-    'size' => $group_service->get_group_member_page_size(),
+    'size' => $group_service->getGroupMemberPageSize(),
     'query' => '',
     'org_uuid' => $org_uuid,
 ]);
@@ -189,9 +189,9 @@ if ($use_unified_view) {
 if ($use_unified_view) {
     return;
 }
-$can_purchase_seats = $org_uuid ? $additional_seats_service->can_purchase_additional_seats($org_uuid) : false;
+$can_purchase_seats = $org_uuid ? $additional_seats_service->canPurchaseAdditionalSeats($org_uuid) : false;
 $purchase_url = ($can_purchase_seats && $membership_uuid)
-    ? $additional_seats_service->get_purchase_form_url($org_uuid, $membership_uuid)
+    ? $additional_seats_service->getPurchaseFormUrl($org_uuid, $membership_uuid)
     : '';
 if ($can_purchase_seats && !empty($purchase_url)) :
     get_component('card-call-out', [

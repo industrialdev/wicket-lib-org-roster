@@ -28,7 +28,7 @@ it('resolves context membership uuid when org matches', function (): void {
     })->call($strategy, $membershipStub);
 
     $result = (function () {
-        return $this->resolve_membership_uuid('org-1', ['membership_uuid' => 'membership-1']);
+        return $this->resolveMembershipUuid('org-1', ['membership_uuid' => 'membership-1']);
     })->call($strategy);
 
     expect($result)->toBe('membership-1');
@@ -57,7 +57,7 @@ it('returns mismatch error when context membership belongs to another org', func
     })->call($strategy, $membershipStub);
 
     $result = (function () {
-        return $this->resolve_membership_uuid('org-1', ['membership_uuid' => 'membership-1']);
+        return $this->resolveMembershipUuid('org-1', ['membership_uuid' => 'membership-1']);
     })->call($strategy);
 
     expect($result)->toBeInstanceOf(WP_Error::class);
@@ -79,7 +79,7 @@ it('falls back to organization membership resolver when context membership is ab
     })->call($strategy, $membershipStub);
 
     $result = (function () {
-        return $this->resolve_membership_uuid('org-1', []);
+        return $this->resolveMembershipUuid('org-1', []);
     })->call($strategy);
 
     expect($result)->toBe('resolved-membership-1');

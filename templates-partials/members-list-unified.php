@@ -110,10 +110,10 @@ $has_seats_available = true;
 $current_user_uuid = function_exists('wicket_current_person_uuid') ? wicket_current_person_uuid() : null;
 
 if ($membership_uuid !== '') {
-    $membership_service = new OrgManagement\Services\MembershipService();
-    $membership_data = $membership_service->getOrgMembershipData($membership_uuid);
+    $membershipService = new OrgManagement\Services\MembershipService();
+    $membership_data = $membershipService->getOrgMembershipData($membership_uuid);
     if ($membership_data && isset($membership_data['data']['attributes'])) {
-        $max_seats = $membership_service->getEffectiveMaxAssignments($membership_data);
+        $max_seats = $membershipService->getEffectiveMaxAssignments($membership_data);
         $active_seats = (int) ($membership_data['data']['attributes']['active_assignments_count'] ?? 0);
         if ($max_seats !== null && $active_seats >= (int) $max_seats) {
             $has_seats_available = false;

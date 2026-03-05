@@ -90,7 +90,7 @@ final class OrgManConfig
                 ],
             ],
             'member_addition' => [
-                'auto_assign_roles' => [],
+                'auto_assignRoles' => [],
                 'base_member_role' => 'member',
                 'auto_opt_in_communications' => [
                     'enabled' => true,

@@ -26,9 +26,9 @@ if (empty($org_uuid) && isset($_GET['org_id'])) {
 $user_uuid = wp_get_current_user()->user_login;
 
 // Services
-$membership_service = new \OrgManagement\Services\MembershipService();
-$config_service = new \OrgManagement\Services\ConfigService();
-$roster_mode = $config_service->get_roster_mode();
+$membershipService = new \OrgManagement\Services\MembershipService();
+$configService = new \OrgManagement\Services\ConfigService();
+$roster_mode = $configService->getRosterMode();
 $group_uuid = isset($_GET['group_uuid']) ? sanitize_text_field($_GET['group_uuid']) : '';
 
 // Fetch organization basic info
@@ -62,8 +62,8 @@ if (!$org_name) {
 }
 
 // Membership UUID and data
-$membership_uuid = $org_uuid ? $membership_service->getMembershipForOrganization($org_uuid) : '';
-$membership_data = $membership_uuid ? $membership_service->getOrgMembershipData($membership_uuid) : null;
+$membership_uuid = $org_uuid ? $membershipService->getMembershipForOrganization($org_uuid) : '';
+$membership_data = $membership_uuid ? $membershipService->getOrgMembershipData($membership_uuid) : null;
 
 // Extract membership summary info
 $membership_name = '';
@@ -72,7 +72,7 @@ $renewal_date = '';
 $seats_label = '';
 
 if ($membership_data) {
-    $membership_name = $membership_service->getMembershipTierName($membership_data);
+    $membership_name = $membershipService->getMembershipTierName($membership_data);
     $owner_id = $membership_data['data']['relationships']['owner']['data']['id'] ?? '';
     $resolve_person_name = static function ($person): string {
         if (empty($person)) {
@@ -167,7 +167,7 @@ if ($membership_data) {
     }
     // Seats (if available)
     $active = $membership_data['data']['attributes']['active_assignments_count'] ?? null;
-    $max = $membership_service->getEffectiveMaxAssignments($membership_data);
+    $max = $membershipService->getEffectiveMaxAssignments($membership_data);
     if ($active !== null || $max !== null) {
         $max_label = $max !== null ? $max : esc_html__('Unlimited', 'wicket-acc');
         $seats_label = sprintf('%s %s / %s', esc_html__('Seats:', 'wicket-acc'), (string) $active, (string) $max_label);
@@ -200,7 +200,7 @@ if ($membership_data) {
         // Check user permissions for this organization
         if ($roster_mode === 'groups' && $group_uuid !== '') {
             $group_service = new \OrgManagement\Services\GroupService();
-            $group_access = $group_service->can_manage_group($group_uuid, (string) $user_uuid);
+            $group_access = $group_service->canManageGroup($group_uuid, $user_uuid);
             $can_edit_org = !empty($group_access['allowed']);
             $is_membership_manager = !empty($group_access['allowed']);
             $can_bulk_upload = !empty($group_access['allowed']);
@@ -211,9 +211,9 @@ if ($membership_data) {
         }
 
 // Get WPML-aware URLs for my-account pages
-$profile_url = \OrgManagement\Helpers\Helper::get_my_account_page_url('organization-profile', '/my-account/organization-profile/');
-$members_url = \OrgManagement\Helpers\Helper::get_my_account_page_url('organization-members', '/my-account/organization-members/');
-$members_bulk_url = \OrgManagement\Helpers\Helper::get_my_account_page_url('organization-members-bulk', '/my-account/organization-members-bulk/');
+$profile_url = \OrgManagement\Helpers\Helper::getMyAccountPageUrl('organization-profile', '/my-account/organization-profile/');
+$members_url = \OrgManagement\Helpers\Helper::getMyAccountPageUrl('organization-members', '/my-account/organization-members/');
+$members_bulk_url = \OrgManagement\Helpers\Helper::getMyAccountPageUrl('organization-members-bulk', '/my-account/organization-members-bulk/');
 $profile_params = [];
 $members_params = [];
 if ($org_uuid !== '') {

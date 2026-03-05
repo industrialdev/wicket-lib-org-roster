@@ -43,9 +43,9 @@ class MembershipCycleStrategy implements RosterManagementStrategy
      * @param array  $context
      * @return array|WP_Error
      */
-    public function add_member($org_id, $member_data, $context = [])
+    public function addMember($org_id, $member_data, $context = [])
     {
-        $membership_uuid = $this->extract_membership_uuid($context);
+        $membership_uuid = $this->extractMembershipUuid($context);
         if ('' === $membership_uuid) {
             return new WP_Error('missing_membership_uuid', 'Membership UUID is required for membership_cycle strategy.');
         }
@@ -54,14 +54,14 @@ class MembershipCycleStrategy implements RosterManagementStrategy
             return new WP_Error('no_permission', 'You do not have permission to add members to this organization.');
         }
 
-        $scope_valid = $this->validate_membership_scope($org_id, $membership_uuid);
+        $scope_valid = $this->validateMembershipScope($org_id, $membership_uuid);
         if (is_wp_error($scope_valid)) {
             return $scope_valid;
         }
 
         $context['membership_uuid'] = $membership_uuid;
 
-        return $this->direct_strategy()->add_member($org_id, $member_data, $context);
+        return $this->directStrategy()->addMember($org_id, $member_data, $context);
     }
 
     /**
@@ -72,9 +72,9 @@ class MembershipCycleStrategy implements RosterManagementStrategy
      * @param array  $context
      * @return array|WP_Error
      */
-    public function remove_member($org_id, $person_uuid, $context = [])
+    public function removeMember($org_id, $person_uuid, $context = [])
     {
-        $membership_uuid = $this->extract_membership_uuid($context);
+        $membership_uuid = $this->extractMembershipUuid($context);
         if ('' === $membership_uuid) {
             return new WP_Error('missing_membership_uuid', 'Membership UUID is required for membership_cycle strategy.');
         }
@@ -88,7 +88,7 @@ class MembershipCycleStrategy implements RosterManagementStrategy
             return new WP_Error('no_permission', 'You do not have permission to remove members from this organization.');
         }
 
-        $scope_valid = $this->validate_membership_scope($org_id, $membership_uuid);
+        $scope_valid = $this->validateMembershipScope($org_id, $membership_uuid);
         if (is_wp_error($scope_valid)) {
             return $scope_valid;
         }
@@ -96,13 +96,13 @@ class MembershipCycleStrategy implements RosterManagementStrategy
         $cycle_config = \OrgManagement\Config\OrgManConfig::get()['membership_cycle'] ?? [];
         $prevent_owner_removal = (bool) ($cycle_config['permissions']['prevent_owner_removal'] ?? true);
         if ($prevent_owner_removal) {
-            $org_owner = $this->organization_service()->get_organization_owner($org_id);
+            $org_owner = $this->organizationService()->getOrganizationOwner($org_id);
             if (!is_wp_error($org_owner) && $org_owner && $org_owner->uuid === $person_uuid) {
                 return new WP_Error('owner_removal_forbidden', 'The organization owner (Primary Member) cannot be removed.');
             }
         }
 
-        $remove_result = $this->membership_service()->endPersonMembershipToday($person_membership_id);
+        $remove_result = $this->membershipService()->endPersonMembershipToday($person_membership_id);
         if (is_wp_error($remove_result)) {
             return $remove_result;
         }
@@ -116,7 +116,7 @@ class MembershipCycleStrategy implements RosterManagementStrategy
      * @param array $context
      * @return string
      */
-    private function extract_membership_uuid(array $context): string
+    private function extractMembershipUuid(array $context): string
     {
         $membership_uuid = $context['membership_uuid'] ?? $context['membership_id'] ?? '';
 
@@ -130,14 +130,14 @@ class MembershipCycleStrategy implements RosterManagementStrategy
      * @param string $membership_uuid
      * @return true|WP_Error
      */
-    private function validate_membership_scope($org_id, string $membership_uuid)
+    private function validateMembershipScope($org_id, string $membership_uuid)
     {
         $org_id = sanitize_text_field((string) $org_id);
         if ('' === $org_id) {
             return new WP_Error('invalid_org_id', 'Organization identifier is required.');
         }
 
-        $membership_data = $this->membership_service()->getOrgMembershipData($membership_uuid);
+        $membership_data = $this->membershipService()->getOrgMembershipData($membership_uuid);
         if (empty($membership_data) || !is_array($membership_data)) {
             return new WP_Error('invalid_membership_uuid', 'Membership UUID is invalid or unavailable.');
         }
@@ -155,7 +155,7 @@ class MembershipCycleStrategy implements RosterManagementStrategy
      *
      * @return DirectAssignmentStrategy
      */
-    private function direct_strategy(): DirectAssignmentStrategy
+    private function directStrategy(): DirectAssignmentStrategy
     {
         if (!isset($this->directStrategy)) {
             $this->directStrategy = new DirectAssignmentStrategy();
@@ -169,7 +169,7 @@ class MembershipCycleStrategy implements RosterManagementStrategy
      *
      * @return MembershipService
      */
-    private function membership_service(): MembershipService
+    private function membershipService(): MembershipService
     {
         if (!isset($this->membershipService)) {
             $this->membershipService = new MembershipService();
@@ -183,7 +183,7 @@ class MembershipCycleStrategy implements RosterManagementStrategy
      *
      * @return OrganizationService
      */
-    private function organization_service(): OrganizationService
+    private function organizationService(): OrganizationService
     {
         if (!isset($this->organizationService)) {
             $this->organizationService = new OrganizationService();

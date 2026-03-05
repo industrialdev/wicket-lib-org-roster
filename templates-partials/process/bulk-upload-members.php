@@ -62,9 +62,9 @@ if (empty($_FILES['bulk_file']['tmp_name']) || !is_uploaded_file((string) $_FILE
     return;
 }
 
-$config_service = new ConfigService();
-$roster_mode = (string) $config_service->get_roster_mode();
-$membership_service = new MembershipService();
+$configService = new ConfigService();
+$roster_mode = (string) $configService->getRosterMode();
+$membershipService = new MembershipService();
 
 $group_access = [
     'allowed' => false,
@@ -89,7 +89,7 @@ if ($roster_mode === 'groups') {
     $current_user = wp_get_current_user();
     $person_uuid = $current_user ? (string) $current_user->user_login : '';
     $group_service = new GroupService();
-    $group_access = $group_service->can_manage_group($group_uuid, $person_uuid);
+    $group_access = $group_service->canManageGroup($group_uuid, $person_uuid);
 
     if (empty($group_access['allowed'])) {
         status_header(200);
@@ -131,7 +131,7 @@ if ($roster_mode === 'groups') {
 }
 
 if ($membership_uuid === '' && $org_uuid !== '') {
-    $membership_uuid = (string) $membership_service->getMembershipForOrganization($org_uuid);
+    $membership_uuid = (string) $membershipService->getMembershipForOrganization($org_uuid);
 }
 
 if ($roster_mode !== 'groups' && $membership_uuid === '') {
@@ -145,8 +145,8 @@ if ($roster_mode !== 'groups' && $membership_uuid === '') {
     return;
 }
 
-$bulk_upload_service = new BulkMemberUploadService($config_service);
-$result = $bulk_upload_service->enqueue_upload(
+$bulk_upload_service = new BulkMemberUploadService($configService);
+$result = $bulk_upload_service->enqueueUpload(
     (string) $_FILES['bulk_file']['tmp_name'],
     sanitize_file_name((string) ($_FILES['bulk_file']['name'] ?? 'bulk-upload.csv')),
     $org_uuid,

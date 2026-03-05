@@ -19,16 +19,16 @@ class AdditionalSeatsService
     /**
      * @var ConfigService
      */
-    private $config_service;
+    private $configService;
 
     /**
      * Constructor.
      *
-     * @param ConfigService $config_service The configuration service.
+     * @param ConfigService $configService The configuration service.
      */
-    public function __construct(ConfigService $config_service)
+    public function __construct(ConfigService $configService)
     {
-        $this->config_service = $config_service;
+        $this->configService = $configService;
     }
 
     /**
@@ -38,10 +38,10 @@ class AdditionalSeatsService
      * @param string $org_uuid The organization UUID.
      * @return bool True if user is authorized, false otherwise.
      */
-    public function can_purchase_additional_seats($org_uuid)
+    public function canPurchaseAdditionalSeats($org_uuid)
     {
         // Check if additional seats functionality is enabled
-        $enabled = $this->config_service->is_additional_seats_enabled();
+        $enabled = $this->configService->isAdditionalSeatsEnabled();
 
         if (!$enabled) {
             return false;
@@ -62,13 +62,13 @@ class AdditionalSeatsService
      *
      * @return int|null The product ID or null if not found.
      */
-    public function get_additional_seats_product()
+    public function getAdditionalSeatsProduct()
     {
-        $primary_sku = $this->config_service->get_additional_seats_sku();
+        $primary_sku = $this->configService->getAdditionalSeatsSku();
         $fallback_skus = ['corporate-seats'];
         $skus = array_values(array_unique(array_filter(array_merge([$primary_sku], $fallback_skus))));
 
-        $logger = wc_get_logger();
+        $logger = wc_getLogger();
 
         if (empty($skus)) {
             return null;
@@ -164,9 +164,9 @@ class AdditionalSeatsService
      *
      * @return array|null Product information or null if not found.
      */
-    public function get_additional_seats_product_info()
+    public function getAdditionalSeatsProductInfo()
     {
-        $product_id = $this->get_additional_seats_product();
+        $product_id = $this->getAdditionalSeatsProduct();
 
         if (!$product_id) {
             return null;
@@ -198,9 +198,9 @@ class AdditionalSeatsService
      * @param int $additional_seats The number of additional seats purchased.
      * @return bool True if successful, false otherwise.
      */
-    public function update_subscription_seat_count($order_id, $subscription_id, $additional_seats)
+    public function updateSubscriptionSeatCount($order_id, $subscription_id, $additional_seats)
     {
-        $logger = wc_get_logger();
+        $logger = wc_getLogger();
 
         try {
             $subscription = wcs_get_subscription($subscription_id);
@@ -220,7 +220,7 @@ class AdditionalSeatsService
             $subscription->save();
 
             // Update MDP via Wicket API if available
-            $this->update_mdp_seat_limit($subscription, $new_seat_limit);
+            $this->updateMdpSeatLimit($subscription, $new_seat_limit);
 
             $logger->info('[OrgMan] Updated subscription seat count', [
                 'source' => 'wicket-orgman',
@@ -245,9 +245,9 @@ class AdditionalSeatsService
         }
     }
 
-    public function update_mdp_membership_max_assignments($membership_id, $new_max_assignments)
+    public function updateMdpMembershipMaxAssignments($membership_id, $new_max_assignments)
     {
-        $logger = wc_get_logger();
+        $logger = wc_getLogger();
 
         $membership_id = is_string($membership_id) ? trim($membership_id) : '';
         $new_max_assignments = (int) $new_max_assignments;
@@ -272,7 +272,7 @@ class AdditionalSeatsService
                 return false;
             }
 
-            $current_membership = $this->get_membership_data_from_api($membership_id);
+            $current_membership = $this->getMembershipDataFromApi($membership_id);
 
             if (empty($current_membership) || !is_array($current_membership)) {
                 $logger->error('[OrgMan] Failed to fetch current MDP membership', [
@@ -344,9 +344,9 @@ class AdditionalSeatsService
      * @param int $new_seat_limit The new seat limit.
      * @return bool True if successful, false otherwise.
      */
-    private function update_mdp_seat_limit($subscription, $new_seat_limit)
+    private function updateMdpSeatLimit($subscription, $new_seat_limit)
     {
-        $logger = wc_get_logger();
+        $logger = wc_getLogger();
 
         try {
             // Get comprehensive membership data from order meta
@@ -480,7 +480,7 @@ class AdditionalSeatsService
      * @param array $membership_data The membership data needed for MDP API.
      * @return bool True if stored successfully.
      */
-    public function store_purchase_user_meta($org_uuid, $membership_id, $membership_data)
+    public function storePurchaseUserMeta($org_uuid, $membership_id, $membership_data)
     {
         $current_user_id = get_current_user_id();
 
@@ -497,7 +497,7 @@ class AdditionalSeatsService
 
         $success = update_user_meta($current_user_id, 'orgman_additional_seats_data', $purchase_data);
 
-        $logger = wc_get_logger();
+        $logger = wc_getLogger();
         if ($success) {
             $logger->info('[OrgMan] Purchase user meta stored', [
                 'source' => 'wicket-orgman',
@@ -523,7 +523,7 @@ class AdditionalSeatsService
      * @param int $user_id Optional user ID, defaults to current user.
      * @return array|null The stored data or null if not found.
      */
-    public function get_purchase_user_meta($user_id = 0)
+    public function getPurchaseUserMeta($user_id = 0)
     {
         if (!$user_id) {
             $user_id = get_current_user_id();
@@ -542,7 +542,7 @@ class AdditionalSeatsService
      * @param int $user_id Optional user ID, defaults to current user.
      * @return bool True if cleared successfully.
      */
-    public function clear_purchase_user_meta($user_id = 0)
+    public function clearPurchaseUserMeta($user_id = 0)
     {
         if (!$user_id) {
             $user_id = get_current_user_id();
@@ -562,9 +562,9 @@ class AdditionalSeatsService
      * @param string $membership_id The membership ID.
      * @return array|null Membership data or null if not found.
      */
-    public function get_membership_data_for_mdp($org_uuid, $membership_id)
+    public function getMembershipDataForMdp($org_uuid, $membership_id)
     {
-        $logger = wc_get_logger();
+        $logger = wc_getLogger();
 
         try {
             // Get organization data
@@ -586,7 +586,7 @@ class AdditionalSeatsService
             }
 
             // Get membership data to find current seat limits and relationships
-            $current_membership = $this->get_membership_data_from_api($membership_id);
+            $current_membership = $this->getMembershipDataFromApi($membership_id);
 
             if (!$current_membership) {
                 $logger->error('[OrgMan] Failed to get current membership data', [
@@ -646,9 +646,9 @@ class AdditionalSeatsService
      * @param string $membership_id The membership ID.
      * @return string The form URL.
      */
-    public function get_purchase_form_url($org_uuid, $membership_id)
+    public function getPurchaseFormUrl($org_uuid, $membership_id)
     {
-        $form_id = $this->config_service->get_additional_seats_form_id_for_current_language();
+        $form_id = $this->configService->getAdditionalSeatsFormIdForCurrentLanguage();
 
         if (empty($form_id)) {
             return '';
@@ -687,14 +687,14 @@ class AdditionalSeatsService
         }
 
         // Get comprehensive membership data
-        $membership_data = $this->get_membership_data_for_mdp($org_uuid, $membership_id);
+        $membership_data = $this->getMembershipDataForMdp($org_uuid, $membership_id);
 
         if (!$membership_data) {
             return '';
         }
 
         // Store data in user meta for later use
-        $this->store_purchase_user_meta($org_uuid, $membership_id, $membership_data);
+        $this->storePurchaseUserMeta($org_uuid, $membership_id, $membership_data);
 
         $args = [
             'org_uuid' => $org_uuid,
@@ -712,9 +712,9 @@ class AdditionalSeatsService
      * @param string $membership_id The membership ID.
      * @return array|null Membership data or null if not found.
      */
-    private function get_membership_data_from_api($membership_id)
+    private function getMembershipDataFromApi($membership_id)
     {
-        $logger = wc_get_logger();
+        $logger = wc_getLogger();
 
         try {
             if (!function_exists('wicket_api_client')) {

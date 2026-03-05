@@ -18,6 +18,6 @@ it('keeps members-list endpoint flow available for search requests', function ()
 
     expect($template)->toBeString()->not->toBeFalse();
     expect($template)->toContain("\$_GET['query']");
-    expect($template)->toContain('$member_service->get_members(');
+    expect($template)->toContain('$member_service->getMembers(');
     expect($template)->toContain("include __DIR__ . '/members-list-unified.php';");
 });

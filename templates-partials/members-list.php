@@ -89,8 +89,8 @@ $unconfirmed_label = (string) ($account_status_config['unconfirmed_label'] ?? __
 $use_unified_member_list = (bool) ($orgman_config['ui']['member_list']['use_unified'] ?? false);
 
 if ((!isset($members) || !is_array($members)) && !empty($org_uuid)) {
-    $config_service = new OrgManagement\Services\ConfigService();
-    $member_service = new OrgManagement\Services\MemberService($config_service);
+    $configService = new OrgManagement\Services\ConfigService();
+    $member_service = new OrgManagement\Services\MemberService($configService);
     $membership = new OrgManagement\Services\MembershipService();
     if (!isset($membership_uuid)) {
         $membership_uuid = $membership->getMembershipForOrganization($org_uuid);
@@ -100,7 +100,7 @@ if ((!isset($members) || !is_array($members)) && !empty($org_uuid)) {
     $query = isset($_GET['query']) ? sanitize_text_field((string) $_GET['query']) : $query;
 
     if (!empty($membership_uuid)) {
-        $result = $member_service->get_members(
+        $result = $member_service->getMembers(
             $membership_uuid,
             $org_uuid,
             [
@@ -120,7 +120,7 @@ if ((!isset($members) || !is_array($members)) && !empty($org_uuid)) {
 }
 
 if ($use_unified_member_list) {
-    $mode = isset($mode) ? (string) $mode : (string) (new OrgManagement\Services\ConfigService())->get_roster_mode();
+    $mode = isset($mode) ? (string) $mode : (string) (new OrgManagement\Services\ConfigService())->getRosterMode();
     $members = isset($members) && is_array($members) ? $members : [];
     $pagination = isset($pagination) && is_array($pagination) ? $pagination : [];
     $query = isset($query) ? (string) $query : '';
@@ -137,11 +137,11 @@ $active_seats = 0;
 $has_seats_available = true;
 
 if (!empty($membership_uuid)) {
-    $membership_service = new OrgManagement\Services\MembershipService();
-    $membership_data = $membership_service->getOrgMembershipData($membership_uuid);
+    $membershipService = new OrgManagement\Services\MembershipService();
+    $membership_data = $membershipService->getOrgMembershipData($membership_uuid);
 
     if ($membership_data && isset($membership_data['data']['attributes'])) {
-        $max_seats = $membership_service->getEffectiveMaxAssignments($membership_data);
+        $max_seats = $membershipService->getEffectiveMaxAssignments($membership_data);
         $active_seats = (int) ($membership_data['data']['attributes']['active_assignments_count'] ?? 0);
 
         if ($max_seats !== null && $active_seats >= (int) $max_seats) {
@@ -155,8 +155,8 @@ $total_pages = max(1, $total_pages);
 $page = min(max(1, $page), $total_pages);
 
 // Load available roles for the edit permissions modal
-$permission_service = new OrgManagement\Services\PermissionService();
-$available_roles = $permission_service->get_available_roles();
+$permissionService = new OrgManagement\Services\PermissionService();
+$available_roles = $permissionService->getAvailableRoles();
 
 // Load config for relationship type editing
 $role_display_map = $orgman_config['role_labels'] ?? [];
@@ -280,8 +280,8 @@ $no_members_message = __('No members found.', 'wicket-acc');
                                 </h3>
                                 <?php
                             // Check confirmation status using helper method
-                            $config_service = new OrgManagement\Services\ConfigService();
-            $member_service = new OrgManagement\Services\MemberService($config_service);
+                            $configService = new OrgManagement\Services\ConfigService();
+            $member_service = new OrgManagement\Services\MemberService($configService);
             $is_confirmed = $member_service->isUserConfirmed($member_uuid);
             ?>
                             <?php if ($show_account_status) : ?>

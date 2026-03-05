@@ -27,7 +27,7 @@ it('matches any role for a person when all_true is false', function (): void {
     $service = new MemberService(new ConfigService());
 
     $permissionStub = new class extends OrgManagement\Services\PermissionService {
-        public function get_person_current_roles_by_org_id($personUuid, $orgId): array
+        public function getPersonCurrentRolesByOrgId($personUuid, $orgId): array
         {
             return ['membership_owner', 'org_editor'];
         }
@@ -37,7 +37,7 @@ it('matches any role for a person when all_true is false', function (): void {
         $this->permissionService = $stub;
     })->call($service, $permissionStub);
 
-    expect($service->person_has_org_roles('person-1', 'membership_owner,missing_role', 'org-1'))
+    expect($service->personHasOrgRoles('person-1', 'membership_owner,missing_role', 'org-1'))
         ->toBeTrue();
 });
 
@@ -45,7 +45,7 @@ it('requires all roles when all_true is true', function (): void {
     $service = new MemberService(new ConfigService());
 
     $permissionStub = new class extends OrgManagement\Services\PermissionService {
-        public function get_person_current_roles_by_org_id($personUuid, $orgId): array
+        public function getPersonCurrentRolesByOrgId($personUuid, $orgId): array
         {
             return ['membership_owner'];
         }
@@ -55,7 +55,7 @@ it('requires all roles when all_true is true', function (): void {
         $this->permissionService = $stub;
     })->call($service, $permissionStub);
 
-    expect($service->person_has_org_roles('person-1', ['membership_owner', 'org_editor'], 'org-1', true))
+    expect($service->personHasOrgRoles('person-1', ['membership_owner', 'org_editor'], 'org-1', true))
         ->toBeFalse();
 });
 
@@ -66,7 +66,7 @@ it('clears member cache transients for common sizes', function (): void {
     $key = 'orgman_members_initial_' . md5($membershipUuid . '_1_10');
     set_transient($key, ['cached'], 300);
 
-    $service->clear_members_cache($membershipUuid);
+    $service->clearMembersCache($membershipUuid);
 
     expect(get_transient($key))->toBeFalse();
 });
@@ -82,7 +82,7 @@ it('preserves member search query across roster modes', function (string $mode):
     $configStub = new class($mode) extends ConfigService {
         public function __construct(private string $modeValue) {}
 
-        public function get_roster_mode()
+        public function getRosterMode()
         {
             return $this->modeValue;
         }
@@ -145,7 +145,7 @@ it('preserves member search query across roster modes', function (string $mode):
         }
     };
 
-    $result = $service->search_members('mem-1', 'org-1', 'meri', [
+    $result = $service->searchMembers('mem-1', 'org-1', 'meri', [
         'page' => 1,
         'size' => 15,
     ]);
@@ -178,7 +178,7 @@ it('passes null query to membership fetch on initial list load', function (): vo
         }
     };
 
-    $service->get_members('mem-1', 'org-1', [
+    $service->getMembers('mem-1', 'org-1', [
         'page' => 1,
         'size' => 15,
         'query' => '',
@@ -218,7 +218,7 @@ it('blocks role updates for inactive members when activity guard is enabled', fu
         $this->config['member_edit']['require_active_membership_for_role_updates'] = true;
     })->call($service);
 
-    $result = $service->update_member_roles('person-1', 'org-1', 'mem-1', ['org_editor']);
+    $result = $service->updateMemberRoles('person-1', 'org-1', 'mem-1', ['org_editor']);
 
     expect(is_wp_error($result))->toBeTrue();
     expect($result->get_error_code())->toBe('inactive_member_role_update_forbidden');
@@ -296,7 +296,7 @@ it('allows role updates when an active membership row exists for the person in t
         $this->config['member_edit']['require_active_membership_for_role_updates'] = true;
     })->call($service);
 
-    $result = $service->update_member_roles('person-1', 'org-1', 'mem-1', ['org_editor']);
+    $result = $service->updateMemberRoles('person-1', 'org-1', 'mem-1', ['org_editor']);
 
     expect(is_wp_error($result))->toBeFalse();
     expect($result['success'] ?? null)->toBeTrue();
@@ -375,7 +375,7 @@ it('allows role updates when an in-grace membership row exists for the person in
         $this->config['member_edit']['require_active_membership_for_role_updates'] = true;
     })->call($service);
 
-    $result = $service->update_member_roles('person-1', 'org-1', 'mem-1', ['org_editor']);
+    $result = $service->updateMemberRoles('person-1', 'org-1', 'mem-1', ['org_editor']);
 
     expect(is_wp_error($result))->toBeFalse();
     expect($result['success'] ?? null)->toBeTrue();
@@ -454,7 +454,7 @@ it('allows role updates when active_at query returns current active row despite 
         $this->config['member_edit']['require_active_membership_for_role_updates'] = true;
     })->call($service);
 
-    $result = $service->update_member_roles('person-1', 'org-1', 'mem-1', ['org_editor']);
+    $result = $service->updateMemberRoles('person-1', 'org-1', 'mem-1', ['org_editor']);
 
     expect(is_wp_error($result))->toBeFalse();
     expect($result['success'] ?? null)->toBeTrue();
@@ -554,7 +554,7 @@ it('includes inactive relationships on member cards by default', function (): vo
     $connectionProperty = new ReflectionProperty(MemberService::class, 'connectionService');
     $connectionProperty->setValue($service, $connectionStub);
 
-    $result = $service->get_members('mem-1', 'org-1', [
+    $result = $service->getMembers('mem-1', 'org-1', [
         'page' => 1,
         'size' => 15,
     ]);
@@ -660,7 +660,7 @@ it('shows only active relationships on member cards when active-only filter is e
     $config['relationships']['member_card_active_only'] = true;
     $configProperty->setValue($service, $config);
 
-    $result = $service->get_members('mem-1', 'org-1', [
+    $result = $service->getMembers('mem-1', 'org-1', [
         'page' => 1,
         'size' => 15,
     ]);
@@ -770,7 +770,7 @@ it('merges duplicate raw roster rows for the same person into one member card', 
     $connectionProperty = new ReflectionProperty(MemberService::class, 'connectionService');
     $connectionProperty->setValue($service, $connectionStub);
 
-    $result = $service->get_members('mem-1', 'org-1', [
+    $result = $service->getMembers('mem-1', 'org-1', [
         'page' => 1,
         'size' => 15,
     ]);
@@ -871,7 +871,7 @@ it('normalizes affiliation aliases and excludes them from roster relationship di
     $config['relationships']['exclude_relationship_types'] = ['affiliate'];
     $configProperty->setValue($service, $config);
 
-    $result = $service->get_members('mem-1', 'org-1', [
+    $result = $service->getMembers('mem-1', 'org-1', [
         'page' => 1,
         'size' => 15,
     ]);
@@ -964,7 +964,7 @@ it('filters displayed member roles using allowlist and exclude config', function
     $config['ui']['member_list']['display_roles_exclude'] = ['supplemental_member'];
     $configProperty->setValue($service, $config);
 
-    $result = $service->get_members('mem-1', 'org-1', [
+    $result = $service->getMembers('mem-1', 'org-1', [
         'page' => 1,
         'size' => 15,
     ]);

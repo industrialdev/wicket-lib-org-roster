@@ -21,7 +21,7 @@ class ConfigService
      *
      * @return string The current roster mode.
      */
-    public function get_roster_mode()
+    public function getRosterMode()
     {
         $config = \OrgManagement\Config\OrgManConfig::get();
         $default_strategy = $config['roster']['strategy'] ?? 'cascade';
@@ -34,7 +34,7 @@ class ConfigService
      *
      * @return bool True if additional seats functionality is enabled.
      */
-    public function is_additional_seats_enabled()
+    public function isAdditionalSeatsEnabled()
     {
         $config = \OrgManagement\Config\OrgManConfig::get();
         $default_enabled = $config['additional_seats']['enabled'] ?? true;
@@ -47,7 +47,7 @@ class ConfigService
      *
      * @return string The SKU for the additional seats product.
      */
-    public function get_additional_seats_sku()
+    public function getAdditionalSeatsSku()
     {
         $config = \OrgManagement\Config\OrgManConfig::get();
         $default_sku = $config['additional_seats']['sku'] ?? 'additional-seats';
@@ -60,7 +60,7 @@ class ConfigService
      *
      * @return int The Gravity Form ID.
      */
-    public function get_additional_seats_form_id()
+    public function getAdditionalSeatsFormId()
     {
         $config = \OrgManagement\Config\OrgManConfig::get();
         $default_form_id = $config['additional_seats']['form_id'] ?? 0;
@@ -83,7 +83,7 @@ class ConfigService
      * @param int $form_id The base Gravity Form ID.
      * @return int The localized form ID.
      */
-    public function get_localized_form_id(int $form_id): int
+    public function getLocalizedFormId(int $form_id): int
     {
         $form_id = absint($form_id);
         if ($form_id === 0) {
@@ -112,9 +112,9 @@ class ConfigService
      *
      * @return int The localized Gravity Form ID.
      */
-    public function get_additional_seats_form_id_for_current_language(): int
+    public function getAdditionalSeatsFormIdForCurrentLanguage(): int
     {
-        return $this->get_localized_form_id($this->get_additional_seats_form_id());
+        return $this->getLocalizedFormId($this->getAdditionalSeatsFormId());
     }
 
     /**
@@ -122,7 +122,7 @@ class ConfigService
      *
      * @return int The minimum quantity.
      */
-    public function get_additional_seats_min_quantity()
+    public function getAdditionalSeatsMinQuantity()
     {
         $config = \OrgManagement\Config\OrgManConfig::get();
         $default_min_quantity = $config['additional_seats']['min_quantity'] ?? 1;
@@ -135,7 +135,7 @@ class ConfigService
      *
      * @return int The maximum quantity.
      */
-    public function get_additional_seats_max_quantity()
+    public function getAdditionalSeatsMaxQuantity()
     {
         $config = \OrgManagement\Config\OrgManConfig::get();
         $default_max_quantity = $config['additional_seats']['max_quantity'] ?? 100;
@@ -148,7 +148,7 @@ class ConfigService
      *
      * @return array Array of allowed document file types.
      */
-    public function get_allowed_document_types()
+    public function getAllowedDocumentTypes()
     {
         $config = \OrgManagement\Config\OrgManConfig::get();
         $default_types = $config['documents']['allowed_types'] ?? [
@@ -163,7 +163,7 @@ class ConfigService
      *
      * @return int Maximum document size in bytes.
      */
-    public function get_max_document_size()
+    public function getMaxDocumentSize()
     {
         $config = \OrgManagement\Config\OrgManConfig::get();
         $default_size = $config['documents']['max_size'] ?? (10 * 1024 * 1024); // 10MB default
@@ -176,7 +176,7 @@ class ConfigService
      *
      * @return string|null Custom seat limit information or null.
      */
-    public function get_business_info_seat_limit_info()
+    public function getBusinessInfoSeatLimitInfo()
     {
         $config = \OrgManagement\Config\OrgManConfig::get();
         $default_info = $config['business_info']['seat_limit_info'] ?? null;
@@ -190,7 +190,7 @@ class ConfigService
      * @param string $org_uuid The organization UUID.
      * @return string The URL for the supplemental members page.
      */
-    public function get_supplemental_members_url($org_uuid = '')
+    public function getSupplementalMembersUrl($org_uuid = '')
     {
         // Find the my-account CPT page with slug 'supplemental-members'
         $args = [

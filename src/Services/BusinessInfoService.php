@@ -37,7 +37,7 @@ class BusinessInfoService
                 'value_key'  => 'attributes',
                 'other_key'  => 'attributesother',
                 'input_type' => 'checkbox',
-                'options'    => $this->build_options([
+                'options'    => $this->buildOptions([
                     '2slgbtqia-owned'        => __('2SLGBTQIA+ Owned', 'wicket-acc'),
                     'bipoc-owned'            => __('Black, Indigenous, Person of Colour Owned', 'wicket-acc'),
                     'quebec-based-business'  => __('Quebec Based Business', 'wicket-acc'),
@@ -54,7 +54,7 @@ class BusinessInfoService
                 'value_key'  => 'certifications',
                 'other_key'  => 'certificationsother',
                 'input_type' => 'checkbox',
-                'options'    => $this->build_options([
+                'options'    => $this->buildOptions([
                     'carbon-neutral'                    => __('Carbon Neutral', 'wicket-acc'),
                     'certified-b-corp'                  => __('Certified B Corp', 'wicket-acc'),
                     'cruelty-free'                      => __('Cruelty Free', 'wicket-acc'),
@@ -75,7 +75,7 @@ class BusinessInfoService
                 'value_key'  => 'services',
                 'other_key'  => 'servicesother',
                 'input_type' => 'checkbox',
-                'options'    => $this->build_options([
+                'options'    => $this->buildOptions([
                     'certification-services'         => __('Certification Services', 'wicket-acc'),
                     'consulting-services'            => __('Consulting Services', 'wicket-acc'),
                     'contract-manufacturing'         => __('Contract Manufacturing', 'wicket-acc'),
@@ -101,7 +101,7 @@ class BusinessInfoService
                 'value_key'  => 'prodoptions',
                 'other_key'  => 'segmentsother',
                 'input_type' => 'checkbox',
-                'options'    => $this->build_options([
+                'options'    => $this->buildOptions([
                     'food-beverage'                               => __('Food & Beverage', 'wicket-acc'),
                     'personal-care-beauty'                        => __('Personal Care & Beauty', 'wicket-acc'),
                     'healthy-home-lifestyle'                      => __('Healthy Home & Lifestyle', 'wicket-acc'),
@@ -119,7 +119,7 @@ class BusinessInfoService
      * @param array $labels Map of API values to labels.
      * @return array
      */
-    private function build_options(array $labels)
+    private function buildOptions(array $labels)
     {
         $options = [];
 
@@ -141,7 +141,7 @@ class BusinessInfoService
      * @param string $org_id Organization UUID.
      * @return array
      */
-    public function get_organization_header($org_id)
+    public function getOrganizationHeader($org_id)
     {
         $default = [
             'name'    => '',
@@ -179,7 +179,7 @@ class BusinessInfoService
      * @param string $org_id Organization UUID.
      * @return array
      */
-    public function get_sections_state($org_id)
+    public function getSectionsState($org_id)
     {
         $state = [];
 
@@ -228,7 +228,7 @@ class BusinessInfoService
      *
      * @return array|WP_Error
      */
-    public function update_sections($org_id, array $payload)
+    public function updateSections($org_id, array $payload)
     {
         if (empty($org_id)) {
             return new WP_Error('missing_org', __('Organization ID is required.', 'wicket-acc'));
@@ -243,7 +243,7 @@ class BusinessInfoService
         $results = [];
 
         foreach ($this->sections as $section_key => $section) {
-            $sanitized = $this->sanitize_section_payload($section_key, $section, $payload);
+            $sanitized = $this->sanitizeSectionPayload($section_key, $section, $payload);
 
             $request_payload = [
                 'data_fields' => [
@@ -254,7 +254,7 @@ class BusinessInfoService
                 ],
             ];
 
-            $response = $this->patch_section($client, $org_id, $request_payload);
+            $response = $this->patchSection($client, $org_id, $request_payload);
 
             if (is_wp_error($response)) {
                 return $response;
@@ -275,7 +275,7 @@ class BusinessInfoService
      *
      * @return array
      */
-    private function sanitize_section_payload($section_key, array $section_config, array $payload)
+    private function sanitizeSectionPayload($section_key, array $section_config, array $payload)
     {
         $values_key = $section_key;
         $other_key = $section_key . '_other';
@@ -317,7 +317,7 @@ class BusinessInfoService
      *
      * @return array|WP_Error
      */
-    private function patch_section($client, $org_id, array $section_payload)
+    private function patchSection($client, $org_id, array $section_payload)
     {
         $payload = [
             'data' => [
@@ -351,7 +351,7 @@ class BusinessInfoService
      *
      * @return array
      */
-    public function get_sections_config()
+    public function getSectionsConfig()
     {
         return $this->sections;
     }

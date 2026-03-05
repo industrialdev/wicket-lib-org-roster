@@ -9,7 +9,7 @@ it('falls back to the provided path when my-account post is missing', function (
     Functions\when('get_posts')->alias(fn (array $args): array => []);
     Functions\when('home_url')->alias(fn (string $path = ''): string => 'https://example.test' . $path);
 
-    $url = Helper::get_my_account_page_url('organization-members', '/my-account/organization-members/');
+    $url = Helper::getMyAccountPageUrl('organization-members', '/my-account/organization-members/');
 
     expect($url)->toBe('https://example.test/my-account/organization-members/');
 });

@@ -12,7 +12,7 @@ it('sanitizes business info payload values against configured options', function
     ));
 
     $service = new BusinessInfoService();
-    $sections = $service->get_sections_config();
+    $sections = $service->getSectionsConfig();
     $section = $sections['company_attributes'];
 
     $payload = [
@@ -25,7 +25,7 @@ it('sanitizes business info payload values against configured options', function
     ];
 
     $result = (function (string $sectionKey, array $sectionConfig, array $payloadData) {
-        return $this->sanitize_section_payload($sectionKey, $sectionConfig, $payloadData);
+        return $this->sanitizeSectionPayload($sectionKey, $sectionConfig, $payloadData);
     })->call($service, 'company_attributes', $section, $payload);
 
     expect($result)->toBe([
@@ -37,7 +37,7 @@ it('sanitizes business info payload values against configured options', function
 it('returns an error when updating sections without an org id', function (): void {
     $service = new BusinessInfoService();
 
-    $result = $service->update_sections('', []);
+    $result = $service->updateSections('', []);
 
     expect(is_wp_error($result))->toBeTrue()
         ->and($result->get_error_code())->toBe('missing_org');

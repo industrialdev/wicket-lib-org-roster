@@ -85,7 +85,7 @@ class ConfigHelper extends Helper
      * @param string $role The role name to normalize
      * @return string Normalized role name
      */
-    private static function normalize_role_name(string $role): string
+    private static function normalizeRoleName(string $role): string
     {
         return strtolower(str_replace(' ', '_', trim($role)));
     }
@@ -96,9 +96,9 @@ class ConfigHelper extends Helper
      * @param array $roles Array of role names to normalize
      * @return array Normalized role names
      */
-    private static function normalize_roles(array $roles): array
+    private static function normalizeRoles(array $roles): array
     {
-        return array_map([self::class, 'normalize_role_name'], $roles);
+        return array_map([self::class, 'normalizeRoleName'], $roles);
     }
 
     /**
@@ -111,7 +111,7 @@ class ConfigHelper extends Helper
         $config = self::get_permissions_config();
         $roles = $config['edit_organization'] ?? ['org_editor'];
 
-        return self::normalize_roles($roles);
+        return self::normalizeRoles($roles);
     }
 
     /**
@@ -124,7 +124,7 @@ class ConfigHelper extends Helper
         $config = self::get_permissions_config();
         $roles = $config['manage_members'] ?? ['membership_manager', 'membership_owner'];
 
-        return self::normalize_roles($roles);
+        return self::normalizeRoles($roles);
     }
 
     /**
@@ -137,7 +137,7 @@ class ConfigHelper extends Helper
         $config = self::get_permissions_config();
         $roles = $config['purchase_seats'] ?? ['membership_owner', 'membership_manager', 'org_editor'];
 
-        return self::normalize_roles($roles);
+        return self::normalizeRoles($roles);
     }
 
     /**
@@ -150,6 +150,6 @@ class ConfigHelper extends Helper
         $config = self::get_permissions_config();
         $roles = $config['any_management'] ?? ['org_editor', 'membership_manager', 'membership_owner'];
 
-        return self::normalize_roles($roles);
+        return self::normalizeRoles($roles);
     }
 }

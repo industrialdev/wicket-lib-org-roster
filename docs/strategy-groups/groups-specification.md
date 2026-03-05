@@ -93,7 +93,7 @@
 - Existing endpoints and template routing remain stable.
 
 ## 5) Security and Validation
-- Group mutations require group-level access validation (`can_manage_group`).
+- Group mutations require group-level access validation (`canManageGroup`).
 - Role slugs are sanitized and validated against config.
 - Request fields are sanitized before use.
 - Mutations fail closed when required context is missing or invalid.

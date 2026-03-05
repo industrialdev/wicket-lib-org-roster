@@ -52,9 +52,9 @@ class GroupsStrategy implements RosterManagementStrategy
      */
     private $logger = null;
 
-    public function add_member($org_id, $member_data, $context = [])
+    public function addMember($org_id, $member_data, $context = [])
     {
-        $logger = $this->get_logger();
+        $logger = $this->getLogger();
         $log_context = [
             'source' => 'wicket-orgman',
             'strategy' => 'groups',
@@ -74,7 +74,7 @@ class GroupsStrategy implements RosterManagementStrategy
 
             $group_uuid = $context['group_uuid'];
             $role_slug = sanitize_key((string) ($context['role'] ?? $context['roster_role'] ?? 'member'));
-            $roster_roles = $this->group_service()->get_roster_roles();
+            $roster_roles = $this->groupService()->getRosterRoles();
             if (!in_array($role_slug, $roster_roles, true)) {
                 $logger->warning('[OrgRoster] Groups strategy invalid roster role', array_merge($log_context, [
                     'role' => $role_slug,
@@ -85,7 +85,7 @@ class GroupsStrategy implements RosterManagementStrategy
 
             $current_person = wp_get_current_user();
             $manager_uuid = $current_person ? (string) $current_person->user_login : '';
-            $manager_access = $this->group_service()->can_manage_group($group_uuid, $manager_uuid);
+            $manager_access = $this->groupService()->canManageGroup($group_uuid, $manager_uuid);
             if (empty($manager_access['allowed'])) {
                 $logger->warning('[OrgRoster] Groups strategy access denied', array_merge($log_context, [
                     'manager_uuid' => $manager_uuid,
@@ -97,7 +97,7 @@ class GroupsStrategy implements RosterManagementStrategy
             $org_identifier = (string) ($manager_access['org_identifier'] ?? '');
             $org_uuid = (string) ($manager_access['org_uuid'] ?? $org_id);
 
-            $person_uuid = $this->person_service()->createOrGetPerson(
+            $person_uuid = $this->personService()->createOrGetPerson(
                 $member_data['first_name'],
                 $member_data['last_name'],
                 $member_data['email'],
@@ -158,7 +158,7 @@ class GroupsStrategy implements RosterManagementStrategy
                 : [$groups_config['member_role'] ?? 'member'];
 
             if (in_array($role_slug, $seat_limited_roles, true)) {
-                $existing_members = $this->group_service()->get_group_members($group_uuid, $org_identifier, [
+                $existing_members = $this->groupService()->getGroupMembers($group_uuid, $org_identifier, [
                     'page' => 1,
                     'size' => 50,
                     'query' => '',
@@ -178,8 +178,8 @@ class GroupsStrategy implements RosterManagementStrategy
             $logger->debug('[OrgRoster] Groups strategy adding member to group', array_merge($log_context, [
                 'role' => $role_slug,
             ]));
-            $custom_data_field = $this->group_service()->build_custom_data_field($org_identifier);
-            $group_member_result = $this->group_service()->create_group_member($person_uuid, $group_uuid, $role_slug, $custom_data_field);
+            $custom_data_field = $this->groupService()->buildCustomDataField($org_identifier);
+            $group_member_result = $this->groupService()->createGroupMember($person_uuid, $group_uuid, $role_slug, $custom_data_field);
             if (is_wp_error($group_member_result)) {
                 return $group_member_result;
             }
@@ -187,7 +187,7 @@ class GroupsStrategy implements RosterManagementStrategy
             $group_details = function_exists('wicket_get_group') ? wicket_get_group($group_uuid) : null;
             $group_name = $group_details['data']['attributes']['name'] ?? 'Unknown Group';
 
-            $notification_result = $this->notification_service()->email_to_person_on_group_assignment($person_uuid, [
+            $notification_result = $this->notificationService()->emailToPersonOnGroupAssignment($person_uuid, [
                 'person_email'      => $member_data['email'],
                 'notification_type' => 'group_assignment',
                 'org_id'            => $org_uuid ?: $org_id,
@@ -221,9 +221,9 @@ class GroupsStrategy implements RosterManagementStrategy
         }
     }
 
-    public function remove_member($org_id, $person_uuid, $context = [])
+    public function removeMember($org_id, $person_uuid, $context = [])
     {
-        $logger = $this->get_logger();
+        $logger = $this->getLogger();
         $log_context = [
             'source' => 'wicket-orgman',
             'strategy' => 'groups',
@@ -246,7 +246,7 @@ class GroupsStrategy implements RosterManagementStrategy
 
             $current_person = wp_get_current_user();
             $manager_uuid = $current_person ? (string) $current_person->user_login : '';
-            $manager_access = $this->group_service()->can_manage_group($group_uuid, $manager_uuid);
+            $manager_access = $this->groupService()->canManageGroup($group_uuid, $manager_uuid);
             if (empty($manager_access['allowed'])) {
                 $logger->warning('[OrgRoster] Groups strategy remove_member access denied', array_merge($log_context, [
                     'manager_uuid' => $manager_uuid,
@@ -259,7 +259,7 @@ class GroupsStrategy implements RosterManagementStrategy
             $org_uuid = (string) ($manager_access['org_uuid'] ?? $org_id);
 
             if (!empty($org_uuid)) {
-                $org_owner = $this->organization_service()->get_organization_owner($org_uuid);
+                $org_owner = $this->organizationService()->getOrganizationOwner($org_uuid);
                 if (!is_wp_error($org_owner) && $org_owner && $org_owner->uuid === $person_uuid) {
                     $logger->warning('[OrgRoster] Groups strategy attempted to remove organization owner', $log_context);
 
@@ -280,7 +280,7 @@ class GroupsStrategy implements RosterManagementStrategy
 
             $group_member_id = (string) ($context['group_member_id'] ?? '');
             if ('' === $group_member_id) {
-                $group_member_id = $this->group_service()->find_group_member_id($group_uuid, $person_uuid, $org_identifier, [], $org_uuid);
+                $group_member_id = $this->groupService()->findGroupMemberId($group_uuid, $person_uuid, $org_identifier, [], $org_uuid);
             }
             if ('' === $group_member_id) {
                 $logger->error('[OrgRoster] Groups strategy could not locate group member', $log_context);
@@ -288,7 +288,7 @@ class GroupsStrategy implements RosterManagementStrategy
                 return new \WP_Error('group_member_not_found', 'Could not find the person in the specified group.');
             }
 
-            $remove_result = $this->group_service()->remove_group_member($group_member_id);
+            $remove_result = $this->groupService()->removeGroupMember($group_member_id);
             if (is_wp_error($remove_result)) {
                 $logger->error('[OrgRoster] Groups strategy failed to remove group member', array_merge($log_context, [
                     'error' => $remove_result->get_error_message(),
@@ -329,7 +329,7 @@ class GroupsStrategy implements RosterManagementStrategy
      *
      * @return PersonService
      */
-    private function person_service(): PersonService
+    private function personService(): PersonService
     {
         if (!isset($this->personService)) {
             $this->personService = new PersonService();
@@ -343,7 +343,7 @@ class GroupsStrategy implements RosterManagementStrategy
      *
      * @return NotificationService
      */
-    private function notification_service(): NotificationService
+    private function notificationService(): NotificationService
     {
         if (!isset($this->notificationService)) {
             $this->notificationService = new NotificationService();
@@ -357,7 +357,7 @@ class GroupsStrategy implements RosterManagementStrategy
      *
      * @return OrganizationService
      */
-    private function organization_service(): OrganizationService
+    private function organizationService(): OrganizationService
     {
         if (!isset($this->organizationService)) {
             $this->organizationService = new OrganizationService();
@@ -371,7 +371,7 @@ class GroupsStrategy implements RosterManagementStrategy
      *
      * @return GroupService
      */
-    private function group_service(): GroupService
+    private function groupService(): GroupService
     {
         if (!isset($this->groupService)) {
             $this->groupService = new GroupService();
@@ -385,10 +385,10 @@ class GroupsStrategy implements RosterManagementStrategy
      *
      * @return \WC_Logger
      */
-    private function get_logger()
+    private function getLogger()
     {
         if (null === $this->logger) {
-            $this->logger = wc_get_logger();
+            $this->logger = wc_getLogger();
         }
 
         return $this->logger;

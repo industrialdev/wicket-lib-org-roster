@@ -21,7 +21,7 @@ class PermissionService
      *
      * @return array
      */
-    public function get_available_roles()
+    public function getAvailableRoles()
     {
         $roles = [];
 
@@ -33,7 +33,7 @@ class PermissionService
         }
 
         if (empty($roles)) {
-            $roles = $this->get_available_roles_native();
+            $roles = $this->getAvailableRolesNative();
         }
 
         return array_map(static function ($label) {
@@ -47,7 +47,7 @@ class PermissionService
      *
      * @return array Associative array of role slugs and their translated labels.
      */
-    private function get_available_roles_native(): array
+    private function getAvailableRolesNative(): array
     {
         $config = \OrgManagement\Config\OrgManConfig::get();
 
@@ -61,7 +61,7 @@ class PermissionService
      * @param string $org_id The ID of the organization
      * @return array An array of current role slugs
      */
-    public function get_person_current_roles_by_org_id($person_uuid, $org_id): array
+    public function getPersonCurrentRolesByOrgId($person_uuid, $org_id): array
     {
         if (empty($person_uuid) || empty($org_id) || !function_exists('wicket_api_client')) {
             return [];
@@ -118,7 +118,7 @@ class PermissionService
      * @param string $org_id The ID of the organization
      * @return bool True if successful, false otherwise
      */
-    private function remove_person_single_role_from_org($person_uuid, $role_name, $org_id): bool
+    private function removePersonSingleRoleFromOrg($person_uuid, $role_name, $org_id): bool
     {
         if (empty($person_uuid) || empty($role_name) || empty($org_id) || !function_exists('wicket_api_client') || !function_exists('wicket_get_person_by_id')) {
             return false;
@@ -177,7 +177,7 @@ class PermissionService
      * @param string       $org_id The organization ID.
      * @return true|\WP_Error True if successful, WP_Error if failed.
      */
-    public function remove_person_roles_from_org($person_uuid, $roles, $org_id)
+    public function removePersonRolesFromOrg($person_uuid, $roles, $org_id)
     {
         if (empty($person_uuid) || empty($roles) || empty($org_id)) {
             return new \WP_Error('invalid_params', 'Person UUID, roles, and organization ID are required.');
@@ -209,7 +209,7 @@ class PermissionService
                     continue;
                 }
 
-                $result = $this->remove_person_single_role_from_org($person_uuid, $role, $org_id);
+                $result = $this->removePersonSingleRoleFromOrg($person_uuid, $role, $org_id);
                 if (!$result) {
                     return new \WP_Error('role_removal_failed', sprintf('Failed removing role %s.', $role));
                 }
@@ -229,13 +229,13 @@ class PermissionService
      * @param string       $org_id The organization ID.
      * @return true|\WP_Error True if successful, WP_Error if failed.
      */
-    public function assign_roles($person_uuid, $roles, $org_id)
+    public function assignRoles($person_uuid, $roles, $org_id)
     {
         if (empty($person_uuid) || empty($roles) || empty($org_id)) {
             return new \WP_Error('invalid_params', 'Person UUID, roles, and organization ID are required.');
         }
 
-        if (!function_exists('wicket_assign_role')) {
+        if (!function_exists('wicket_assignRole')) {
             return new \WP_Error('missing_dependency', 'Role assignment helper is unavailable.');
         }
 
@@ -257,7 +257,7 @@ class PermissionService
 
         try {
             foreach ($roles as $role) {
-                $result = wicket_assign_role($person_uuid, $role, $org_id);
+                $result = wicket_assignRole($person_uuid, $role, $org_id);
                 if (false === $result) {
                     return new \WP_Error('role_assignment_failed', sprintf('Failed assigning role %s.', $role));
                 }
@@ -277,10 +277,10 @@ class PermissionService
      * @param array  $roles The array of role slugs to assign.
      * @return array|\WP_Error
      */
-    public function update_member_roles($person_uuid, $org_id, $roles)
+    public function updateMemberRoles($person_uuid, $org_id, $roles)
     {
         // Get current roles
-        $current_roles = $this->get_person_current_roles_by_org_id($person_uuid, $org_id);
+        $current_roles = $this->getPersonCurrentRolesByOrgId($person_uuid, $org_id);
 
         // Roles to add
         $roles_to_add = array_diff($roles, $current_roles);
@@ -290,7 +290,7 @@ class PermissionService
 
         // Assign new roles
         if (!empty($roles_to_add)) {
-            $result = $this->assign_roles($person_uuid, $roles_to_add, $org_id);
+            $result = $this->assignRoles($person_uuid, $roles_to_add, $org_id);
             if (is_wp_error($result)) {
                 return $result;
             }
@@ -298,7 +298,7 @@ class PermissionService
 
         // Remove old roles
         if (!empty($roles_to_remove)) {
-            $result = $this->remove_person_roles_from_org($person_uuid, $roles_to_remove, $org_id);
+            $result = $this->removePersonRolesFromOrg($person_uuid, $roles_to_remove, $org_id);
             if (is_wp_error($result)) {
                 return $result;
             }

@@ -15,7 +15,7 @@ if ('POST' !== strtoupper($request_method)) {
     return;
 }
 
-$logger = wc_get_logger();
+$logger = wc_getLogger();
 $log_context = [
     'source' => 'wicket-orgman',
     'action' => 'update_group',
@@ -48,7 +48,7 @@ if (empty($group_uuid)) {
 
 $group_service = new GroupService();
 $current_user = wp_get_current_user();
-$access = $group_service->can_manage_group($group_uuid, (string) $current_user->user_login);
+$access = $group_service->canManageGroup($group_uuid, (string) $current_user->user_login);
 if (empty($access['allowed'])) {
     $logger->warning('[OrgRoster] Update group access denied', $log_context);
     status_header(200);

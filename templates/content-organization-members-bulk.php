@@ -12,8 +12,8 @@ if (!is_user_logged_in()) {
     exit;
 }
 
-$config_service = new \OrgManagement\Services\ConfigService();
-$roster_mode = (string) $config_service->get_roster_mode();
+$configService = new \OrgManagement\Services\ConfigService();
+$roster_mode = (string) $configService->getRosterMode();
 
 $org_uuid = isset($_GET['org_uuid']) ? sanitize_text_field((string) $_GET['org_uuid']) : '';
 $group_uuid = isset($_GET['group_uuid']) ? sanitize_text_field((string) $_GET['group_uuid']) : '';
@@ -31,9 +31,9 @@ if (empty($org_uuid) && !empty($org_id_fallback)) {
 $member_list_config = \OrgManagement\Config\OrgManConfig::get()['ui']['member_list'] ?? [];
 $show_bulk_upload = (bool) ($member_list_config['show_bulk_upload'] ?? false);
 
-$membership_service = new \OrgManagement\Services\MembershipService();
+$membershipService = new \OrgManagement\Services\MembershipService();
 $user_uuid = (string) wp_get_current_user()->user_login;
-$bulk_page_url = \OrgManagement\Helpers\Helper::get_my_account_page_url(
+$bulk_page_url = \OrgManagement\Helpers\Helper::getMyAccountPageUrl(
     'organization-members-bulk',
     '/my-account/organization-members-bulk/'
 );
@@ -63,9 +63,9 @@ if ($roster_mode === 'groups') {
     $total_pages = 1;
 
     do {
-        $groups_response = $group_service->get_manageable_groups($user_uuid, [
+        $groups_response = $group_service->getManageableGroups($user_uuid, [
             'page' => $page,
-            'size' => $group_service->get_group_list_page_size(),
+            'size' => $group_service->getGroupListPageSize(),
             'query' => '',
         ]);
 
@@ -116,7 +116,7 @@ if ($roster_mode === 'groups') {
     }
 
     if ($group_uuid !== '') {
-        $group_access = $group_service->can_manage_group($group_uuid, $user_uuid);
+        $group_access = $group_service->canManageGroup($group_uuid, $user_uuid);
         if (!empty($group_access['allowed'])) {
             $resolved_org_uuid = (string) ($group_access['org_uuid'] ?? '');
             if ($resolved_org_uuid !== '') {
@@ -126,7 +126,7 @@ if ($roster_mode === 'groups') {
     }
 
     if ($org_uuid !== '') {
-        $membership_uuid = (string) $membership_service->getMembershipForOrganization($org_uuid);
+        $membership_uuid = (string) $membershipService->getMembershipForOrganization($org_uuid);
     }
     ?>
     <div id="org-management-members-bulk-app"
@@ -184,12 +184,12 @@ if ($roster_mode === 'groups') {
     return;
 }
 
-$organization_service = new \OrgManagement\Services\OrganizationService();
-$organizations = $organization_service->get_user_organizations($user_uuid);
+$organizationService = new \OrgManagement\Services\OrganizationService();
+$organizations = $organizationService->getUserOrganizations($user_uuid);
 if (!is_array($organizations)) {
     $organizations = [];
 }
-$organizations = $organization_service->filter_active_organizations($organizations, $user_uuid);
+$organizations = $organizationService->filterActiveOrganizations($organizations, $user_uuid);
 
 $manageable_organizations = [];
 foreach ($organizations as $organization) {
@@ -225,7 +225,7 @@ if ($show_bulk_upload && empty($org_uuid) && count($manageable_organizations) ==
 }
 
 if ($org_uuid !== '') {
-    $membership_uuid = (string) $membership_service->getMembershipForOrganization($org_uuid);
+    $membership_uuid = (string) $membershipService->getMembershipForOrganization($org_uuid);
 }
 ?>
 <div id="org-management-members-bulk-app"

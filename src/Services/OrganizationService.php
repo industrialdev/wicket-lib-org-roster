@@ -32,7 +32,7 @@ class OrganizationService
      * @param array $attributes
      * @return string
      */
-    private function resolve_org_name_from_attributes(array $attributes): string
+    private function resolveOrgNameFromAttributes(array $attributes): string
     {
         $candidates = [
             $attributes['legal_name'] ?? null,
@@ -61,9 +61,9 @@ class OrganizationService
      * @param string $cache_key The cache key.
      * @return mixed|false Cached data or false if not found/disabled.
      */
-    private function get_cached_data($cache_key)
+    private function getCachedData($cache_key)
     {
-        if (!\OrgManagement\Helpers\ConfigHelper::is_cache_enabled()) {
+        if (!\OrgManagement\Helpers\ConfigHelper::isCacheEnabled()) {
             return false;
         }
 
@@ -77,10 +77,10 @@ class OrganizationService
      * @param mixed $data The data to cache.
      * @return void
      */
-    private function set_cached_data($cache_key, $data)
+    private function setCachedData($cache_key, $data)
     {
-        if (\OrgManagement\Helpers\ConfigHelper::is_cache_enabled()) {
-            $cache_duration = \OrgManagement\Helpers\ConfigHelper::get_cache_duration();
+        if (\OrgManagement\Helpers\ConfigHelper::isCacheEnabled()) {
+            $cache_duration = \OrgManagement\Helpers\ConfigHelper::getCacheDuration();
             set_transient($cache_key, $data, $cache_duration);
         }
     }
@@ -91,7 +91,7 @@ class OrganizationService
      * @param string $role Role name.
      * @return string
      */
-    private function normalize_role_name(string $role): string
+    private function normalizeRoleName(string $role): string
     {
         return strtolower(str_replace(' ', '_', trim($role)));
     }
@@ -101,7 +101,7 @@ class OrganizationService
      *
      * @return array
      */
-    private function get_role_only_access_config(): array
+    private function getRoleOnlyAccessConfig(): array
     {
         $permissions = $this->config['permissions'] ?? [];
         $role_only = $permissions['role_only_management_access'] ?? [];
@@ -114,9 +114,9 @@ class OrganizationService
      *
      * @return bool
      */
-    private function is_role_only_access_enabled(): bool
+    private function isRoleOnlyAccessEnabled(): bool
     {
-        $role_only = $this->get_role_only_access_config();
+        $role_only = $this->getRoleOnlyAccessConfig();
 
         return !empty($role_only['enabled']);
     }
@@ -126,9 +126,9 @@ class OrganizationService
      *
      * @return array
      */
-    private function get_role_only_access_allowed_roles(): array
+    private function getRoleOnlyAccessAllowedRoles(): array
     {
-        $role_only = $this->get_role_only_access_config();
+        $role_only = $this->getRoleOnlyAccessConfig();
         $allowed_roles = $role_only['allowed_roles'] ?? [];
 
         if (!is_array($allowed_roles)) {
@@ -137,7 +137,7 @@ class OrganizationService
 
         $normalized_roles = [];
         foreach ($allowed_roles as $role) {
-            $normalized = $this->normalize_role_name((string) $role);
+            $normalized = $this->normalizeRoleName((string) $role);
             if ($normalized === '') {
                 continue;
             }
@@ -153,13 +153,13 @@ class OrganizationService
      * @param string $person_uuid Person UUID.
      * @return array
      */
-    private function get_user_organizations_from_roles(string $person_uuid): array
+    private function getUserOrganizationsFromRoles(string $person_uuid): array
     {
-        if (!$this->is_role_only_access_enabled() || empty($person_uuid) || !function_exists('wicket_api_client')) {
+        if (!$this->isRoleOnlyAccessEnabled() || empty($person_uuid) || !function_exists('wicket_api_client')) {
             return [];
         }
 
-        $allowed_roles = $this->get_role_only_access_allowed_roles();
+        $allowed_roles = $this->getRoleOnlyAccessAllowedRoles();
         if (empty($allowed_roles)) {
             return [];
         }
@@ -191,11 +191,11 @@ class OrganizationService
                         continue;
                     }
                     $org_attrs = (array) ($included['attributes'] ?? []);
-                    $org_name_by_id[$org_id] = $this->resolve_org_name_from_attributes($org_attrs);
+                    $org_name_by_id[$org_id] = $this->resolveOrgNameFromAttributes($org_attrs);
                 }
 
                 foreach ($response_data as $role) {
-                    $role_name = $this->normalize_role_name((string) ($role['attributes']['name'] ?? ''));
+                    $role_name = $this->normalizeRoleName((string) ($role['attributes']['name'] ?? ''));
                     if ($role_name === '' || !isset($allowed_lookup[$role_name])) {
                         continue;
                     }
@@ -238,7 +238,7 @@ class OrganizationService
                 $page_number++;
             } while ($page_number <= $total_pages);
         } catch (\Throwable $e) {
-            wc_get_logger()->warning('[OrgMan] Failed resolving organizations from role-only access: ' . $e->getMessage(), [
+            wc_getLogger()->warning('[OrgMan] Failed resolving organizations from role-only access: ' . $e->getMessage(), [
                 'source' => 'wicket-orgman',
                 'person_uuid' => $person_uuid,
             ]);
@@ -264,24 +264,24 @@ class OrganizationService
      * @param string $person_uuid The UUID of the person.
      * @return array An array of organization data.
      */
-    public function get_user_organizations($person_uuid)
+    public function getUserOrganizations($person_uuid)
     {
         // Check cache first - user specific cache
         $user_uuid = wicket_current_person_uuid();
         $cache_key = 'orgman_user_orgs_' . md5($user_uuid . '_' . $person_uuid);
-        $cached_data = $this->get_cached_data($cache_key);
+        $cached_data = $this->getCachedData($cache_key);
 
         if (false !== $cached_data) {
             return $cached_data;
         }
 
-        $logger = wc_get_logger();
+        $logger = wc_getLogger();
         $person = wicket_get_person_by_id($person_uuid);
 
         if (!$person) {
             $logger->error('[OrgMan] Person not found for UUID: ' . $person_uuid, ['source' => 'wicket-orgman']);
             $error_data = ['error' => 'person_not_found'];
-            $this->set_cached_data($cache_key, $error_data);
+            $this->setCachedData($cache_key, $error_data);
 
             return $error_data;
         }
@@ -320,7 +320,7 @@ class OrganizationService
                             // Find the full organization data in included items
                             foreach ($membership_response['included'] as $org_item) {
                                 if ($org_item['type'] === 'organizations' && $org_item['id'] === $org_id) {
-                                    $org_name = $this->resolve_org_name_from_attributes((array) ($org_item['attributes'] ?? []));
+                                    $org_name = $this->resolveOrgNameFromAttributes((array) ($org_item['attributes'] ?? []));
 
                                     $organizations[] = [
                                         'id' => $org_id,
@@ -340,7 +340,7 @@ class OrganizationService
             $membership_error = ['error' => 'api_error', 'message' => 'Unable to fetch memberships. Please try again later.'];
         }
 
-        $role_organizations = $this->get_user_organizations_from_roles((string) $person_uuid);
+        $role_organizations = $this->getUserOrganizationsFromRoles((string) $person_uuid);
         if (!empty($role_organizations)) {
             $organizations = array_merge($organizations, $role_organizations);
         }
@@ -368,7 +368,7 @@ class OrganizationService
                 $organizations_by_id[$org_id]['user_role'] = (string) $organization['user_role'];
             }
             foreach ((array) ($organization['roles'] ?? []) as $role_slug) {
-                $normalized_role = $this->normalize_role_name((string) $role_slug);
+                $normalized_role = $this->normalizeRoleName((string) $role_slug);
                 if ($normalized_role === '') {
                     continue;
                 }
@@ -390,19 +390,19 @@ class OrganizationService
                     ? $org_detail['attributes']
                     : (is_array($org_detail['data']['attributes'] ?? null) ? $org_detail['data']['attributes'] : []);
                 if (!empty($org_attrs)) {
-                    $organizations_by_id[$org_id]['org_name'] = $this->resolve_org_name_from_attributes($org_attrs);
+                    $organizations_by_id[$org_id]['org_name'] = $this->resolveOrgNameFromAttributes($org_attrs);
                 }
             }
         }
 
         $organizations = array_values($organizations_by_id);
         if ($membership_error !== null && empty($organizations)) {
-            $this->set_cached_data($cache_key, $membership_error);
+            $this->setCachedData($cache_key, $membership_error);
 
             return $membership_error;
         }
 
-        $this->set_cached_data($cache_key, $organizations);
+        $this->setCachedData($cache_key, $organizations);
 
         return $organizations;
     }
@@ -414,7 +414,7 @@ class OrganizationService
      * @param string $user_uuid Current user identifier
      * @return array Filtered organizations with active memberships or roles
      */
-    public function filter_active_organizations($organizations, $user_uuid)
+    public function filterActiveOrganizations($organizations, $user_uuid)
     {
         return $organizations;
     }
@@ -425,7 +425,7 @@ class OrganizationService
      * @param string $organizationUuid Organization identifier.
      * @return string|null
      */
-    public function get_membership_uuid(string $organizationUuid): ?string
+    public function getMembershipUuid(string $organizationUuid): ?string
     {
         if (empty($organizationUuid)) {
             return null;
@@ -436,7 +436,7 @@ class OrganizationService
 
             return $membershipService->getMembershipForOrganization($organizationUuid);
         } catch (\Throwable $e) {
-            wc_get_logger()->warning(
+            wc_getLogger()->warning(
                 '[OrgMan] Failed resolving membership uuid for organization: ' . $e->getMessage(),
                 [
                     'source'   => 'wicket-orgman',
@@ -454,7 +454,7 @@ class OrganizationService
      * @param string $org_id The organization ID.
      * @return object|WP_Error The person object or WP_Error on failure.
      */
-    public function get_organization_owner($org_id)
+    public function getOrganizationOwner($org_id)
     {
         if (empty($org_id)) {
             return new \WP_Error('invalid_params', 'Organization ID is required.');
@@ -505,7 +505,7 @@ class OrganizationService
             return $person;
 
         } catch (\Exception $e) {
-            error_log('OrganizationService::get_organization_owner() - Exception: ' . $e->getMessage());
+            error_log('OrganizationService::getOrganizationOwner() - Exception: ' . $e->getMessage());
 
             return new \WP_Error('get_owner_exception', $e->getMessage());
         }

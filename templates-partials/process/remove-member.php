@@ -58,11 +58,11 @@ if ('POST' === strtoupper($request_method)) {
     $connection_ids = array_filter(array_map('trim', $connection_ids));
 
     try {
-        $config_service = new ConfigService();
-        $roster_mode = (string) $config_service->get_roster_mode();
-        $membership_service = new OrgManagement\Services\MembershipService();
-        $permission_service = new OrgManagement\Services\PermissionService();
-        $organization_service = new OrgManagement\Services\OrganizationService();
+        $configService = new ConfigService();
+        $roster_mode = (string) $configService->getRosterMode();
+        $membershipService = new OrgManagement\Services\MembershipService();
+        $permissionService = new OrgManagement\Services\PermissionService();
+        $organizationService = new OrgManagement\Services\OrganizationService();
 
         if ($roster_mode === 'membership_cycle' && empty($membership_uuid)) {
             status_header(200);
@@ -79,7 +79,7 @@ if ('POST' === strtoupper($request_method)) {
             $cycle_config = OrgManagement\Config\OrgManConfig::get()['membership_cycle'] ?? [];
             $prevent_owner_removal = (bool) ($cycle_config['permissions']['prevent_owner_removal'] ?? true);
             if ($prevent_owner_removal) {
-                $org_owner = $organization_service->get_organization_owner($org_uuid);
+                $org_owner = $organizationService->getOrganizationOwner($org_uuid);
                 if (!is_wp_error($org_owner) && $org_owner && $org_owner->uuid === $person_uuid) {
                     status_header(200);
                     OrgManagement\Helpers\DatastarSSE::renderError(
@@ -149,7 +149,7 @@ if ('POST' === strtoupper($request_method)) {
                         OrgManagement\Helpers\Helper::log_info('[OrgMan Debug] Processing extra p_membership', ['id' => $p_membership_id, 'active' => $p_membership_active]);
 
                         if ($p_membership_id && $p_membership_active) {
-                            $result = $membership_service->endPersonMembershipToday($p_membership_id);
+                            $result = $membershipService->endPersonMembershipToday($p_membership_id);
                             if (!is_wp_error($result)) {
                                 $removal_success = true;
                                 OrgManagement\Helpers\Helper::log_info('[OrgMan] Successfully end-dated extra person membership by ID', [
@@ -171,7 +171,7 @@ if ('POST' === strtoupper($request_method)) {
 
         // 2. Fallback or explicit removal of the provided person membership ID
         if (!empty($person_membership_id)) {
-            $result = $membership_service->endPersonMembershipToday($person_membership_id);
+            $result = $membershipService->endPersonMembershipToday($person_membership_id);
 
             if (is_wp_error($result)) {
                 OrgManagement\Helpers\Helper::log_error('[OrgMan] Failed to end-date primary person membership', [
@@ -202,7 +202,7 @@ if ('POST' === strtoupper($request_method)) {
 
             if (!empty($membership_uuid)) {
                 $orgman_instance = OrgManagement\OrgMan::get_instance();
-                $orgman_instance->clear_members_cache($membership_uuid);
+                $orgman_instance->clearMembersCache($membership_uuid);
             }
 
             $success_message = sprintf(
@@ -277,9 +277,9 @@ if ('POST' === strtoupper($request_method)) {
         }
 
         // 2. Remove all org-scoped roles
-        $roles_to_remove = $permission_service->get_person_current_roles_by_org_id($person_uuid, $org_uuid);
+        $roles_to_remove = $permissionService->getPersonCurrentRolesByOrgId($person_uuid, $org_uuid);
         if (!empty($roles_to_remove)) {
-            $role_removal_result = $permission_service->remove_person_roles_from_org($person_uuid, $roles_to_remove, $org_uuid);
+            $role_removal_result = $permissionService->removePersonRolesFromOrg($person_uuid, $roles_to_remove, $org_uuid);
 
             if (is_wp_error($role_removal_result)) {
                 OrgManagement\Helpers\Helper::log_error('[OrgMan] Failed to remove roles', [
@@ -314,7 +314,7 @@ if ('POST' === strtoupper($request_method)) {
         // Clear members cache for this organization after successful removal
         if ($removal_success && !empty($membership_uuid)) {
             $orgman_instance = OrgManagement\OrgMan::get_instance();
-            $orgman_instance->clear_members_cache($membership_uuid);
+            $orgman_instance->clearMembersCache($membership_uuid);
         }
 
         status_header(200);

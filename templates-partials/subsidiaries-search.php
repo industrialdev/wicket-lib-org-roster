@@ -16,8 +16,8 @@ use OrgManagement\Services\ConfigService;
 use OrgManagement\Services\SubsidiaryService;
 
 // Instantiate services
-$config_service = new ConfigService();
-$subsidiary_service = new SubsidiaryService($config_service);
+$configService = new ConfigService();
+$subsidiary_service = new SubsidiaryService($configService);
 
 // Get parameters from the request
 $search_term = isset($_REQUEST['search']) ? sanitize_text_field($_REQUEST['search']) : '';
@@ -26,7 +26,7 @@ $org_id = isset($_REQUEST['org_id']) ? sanitize_text_field($_REQUEST['org_id']) 
 // Perform the search
 $candidates = [];
 if (!empty($search_term) && !empty($org_id)) {
-    $candidates = $subsidiary_service->search_subsidiary_candidates($search_term, $org_id);
+    $candidates = $subsidiary_service->searchSubsidiaryCandidates($search_term, $org_id);
 }
 
 // Generate the HTML for the search results

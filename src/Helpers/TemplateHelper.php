@@ -137,7 +137,7 @@ class TemplateHelper extends Helper
                 // Initialize the organization service
                 $org_service = new \OrgManagement\Services\OrganizationService();
                 $user_uuid = wp_get_current_user()->user_login;
-                $organizations = $org_service->get_user_organizations($user_uuid);
+                $organizations = $org_service->getUserOrganizations($user_uuid);
 
                 // Check for error responses
                 if (isset($organizations['error'])) {

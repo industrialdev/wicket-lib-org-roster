@@ -51,3 +51,16 @@ Bulk CSV member upload follows the same flow using the process handler:
 - **WooCommerce**: Handles seat limit transactions.
 - **Datastar**: Provides the frontend reactivity framework.
 - **Scoped CSS layer**: Vanilla CSS with `wt_` prefixed utility-style classes to prevent collisions.
+
+## 6. Coding Conventions
+- PHP code follows PSR-12.
+- Class names use PascalCase.
+- Method and property names use camelCase across services, strategies, and helpers.
+- Internal snake_case compatibility wrappers are intentionally avoided, except `OrgManagement\OrgMan::get_instance()` for theme compatibility.
+- External WordPress/WooCommerce/Wicket API naming is preserved as-is when upstream uses underscores.
+
+## 7. Runtime Debug Markup
+- OrgMan injects debug comments inside the `ORGMAN:BEGIN` and `ORGMAN:END` content block.
+- Current comments include:
+  - library filesystem path
+  - library version from `OrgManagement\Helpers\Helper::getLibraryVersion()`

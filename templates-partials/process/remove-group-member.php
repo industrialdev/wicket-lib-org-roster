@@ -17,7 +17,7 @@ if ('POST' !== strtoupper($request_method)) {
     return;
 }
 
-$logger = wc_get_logger();
+$logger = wc_getLogger();
 $log_context = [
     'source' => 'wicket-orgman',
     'action' => 'remove_group_member',
@@ -56,7 +56,7 @@ if (empty($group_uuid) || empty($person_uuid)) {
 
 $group_service = new GroupService();
 $current_user = wp_get_current_user();
-$access = $group_service->can_manage_group($group_uuid, (string) $current_user->user_login);
+$access = $group_service->canManageGroup($group_uuid, (string) $current_user->user_login);
 if (empty($access['allowed'])) {
     $logger->warning('[OrgRoster] Remove group member access denied', $log_context);
     status_header(200);
@@ -65,8 +65,8 @@ if (empty($access['allowed'])) {
     return;
 }
 
-$config_service = new ConfigService();
-$member_service = new MemberService($config_service);
+$configService = new ConfigService();
+$member_service = new MemberService($configService);
 
 $context = [
     'group_uuid' => $group_uuid,
@@ -74,7 +74,7 @@ $context = [
     'role' => $role,
 ];
 
-$result = $member_service->remove_member($org_uuid, $person_uuid, $context);
+$result = $member_service->removeMember($org_uuid, $person_uuid, $context);
 if (is_wp_error($result)) {
     $logger->error('[OrgRoster] Remove group member failed', array_merge($log_context, [
         'error' => $result->get_error_message(),

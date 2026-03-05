@@ -20,16 +20,16 @@ class DocumentService
     /**
      * @var ConfigService
      */
-    private $config_service;
+    private $configService;
 
     /**
      * Constructor.
      *
-     * @param ConfigService|null $config_service Optional ConfigService instance.
+     * @param ConfigService|null $configService Optional ConfigService instance.
      */
-    public function __construct(?ConfigService $config_service = null)
+    public function __construct(?ConfigService $configService = null)
     {
-        $this->config_service = $config_service ?: new ConfigService();
+        $this->configService = $configService ?: new ConfigService();
     }
 
     /**
@@ -38,7 +38,7 @@ class DocumentService
      * @param string $org_id Organization UUID.
      * @return array|WP_Error Array of documents or WP_Error on failure.
      */
-    public function get_documents($org_id)
+    public function getDocuments($org_id)
     {
         if (empty($org_id)) {
             return new WP_Error('missing_org_id', __('Organization ID is required.', 'wicket-acc'));
@@ -67,7 +67,7 @@ class DocumentService
      * @param array  $metadata Additional metadata for the document.
      * @return array|WP_Error Document info or WP_Error on failure.
      */
-    public function upload_document($org_id, $file_data, $metadata = [])
+    public function uploadDocument($org_id, $file_data, $metadata = [])
     {
         if (empty($org_id)) {
             return new WP_Error('missing_org_id', __('Organization ID is required.', 'wicket-acc'));
@@ -78,7 +78,7 @@ class DocumentService
         }
 
         // Validate file type and size using config
-        $allowed_types = $this->config_service->get_allowed_document_types();
+        $allowed_types = $this->configService->getAllowedDocumentTypes();
 
         $file_type = strtolower(pathinfo($file_data['name'], PATHINFO_EXTENSION));
 
@@ -93,7 +93,7 @@ class DocumentService
         }
 
         // Validate file size using config
-        $max_size = $this->config_service->get_max_document_size();
+        $max_size = $this->configService->getMaxDocumentSize();
         if ($file_data['size'] > $max_size) {
             return new WP_Error(
                 'file_too_large',
@@ -166,7 +166,7 @@ class DocumentService
      * @param bool $force_delete Whether to bypass trash.
      * @return bool|WP_Error True on success, WP_Error on failure.
      */
-    public function delete_document($document_id, $force_delete = true)
+    public function deleteDocument($document_id, $force_delete = true)
     {
         if (empty($document_id)) {
             return new WP_Error('missing_document_id', __('Document ID is required.', 'wicket-acc'));
@@ -198,7 +198,7 @@ class DocumentService
      * @param string $category Optional category filter.
      * @return array Array of document objects.
      */
-    public function get_documents_by_org($org_id, $category = null)
+    public function getDocumentsByOrg($org_id, $category = null)
     {
         if (empty($org_id)) {
             return [];

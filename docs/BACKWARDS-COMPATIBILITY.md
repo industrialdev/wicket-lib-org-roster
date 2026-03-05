@@ -13,6 +13,11 @@ Recent additive key:
 - `ui.member_list.account_status.*` was introduced with additive defaults so account-status copy/visibility can be customized without template changes.
 - `ui.member_list.display_roles_allowlist` and `ui.member_list.display_roles_exclude` were introduced with empty-array defaults to preserve existing role-display behavior unless configured.
 
+Naming compatibility policy:
+- Internal class APIs follow PSR-12 camelCase naming.
+- Legacy snake_case compatibility wrappers are not retained for internal APIs.
+- Approved exception: `OrgManagement\OrgMan::get_instance()` remains as a theme-facing bridge alias.
+
 ## Deprecation
 
 Deprecated or compatibility layers may be removed only when both conditions are true:

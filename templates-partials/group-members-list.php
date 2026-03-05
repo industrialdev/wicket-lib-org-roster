@@ -29,14 +29,14 @@ $total_items = (int) ($pagination['totalItems'] ?? count($members));
 $page = max(1, $page);
 $total_pages = max(1, $total_pages);
 
-$membership_service = new MembershipService();
-$config_service = new ConfigService();
-$additional_seats_service = new AdditionalSeatsService($config_service);
-$member_service = new OrgManagement\Services\MemberService($config_service);
+$membershipService = new MembershipService();
+$configService = new ConfigService();
+$additional_seats_service = new AdditionalSeatsService($configService);
+$member_service = new OrgManagement\Services\MemberService($configService);
 
 $membership_uuid = '';
 if (!empty($org_uuid)) {
-    $membership_uuid = $membership_service->getMembershipForOrganization($org_uuid);
+    $membership_uuid = $membershipService->getMembershipForOrganization($org_uuid);
 }
 
 $has_seats_available = true;
@@ -45,9 +45,9 @@ $active_seats = 0;
 $purchase_seats_url = '';
 $can_purchase_seats = false;
 if ($membership_uuid) {
-    $membership_data = $membership_service->getOrgMembershipData($membership_uuid);
+    $membership_data = $membershipService->getOrgMembershipData($membership_uuid);
     if ($membership_data && isset($membership_data['data']['attributes'])) {
-        $max_seats = $membership_service->getEffectiveMaxAssignments($membership_data);
+        $max_seats = $membershipService->getEffectiveMaxAssignments($membership_data);
         $active_seats = (int) ($membership_data['data']['attributes']['active_assignments_count'] ?? 0);
         if ($max_seats !== null && $active_seats >= (int) $max_seats) {
             $has_seats_available = false;
@@ -55,9 +55,9 @@ if ($membership_uuid) {
     }
 
     if (!$has_seats_available) {
-        $can_purchase_seats = $additional_seats_service->can_purchase_additional_seats($org_uuid);
+        $can_purchase_seats = $additional_seats_service->canPurchaseAdditionalSeats($org_uuid);
         if ($can_purchase_seats) {
-            $purchase_seats_url = $additional_seats_service->get_purchase_form_url($org_uuid, $membership_uuid);
+            $purchase_seats_url = $additional_seats_service->getPurchaseFormUrl($org_uuid, $membership_uuid);
         }
     }
 }

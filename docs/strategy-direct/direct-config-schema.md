@@ -17,7 +17,7 @@
   - `prevent_owner_assignment`
 - `member_addition`:
   - `base_member_role`
-  - `auto_assign_roles`
+  - `auto_assignRoles`
   - `auto_opt_in_communications`
 - `relationships`:
   - `member_addition_type`

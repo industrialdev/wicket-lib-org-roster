@@ -21,9 +21,9 @@ abstract class Helper
      *
      * @return \WC_Logger
      */
-    protected static function get_logger()
+    protected static function getLogger()
     {
-        return wc_get_logger();
+        return wc_getLogger();
     }
 
     /**
@@ -70,7 +70,7 @@ abstract class Helper
             return;
         }
 
-        $logger = self::get_logger();
+        $logger = self::getLogger();
         if ($logger) {
             $logger->critical($message, array_merge(['source' => 'wicket-orgman'], $context));
         }
@@ -89,7 +89,7 @@ abstract class Helper
             return;
         }
 
-        $logger = self::get_logger();
+        $logger = self::getLogger();
         if ($logger) {
             $logger->debug($message, array_merge(['source' => 'wicket-orgman'], $context));
         }
@@ -108,7 +108,7 @@ abstract class Helper
             return;
         }
 
-        $logger = self::get_logger();
+        $logger = self::getLogger();
         if ($logger) {
             $logger->error($message, array_merge(['source' => 'wicket-orgman'], $context));
         }
@@ -127,7 +127,7 @@ abstract class Helper
             return;
         }
 
-        $logger = self::get_logger();
+        $logger = self::getLogger();
         if ($logger) {
             $logger->warning($message, array_merge(['source' => 'wicket-orgman'], $context));
         }
@@ -146,7 +146,7 @@ abstract class Helper
             return;
         }
 
-        $logger = self::get_logger();
+        $logger = self::getLogger();
         if ($logger) {
             $logger->info($message, array_merge(['source' => 'wicket-orgman'], $context));
         }
@@ -234,6 +234,46 @@ abstract class Helper
     }
 
     /**
+     * Get the library version from composer.json.
+     *
+     * @return string
+     */
+    public static function getLibraryVersion(): string
+    {
+        static $version = null;
+
+        if ($version !== null) {
+            return $version;
+        }
+
+        $composerPath = dirname(__DIR__, 2) . '/composer.json';
+        if (!is_readable($composerPath)) {
+            $version = 'unknown';
+
+            return $version;
+        }
+
+        $composerJson = file_get_contents($composerPath);
+        if ($composerJson === false) {
+            $version = 'unknown';
+
+            return $version;
+        }
+
+        $composerData = json_decode($composerJson, true);
+        if (!is_array($composerData)) {
+            $version = 'unknown';
+
+            return $version;
+        }
+
+        $detectedVersion = $composerData['version'] ?? 'unknown';
+        $version = is_string($detectedVersion) && $detectedVersion !== '' ? $detectedVersion : 'unknown';
+
+        return $version;
+    }
+
+    /**
      * Get WPML-aware permalink for a my-account CPT page by slug.
      * Automatically detects current language and returns translated permalink.
      *
@@ -241,7 +281,7 @@ abstract class Helper
      * @param string $fallback_path Optional fallback path if page not found (e.g., '/my-account/organization-members/')
      * @return string The permalink URL
      */
-    public static function get_my_account_page_url(string $slug, string $fallback_path = ''): string
+    public static function getMyAccountPageUrl(string $slug, string $fallback_path = ''): string
     {
         $args = [
             'post_type' => 'my-account',

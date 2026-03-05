@@ -131,13 +131,13 @@ it('includes manageable group when tags are only available from group details en
             $this->mockResponse = $mockResponse;
         }
 
-        public function get_person_group_memberships(string $person_uuid, array $args = [])
+        public function getPersonGroupMemberships(string $person_uuid, array $args = [])
         {
             return $this->mockResponse;
         }
     };
 
-    $result = $service->get_manageable_groups('person-1');
+    $result = $service->getManageableGroups('person-1');
 
     expect($result['data'])->toHaveCount(1)
         ->and($result['data'][0]['org_uuid'])->toBe('org-1')
@@ -200,13 +200,13 @@ it('allows delegate role to manage groups by default config', function (): void 
             $this->mockResponse = $mockResponse;
         }
 
-        public function get_person_group_memberships(string $person_uuid, array $args = [])
+        public function getPersonGroupMemberships(string $person_uuid, array $args = [])
         {
             return $this->mockResponse;
         }
     };
 
-    $result = $service->get_manageable_groups('person-2');
+    $result = $service->getManageableGroups('person-2');
 
     expect($result['data'])->toHaveCount(1)
         ->and($result['data'][0]['role_slug'])->toBe('delegate');
@@ -288,13 +288,13 @@ it('includes non-manage roles on groups landing when include_all_roles is enable
             $this->mockResponse = $mockResponse;
         }
 
-        public function get_person_group_memberships(string $person_uuid, array $args = [])
+        public function getPersonGroupMemberships(string $person_uuid, array $args = [])
         {
             return $this->mockResponse;
         }
     };
 
-    $result = $service->get_manageable_groups('person-3', [
+    $result = $service->getManageableGroups('person-3', [
         'include_all_roles' => true,
     ]);
     $byGroup = [];
@@ -377,13 +377,13 @@ it('keeps non-manage roles excluded when include_all_roles is not enabled', func
             $this->mockResponse = $mockResponse;
         }
 
-        public function get_person_group_memberships(string $person_uuid, array $args = [])
+        public function getPersonGroupMemberships(string $person_uuid, array $args = [])
         {
             return $this->mockResponse;
         }
     };
 
-    $result = $service->get_manageable_groups('person-4');
+    $result = $service->getManageableGroups('person-4');
 
     expect($result['data'])->toHaveCount(1);
     expect($result['data'][0]['group']['id'] ?? null)->toBe('group-manage');
@@ -429,13 +429,13 @@ it('keeps tagged group in results even when organization relationship is missing
             $this->mockResponse = $mockResponse;
         }
 
-        public function get_person_group_memberships(string $person_uuid, array $args = [])
+        public function getPersonGroupMemberships(string $person_uuid, array $args = [])
         {
             return $this->mockResponse;
         }
     };
 
-    $result = $service->get_manageable_groups('person-5');
+    $result = $service->getManageableGroups('person-5');
 
     expect($result['data'])->toHaveCount(1);
     expect($result['data'][0]['group']['id'] ?? null)->toBe('group-keep');
@@ -489,13 +489,13 @@ it('resolves group management org scope from group relationship when membership 
             $this->mockResponse = $mockResponse;
         }
 
-        public function get_person_group_memberships(string $person_uuid, array $args = [])
+        public function getPersonGroupMemberships(string $person_uuid, array $args = [])
         {
             return $this->mockResponse;
         }
     };
 
-    $access = $service->can_manage_group('group-1', 'person-6');
+    $access = $service->canManageGroup('group-1', 'person-6');
 
     expect($access['allowed'])->toBeTrue();
     expect($access['org_uuid'])->toBe('org-fallback');
@@ -586,11 +586,11 @@ it('matches group members by normalized org scope tokens for listing and remove 
 
     $service = new GroupService();
 
-    $members = $service->get_group_members('group-1', 'ab89ceb6-a1cf-4e95-9471-e637d6fd7cc2', [
+    $members = $service->getGroupMembers('group-1', 'ab89ceb6-a1cf-4e95-9471-e637d6fd7cc2', [
         'page' => 1,
         'size' => 15,
     ]);
-    $matchId = $service->find_group_member_id(
+    $matchId = $service->findGroupMemberId(
         'group-1',
         'person-1',
         'ab89ceb6-a1cf-4e95-9471-e637d6fd7cc2'
@@ -615,7 +615,7 @@ it('uses standardized helper start_date when creating a group member', function 
     };
 
     $service = new GroupService();
-    $service->create_group_member('person-1', 'group-1', 'member');
+    $service->createGroupMember('person-1', 'group-1', 'member');
 
     expect($GLOBALS['__orgroster_api_client']->lastPayload['data']['attributes']['start_date'] ?? null)
         ->toBe('2026-03-04T00:00:00Z');
@@ -634,7 +634,7 @@ it('uses standardized helper end_date when removing a group member with default 
     };
 
     $service = new GroupService();
-    $service->remove_group_member('gm-1');
+    $service->removeGroupMember('gm-1');
 
     expect($GLOBALS['__orgroster_api_client']->lastPayload['data']['attributes']['end_date'] ?? null)
         ->toBe('2026-03-04T00:00:00Z');

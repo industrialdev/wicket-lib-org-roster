@@ -20,8 +20,8 @@ if (!is_user_logged_in()) {
 } ?>
 
 <?php
-$config_service = new \OrgManagement\Services\ConfigService();
-$roster_mode = $config_service->get_roster_mode();
+$configService = new \OrgManagement\Services\ConfigService();
+$roster_mode = $configService->getRosterMode();
 
 // Get current user identifier
 $user_uuid = wp_get_current_user()->user_login;
@@ -29,7 +29,7 @@ $user_uuid = wp_get_current_user()->user_login;
 // Get organizations data from template helper or fallback to service
 if (!isset($organizations)) {
     $org_service = new \OrgManagement\Services\OrganizationService();
-    $organizations = $org_service->get_user_organizations($user_uuid);
+    $organizations = $org_service->getUserOrganizations($user_uuid);
 }
 
 // Handle connection errors
@@ -73,10 +73,10 @@ if (($roster_mode !== 'groups') && (empty($organizations) || !is_array($organiza
 
 // Apply active membership filtering using the service
 $org_service = new \OrgManagement\Services\OrganizationService();
-$organizations = $org_service->filter_active_organizations($organizations, $user_uuid);
+$organizations = $org_service->filterActiveOrganizations($organizations, $user_uuid);
 
 // Map roster-management groups per organization for card display.
-$logger = wc_get_logger();
+$logger = wc_getLogger();
 $groups_by_org = [];
 $groups_by_org_tagged = [];
 $group_service = new \OrgManagement\Services\GroupService();
@@ -85,7 +85,7 @@ $group_total_pages = 1;
 $logger->info('[OrgRoster] Organization list group mapping start', [
     'source' => 'wicket-orgman',
     'user_uuid' => $user_uuid,
-    'page_size' => $group_service->get_group_list_page_size(),
+    'page_size' => $group_service->getGroupListPageSize(),
 ]);
 do {
     $logger->debug('[OrgRoster] Fetching manageable groups page', [
@@ -93,9 +93,9 @@ do {
         'user_uuid' => $user_uuid,
         'page' => $group_page,
     ]);
-    $groups_result = $group_service->get_manageable_groups($user_uuid, [
+    $groups_result = $group_service->getManageableGroups($user_uuid, [
         'page' => $group_page,
-        'size' => $group_service->get_group_list_page_size(),
+        'size' => $group_service->getGroupListPageSize(),
         'query' => '',
         // For groups strategy landing, list all active group memberships and let group pages enforce manage access.
         'include_all_roles' => $roster_mode === 'groups',
@@ -215,7 +215,7 @@ if ($roster_mode === 'groups') {
     });
 
     $groups_count = count($manageable_groups);
-    $group_members_url = \OrgManagement\Helpers\Helper::get_my_account_page_url(
+    $group_members_url = \OrgManagement\Helpers\Helper::getMyAccountPageUrl(
         'organization-members',
         '/my-account/organization-members/'
     );
@@ -258,7 +258,7 @@ if ($roster_mode === 'groups') {
                     $item_params['org_uuid'] = (string) $group_item['org_uuid'];
                 }
                 $can_manage_group = !empty($group_item['can_manage']);
-                $group_profile_url_base = \OrgManagement\Helpers\Helper::get_my_account_page_url(
+                $group_profile_url_base = \OrgManagement\Helpers\Helper::getMyAccountPageUrl(
                     'organization-profile',
                     '/my-account/organization-profile/'
                 );
@@ -499,7 +499,7 @@ echo "<p class='mb-2'>" . __('Organizations Found:', 'wicket-acc') . ' ' . (int)
 // Start organization list
 echo '<div class="wt_w-full wt_flex wt_flex-col wt_gap-4" role="list">';
 // Initialize membership service once for the loop
-$membership_service = new \OrgManagement\Services\MembershipService();
+$membershipService = new \OrgManagement\Services\MembershipService();
 foreach ($organizations_page as $org) :
     $org_id = (string) ($org['id'] ?? '');
     $org_name = $org['org_name'] ?? __('Unknown', 'wicket-acc');
@@ -514,7 +514,7 @@ foreach ($organizations_page as $org) :
     }
     try {
         if ($org_uuid_for_scope !== '') {
-            $tag_name = $group_service->get_roster_tag_name();
+            $tag_name = $group_service->getRosterTagName();
             $groups_response = wicket_api_client()->get('/groups', [
                 'query' => [
                     'page' => [
@@ -628,9 +628,9 @@ foreach ($organizations_page as $org) :
 
     // Get membership information
     $membership_uuid = $org_uuid_for_scope !== ''
-        ? $membership_service->getMembershipForOrganization($org_uuid_for_scope)
+        ? $membershipService->getMembershipForOrganization($org_uuid_for_scope)
         : '';
-    $membership_data = $membership_uuid ? $membership_service->getOrgMembershipData($membership_uuid) : null;
+    $membership_data = $membership_uuid ? $membershipService->getOrgMembershipData($membership_uuid) : null;
 
     // Extract membership names from pre-calculated tiers first (membership_cycle only),
     // then fallback to single membership data for all strategies.
@@ -765,7 +765,7 @@ endforeach; ?>
         }
         unset($base_query_args['org_page']);
 
-        $base_list_url = \OrgManagement\Helpers\Helper::get_my_account_page_url(
+        $base_list_url = \OrgManagement\Helpers\Helper::getMyAccountPageUrl(
             'organization-management',
             '/my-account/organization-management/'
         );

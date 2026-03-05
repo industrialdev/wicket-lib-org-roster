@@ -22,7 +22,7 @@ class BulkMemberUploadService
     /**
      * @var ConfigService
      */
-    private $config_service;
+    private $configService;
 
     /**
      * @var MemberService
@@ -37,12 +37,12 @@ class BulkMemberUploadService
     /**
      * Constructor.
      *
-     * @param ConfigService|null $config_service
+     * @param ConfigService|null $configService
      */
-    public function __construct(?ConfigService $config_service = null)
+    public function __construct(?ConfigService $configService = null)
     {
-        $this->config_service = $config_service ?? new ConfigService();
-        $this->member_service = new MemberService($this->config_service);
+        $this->configService = $configService ?? new ConfigService();
+        $this->member_service = new MemberService($this->configService);
         $this->connection_service = new ConnectionService();
     }
 
@@ -57,7 +57,7 @@ class BulkMemberUploadService
      * @param string $group_uuid
      * @return array<string, mixed>|WP_Error
      */
-    public function enqueue_upload(
+    public function enqueueUpload(
         string $file_path,
         string $file_name,
         string $org_uuid,
@@ -69,11 +69,11 @@ class BulkMemberUploadService
         $bulk_upload_config = is_array($config['bulk_upload'] ?? null)
             ? $config['bulk_upload']
             : [];
-        $bulk_column_definitions = $this->get_bulk_column_definitions($bulk_upload_config);
+        $bulk_column_definitions = $this->getBulkColumnDefinitions($bulk_upload_config);
 
         $file = fopen($file_path, 'r');
         if ($file === false) {
-            $this->log_activity('error', 'Bulk upload enqueue failed: file unreadable', [
+            $this->logActivity('error', 'Bulk upload enqueue failed: file unreadable', [
                 'file_name' => $file_name,
                 'org_uuid' => $org_uuid,
                 'membership_uuid' => $membership_uuid,
@@ -86,7 +86,7 @@ class BulkMemberUploadService
         $header_row = fgetcsv($file, 0, ',', '"', '\\');
         if (!is_array($header_row) || empty($header_row)) {
             fclose($file);
-            $this->log_activity('error', 'Bulk upload enqueue failed: invalid CSV header', [
+            $this->logActivity('error', 'Bulk upload enqueue failed: invalid CSV header', [
                 'file_name' => $file_name,
                 'org_uuid' => $org_uuid,
                 'membership_uuid' => $membership_uuid,
@@ -96,15 +96,15 @@ class BulkMemberUploadService
             return new WP_Error('bulk_header_invalid', __('CSV header row is missing or invalid.', 'wicket-acc'));
         }
 
-        $column_idx = $this->resolve_header_index($header_row, $bulk_column_definitions);
+        $column_index_map = $this->resolveHeaderIndex($header_row, $bulk_column_definitions);
         foreach ($bulk_column_definitions as $column_key => $column_definition) {
             if (
                 !empty($column_definition['enabled'])
                 && !empty($column_definition['required'])
-                && (($column_idx[$column_key] ?? -1) < 0)
+                && (($column_index_map[$column_key] ?? -1) < 0)
             ) {
                 fclose($file);
-                $this->log_activity('error', 'Bulk upload enqueue failed: missing required CSV column', [
+                $this->logActivity('error', 'Bulk upload enqueue failed: missing required CSV column', [
                     'file_name' => $file_name,
                     'org_uuid' => $org_uuid,
                     'membership_uuid' => $membership_uuid,
@@ -130,14 +130,14 @@ class BulkMemberUploadService
                 continue;
             }
 
-            $first_name = sanitize_text_field((string) ($row[$column_idx['first_name']] ?? ''));
-            $last_name = sanitize_text_field((string) ($row[$column_idx['last_name']] ?? ''));
-            $email = sanitize_email((string) ($row[$column_idx['email']] ?? ''));
-            $roles_raw = (!empty($bulk_column_definitions['roles']['enabled']) && ($column_idx['roles'] ?? -1) >= 0)
-                ? (string) ($row[$column_idx['roles']] ?? '')
+            $first_name = sanitize_text_field((string) ($row[$column_index_map['first_name']] ?? ''));
+            $last_name = sanitize_text_field((string) ($row[$column_index_map['last_name']] ?? ''));
+            $email = sanitize_email((string) ($row[$column_index_map['email']] ?? ''));
+            $roles_raw = (!empty($bulk_column_definitions['roles']['enabled']) && ($column_index_map['roles'] ?? -1) >= 0)
+                ? (string) ($row[$column_index_map['roles']] ?? '')
                 : '';
-            $relationship_raw = (!empty($bulk_column_definitions['relationship_type']['enabled']) && ($column_idx['relationship_type'] ?? -1) >= 0)
-                ? sanitize_text_field((string) ($row[$column_idx['relationship_type']] ?? ''))
+            $relationship_raw = (!empty($bulk_column_definitions['relationship_type']['enabled']) && ($column_index_map['relationship_type'] ?? -1) >= 0)
+                ? sanitize_text_field((string) ($row[$column_index_map['relationship_type']] ?? ''))
                 : '';
 
             if ($first_name === '' && $last_name === '' && $email === '') {
@@ -157,7 +157,7 @@ class BulkMemberUploadService
         fclose($file);
 
         if (empty($rows)) {
-            $this->log_activity('warning', 'Bulk upload enqueue rejected: no rows', [
+            $this->logActivity('warning', 'Bulk upload enqueue rejected: no rows', [
                 'file_name' => $file_name,
                 'org_uuid' => $org_uuid,
                 'membership_uuid' => $membership_uuid,
@@ -167,16 +167,16 @@ class BulkMemberUploadService
             return new WP_Error('bulk_no_rows', __('CSV has no member rows to process.', 'wicket-acc'));
         }
 
-        $batch_size = $this->get_batch_size($bulk_upload_config);
+        $batch_size = $this->getBatchSize($bulk_upload_config);
         $file_sha256 = hash_file('sha256', $file_path);
         $file_sha256 = is_string($file_sha256) ? strtolower(trim($file_sha256)) : '';
         if ($file_sha256 !== '') {
-            $existing_job = $this->find_job_by_hash($file_sha256);
+            $existing_job = $this->findJobByHash($file_sha256);
             if (is_array($existing_job)) {
                 $existing_job_id = (string) ($existing_job['id'] ?? '');
                 $existing_status = (string) ($existing_job['status'] ?? 'queued');
                 if (in_array($existing_status, ['queued', 'processing'], true)) {
-                    $this->log_activity('warning', 'Bulk upload enqueue blocked: duplicate file already in progress', [
+                    $this->logActivity('warning', 'Bulk upload enqueue blocked: duplicate file already in progress', [
                         'existing_job_id' => $existing_job_id,
                         'existing_status' => $existing_status,
                         'file_name' => $file_name,
@@ -195,7 +195,7 @@ class BulkMemberUploadService
                     );
                 }
 
-                $this->log_activity('warning', 'Bulk upload enqueue blocked: duplicate file already processed', [
+                $this->logActivity('warning', 'Bulk upload enqueue blocked: duplicate file already processed', [
                     'existing_job_id' => $existing_job_id,
                     'existing_status' => $existing_status,
                     'file_name' => $file_name,
@@ -221,8 +221,8 @@ class BulkMemberUploadService
         $job = [
             'id' => $job_id,
             'status' => 'queued',
-            'created_at' => $this->now_iso8601(),
-            'updated_at' => $this->now_iso8601(),
+            'created_at' => $this->nowIso8601(),
+            'updated_at' => $this->nowIso8601(),
             'file_name' => sanitize_file_name($file_name),
             'file_sha256' => $file_sha256,
             'org_uuid' => $org_uuid,
@@ -241,8 +241,8 @@ class BulkMemberUploadService
             'rows' => $rows,
         ];
 
-        $this->save_job($job);
-        $this->log_activity('info', 'Bulk upload job queued', [
+        $this->saveJob($job);
+        $this->logActivity('info', 'Bulk upload job queued', [
             'job_id' => $job_id,
             'file_name' => $job['file_name'],
             'file_sha256' => $file_sha256,
@@ -254,12 +254,12 @@ class BulkMemberUploadService
             'batch_size' => $batch_size,
         ]);
 
-        if (!$this->schedule_next_batch($job_id, 2)) {
+        if (!$this->scheduleNextBatch($job_id, 2)) {
             $job['status'] = 'failed';
-            $job['updated_at'] = $this->now_iso8601();
-            $this->append_error_snippet($job, __('Unable to schedule background processing.', 'wicket-acc'));
-            $this->save_job($job);
-            $this->log_activity('error', 'Bulk upload job queue failed: unable to schedule first batch', [
+            $job['updated_at'] = $this->nowIso8601();
+            $this->appendErrorSnippet($job, __('Unable to schedule background processing.', 'wicket-acc'));
+            $this->saveJob($job);
+            $this->logActivity('error', 'Bulk upload job queue failed: unable to schedule first batch', [
                 'job_id' => $job_id,
                 'file_name' => $job['file_name'],
             ]);
@@ -281,9 +281,9 @@ class BulkMemberUploadService
      * @param string $job_id
      * @return void
      */
-    public function process_scheduled_job(string $job_id): void
+    public function processScheduledJob(string $job_id): void
     {
-        $job = $this->get_job($job_id);
+        $job = $this->getJob($job_id);
         if (empty($job) || !is_array($job)) {
             return;
         }
@@ -294,8 +294,8 @@ class BulkMemberUploadService
         }
 
         $job['status'] = 'processing';
-        $job['updated_at'] = $this->now_iso8601();
-        $this->log_activity('info', 'Bulk upload batch started', [
+        $job['updated_at'] = $this->nowIso8601();
+        $this->logActivity('info', 'Bulk upload batch started', [
             'job_id' => $job_id,
             'status' => $status,
             'processed' => (int) ($job['processed'] ?? 0),
@@ -309,12 +309,12 @@ class BulkMemberUploadService
 
         if (empty($rows) || $total_records <= 0 || $next_offset >= $total_records) {
             $job['status'] = 'completed';
-            $job['completed_at'] = $this->now_iso8601();
-            $job['updated_at'] = $this->now_iso8601();
+            $job['completed_at'] = $this->nowIso8601();
+            $job['updated_at'] = $this->nowIso8601();
             $job['rows'] = [];
             $job['seen_emails'] = [];
-            $this->save_job($job);
-            $this->log_activity('info', 'Bulk upload job completed with no pending rows', [
+            $this->saveJob($job);
+            $this->logActivity('info', 'Bulk upload job completed with no pending rows', [
                 'job_id' => $job_id,
                 'processed' => (int) ($job['processed'] ?? 0),
                 'added' => (int) ($job['added'] ?? 0),
@@ -329,7 +329,7 @@ class BulkMemberUploadService
         $bulk_upload_config = is_array($config['bulk_upload'] ?? null)
             ? $config['bulk_upload']
             : [];
-        $bulk_column_definitions = $this->get_bulk_column_definitions($bulk_upload_config);
+        $bulk_column_definitions = $this->getBulkColumnDefinitions($bulk_upload_config);
         $relationship_bulk_config = is_array($bulk_upload_config['relationship_type'] ?? null)
             ? $bulk_upload_config['relationship_type']
             : [];
@@ -359,7 +359,7 @@ class BulkMemberUploadService
         $relationship_types_map = is_array($config['relationship_types']['custom_types'] ?? null)
             ? $config['relationship_types']['custom_types']
             : [];
-        $relationship_lookup = $this->build_relationship_lookup($relationship_types_map, $relationship_aliases);
+        $relationship_lookup = $this->buildRelationshipLookup($relationship_types_map, $relationship_aliases);
 
         $start = $next_offset;
         $end = min($start + $batch_size, $total_records);
@@ -383,11 +383,11 @@ class BulkMemberUploadService
 
             if ($email === '' || !is_email($email) || $first_name === '' || $last_name === '') {
                 $job['failed'] = (int) ($job['failed'] ?? 0) + 1;
-                $this->append_error_snippet(
+                $this->appendErrorSnippet(
                     $job,
                     sprintf(__('Row %d skipped: missing required name/email fields.', 'wicket-acc'), $row_num)
                 );
-                $this->log_activity('warning', 'Bulk upload row failed validation', [
+                $this->logActivity('warning', 'Bulk upload row failed validation', [
                     'job_id' => $job_id,
                     'row_num' => $row_num,
                     'email' => $email,
@@ -398,7 +398,7 @@ class BulkMemberUploadService
             $email_key = strtolower($email);
             if (isset($seen_emails[$email_key])) {
                 $job['skipped'] = (int) ($job['skipped'] ?? 0) + 1;
-                $this->log_activity('info', 'Bulk upload row skipped duplicate email in file', [
+                $this->logActivity('info', 'Bulk upload row skipped duplicate email in file', [
                     'job_id' => $job_id,
                     'row_num' => $row_num,
                     'email' => $email,
@@ -406,14 +406,14 @@ class BulkMemberUploadService
                 continue;
             }
 
-            $resolved_relationship_type = $this->resolve_relationship_type($relationship_raw, $relationship_lookup);
+            $resolved_relationship_type = $this->resolveRelationshipType($relationship_raw, $relationship_lookup);
             if ($relationship_column_enabled && $relationship_required && trim($relationship_raw) === '') {
                 $job['skipped'] = (int) ($job['skipped'] ?? 0) + 1;
-                $this->append_error_snippet(
+                $this->appendErrorSnippet(
                     $job,
                     sprintf(__('Row %d skipped: relationship type is required for bulk upload.', 'wicket-acc'), $row_num)
                 );
-                $this->log_activity('warning', 'Bulk upload row skipped: missing required relationship type', [
+                $this->logActivity('warning', 'Bulk upload row skipped: missing required relationship type', [
                     'job_id' => $job_id,
                     'row_num' => $row_num,
                     'email' => $email,
@@ -421,13 +421,13 @@ class BulkMemberUploadService
                 continue;
             }
 
-            if ($relationship_raw !== '' && !$this->is_allowed_relationship_type($resolved_relationship_type, $relationship_allowed_types)) {
+            if ($relationship_raw !== '' && !$this->isAllowedRelationshipType($resolved_relationship_type, $relationship_allowed_types)) {
                 $job['failed'] = (int) ($job['failed'] ?? 0) + 1;
-                $this->append_error_snippet(
+                $this->appendErrorSnippet(
                     $job,
                     sprintf(__('Row %d failed: relationship type is not allowed.', 'wicket-acc'), $row_num)
                 );
-                $this->log_activity('warning', 'Bulk upload row failed: disallowed relationship type', [
+                $this->logActivity('warning', 'Bulk upload row failed: disallowed relationship type', [
                     'job_id' => $job_id,
                     'row_num' => $row_num,
                     'email' => $email,
@@ -441,7 +441,7 @@ class BulkMemberUploadService
                 $group_uuid = (string) ($job['group_uuid'] ?? '');
                 $org_uuid = (string) ($job['org_uuid'] ?? '');
                 if (
-                    $this->active_group_membership_exists(
+                    $this->activeGroupMembershipExists(
                         $group_uuid,
                         $org_uuid,
                         $email,
@@ -450,7 +450,7 @@ class BulkMemberUploadService
                 ) {
                     $job['skipped'] = (int) ($job['skipped'] ?? 0) + 1;
                     $seen_emails[$email_key] = true;
-                    $this->log_activity('info', 'Bulk upload row skipped: active group membership already exists', [
+                    $this->logActivity('info', 'Bulk upload row skipped: active group membership already exists', [
                         'job_id' => $job_id,
                         'row_num' => $row_num,
                         'email' => $email,
@@ -460,12 +460,12 @@ class BulkMemberUploadService
                     continue;
                 }
             } elseif (
-                $this->active_membership_exists($membership_uuid, $email)
-                || $this->active_membership_exists_by_person($membership_uuid, $email)
+                $this->activeMembershipExists($membership_uuid, $email)
+                || $this->activeMembershipExistsByPerson($membership_uuid, $email)
             ) {
                 $job['skipped'] = (int) ($job['skipped'] ?? 0) + 1;
                 $seen_emails[$email_key] = true;
-                $this->log_activity('info', 'Bulk upload row skipped: active membership already exists', [
+                $this->logActivity('info', 'Bulk upload row skipped: active membership already exists', [
                     'job_id' => $job_id,
                     'row_num' => $row_num,
                     'email' => $email,
@@ -483,7 +483,7 @@ class BulkMemberUploadService
                 $roles = array_values(array_filter($roles, static function ($role): bool {
                     return $role !== '';
                 }));
-                $roles = \OrgManagement\Helpers\PermissionHelper::filter_role_submission(
+                $roles = \OrgManagement\Helpers\PermissionHelper::filterRoleSubmission(
                     $roles,
                     $allowed_roles,
                     $excluded_roles
@@ -508,7 +508,7 @@ class BulkMemberUploadService
                 $group_uuid = (string) ($job['group_uuid'] ?? '');
                 $default_group_role = sanitize_key((string) (($config['groups']['member_role'] ?? 'member')));
                 $roster_roles = $group_service_instance instanceof GroupService
-                    ? $group_service_instance->get_roster_roles()
+                    ? $group_service_instance->getRosterRoles()
                     : [];
                 if (empty($roster_roles)) {
                     $roster_roles = [$default_group_role];
@@ -530,13 +530,13 @@ class BulkMemberUploadService
                 $context['role'] = $row_role;
             }
 
-            $result = $this->member_service->add_member((string) ($job['org_uuid'] ?? ''), $member_data, $context);
+            $result = $this->memberService->addMember((string) ($job['org_uuid'] ?? ''), $member_data, $context);
             if (is_wp_error($result)) {
                 $error_code = (string) $result->get_error_code();
                 if ($error_code === 'group_member_exists') {
                     $job['skipped'] = (int) ($job['skipped'] ?? 0) + 1;
                     $seen_emails[$email_key] = true;
-                    $this->log_activity('info', 'Bulk upload row skipped: member already assigned to group', [
+                    $this->logActivity('info', 'Bulk upload row skipped: member already assigned to group', [
                         'job_id' => $job_id,
                         'row_num' => $row_num,
                         'email' => $email,
@@ -545,7 +545,7 @@ class BulkMemberUploadService
                 }
 
                 $job['failed'] = (int) ($job['failed'] ?? 0) + 1;
-                $this->append_error_snippet(
+                $this->appendErrorSnippet(
                     $job,
                     sprintf(
                         __('Row %1$d failed (%2$s): %3$s', 'wicket-acc'),
@@ -554,7 +554,7 @@ class BulkMemberUploadService
                         esc_html($result->get_error_message())
                     )
                 );
-                $this->log_activity('error', 'Bulk upload row add_member failed', [
+                $this->logActivity('error', 'Bulk upload row add_member failed', [
                     'job_id' => $job_id,
                     'row_num' => $row_num,
                     'email' => $email,
@@ -565,7 +565,7 @@ class BulkMemberUploadService
 
             $job['added'] = (int) ($job['added'] ?? 0) + 1;
             $seen_emails[$email_key] = true;
-            $this->log_activity('info', 'Bulk upload row added successfully', [
+            $this->logActivity('info', 'Bulk upload row added successfully', [
                 'job_id' => $job_id,
                 'row_num' => $row_num,
                 'email' => $email,
@@ -574,22 +574,22 @@ class BulkMemberUploadService
 
         $job['seen_emails'] = $seen_emails;
         $job['next_offset'] = $end;
-        $job['updated_at'] = $this->now_iso8601();
+        $job['updated_at'] = $this->nowIso8601();
 
         if ($end >= $total_records) {
             $job['status'] = 'completed';
-            $job['completed_at'] = $this->now_iso8601();
+            $job['completed_at'] = $this->nowIso8601();
             $job['rows'] = [];
             $job['seen_emails'] = [];
 
             $membership_uuid = (string) ($job['membership_uuid'] ?? '');
             if ((int) ($job['added'] ?? 0) > 0 && $membership_uuid !== '') {
-                $orgman_instance = \OrgManagement\OrgMan::get_instance();
-                $orgman_instance->clear_members_cache($membership_uuid);
+                $orgman_instance = \OrgManagement\OrgMan::getInstance();
+                $orgman_instance->clearMembersCache($membership_uuid);
             }
 
-            $this->save_job($job);
-            $this->log_activity('info', 'Bulk upload job completed', [
+            $this->saveJob($job);
+            $this->logActivity('info', 'Bulk upload job completed', [
                 'job_id' => $job_id,
                 'processed' => (int) ($job['processed'] ?? 0),
                 'added' => (int) ($job['added'] ?? 0),
@@ -601,20 +601,20 @@ class BulkMemberUploadService
         }
 
         $job['status'] = 'queued';
-        $this->save_job($job);
-        $this->log_activity('info', 'Bulk upload batch finished; scheduling next batch', [
+        $this->saveJob($job);
+        $this->logActivity('info', 'Bulk upload batch finished; scheduling next batch', [
             'job_id' => $job_id,
             'processed' => (int) ($job['processed'] ?? 0),
             'next_offset' => (int) ($job['next_offset'] ?? 0),
             'total_records' => $total_records,
         ]);
 
-        if (!$this->schedule_next_batch((string) $job['id'], 2)) {
+        if (!$this->scheduleNextBatch((string) $job['id'], 2)) {
             $job['status'] = 'failed';
-            $job['updated_at'] = $this->now_iso8601();
-            $this->append_error_snippet($job, __('Unable to schedule next background batch.', 'wicket-acc'));
-            $this->save_job($job);
-            $this->log_activity('error', 'Bulk upload job failed: unable to schedule next batch', [
+            $job['updated_at'] = $this->nowIso8601();
+            $this->appendErrorSnippet($job, __('Unable to schedule next background batch.', 'wicket-acc'));
+            $this->saveJob($job);
+            $this->logActivity('error', 'Bulk upload job failed: unable to schedule next batch', [
                 'job_id' => (string) ($job['id'] ?? ''),
             ]);
         }
@@ -624,9 +624,9 @@ class BulkMemberUploadService
      * @param string $job_id
      * @return array<string, mixed>|null
      */
-    public function get_job_status(string $job_id): ?array
+    public function getJobStatus(string $job_id): ?array
     {
-        $job = $this->get_job($job_id);
+        $job = $this->getJob($job_id);
         if (!is_array($job)) {
             return null;
         }
@@ -653,7 +653,7 @@ class BulkMemberUploadService
      * @param array<string, mixed> $bulk_upload_config
      * @return int
      */
-    private function get_batch_size(array $bulk_upload_config): int
+    private function getBatchSize(array $bulk_upload_config): int
     {
         $batch_size = (int) ($bulk_upload_config['batch_size'] ?? 25);
 
@@ -664,7 +664,7 @@ class BulkMemberUploadService
      * @param array<string, mixed> $job
      * @return void
      */
-    private function append_error_snippet(array &$job, string $message): void
+    private function appendErrorSnippet(array &$job, string $message): void
     {
         $snippets = is_array($job['error_snippets'] ?? null) ? $job['error_snippets'] : [];
         if (count($snippets) >= 5) {
@@ -680,7 +680,7 @@ class BulkMemberUploadService
      * @param int $delay_seconds
      * @return bool
      */
-    private function schedule_next_batch(string $job_id, int $delay_seconds = 2): bool
+    private function scheduleNextBatch(string $job_id, int $delay_seconds = 2): bool
     {
         if (!function_exists('wp_schedule_single_event')) {
             return false;
@@ -695,7 +695,7 @@ class BulkMemberUploadService
      * @param string $job_id
      * @return array<string, mixed>|null
      */
-    private function get_job(string $job_id): ?array
+    private function getJob(string $job_id): ?array
     {
         $job = get_option(self::JOB_OPTION_PREFIX . $job_id, null);
         if (!is_array($job)) {
@@ -709,7 +709,7 @@ class BulkMemberUploadService
      * @param array<string, mixed> $job
      * @return void
      */
-    private function save_job(array $job): void
+    private function saveJob(array $job): void
     {
         $job_id = (string) ($job['id'] ?? '');
         if ($job_id === '') {
@@ -727,7 +727,7 @@ class BulkMemberUploadService
             array_unshift($job_ids, $job_id);
         }
 
-        $job_ids = $this->prune_jobs($job_ids);
+        $job_ids = $this->pruneJobs($job_ids);
         update_option(self::OPTION_KEY, $job_ids, false);
     }
 
@@ -735,7 +735,7 @@ class BulkMemberUploadService
      * @param array<int, string> $job_ids
      * @return array<int, string>
      */
-    private function prune_jobs(array $job_ids): array
+    private function pruneJobs(array $job_ids): array
     {
         if (count($job_ids) <= 20) {
             return $job_ids;
@@ -775,7 +775,7 @@ class BulkMemberUploadService
     /**
      * @return string
      */
-    private function now_iso8601(): string
+    private function nowIso8601(): string
     {
         return gmdate('c');
     }
@@ -784,7 +784,7 @@ class BulkMemberUploadService
      * @param string $file_sha256
      * @return array<string, mixed>|null
      */
-    private function find_job_by_hash(string $file_sha256): ?array
+    private function findJobByHash(string $file_sha256): ?array
     {
         if ($file_sha256 === '') {
             return null;
@@ -821,12 +821,12 @@ class BulkMemberUploadService
      * @param array<string, mixed> $context
      * @return void
      */
-    private function log_activity(string $level, string $message, array $context = []): void
+    private function logActivity(string $level, string $message, array $context = []): void
     {
         $normalized_context = array_merge(['source' => 'wicket-orgman-bulk-upload'], $context);
 
-        if (function_exists('wc_get_logger')) {
-            $logger = wc_get_logger();
+        if (function_exists('wc_getLogger')) {
+            $logger = wc_getLogger();
             if ($logger && method_exists($logger, $level)) {
                 $logger->{$level}('[OrgMan] ' . $message, $normalized_context);
 
@@ -846,7 +846,7 @@ class BulkMemberUploadService
      * @param array<string, mixed> $bulk_upload_config
      * @return array<string, array<string, mixed>>
      */
-    private function get_bulk_column_definitions(array $bulk_upload_config): array
+    private function getBulkColumnDefinitions(array $bulk_upload_config): array
     {
         $bulk_columns_config = is_array($bulk_upload_config['columns'] ?? null)
             ? $bulk_upload_config['columns']
@@ -919,7 +919,7 @@ class BulkMemberUploadService
      * @param array<string, array<string, mixed>> $bulk_column_definitions
      * @return array<string, int>
      */
-    private function resolve_header_index(array $headers, array $bulk_column_definitions): array
+    private function resolveHeaderIndex(array $headers, array $bulk_column_definitions): array
     {
         $normalized = [];
         foreach ($headers as $idx => $header) {
@@ -962,7 +962,7 @@ class BulkMemberUploadService
      * @param array<string, mixed> $relationship_aliases
      * @return array<string, string>
      */
-    private function build_relationship_lookup(array $relationship_types_map, array $relationship_aliases): array
+    private function buildRelationshipLookup(array $relationship_types_map, array $relationship_aliases): array
     {
         $lookup = [];
         foreach ($relationship_types_map as $slug => $label) {
@@ -971,12 +971,12 @@ class BulkMemberUploadService
                 continue;
             }
 
-            $lookup[$this->normalize_relationship_value($clean_slug)] = $clean_slug;
-            $lookup[$this->normalize_relationship_value((string) $label)] = $clean_slug;
+            $lookup[$this->normalizeRelationshipValue($clean_slug)] = $clean_slug;
+            $lookup[$this->normalizeRelationshipValue((string) $label)] = $clean_slug;
         }
 
         foreach ($relationship_aliases as $alias => $mapped_slug) {
-            $alias_key = $this->normalize_relationship_value((string) $alias);
+            $alias_key = $this->normalizeRelationshipValue((string) $alias);
             $clean_slug = sanitize_key((string) $mapped_slug);
             if ($alias_key === '' || $clean_slug === '') {
                 continue;
@@ -992,7 +992,7 @@ class BulkMemberUploadService
      * @param string $value
      * @return string
      */
-    private function normalize_relationship_value(string $value): string
+    private function normalizeRelationshipValue(string $value): string
     {
         $value = strtolower(trim($value));
         $value = str_replace(['_', '-'], ' ', $value);
@@ -1006,9 +1006,9 @@ class BulkMemberUploadService
      * @param array<string, string> $relationship_lookup
      * @return string
      */
-    private function resolve_relationship_type(string $raw_value, array $relationship_lookup): string
+    private function resolveRelationshipType(string $raw_value, array $relationship_lookup): string
     {
-        $normalized = $this->normalize_relationship_value($raw_value);
+        $normalized = $this->normalizeRelationshipValue($raw_value);
         if ($normalized === '') {
             return '';
         }
@@ -1021,7 +1021,7 @@ class BulkMemberUploadService
      * @param array<int, string> $relationship_allowed_types
      * @return bool
      */
-    private function is_allowed_relationship_type(string $relationship_type, array $relationship_allowed_types): bool
+    private function isAllowedRelationshipType(string $relationship_type, array $relationship_allowed_types): bool
     {
         if ($relationship_type === '') {
             return false;
@@ -1039,7 +1039,7 @@ class BulkMemberUploadService
      * @param string $email
      * @return bool
      */
-    private function active_membership_exists(string $membership_uuid, string $email): bool
+    private function activeMembershipExists(string $membership_uuid, string $email): bool
     {
         if ($membership_uuid === '' || $email === '' || !function_exists('wicket_api_client')) {
             return false;
@@ -1082,14 +1082,14 @@ class BulkMemberUploadService
      * @param string $email
      * @return bool
      */
-    private function active_membership_exists_by_person(string $membership_uuid, string $email): bool
+    private function activeMembershipExistsByPerson(string $membership_uuid, string $email): bool
     {
         if ($membership_uuid === '' || $email === '') {
             return false;
         }
 
         try {
-            $person_uuid = $this->resolve_person_uuid_by_email($email);
+            $person_uuid = $this->resolvePersonUuidByEmail($email);
             if ($person_uuid === '') {
                 return false;
             }
@@ -1114,7 +1114,7 @@ class BulkMemberUploadService
      * @param GroupService|null $group_service
      * @return bool
      */
-    private function active_group_membership_exists(
+    private function activeGroupMembershipExists(
         string $group_uuid,
         string $org_uuid,
         string $email,
@@ -1124,7 +1124,7 @@ class BulkMemberUploadService
             return false;
         }
 
-        $person_uuid = $this->resolve_person_uuid_by_email($email);
+        $person_uuid = $this->resolvePersonUuidByEmail($email);
         if ($person_uuid === '') {
             return false;
         }
@@ -1134,7 +1134,7 @@ class BulkMemberUploadService
         $max_pages = 10;
 
         while ($page <= $max_pages) {
-            $memberships = $group_service->get_person_group_memberships($person_uuid, [
+            $memberships = $group_service->getPersonGroupMemberships($person_uuid, [
                 'page' => $page,
                 'size' => 100,
                 'active' => true,
@@ -1175,7 +1175,7 @@ class BulkMemberUploadService
      * @param string $email
      * @return string
      */
-    private function resolve_person_uuid_by_email(string $email): string
+    private function resolvePersonUuidByEmail(string $email): string
     {
         if ($email === '' || !function_exists('wicket_get_person_by_email')) {
             return '';

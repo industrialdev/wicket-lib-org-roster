@@ -31,7 +31,7 @@ class NotificationService
      * @param array  $options Additional options.
      * @return array The notification data.
      */
-    public function add_notification($message, $type = 'info', $title = '', $options = [])
+    public function addNotification($message, $type = 'info', $title = '', $options = [])
     {
         $notification = [
             'id'       => uniqid('notification_'),
@@ -59,7 +59,7 @@ class NotificationService
      */
     public function success($message, $title = '', $options = [])
     {
-        return $this->add_notification($message, 'success', $title, $options);
+        return $this->addNotification($message, 'success', $title, $options);
     }
 
     /**
@@ -106,7 +106,7 @@ class NotificationService
      *
      * @return array Array of notifications.
      */
-    public function get_notifications()
+    public function getNotifications()
     {
         return $this->notifications;
     }
@@ -116,7 +116,7 @@ class NotificationService
      *
      * @return void
      */
-    public function clear_notifications()
+    public function clearNotifications()
     {
         $this->notifications = [];
     }
@@ -128,7 +128,7 @@ class NotificationService
      * @param array    $options Additional options.
      * @return array|null The notification data or null if no error.
      */
-    public function convert_wp_error($wp_error, $options = [])
+    public function convertWpError($wp_error, $options = [])
     {
         if (!is_wp_error($wp_error)) {
             return null;
@@ -145,7 +145,7 @@ class NotificationService
      *
      * @return string JavaScript code.
      */
-    public function generate_js()
+    public function generateJs()
     {
         if (empty($this->notifications)) {
             return '';
@@ -190,9 +190,9 @@ class NotificationService
      * @param string $org_id The organization ID.
      * @return bool|WP_Error True if email sent successfully, false if not, WP_Error on failure.
      */
-    public function send_person_to_org_assignment_email($person_uuid, $org_id)
+    public function sendPersonToOrgAssignmentEmail($person_uuid, $org_id)
     {
-        $logger = wc_get_logger();
+        $logger = wc_getLogger();
         $context = [
             'source' => 'wicket-orgman',
             'notification' => 'person_to_org_assignment',
@@ -315,7 +315,7 @@ class NotificationService
      *
      * @return string HTML for legacy notices.
      */
-    public function render_legacy()
+    public function renderLegacy()
     {
         if (empty($this->notifications)) {
             return '';
@@ -345,7 +345,7 @@ class NotificationService
      * @param array $data Additional data including notification_type, org_id, person_email, group_name, etc.
      * @return bool|WP_Error True if email sent successfully, false if not, WP_Error on failure.
      */
-    public function email_to_person_on_group_assignment($person_input, array $data = [])
+    public function emailToPersonOnGroupAssignment($person_input, array $data = [])
     {
         // Validate required parameters
         if (empty($person_input)) {

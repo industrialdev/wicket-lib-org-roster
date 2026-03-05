@@ -39,17 +39,17 @@ class BusinessInfoController extends ApiController
     /**
      * Register REST routes handled by this controller.
      */
-    public function register_routes()
+    public function registerRoutes()
     {
         register_rest_route($this->namespace, '/info', [
             [
                 'methods'             => WP_REST_Server::READABLE,
-                'callback'            => [$this, 'get_business_info'],
+                'callback'            => [$this, 'getBusinessInfo'],
                 'permission_callback' => [$this, 'check_logged_in'],
             ],
             [
                 'methods'             => WP_REST_Server::CREATABLE,
-                'callback'            => [$this, 'post_business_info'],
+                'callback'            => [$this, 'postBusinessInfo'],
                 'permission_callback' => [$this, 'check_logged_in'],
             ],
         ]);
@@ -61,12 +61,12 @@ class BusinessInfoController extends ApiController
      * @param WP_REST_Request $request Request object.
      * @return WP_REST_Response
      */
-    public function get_business_info(WP_REST_Request $request)
+    public function getBusinessInfo(WP_REST_Request $request)
     {
         $org_id = sanitize_text_field($request->get_param('org_id'));
 
         if (empty($org_id)) {
-            return $this->html_response('business-info', [
+            return $this->htmlResponse('business-info', [
                 'org_id'  => '',
                 'header'  => ['name' => '', 'address' => '', 'email' => '', 'phone' => ''],
                 'sections' => [],
@@ -78,9 +78,9 @@ class BusinessInfoController extends ApiController
             ]);
         }
 
-        $view_model = $this->build_view_model($org_id);
+        $view_model = $this->buildViewModel($org_id);
 
-        return $this->html_response('business-info', $view_model);
+        return $this->htmlResponse('business-info', $view_model);
     }
 
     /**
@@ -89,12 +89,12 @@ class BusinessInfoController extends ApiController
      * @param WP_REST_Request $request Request object.
      * @return WP_REST_Response
      */
-    public function post_business_info(WP_REST_Request $request)
+    public function postBusinessInfo(WP_REST_Request $request)
     {
         $org_id = sanitize_text_field($request->get_param('org_id'));
 
         if (empty($org_id)) {
-            return $this->html_response('business-info', [
+            return $this->htmlResponse('business-info', [
                 'notice' => [
                     'type'    => 'error',
                     'message' => __('Organization ID is required.', 'wicket-acc'),
@@ -105,7 +105,7 @@ class BusinessInfoController extends ApiController
         // Verify nonce for security
         $nonce = $request->get_param('_wpnonce');
         if (!$nonce || !wp_verify_nonce($nonce, 'org_management_business_info_' . $org_id)) {
-            return $this->html_response('business-info', [
+            return $this->htmlResponse('business-info', [
                 'notice' => [
                     'type'    => 'error',
                     'message' => __('Security verification failed. Please try again.', 'wicket-acc'),
@@ -113,7 +113,7 @@ class BusinessInfoController extends ApiController
             ]);
         }
 
-        $result = $this->business_info_service->update_sections($org_id, $request->get_params());
+        $result = $this->business_info_service->updateSections($org_id, $request->get_params());
 
         $notice = [
             'type'    => 'success',
@@ -127,10 +127,10 @@ class BusinessInfoController extends ApiController
             ];
         }
 
-        $view_model = $this->build_view_model($org_id);
+        $view_model = $this->buildViewModel($org_id);
         $view_model['notice'] = $notice;
 
-        return $this->html_response('business-info', $view_model);
+        return $this->htmlResponse('business-info', $view_model);
     }
 
     /**
@@ -139,13 +139,13 @@ class BusinessInfoController extends ApiController
      * @param string $org_id Organization UUID.
      * @return array
      */
-    private function build_view_model($org_id)
+    private function buildViewModel($org_id)
     {
         return [
             'org_id'  => $org_id,
-            'header'  => $this->business_info_service->get_organization_header($org_id),
-            'sections' => $this->business_info_service->get_sections_config(),
-            'state'   => $this->business_info_service->get_sections_state($org_id),
+            'header'  => $this->business_info_service->getOrganizationHeader($org_id),
+            'sections' => $this->business_info_service->getSectionsConfig(),
+            'state'   => $this->business_info_service->getSectionsState($org_id),
         ];
     }
 
@@ -156,7 +156,7 @@ class BusinessInfoController extends ApiController
      * @param array  $data     Data for the template.
      * @return WP_REST_Response
      */
-    private function html_response($template, array $data)
+    private function htmlResponse($template, array $data)
     {
         ob_start();
         extract($data);

@@ -49,7 +49,7 @@ if ('POST' === strtoupper($request_method)) {
         return;
     }
 
-    $requested_roster_mode = (new ConfigService())->get_roster_mode();
+    $requested_roster_mode = (new ConfigService())->getRosterMode();
     if ($requested_roster_mode === 'membership_cycle' && empty($membership_uuid)) {
         status_header(200);
         OrgManagement\Helpers\DatastarSSE::renderError(
@@ -130,8 +130,8 @@ if ('POST' === strtoupper($request_method)) {
     );
 
     try {
-        $config_service = new ConfigService();
-        $member_service = new MemberService($config_service);
+        $configService = new ConfigService();
+        $member_service = new MemberService($configService);
 
         OrgManagement\Helpers\Helper::log_info('[OrgMan] Member addition attempt', [
             'org_uuid' => $org_uuid,
@@ -147,7 +147,7 @@ if ('POST' === strtoupper($request_method)) {
             'relationship_description' => $relationship_description,
         ];
 
-        $result = $member_service->add_member($org_uuid, $member_data, $context);
+        $result = $member_service->addMember($org_uuid, $member_data, $context);
 
         OrgManagement\Helpers\Helper::log_info('[OrgMan] Member addition completed', [
             'org_uuid' => $org_uuid,
@@ -204,12 +204,12 @@ if ('POST' === strtoupper($request_method)) {
         // Clear members cache for this organization after successful addition
         $cache_membership_uuid = $membership_uuid;
         if ($cache_membership_uuid === '') {
-            $membership_service = new OrgManagement\Services\MembershipService();
-            $cache_membership_uuid = (string) $membership_service->getMembershipForOrganization($org_uuid);
+            $membershipService = new OrgManagement\Services\MembershipService();
+            $cache_membership_uuid = (string) $membershipService->getMembershipForOrganization($org_uuid);
         }
         if ($cache_membership_uuid) {
             $orgman_instance = OrgManagement\OrgMan::get_instance();
-            $orgman_instance->clear_members_cache($cache_membership_uuid);
+            $orgman_instance->clearMembersCache($cache_membership_uuid);
         }
 
         // Success message

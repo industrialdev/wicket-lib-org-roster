@@ -12,7 +12,7 @@ it('detects additional seats form id by slug when form id is zero', function ():
 
     $service = new ConfigService();
 
-    expect($service->get_additional_seats_form_id())->toBe(55);
+    expect($service->getAdditionalSeatsFormId())->toBe(55);
 });
 
 it('includes membership cycle strategy configuration defaults', function (): void {

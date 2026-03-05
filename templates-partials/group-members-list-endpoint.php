@@ -23,7 +23,7 @@ if (empty($group_uuid)) {
 
 $group_service = new GroupService();
 $current_user = wp_get_current_user();
-$access = $group_service->can_manage_group($group_uuid, (string) $current_user->user_login);
+$access = $group_service->canManageGroup($group_uuid, (string) $current_user->user_login);
 if (empty($access['allowed'])) {
     echo '<p class="wt_text-gray-500">' . esc_html__('You do not have permission to manage this group.', 'wicket-acc') . '</p>';
 
@@ -38,9 +38,9 @@ if (empty($org_uuid) && function_exists('wicket_get_group')) {
         $org_uuid = $group_data['data']['relationships']['organization']['data']['id'] ?? $org_uuid;
     }
 }
-$result = $group_service->get_group_members($group_uuid, $org_identifier, [
+$result = $group_service->getGroupMembers($group_uuid, $org_identifier, [
     'page' => $page,
-    'size' => $group_service->get_group_member_page_size(),
+    'size' => $group_service->getGroupMemberPageSize(),
     'query' => $query,
     'org_uuid' => $org_uuid,
 ]);
@@ -60,8 +60,8 @@ if ($use_unified_member_list) {
     $query = $group_query;
     $members_list_endpoint = $group_members_list_endpoint;
     $members_list_target = $group_members_list_target;
-    $membership_service = new OrgManagement\Services\MembershipService();
-    $membership_uuid = $org_uuid ? $membership_service->getMembershipForOrganization($org_uuid) : '';
+    $membershipService = new OrgManagement\Services\MembershipService();
+    $membership_uuid = $org_uuid ? $membershipService->getMembershipForOrganization($org_uuid) : '';
     $show_edit_permissions = (bool) ($orgman_config['groups']['ui']['show_edit_permissions'] ?? false);
     $show_account_status = (bool) (($orgman_config['ui']['member_list']['account_status']['enabled'] ?? true));
     $show_add_member_button = true;

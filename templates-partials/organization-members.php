@@ -31,12 +31,12 @@ $lang = wicket_get_current_language();
 ]);
 
 // Fetch organization members if the Wicket function exists.
-$membership_service = new \OrgManagement\Services\MembershipService();
-$config_service = new \OrgManagement\Services\ConfigService();
-$member_service = new \OrgManagement\Services\MemberService($config_service);
-$permission_service = new \OrgManagement\Services\PermissionService();
+$membershipService = new \OrgManagement\Services\MembershipService();
+$configService = new \OrgManagement\Services\ConfigService();
+$member_service = new \OrgManagement\Services\MemberService($configService);
+$permissionService = new \OrgManagement\Services\PermissionService();
 
-$additional_seats_service = new \OrgManagement\Services\AdditionalSeatsService($config_service);
+$additional_seats_service = new \OrgManagement\Services\AdditionalSeatsService($configService);
 
 // Load org management configuration
 $orgman_config = \OrgManagement\Config\OrgManConfig::get();
@@ -44,7 +44,7 @@ $requested_membership_uuid = isset($_GET['membership_uuid']) ? sanitize_text_fie
 
 $membershipUuid = $requested_membership_uuid !== ''
     ? $requested_membership_uuid
-    : $membership_service->getMembershipForOrganization($org_uuid);
+    : $membershipService->getMembershipForOrganization($org_uuid);
 
 $membersResult = [
     'members'    => [],
@@ -60,7 +60,7 @@ $membersResult = [
 
 if (!empty($membershipUuid)) {
     try {
-        $membersResult = $member_service->get_members(
+        $membersResult = $member_service->getMembers(
             $membershipUuid,
             $org_uuid,
             [
@@ -100,7 +100,7 @@ $show_bulk_upload = (bool) ($member_list_config['show_bulk_upload'] ?? false);
     'page_size'         => $pagination['pageSize'] ?? 10,
 ]);
 
-$available_roles = $permission_service->get_available_roles();
+$available_roles = $permissionService->getAvailableRoles();
 
 $containerId = 'members-list-container-' . $org_uuid_dom_suffix;
 $membersListEndpoint = \OrgManagement\Helpers\template_url() . 'members-list';
@@ -120,7 +120,7 @@ $signals = [
 ];
 $use_unified_view = (bool) ($orgman_config['ui']['member_view']['use_unified'] ?? false);
 if ($use_unified_view) {
-    $mode = (string) ($config_service->get_roster_mode() ?? 'direct');
+    $mode = (string) ($configService->getRosterMode() ?? 'direct');
     $members = $membersResult['members'] ?? [];
     $pagination = $membersResult['pagination'] ?? [];
     $query = $membersResult['query'] ?? '';
@@ -213,7 +213,7 @@ $members_list_endpoint = $membersListEndpoint;
 	    $org_uuid_for_partial = $org_uuid;
 	    $use_unified_member_list = (bool) ($orgman_config['ui']['member_list']['use_unified'] ?? false);
 	    if ($use_unified_member_list) {
-	        $mode = (string) ($config_service->get_roster_mode() ?? 'direct');
+	        $mode = (string) ($configService->getRosterMode() ?? 'direct');
 	        $members = $membersResult['members'] ?? [];
 	        $pagination = $membersResult['pagination'] ?? [];
 	        $query = $membersResult['query'] ?? '';
@@ -236,8 +236,8 @@ $members_list_endpoint = $membersListEndpoint;
 
 		<?php
 	        // Check if user can purchase additional seats
-	        $can_purchase_seats = $additional_seats_service->can_purchase_additional_seats($org_uuid);
-	    $purchase_url = $additional_seats_service->get_purchase_form_url($org_uuid, $membershipUuid);
+	        $can_purchase_seats = $additional_seats_service->canPurchaseAdditionalSeats($org_uuid);
+	    $purchase_url = $additional_seats_service->getPurchaseFormUrl($org_uuid, $membershipUuid);
 
 	    // Debug logging for administrators
 	    if (current_user_can('administrator')) {
@@ -246,7 +246,7 @@ $members_list_endpoint = $membersListEndpoint;
 	            'membershipUuid' => $membershipUuid,
 	            'can_purchase_seats' => $can_purchase_seats,
 	            'purchase_url' => $purchase_url,
-	            'additional_seats_enabled' => $config_service->is_additional_seats_enabled(),
+	            'additional_seats_enabled' => $configService->isAdditionalSeatsEnabled(),
 	            'current_user_roles' => wp_get_current_user()->roles,
 	            'current_user_login' => wp_get_current_user()->user_login,
 	        ]);

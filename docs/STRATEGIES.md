@@ -16,8 +16,8 @@ Current strategy keys:
 ### Strategy Interface
 - Contract: `src/Services/Strategies/RosterManagementStrategy.php`
 - Required methods:
-  - `add_member($org_id, $member_data, $context = [])`
-  - `remove_member($org_id, $person_uuid, $context = [])`
+  - `addMember($org_id, $member_data, $context = [])`
+  - `removeMember($org_id, $person_uuid, $context = [])`
 
 ### Strategy Registry
 - Service: `src/Services/MemberService.php`
@@ -28,7 +28,7 @@ Current strategy keys:
   - `membership_cycle` => `MembershipCycleStrategy`
 
 ### Selection Behavior
-- Active strategy is read from `ConfigService::get_roster_mode()`.
+- Active strategy is read from `ConfigService::getRosterMode()`.
 - Unknown strategy keys fall back to `cascade` (backward-safe behavior).
 
 ## 2) Cross-Strategy Contracts

@@ -19,7 +19,7 @@ Exit Criteria:
 
 ## Phase 1 — Strategy Scaffolding
 - [x] Add `MembershipCycleStrategy` implementing `RosterManagementStrategy`.
-- [x] Register strategy in `MemberService::init_strategies()`.
+- [x] Register strategy in `MemberService::initStrategies()`.
 - [x] Keep fallback unchanged (`cascade`) for unknown strategy keys.
 - [x] Add strategy-specific configuration defaults in `src/Config/OrgManConfig.php` (additive only).
 

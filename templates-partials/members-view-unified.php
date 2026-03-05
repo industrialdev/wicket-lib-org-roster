@@ -58,11 +58,11 @@ $signals = [
 ];
 
 $membership_uuid = isset($membership_uuid) ? (string) $membership_uuid : '';
-$membership_service = new OrgManagement\Services\MembershipService();
-$config_service = new OrgManagement\Services\ConfigService();
-$additional_seats_service = new OrgManagement\Services\AdditionalSeatsService($config_service);
+$membershipService = new OrgManagement\Services\MembershipService();
+$configService = new OrgManagement\Services\ConfigService();
+$additional_seats_service = new OrgManagement\Services\AdditionalSeatsService($configService);
 if ($membership_uuid === '' && $org_uuid !== '') {
-    $membership_uuid = $membership_service->getMembershipForOrganization($org_uuid);
+    $membership_uuid = $membershipService->getMembershipForOrganization($org_uuid);
 }
 $encoded_membership_uuid = rawurlencode((string) $membership_uuid);
 $membership_query_fragment = $membership_uuid !== '' ? "&membership_uuid={$encoded_membership_uuid}" : '';
@@ -70,9 +70,9 @@ if ($mode !== 'groups') {
     $search_action = "@get('{$members_list_endpoint}{$members_list_separator}org_uuid={$encoded_org_uuid}{$membership_query_fragment}&page=1&query=' + encodeURIComponent(" . '$searchQuery' . '))';
 }
 
-$can_purchase_seats = $org_uuid ? $additional_seats_service->can_purchase_additional_seats($org_uuid) : false;
+$can_purchase_seats = $org_uuid ? $additional_seats_service->canPurchaseAdditionalSeats($org_uuid) : false;
 $purchase_url = ($can_purchase_seats && $membership_uuid)
-    ? $additional_seats_service->get_purchase_form_url($org_uuid, $membership_uuid)
+    ? $additional_seats_service->getPurchaseFormUrl($org_uuid, $membership_uuid)
     : '';
 
 $show_edit_permissions = isset($show_edit_permissions)
@@ -219,8 +219,8 @@ $remove_member_error_actions = "console.error('Failed to remove member'); \$remo
 
     <?php if ($mode !== 'groups' && $show_edit_permissions) : ?>
         <?php
-    $permission_service = new OrgManagement\Services\PermissionService();
-        $available_roles = $permission_service->get_available_roles();
+    $permissionService = new OrgManagement\Services\PermissionService();
+        $available_roles = $permissionService->getAvailableRoles();
 
         if (!empty($orgman_config['permissions']['prevent_owner_assignment'])) {
             unset($available_roles['membership_owner']);
@@ -584,8 +584,8 @@ $remove_member_error_actions = "console.error('Failed to remove member'); \$remo
                 $permissions_field_config = $orgman_config['member_addition_form']['fields']['permissions'] ?? [];
 $allowed_roles = $permissions_field_config['allowed_roles'] ?? [];
 $excluded_roles = $permissions_field_config['excluded_roles'] ?? [];
-$permission_service = new OrgManagement\Services\PermissionService();
-$available_roles = $permission_service->get_available_roles();
+$permissionService = new OrgManagement\Services\PermissionService();
+$available_roles = $permissionService->getAvailableRoles();
 if (!empty($orgman_config['permissions']['prevent_owner_assignment'])) {
     unset($available_roles['membership_owner']);
 }
