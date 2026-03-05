@@ -483,7 +483,7 @@ class BulkMemberUploadService
                 $roles = array_values(array_filter($roles, static function ($role): bool {
                     return $role !== '';
                 }));
-                $roles = \OrgManagement\Helpers\PermissionHelper::filterRoleSubmission(
+                $roles = \OrgManagement\Helpers\PermissionHelper::filter_role_submission(
                     $roles,
                     $allowed_roles,
                     $excluded_roles

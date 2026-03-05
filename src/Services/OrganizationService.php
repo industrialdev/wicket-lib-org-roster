@@ -63,7 +63,7 @@ class OrganizationService
      */
     private function getCachedData($cache_key)
     {
-        if (!\OrgManagement\Helpers\ConfigHelper::isCacheEnabled()) {
+        if (!\OrgManagement\Helpers\ConfigHelper::is_cache_enabled()) {
             return false;
         }
 
@@ -79,8 +79,8 @@ class OrganizationService
      */
     private function setCachedData($cache_key, $data)
     {
-        if (\OrgManagement\Helpers\ConfigHelper::isCacheEnabled()) {
-            $cache_duration = \OrgManagement\Helpers\ConfigHelper::getCacheDuration();
+        if (\OrgManagement\Helpers\ConfigHelper::is_cache_enabled()) {
+            $cache_duration = \OrgManagement\Helpers\ConfigHelper::get_cache_duration();
             set_transient($cache_key, $data, $cache_duration);
         }
     }
