@@ -825,8 +825,8 @@ class BulkMemberUploadService
     {
         $normalized_context = array_merge(['source' => 'wicket-orgman-bulk-upload'], $context);
 
-        if (function_exists('wc_getLogger')) {
-            $logger = wc_getLogger();
+        if (function_exists('wc_get_logger')) {
+            $logger = wc_get_logger();
             if ($logger && method_exists($logger, $level)) {
                 $logger->{$level}('[OrgMan] ' . $message, $normalized_context);
 

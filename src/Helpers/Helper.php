@@ -23,7 +23,7 @@ abstract class Helper
      */
     protected static function getLogger()
     {
-        return wc_getLogger();
+        return wc_get_logger();
     }
 
     /**

@@ -53,7 +53,7 @@ if ('POST' === strtoupper($request_method)) {
         $configService = new ConfigService();
         $member_service = new MemberService($configService);
         $membershipService = new MembershipService();
-        $logger = function_exists('wc_getLogger') ? wc_getLogger() : null;
+        $logger = function_exists('wc_get_logger') ? wc_get_logger() : null;
         $log_context = ['source' => 'wicket-orgman', 'action' => 'update-permissions'];
 
         // First update relationship type if provided and enabled

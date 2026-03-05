@@ -11,7 +11,7 @@
 
 ## Role Assignment on Add
 - Base role from `member_addition.base_member_role` is assigned.
-- Auto roles from `member_addition.auto_assignRoles` are assigned.
+- Auto roles from `member_addition.auto_assign_roles` are assigned.
 - Optional additional roles can be merged with relationship-mapped roles.
 - `membership_owner` can be filtered by `permissions.prevent_owner_assignment`.
 

@@ -68,7 +68,7 @@ class AdditionalSeatsService
         $fallback_skus = ['corporate-seats'];
         $skus = array_values(array_unique(array_filter(array_merge([$primary_sku], $fallback_skus))));
 
-        $logger = wc_getLogger();
+        $logger = wc_get_logger();
 
         if (empty($skus)) {
             return null;
@@ -200,7 +200,7 @@ class AdditionalSeatsService
      */
     public function updateSubscriptionSeatCount($order_id, $subscription_id, $additional_seats)
     {
-        $logger = wc_getLogger();
+        $logger = wc_get_logger();
 
         try {
             $subscription = wcs_get_subscription($subscription_id);
@@ -247,7 +247,7 @@ class AdditionalSeatsService
 
     public function updateMdpMembershipMaxAssignments($membership_id, $new_max_assignments)
     {
-        $logger = wc_getLogger();
+        $logger = wc_get_logger();
 
         $membership_id = is_string($membership_id) ? trim($membership_id) : '';
         $new_max_assignments = (int) $new_max_assignments;
@@ -346,7 +346,7 @@ class AdditionalSeatsService
      */
     private function updateMdpSeatLimit($subscription, $new_seat_limit)
     {
-        $logger = wc_getLogger();
+        $logger = wc_get_logger();
 
         try {
             // Get comprehensive membership data from order meta
@@ -497,7 +497,7 @@ class AdditionalSeatsService
 
         $success = update_user_meta($current_user_id, 'orgman_additional_seats_data', $purchase_data);
 
-        $logger = wc_getLogger();
+        $logger = wc_get_logger();
         if ($success) {
             $logger->info('[OrgMan] Purchase user meta stored', [
                 'source' => 'wicket-orgman',
@@ -564,7 +564,7 @@ class AdditionalSeatsService
      */
     public function getMembershipDataForMdp($org_uuid, $membership_id)
     {
-        $logger = wc_getLogger();
+        $logger = wc_get_logger();
 
         try {
             // Get organization data
@@ -714,7 +714,7 @@ class AdditionalSeatsService
      */
     private function getMembershipDataFromApi($membership_id)
     {
-        $logger = wc_getLogger();
+        $logger = wc_get_logger();
 
         try {
             if (!function_exists('wicket_api_client')) {

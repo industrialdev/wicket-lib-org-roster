@@ -66,7 +66,7 @@ All keys below are current defaults from `src/Config/OrgManConfig.php`.
 ### `member_addition`
 | Key | Default | Type | Description |
 |---|---|---|---|
-| `member_addition.auto_assignRoles` | `[]` | array | Role slugs automatically attached to newly added members. |
+| `member_addition.auto_assign_roles` | `[]` | array | Role slugs automatically attached to newly added members. |
 | `member_addition.base_member_role` | `member` | string | Base membership role/type applied when creating member assignments. |
 | `member_addition.auto_opt_in_communications.enabled` | `true` | bool | Master toggle for auto-opting newly added members into communication preferences. |
 | `member_addition.auto_opt_in_communications.email` | `true` | bool | If auto opt-in is enabled, controls whether email opt-in is set. |

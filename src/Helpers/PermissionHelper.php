@@ -309,7 +309,7 @@ class PermissionHelper extends Helper
 
         // Use wicket_get_person_active_memberships to support impersonation
         if (!function_exists('wicket_get_person_active_memberships')) {
-            wc_getLogger()->warning('[PermissionHelper] wicket_get_person_active_memberships function not available', [
+            wc_get_logger()->warning('[PermissionHelper] wicket_get_person_active_memberships function not available', [
                 'source' => 'wicket-orgman',
                 'org_id' => $org_id,
             ]);
@@ -335,7 +335,7 @@ class PermissionHelper extends Helper
             }
         } catch (\Throwable $e) {
             // Log error but return false
-            wc_getLogger()->error('[PermissionHelper] Error checking active membership: ' . $e->getMessage(), [
+            wc_get_logger()->error('[PermissionHelper] Error checking active membership: ' . $e->getMessage(), [
                 'source' => 'wicket-orgman',
                 'org_id' => $org_id,
                 'person_uuid' => $person_uuid ?? 'unknown',
@@ -528,7 +528,7 @@ class PermissionHelper extends Helper
         try {
             // Get the organization membership to find the owner
             if (!class_exists('\OrgManagement\Services\MembershipService')) {
-                wc_getLogger()->warning('[PermissionHelper] MembershipService class not available', [
+                wc_get_logger()->warning('[PermissionHelper] MembershipService class not available', [
                     'source' => 'wicket-orgman',
                     'org_id' => $org_id,
                 ]);
@@ -555,7 +555,7 @@ class PermissionHelper extends Helper
             return $person_uuid === $owner_id;
 
         } catch (\Throwable $e) {
-            wc_getLogger()->error('[PermissionHelper] Error checking membership owner: ' . $e->getMessage(), [
+            wc_get_logger()->error('[PermissionHelper] Error checking membership owner: ' . $e->getMessage(), [
                 'source' => 'wicket-orgman',
                 'org_id' => $org_id,
                 'person_uuid' => $person_uuid ?? 'unknown',

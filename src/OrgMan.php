@@ -169,7 +169,7 @@ final class OrgMan
     private function registerAdditionalSeatsHook($hook)
     {
         add_action($hook, function ($order_id) use ($hook) {
-            $logger = wc_getLogger();
+            $logger = wc_get_logger();
             $context = [
                 'source' => 'wicket-orgman',
                 'hook' => $hook,
@@ -224,7 +224,7 @@ final class OrgMan
     {
         $order = wc_get_order($order_id);
 
-        $logger = wc_getLogger();
+        $logger = wc_get_logger();
         $context = ['source' => 'wicket-orgman'];
 
         $logger->info('[OrgMan] Additional seats handler invoked', array_merge($context, [
@@ -616,7 +616,7 @@ final class OrgMan
 
     public function filterWoocommerceReturnUrl($return_url, $order)
     {
-        $logger = wc_getLogger();
+        $logger = wc_get_logger();
         $context = ['source' => 'wicket-orgman'];
 
         if (!$order || !is_object($order)) {
@@ -654,7 +654,7 @@ final class OrgMan
 
     private function orderHasAdditionalSeats($order)
     {
-        $logger = wc_getLogger();
+        $logger = wc_get_logger();
         $context = ['source' => 'wicket-orgman'];
 
         $additional_seats_service = $this->services['additional_seats'] ?? null;
@@ -693,7 +693,7 @@ final class OrgMan
 
     private function getOrganizationMembersUrlFromOrder($order)
     {
-        $logger = wc_getLogger();
+        $logger = wc_get_logger();
         $context = ['source' => 'wicket-orgman'];
 
         $org_uuid = (string) $order->get_meta('org_uuid', true);
@@ -1027,7 +1027,7 @@ final class OrgMan
         $user_meta_data = $additional_seats_service->getPurchaseUserMeta($user_id);
 
         if (!$user_meta_data) {
-            $logger = wc_getLogger();
+            $logger = wc_get_logger();
             $logger->warning('[OrgMan] No user meta data found for additional seats order item', [
                 'source' => 'wicket-orgman',
                 'user_id' => $user_id,
@@ -1049,7 +1049,7 @@ final class OrgMan
             $item->update_meta_data('_membership_post_id_renew', (int) $values['membership_post_id_renew']);
         }
 
-        $logger = wc_getLogger();
+        $logger = wc_get_logger();
         $logger->info('[OrgMan] Added additional seats data to order item', [
             'source' => 'wicket-orgman',
             'user_id' => $user_id,
@@ -1130,6 +1130,6 @@ final class OrgMan
             )
         );
 
-        wc_getLogger()->info('[OrgMan] Cleared all organization management cache', ['source' => 'wicket-orgman']);
+        wc_get_logger()->info('[OrgMan] Cleared all organization management cache', ['source' => 'wicket-orgman']);
     }
 }

@@ -96,8 +96,8 @@ namespace OrgManagement\Services {
         }
     }
 
-    if (!function_exists(__NAMESPACE__ . '\\wc_getLogger')) {
-        function wc_getLogger()
+    if (!function_exists(__NAMESPACE__ . '\\wc_get_logger')) {
+        function wc_get_logger()
         {
             return new class {
                 public function debug(string $message, array $context = []): void {}
@@ -115,8 +115,8 @@ namespace OrgManagement\Services {
 }
 
 namespace OrgManagement\Helpers {
-    if (!function_exists(__NAMESPACE__ . '\\wc_getLogger')) {
-        function wc_getLogger()
+    if (!function_exists(__NAMESPACE__ . '\\wc_get_logger')) {
+        function wc_get_logger()
         {
             return new class {
                 public function debug(string $message, array $context = []): void {}

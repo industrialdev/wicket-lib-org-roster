@@ -61,7 +61,7 @@ class GravityFormsHelper extends Helper
         $configService = new \OrgManagement\Services\ConfigService();
         $additional_seats_form_id = $configService->getAdditionalSeatsFormId();
 
-        $logger = wc_getLogger();
+        $logger = wc_get_logger();
         $context = [
             'source' => 'wicket-orgman',
             'form_id' => $form['id'] ?? null,
@@ -155,7 +155,7 @@ class GravityFormsHelper extends Helper
         $configService = new \OrgManagement\Services\ConfigService();
         $additional_seats_form_id = $configService->getAdditionalSeatsFormId();
 
-        $logger = wc_getLogger();
+        $logger = wc_get_logger();
         $context = [
             'source' => 'wicket-orgman',
             'form_id' => $form['id'] ?? null,
@@ -642,7 +642,7 @@ class GravityFormsHelper extends Helper
             return;
         }
 
-        $logger = wc_getLogger();
+        $logger = wc_get_logger();
         $is_cart_hook = did_action('woocommerce_before_cart') > 0;
         $is_checkout_hook = did_action('woocommerce_before_checkout_form') > 0;
         $force_restore = is_bool($force) ? $force : false;

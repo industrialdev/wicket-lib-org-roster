@@ -18,7 +18,7 @@ if ('POST' !== strtoupper($request_method)) {
     return;
 }
 
-$logger = wc_getLogger();
+$logger = wc_get_logger();
 $log_context = [
     'source' => 'wicket-orgman',
     'action' => 'add_group_member',

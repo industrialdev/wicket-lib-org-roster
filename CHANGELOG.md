@@ -2,7 +2,26 @@
 
 All notable changes to this project are documented in this file.
 
-## [0.4.6] - 2026-03-05
+## [0.4.7] - 2026-03-05
+
+### Fixed
+- Completed PSR-12 naming migration across internal class APIs and updated in-repo callsites to camelCase.
+- Updated cascade strategy add flow to relationship-only mutation:
+  - added pre-add seat-capacity guard (`active_assignments_count` vs effective max assignments).
+  - preserved downstream/system-managed membership assignment behavior for cascade mode.
+
+### Added
+- New regression coverage for cascade contract enforcement:
+  - `tests/Unit/Helpers/CascadeStrategyRegressionTest.php`
+
+### Documentation
+- Updated cascade strategy docs to match implementation:
+  - relationship-only add flow in cascade mode
+  - seat-capacity validation before relationship creation
+  - downstream/system responsibility for membership assignment
+- Updated naming policy docs to reflect PSR-12 camelCase convention and the single compatibility alias (`OrgMan::get_instance()`).
+
+## [0.4.6] - 2026-03-04
 
 ### Fixed
 - Prevented duplicate cascade seat/member assignment behavior:
@@ -32,6 +51,10 @@ All notable changes to this project are documented in this file.
   - `ConnectionService::endRelationshipToday()` now uses MDP day-start UTC helper.
   - `GroupService::create_group_member()` now uses MDP day-start UTC helper for `start_date`.
   - `GroupService::remove_group_member()` now uses MDP day-start UTC helper when default end-date format is configured.
+- Fixed cascade add-member behavior to be relationship-only:
+  - removed direct membership-seat assignment call from `CascadeStrategy`.
+  - added pre-add seat-capacity check (`active_assignments_count` vs effective max assignments).
+  - downstream/system cascade automation remains responsible for membership assignment.
 
 ### Changed
 - Updated organization summary card text/typography:

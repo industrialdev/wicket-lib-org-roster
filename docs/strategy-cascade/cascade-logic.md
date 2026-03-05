@@ -7,8 +7,8 @@ Support roster management in environments that rely on cascade-oriented side-eff
 1. Validate/sanitize request (handler layer).
 2. Resolve/create person from input profile.
 3. Resolve organization membership UUID for target org.
-4. Ensure person-to-organization connection exists.
-5. Assign person to resolved membership seat.
+4. Validate seat availability for resolved membership (`active_assignments_count` vs effective max assignments).
+5. Ensure person-to-organization connection exists.
 6. Assign base member role.
 7. Assign configured auto roles.
 8. Optionally merge relationship-mapped roles and assign additional roles.
@@ -30,6 +30,7 @@ Support roster management in environments that rely on cascade-oriented side-eff
 - Mappings are configured in `permissions.relationship_roles_map`.
 
 ## Operational Notes
-- Strategy depends on legacy helper availability (for role and membership assignment).
+- Strategy depends on legacy helper availability for role assignment.
+- Cascade strategy intentionally does not call direct membership-assignment helpers; downstream system automation handles membership assignment.
 - Notifications are logged; failures are observable through logger output.
 - Cascade semantics differ from direct remove semantics (cascade remove ends membership).

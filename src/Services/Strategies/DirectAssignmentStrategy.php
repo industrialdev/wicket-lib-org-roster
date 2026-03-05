@@ -86,7 +86,7 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
             // Get configuration for member addition settings
             $config = \OrgManagement\Config\OrgManConfig::get();
             $base_member_role = $config['member_addition']['base_member_role'] ?? 'member';
-            $auto_assignRoles = $config['member_addition']['auto_assignRoles'] ?? [];
+            $auto_assign_roles = $config['member_addition']['auto_assign_roles'] ?? [];
 
             // Use relationship type from context if provided, otherwise use config default
             $relationship_type = !empty($context['relationship_type'])
@@ -170,15 +170,15 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
             ]));
 
             // Assign site-specific auto-roles from config
-            if (!empty($auto_assignRoles)) {
+            if (!empty($auto_assign_roles)) {
                 $logger->debug('[OrgMan] Assigning configured auto roles', array_merge($log_context, [
-                    'auto_roles' => $auto_assignRoles,
+                    'auto_roles' => $auto_assign_roles,
                 ]));
 
-                $auto_roles_result = $this->assignAdditionalRoles($person_uuid, $org_id, $auto_assignRoles);
+                $auto_roles_result = $this->assignAdditionalRoles($person_uuid, $org_id, $auto_assign_roles);
                 if (is_wp_error($auto_roles_result)) {
                     $logger->error('[OrgMan] Auto-role assignment failed', array_merge($log_context, [
-                        'roles' => $auto_assignRoles,
+                        'roles' => $auto_assign_roles,
                         'error' => $auto_roles_result->get_error_message(),
                     ]));
 
@@ -502,12 +502,12 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
      */
     private function assignRole(string $person_uuid, string $role, string $org_id)
     {
-        if (!function_exists('wicket_assignRole')) {
+        if (!function_exists('wicket_assign_role')) {
             return new WP_Error('missing_dependency', 'Role assignment helper is unavailable.');
         }
 
         try {
-            $result = wicket_assignRole($person_uuid, $role, $org_id);
+            $result = wicket_assign_role($person_uuid, $role, $org_id);
         } catch (\Throwable $e) {
             return new WP_Error('role_assignment_failed', $e->getMessage());
         }
@@ -784,7 +784,7 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
     private function getLogger()
     {
         if (null === $this->logger) {
-            $this->logger = wc_getLogger();
+            $this->logger = wc_get_logger();
         }
 
         return $this->logger;

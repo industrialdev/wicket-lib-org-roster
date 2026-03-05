@@ -76,7 +76,7 @@ $org_service = new \OrgManagement\Services\OrganizationService();
 $organizations = $org_service->filterActiveOrganizations($organizations, $user_uuid);
 
 // Map roster-management groups per organization for card display.
-$logger = wc_getLogger();
+$logger = wc_get_logger();
 $groups_by_org = [];
 $groups_by_org_tagged = [];
 $group_service = new \OrgManagement\Services\GroupService();

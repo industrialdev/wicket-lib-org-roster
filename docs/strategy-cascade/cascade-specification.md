@@ -19,14 +19,14 @@
 ### 3.1 Core Model
 - Management scope is organization-first with cascade-oriented side-effects.
 - Membership target is resolved from current person memberships by organization.
-- Add flow connects person, assigns membership seat, then applies role assignment.
+- Add flow checks seat capacity, creates connection, then applies role assignment.
 
 ### 3.2 Add Member Behavior
 - Add flow performs:
   - person resolve/create,
   - membership resolution for target organization,
+  - seat availability validation against organization membership limits,
   - person-to-organization connection creation when needed,
-  - membership seat assignment,
   - base role assignment,
   - auto-role assignment,
   - relationship-mapped role assignment (when enabled),
@@ -45,7 +45,7 @@
 
 ### 3.4 Roles and Assignment Rules
 - Base role: `member_addition.base_member_role`.
-- Auto roles: `member_addition.auto_assignRoles`.
+- Auto roles: `member_addition.auto_assign_roles`.
 - Additional submitted roles are merged with relationship-mapped roles (if enabled).
 - `membership_owner` assignment can be filtered when `permissions.prevent_owner_assignment = true`.
 
@@ -64,7 +64,7 @@
 - Process handlers enforce nonce and permission checks before strategy execution.
 - Input fields are sanitized prior to mutation calls.
 - Remove fails closed when `person_membership_id` is missing.
-- Membership seat assignment fails closed on helper/API failure.
+- Add flow fails closed when seat limit is reached.
 
 ## 6) Test Strategy (Pest)
 - Coverage should include:
@@ -74,7 +74,7 @@
   - role assignment gates and relationship-based role mapping behavior.
 
 ## 7) Acceptance Criteria
-- Cascade add creates/links person, assigns membership seat, and applies configured roles.
+- Cascade add validates available seats, creates/links person relationship, and applies configured roles.
 - Cascade remove end-dates target person membership and removes org roles.
 - Owner cannot be removed through cascade strategy.
 - Existing non-cascade strategy behavior remains unchanged.

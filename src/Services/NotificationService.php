@@ -192,7 +192,7 @@ class NotificationService
      */
     public function sendPersonToOrgAssignmentEmail($person_uuid, $org_id)
     {
-        $logger = wc_getLogger();
+        $logger = wc_get_logger();
         $context = [
             'source' => 'wicket-orgman',
             'notification' => 'person_to_org_assignment',

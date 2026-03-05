@@ -39,7 +39,7 @@ class OrganizationBatchService
             return [];
         }
 
-        $logger = wc_getLogger();
+        $logger = wc_get_logger();
 
         // Get the same API client that wicket_get_organization uses
         $client = wicket_api_client();
@@ -104,7 +104,7 @@ class OrganizationBatchService
         try {
             return wicket_get_organization($uuid);
         } catch (\Exception $e) {
-            $logger = wc_getLogger();
+            $logger = wc_get_logger();
             $logger->error('[OrgMan Batch] Individual call failed for ' . $uuid . ': ' . $e->getMessage(), ['source' => 'wicket-orgman']);
 
             return false;

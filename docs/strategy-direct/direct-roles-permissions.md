@@ -11,7 +11,7 @@
 
 ## Role Assignment Rules on Add
 - Base role from `member_addition.base_member_role` is always assigned.
-- Auto roles from `member_addition.auto_assignRoles` are assigned.
+- Auto roles from `member_addition.auto_assign_roles` are assigned.
 - Submitted roles are filtered by member-addition form allow/exclude config.
 - `membership_owner` assignment can be blocked by `permissions.prevent_owner_assignment`.
 

@@ -157,7 +157,7 @@ class CascadeStrategy implements RosterManagementStrategy
             $logger->info('[OrgMan] Cascade strategy add_member invoked', $log_context);
 
             $required_functions = [
-                'wicket_assignRole',
+                'wicket_assign_role',
             ];
             foreach ($required_functions as $func) {
                 if (!function_exists($func)) {
@@ -214,6 +214,11 @@ class CascadeStrategy implements RosterManagementStrategy
             }
 
             if (!$has_membership) {
+                $seat_check = $this->ensureSeatAvailability($membership_uuid, $log_context);
+                if (is_wp_error($seat_check)) {
+                    return $seat_check;
+                }
+
                 $relationship_type = $context['relationship_type'] ?? $member_data['relationship_type'] ?? '';
                 $relationship_type = is_string($relationship_type) ? sanitize_key($relationship_type) : '';
                 $relationship_description = $context['relationship_description'] ?? $member_data['relationship_description'] ?? '';
@@ -251,36 +256,25 @@ class CascadeStrategy implements RosterManagementStrategy
                     }
                     $logger->debug('[OrgMan] Cascade strategy created org connection', $log_context);
                 }
-
-                // Assign person to membership seat (CRITICAL STEP)
-                $membership_assignment_result = $this->assignPersonToMembershipSeat($person_uuid, $membership_uuid);
-                if (is_wp_error($membership_assignment_result)) {
-                    $logger->error('[OrgMan] Cascade membership assignment failed', array_merge($log_context, [
-                        'error' => $membership_assignment_result->get_error_message(),
-                    ]));
-
-                    return $membership_assignment_result;
-                }
-                $logger->info('[OrgMan] Cascade membership assignment succeeded', $log_context);
             }
 
             // Get configuration for member addition settings
             $base_member_role = $config['member_addition']['base_member_role'] ?? 'member';
-            $auto_assignRoles = $config['member_addition']['auto_assignRoles'] ?? [];
+            $auto_assign_roles = $config['member_addition']['auto_assign_roles'] ?? [];
 
             // Assign base member role
-            wicket_assignRole($person_uuid, $base_member_role, $org_id);
+            wicket_assign_role($person_uuid, $base_member_role, $org_id);
             $logger->debug('[OrgMan] Cascade base role assigned', array_merge($log_context, [
                 'role' => $base_member_role,
             ]));
 
             // Assign auto-roles from config
-            foreach ($auto_assignRoles as $role) {
-                wicket_assignRole($person_uuid, $role, $org_id);
+            foreach ($auto_assign_roles as $role) {
+                wicket_assign_role($person_uuid, $role, $org_id);
             }
-            if (!empty($auto_assignRoles)) {
+            if (!empty($auto_assign_roles)) {
                 $logger->debug('[OrgMan] Cascade auto roles assigned', array_merge($log_context, [
-                    'roles' => $auto_assignRoles,
+                    'roles' => $auto_assign_roles,
                 ]));
             }
 
@@ -307,7 +301,7 @@ class CascadeStrategy implements RosterManagementStrategy
 
             if (!empty($additional_roles)) {
                 foreach ($additional_roles as $role) {
-                    wicket_assignRole($person_uuid, $role, $org_id);
+                    wicket_assign_role($person_uuid, $role, $org_id);
                 }
             }
 
@@ -391,100 +385,33 @@ class CascadeStrategy implements RosterManagementStrategy
     }
 
     /**
-     * Assign person to membership seat using Wicket API.
+     * Ensure the target organization membership still has seat capacity.
+     * Cascade strategy creates relationship only and lets downstream systems assign memberships.
      *
-     * @param string $person_uuid
      * @param string $membership_uuid
-     * @return true|WP_Error
+     * @param array $log_context
+     * @return true|\WP_Error
      */
-    private function assignPersonToMembershipSeat(string $person_uuid, string $membership_uuid)
+    private function ensureSeatAvailability(string $membership_uuid, array $log_context)
     {
-        $logger = $this->getLogger();
-        $log_context = [
-            'source' => 'wicket-orgman',
-            'strategy' => 'cascade',
-            'person_uuid' => $person_uuid,
-            'membership_uuid' => $membership_uuid,
-        ];
-
-        if (!function_exists('wicket_assign_person_to_org_membership')) {
-            return new \WP_Error('missing_dependency', 'Membership assignment helper is unavailable.');
+        $membership_data = $this->membershipService()->getOrgMembershipData($membership_uuid);
+        if (!is_array($membership_data) || empty($membership_data['data'])) {
+            return new \WP_Error('membership_data_missing', 'Membership details unavailable.');
         }
 
-        try {
-            $already_assigned = $this->connectionService()->personHasMembership($person_uuid, $membership_uuid);
-            if (is_wp_error($already_assigned)) {
-                return $already_assigned;
-            }
+        $max_seats = $this->membershipService()->getEffectiveMaxAssignments($membership_data);
+        $active_seats = (int) ($membership_data['data']['attributes']['active_assignments_count'] ?? 0);
 
-            if ($already_assigned) {
-                return true;
-            }
+        if ($max_seats !== null && $active_seats >= (int) $max_seats) {
+            $this->getLogger()->warning('[OrgMan] Cascade add blocked by seat limit', array_merge($log_context, [
+                'max_seats' => $max_seats,
+                'active_seats' => $active_seats,
+            ]));
 
-            // Get organization membership data to pass to the assignment function
-            $membership_data = $this->membershipService()->getOrgMembershipData($membership_uuid);
-            if (is_wp_error($membership_data)) {
-                return $membership_data;
-            }
-
-            if (empty($membership_data) || empty($membership_data['data'])) {
-                return new \WP_Error('membership_data_missing', 'Membership details unavailable.');
-            }
-
-            // Extract Membership Type ID
-            $membership_type_id = $membership_data['data']['relationships']['membership']['data']['id'] ?? '';
-            if (empty($membership_type_id) && !empty($membership_data['included']) && is_array($membership_data['included'])) {
-                foreach ($membership_data['included'] as $included) {
-                    $included_type = $included['type'] ?? '';
-                    if (in_array($included_type, ['memberships', 'membership', 'membership_types'], true)) {
-                        $membership_type_id = $included['id'] ?? '';
-                        if (!empty($membership_type_id)) {
-                            break;
-                        }
-                    }
-                }
-            }
-
-            if (empty($membership_type_id)) {
-                return new \WP_Error('membership_type_missing', 'Could not find membership type ID.');
-            }
-
-            // Assign the person to the membership seat
-            $result = wicket_assign_person_to_org_membership(
-                $person_uuid,           // person ID
-                $membership_type_id,    // membership type ID
-                $membership_uuid,       // organization membership ID
-                $membership_data        // organization membership data
-            );
-
-            if (empty($result) || isset($result['errors'])) {
-                $error_message = $result['errors'][0]['detail'] ?? 'Failed to assign person to membership seat.';
-                $logger->warning('[OrgMan] Cascade membership assignment API returned error, verifying existing membership', array_merge($log_context, [
-                    'membership_type_id' => $membership_type_id,
-                    'api_error' => $error_message,
-                ]));
-
-                $post_check = $this->connectionService()->personHasMembership($person_uuid, $membership_uuid);
-                if (true === $post_check) {
-                    $logger->info('[OrgMan] Cascade membership assignment already present after API error', $log_context);
-
-                    return true;
-                }
-
-                if (is_wp_error($post_check)) {
-                    $logger->error('[OrgMan] Cascade membership verification after API error failed', array_merge($log_context, [
-                        'verification_error' => $post_check->get_error_message(),
-                    ]));
-                }
-
-                return new \WP_Error('membership_assignment_failed', $error_message);
-            }
-
-            return true;
-
-        } catch (\Throwable $e) {
-            return new \WP_Error('membership_assignment_exception', $e->getMessage());
+            return new \WP_Error('seat_limit_reached', 'No seats available for this organization.');
         }
+
+        return true;
     }
 
     /**
@@ -537,7 +464,7 @@ class CascadeStrategy implements RosterManagementStrategy
     private function getLogger()
     {
         if (null === $this->logger) {
-            $this->logger = wc_getLogger();
+            $this->logger = wc_get_logger();
         }
 
         return $this->logger;

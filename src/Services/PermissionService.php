@@ -235,7 +235,7 @@ class PermissionService
             return new \WP_Error('invalid_params', 'Person UUID, roles, and organization ID are required.');
         }
 
-        if (!function_exists('wicket_assignRole')) {
+        if (!function_exists('wicket_assign_role')) {
             return new \WP_Error('missing_dependency', 'Role assignment helper is unavailable.');
         }
 
@@ -257,7 +257,7 @@ class PermissionService
 
         try {
             foreach ($roles as $role) {
-                $result = wicket_assignRole($person_uuid, $role, $org_id);
+                $result = wicket_assign_role($person_uuid, $role, $org_id);
                 if (false === $result) {
                     return new \WP_Error('role_assignment_failed', sprintf('Failed assigning role %s.', $role));
                 }

@@ -43,7 +43,7 @@ class MembershipService
         try {
             $memberships = wicket_get_org_memberships($organizationUuid);
         } catch (\Throwable $e) {
-            wc_getLogger()->error(
+            wc_get_logger()->error(
                 '[OrgMan] Failed fetching organization memberships: ' . $e->getMessage(),
                 ['source' => 'wicket-orgman', 'org_uuid' => $organizationUuid]
             );

@@ -18,7 +18,7 @@
   - `relationship_roles_map`
 - `member_addition`:
   - `base_member_role`
-  - `auto_assignRoles`
+  - `auto_assign_roles`
 - `relationships`:
   - `default_type`
   - `member_addition_type`

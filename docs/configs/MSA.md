@@ -14,7 +14,7 @@ add_filter('wicket/acc/orgman/config', function (array $config): array {
     // Strategy
     $config['roster']['strategy'] = 'cascade';
     $config['feature_flags']['membership_resolution_prefer_current_cycle'] = true;
-    $config['member_addition']['auto_assignRoles'] = [];
+    $config['member_addition']['auto_assign_roles'] = [];
 
     // Management permissions
     $config['permissions']['manage_members'] = ['membership_manager', 'membership_owner'];

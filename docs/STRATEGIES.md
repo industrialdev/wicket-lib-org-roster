@@ -122,7 +122,7 @@ Current strategy keys:
 
 #### Core Behavior
 - Creates/updates person and relationship.
-- Delegates parts of assignment behavior to legacy/system cascade path.
+- Performs seat-capacity validation, then delegates membership-seat assignment to legacy/system cascade path.
 - Applies role mapping and relationship-driven role logic as configured.
 
 #### Typical Use

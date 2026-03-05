@@ -269,7 +269,7 @@ class MemberService
         $size = max(1, (int) ($args['size'] ?? $defaultPageSize));
         $searchTerm = isset($args['query']) ? sanitize_text_field((string) $args['query']) : '';
 
-        $logger = wc_getLogger();
+        $logger = wc_get_logger();
 
         // Cache initial load only (no search term)
         if (empty($searchTerm)) {
@@ -422,7 +422,7 @@ class MemberService
         if (is_wp_error($response)) {
             /** @var \WP_Error $response */
             $error_message = $response->get_error_message();
-            wc_getLogger()->error(
+            wc_get_logger()->error(
                 '[OrgMan] MembershipService::getOrgMembershipMembers() returned error',
                 [
                     'source'          => 'wicket-orgman',
@@ -895,7 +895,7 @@ class MemberService
      */
     private function prepareMembersResult(?array $membersResponse, array $context): array
     {
-        $logger = wc_getLogger();
+        $logger = wc_get_logger();
 
         $page = max(1, (int) ($context['page'] ?? 1));
         $size = max(1, (int) ($context['size'] ?? 15));
@@ -1239,7 +1239,7 @@ class MemberService
         }
 
         if (null === $body) {
-            wc_getLogger()->debug(
+            wc_get_logger()->debug(
                 '[OrgMan] Membership response had no body to decode',
                 [
                     'source'   => 'wicket-orgman',
@@ -1252,7 +1252,7 @@ class MemberService
 
         $decoded = json_decode($body, true);
         if (json_last_error() !== JSON_ERROR_NONE) {
-            wc_getLogger()->warning(
+            wc_get_logger()->warning(
                 '[OrgMan] Unable to decode membership response JSON',
                 [
                     'source' => 'wicket-orgman',
@@ -1378,7 +1378,7 @@ class MemberService
 
         } catch (\Throwable $e) {
             // Log error for debugging but return false for safety
-            $logger = wc_getLogger();
+            $logger = wc_get_logger();
             $logger->warning(
                 '[OrgMan] Failed to check user confirmation status',
                 [
@@ -1458,7 +1458,7 @@ class MemberService
 
         try {
             $client = wicket_api_client();
-            $logger = function_exists('wc_getLogger') ? wc_getLogger() : null;
+            $logger = function_exists('wc_get_logger') ? wc_get_logger() : null;
             $log_context = ['source' => 'wicket-orgman', 'action' => 'update_member_roles'];
 
             // Get current person memberships (paginate to avoid selecting stale/inactive records on partial pages)
@@ -1605,7 +1605,7 @@ class MemberService
             ];
 
             // Update roles using the correct API approach
-            // Based on legacy wicket_assignRole and wicket_remove_role functions
+            // Based on legacy wicket_assign_role and wicket_remove_role functions
 
             // Get current person data to find existing role IDs
             $person_data = $this->getPersonById($personUuid);
@@ -1764,8 +1764,8 @@ class MemberService
                 // Add new relationship-based roles
                 if (!empty($roles_to_add)) {
                     foreach ($roles_to_add as $role) {
-                        if (function_exists('wicket_assignRole')) {
-                            wicket_assignRole($personUuid, $role, $orgUuid);
+                        if (function_exists('wicket_assign_role')) {
+                            wicket_assign_role($personUuid, $role, $orgUuid);
                         }
                     }
                 }
