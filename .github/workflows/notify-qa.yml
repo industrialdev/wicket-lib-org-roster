@@ -1,0 +1,24 @@
+name: Notify QA on Tag Push
+
+on:
+  push:
+    tags:
+      - "v*"
+      - "*.*.*"
+
+jobs:
+  dispatch-to-qa:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispatch to wicket-warden
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.WARDEN_DISPATCH_PAT }}
+          repository: industrialdev/wicket-warden
+          event-type: tag_push
+          client-payload: >-
+            {
+              "component": "wicket-lib-org-roster",
+              "ref": "${{ github.ref_name }}",
+              "sha": "${{ github.sha }}"
+            }
