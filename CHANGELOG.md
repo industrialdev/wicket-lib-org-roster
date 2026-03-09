@@ -2,6 +2,24 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.4.10] - 2026-03-09
+
+### Fixed
+- Fixed cascade add-member recovery for pre-existing broken person-to-organization relationships:
+  - when strategy is `cascade` and the target person does not already hold the organization membership seat, the add flow now detects active `person_to_organization` relationships for the same org, end-dates all active matches, and creates a fresh relationship so downstream/system-managed cascade automation can assign the membership seat.
+  - added detailed wc log events for stale-relationship detection, end-dating, and recreation during cascade add.
+
+### Added
+- New cascade repair config default:
+  - `member_addition.repair_stale_relationship_without_membership = true`
+- New `ConnectionService` helpers to support stale-relationship repair:
+  - enumerate active `person_to_organization` relationships for a person/org pair
+  - end-date all active relationships for that person/org pair
+
+### Security
+- Reduced HTML debug comment path disclosure in injected OrgMan content:
+  - `Wicket Roster Library Path` now renders an `ABSPATH`-relative `./...` path when possible, with safe public-path fallbacks for Bedrock and standard WordPress layouts, instead of exposing the full server filesystem path.
+
 ## [0.4.7] - 2026-03-05
 
 ### Fixed

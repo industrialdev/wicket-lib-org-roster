@@ -760,7 +760,7 @@ final class OrgMan
 
             $debug_comments = sprintf(
                 "\n<!-- Wicket Roster Library Path: %s -->\n<!-- Wicket Roster Library Version: %s -->\n",
-                esc_html(dirname(__DIR__)),
+                esc_html($this->getDebugLibraryPath()),
                 esc_html(Helpers\Helper::getLibraryVersion())
             );
 
@@ -941,6 +941,37 @@ final class OrgMan
     private function relativePath(string $path, string $root): string
     {
         return ltrim(substr($path, strlen($root)), '/');
+    }
+
+    /**
+     * Resolve a safe debug path without exposing server filesystem roots.
+     */
+    private function getDebugLibraryPath(): string
+    {
+        $library_path = $this->normalizePath(dirname(__DIR__));
+        $abs_path = defined('ABSPATH') ? $this->normalizePath(ABSPATH) : '';
+
+        if ($this->pathIsWithin($library_path, $abs_path)) {
+            return './' . $this->relativePath($library_path, $abs_path);
+        }
+
+        $public_markers = [
+            '/web/app/',
+            '/app/',
+            '/wp-content/',
+            '/content/',
+        ];
+
+        foreach ($public_markers as $marker) {
+            $position = strpos($library_path, $marker);
+            if ($position === false) {
+                continue;
+            }
+
+            return './' . ltrim(substr($library_path, $position + 1), '/');
+        }
+
+        return './' . basename($library_path);
     }
 
     /**
