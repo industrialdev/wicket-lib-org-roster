@@ -218,22 +218,41 @@ class CascadeStrategy implements RosterManagementStrategy
                 if (is_wp_error($seat_check)) {
                     return $seat_check;
                 }
+                $repaired_stale_relationship = false;
 
-                $relationship_type = $context['relationship_type'] ?? $member_data['relationship_type'] ?? '';
-                $relationship_type = is_string($relationship_type) ? sanitize_key($relationship_type) : '';
-                $relationship_description = $context['relationship_description'] ?? $member_data['relationship_description'] ?? '';
-                $relationship_description = is_string($relationship_description) ? sanitize_textarea_field($relationship_description) : '';
-                $custom_types = $config['relationship_types']['custom_types'] ?? [];
-                if ($relationship_type && !empty($custom_types) && !array_key_exists($relationship_type, $custom_types)) {
-                    $relationship_type = '';
-                }
-                if (empty($relationship_type)) {
-                    $relationship_type = \OrgManagement\Helpers\RelationshipHelper::get_default_relationship_type();
-                }
+                [$relationship_type, $relationship_description] = $this->resolveRelationshipInputs(
+                    $config,
+                    $context,
+                    $member_data
+                );
 
                 $has_relationship = $this->connectionService()->personHasRelationship($person_uuid, $org_id);
                 if (is_wp_error($has_relationship)) {
                     return $has_relationship;
+                }
+
+                $repair_stale_relationship = (bool) ($config['member_addition']['repair_stale_relationship_without_membership'] ?? true);
+                if ($has_relationship && $repair_stale_relationship) {
+                    $logger->info('[OrgMan] Cascade stale relationship detected without membership', array_merge($log_context, [
+                        'repair_enabled' => true,
+                    ]));
+
+                    $end_result = $this->connectionService()->endActivePersonOrganizationConnections($person_uuid, $org_id);
+                    if (is_wp_error($end_result)) {
+                        $logger->error('[OrgMan] Cascade stale relationship end-date failed', array_merge($log_context, [
+                            'error' => $end_result->get_error_message(),
+                        ]));
+
+                        return $end_result;
+                    }
+
+                    $logger->info('[OrgMan] Cascade stale relationship end-dated', array_merge($log_context, [
+                        'ended_connection_count' => (int) ($end_result['count'] ?? 0),
+                        'ended_connection_ids' => $end_result['connection_ids'] ?? [],
+                    ]));
+
+                    $has_relationship = false;
+                    $repaired_stale_relationship = true;
                 }
 
                 if (!$has_relationship) {
@@ -255,6 +274,11 @@ class CascadeStrategy implements RosterManagementStrategy
                         return new \WP_Error('connection_failed', $connection_response->get_error_message() ?? 'Failed to create organization connection.');
                     }
                     $logger->debug('[OrgMan] Cascade strategy created org connection', $log_context);
+                    if ($repaired_stale_relationship) {
+                        $logger->info('[OrgMan] Cascade stale relationship recreated', array_merge($log_context, [
+                            'relationship_type' => $relationship_type,
+                        ]));
+                    }
                 }
             }
 
@@ -412,6 +436,31 @@ class CascadeStrategy implements RosterManagementStrategy
         }
 
         return true;
+    }
+
+    /**
+     * Resolve the relationship payload used for cascade connection creation.
+     *
+     * @param array $config
+     * @param array $context
+     * @param array $member_data
+     * @return array{0:string,1:string}
+     */
+    private function resolveRelationshipInputs(array $config, array $context, array $member_data): array
+    {
+        $relationship_type = $context['relationship_type'] ?? $member_data['relationship_type'] ?? '';
+        $relationship_type = is_string($relationship_type) ? sanitize_key($relationship_type) : '';
+        $relationship_description = $context['relationship_description'] ?? $member_data['relationship_description'] ?? '';
+        $relationship_description = is_string($relationship_description) ? sanitize_textarea_field($relationship_description) : '';
+        $custom_types = $config['relationship_types']['custom_types'] ?? [];
+        if ($relationship_type && !empty($custom_types) && !array_key_exists($relationship_type, $custom_types)) {
+            $relationship_type = '';
+        }
+        if (empty($relationship_type)) {
+            $relationship_type = \OrgManagement\Helpers\RelationshipHelper::get_default_relationship_type();
+        }
+
+        return [$relationship_type, $relationship_description];
     }
 
     /**

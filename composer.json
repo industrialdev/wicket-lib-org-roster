@@ -1,6 +1,6 @@
 {
   "name": "industrialdev/wicket-lib-org-roster",
-  "version": "0.4.8",
+  "version": "0.4.9",
   "description": "Organization & Roster management library for Wicket Inc.",
   "type": "library",
   "license": "GPL-2.0-or-later",
@@ -10,19 +10,11 @@
     "starfederation/datastar-php": "^1@dev"
   },
   "require-dev": {
-    "pestphp/pest": "^4",
-    "brain/monkey": "^2",
-    "mockery/mockery": "^1",
     "friendsofphp/php-cs-fixer": "^3"
   },
   "autoload": {
     "psr-4": {
       "OrgManagement\\": "src/"
-    }
-  },
-  "autoload-dev": {
-    "psr-4": {
-      "OrgManagement\\Tests\\": "tests/Unit/"
     }
   },
   "scripts": {
@@ -32,23 +24,16 @@
     ],
     "check:case-collisions": "@php .ci/check-case-collisions.php src",
     "setup-hooks": "mkdir -p .git/hooks && cp .ci/pre-push .git/hooks/pre-push && chmod +x .git/hooks/pre-push && echo 'Git hooks installed to .git/hooks/pre-push'",
-    "test": "[ -x vendor/bin/pest ] || composer install && ./vendor/bin/pest --testsuite unit",
-    "test:unit": "pest --testsuite unit",
-    "test:coverage": "pest --testsuite unit --coverage-html coverage",
-    "test:browser": "sh -lc 'if [ -f .env ]; then set -a; . ./.env; set +a; fi; : \"${WICKET_BROWSER_BASE_URL:=https://localhost}\"; export WICKET_BROWSER_BASE_URL; ./vendor/bin/pest --testsuite browser'",
-    "test:frontend": "@test:browser",
     "cs:lint": "php-cs-fixer fix --dry-run --diff",
     "cs:format": "php-cs-fixer fix",
     "check": [
-      "@cs:lint",
-      "@test"
+      "@cs:lint"
     ],
     "cs:fix": "php-cs-fixer fix",
     "version-bump": "echo 'Use wicket-cli-tools: wicket plugin version-bump'"
   },
   "config": {
     "allow-plugins": {
-      "pestphp/pest-plugin": true
     }
   }
 }

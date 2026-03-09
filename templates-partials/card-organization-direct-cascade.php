@@ -14,7 +14,7 @@
             <span class="wt_text-content"><?php echo esc_html($org_name); ?></span>
         <?php endif; ?>
     </h2>
-    <div class="wt_flex wt_flex-col wt_gap-3">
+    <div class="wt_flex wt_flex-col">
         <?php foreach ($membership_entries as $entry_index => $membership_entry): ?>
             <?php
             $entry_membership_uuid = (string) ($membership_entry['membership_uuid'] ?? '');

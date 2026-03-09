@@ -92,6 +92,7 @@ final class OrgManConfig
             'member_addition' => [
                 'auto_assign_roles' => [],
                 'base_member_role' => 'member',
+                'repair_stale_relationship_without_membership' => true,
                 'auto_opt_in_communications' => [
                     'enabled' => true,
                     'email' => true,

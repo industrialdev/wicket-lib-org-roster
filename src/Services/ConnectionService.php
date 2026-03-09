@@ -573,6 +573,79 @@ class ConnectionService
     }
 
     /**
+     * Get active person-to-organization connections for a person and organization.
+     *
+     * @param string $person_uuid
+     * @param string $org_id
+     * @return array|WP_Error
+     */
+    public function getActivePersonOrganizationConnections($person_uuid, $org_id)
+    {
+        if (empty($person_uuid) || empty($org_id)) {
+            return new WP_Error('invalid_params', 'Person UUID and organization ID are required.');
+        }
+
+        $connections = $this->getPersonConnectionsById($person_uuid);
+        if ($connections === false) {
+            return new WP_Error('relationship_lookup_failed', 'Unable to load person connections.');
+        }
+
+        $matches = [];
+        foreach (($connections['data'] ?? []) as $connection) {
+            if (
+                ($connection['type'] ?? '') !== 'connections'
+                || ($connection['attributes']['connection_type'] ?? '') !== 'person_to_organization'
+                || ($connection['relationships']['organization']['data']['id'] ?? '') !== $org_id
+            ) {
+                continue;
+            }
+
+            if (empty($connection['attributes']['active'])) {
+                continue;
+            }
+
+            $matches[] = $connection;
+        }
+
+        return $matches;
+    }
+
+    /**
+     * End-date all active person-to-organization connections for a person and organization.
+     *
+     * @param string $person_uuid
+     * @param string $org_id
+     * @return array|WP_Error
+     */
+    public function endActivePersonOrganizationConnections($person_uuid, $org_id)
+    {
+        $connections = $this->getActivePersonOrganizationConnections($person_uuid, $org_id);
+        if (is_wp_error($connections)) {
+            return $connections;
+        }
+
+        $ended_ids = [];
+        foreach ($connections as $connection) {
+            $connection_id = (string) ($connection['id'] ?? '');
+            if ($connection_id === '') {
+                continue;
+            }
+
+            $result = $this->endRelationshipToday($person_uuid, $connection_id, $org_id);
+            if (is_wp_error($result)) {
+                return $result;
+            }
+
+            $ended_ids[] = $connection_id;
+        }
+
+        return [
+            'count' => count($ended_ids),
+            'connection_ids' => $ended_ids,
+        ];
+    }
+
+    /**
      * Update the relationship type for a person-to-organization connection.
      *
      * @param string $person_uuid The UUID of the person.
