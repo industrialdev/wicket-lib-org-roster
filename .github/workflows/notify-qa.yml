@@ -5,11 +5,30 @@ on:
     tags:
       - "v*"
       - "*.*.*"
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Tag or branch name to report to wicket-warden
+        required: true
+        type: string
+      sha:
+        description: Commit SHA to report to wicket-warden
+        required: true
+        type: string
 
 jobs:
   dispatch-to-qa:
     runs-on: ubuntu-latest
     steps:
+      - name: Validate dispatch token
+        env:
+          WARDEN_DISPATCH_PAT: ${{ secrets.WARDEN_DISPATCH_PAT }}
+        run: |
+          if [ -z "${WARDEN_DISPATCH_PAT}" ]; then
+            echo "::error title=Missing GitHub secret::WARDEN_DISPATCH_PAT is not configured for this repository. Add a Fine-grained PAT with access to industrialdev/wicket-warden before tagging a release."
+            exit 1
+          fi
+
       - name: Dispatch to wicket-warden
         uses: peter-evans/repository-dispatch@v3
         with:
@@ -19,6 +38,6 @@ jobs:
           client-payload: >-
             {
               "component": "wicket-lib-org-roster",
-              "ref": "${{ github.ref_name }}",
-              "sha": "${{ github.sha }}"
+              "ref": "${{ inputs.ref || github.ref_name }}",
+              "sha": "${{ inputs.sha || github.sha }}"
             }
