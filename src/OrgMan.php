@@ -759,9 +759,10 @@ final class OrgMan
             $orgman_content = ob_get_clean();
 
             $debug_comments = sprintf(
-                "\n<!-- Wicket Roster Library Path: %s -->\n<!-- Wicket Roster Library Version: %s -->\n",
+                "\n<!-- Wicket Roster Library Path: %s -->\n<!-- Wicket Roster Library Version: %s -->\n<!-- Wicket Roster Strategy: %s -->\n",
                 esc_html($this->getDebugLibraryPath()),
-                esc_html(Helpers\Helper::getLibraryVersion())
+                esc_html(Helpers\Helper::getLibraryVersion()),
+                esc_html($this->getDebugRosterStrategy())
             );
 
             $orgman_markup = '<!-- ORGMAN:BEGIN -->' . $debug_comments . $notifications . $orgman_content . '<!-- ORGMAN:END -->';
@@ -972,6 +973,23 @@ final class OrgMan
         }
 
         return './' . basename($library_path);
+    }
+
+    /**
+     * Resolve the active roster strategy for debug output.
+     */
+    private function getDebugRosterStrategy(): string
+    {
+        if (
+            !isset($this->services['config']) ||
+            !$this->services['config'] instanceof Services\ConfigService
+        ) {
+            return 'unknown';
+        }
+
+        $strategy = $this->services['config']->getRosterMode();
+
+        return is_string($strategy) && $strategy !== '' ? $strategy : 'unknown';
     }
 
     /**
