@@ -105,7 +105,7 @@ Relationship matching in member-card filtering is normalized before comparison (
 | `groups.additional_info.value_field` | `name` | string | Nested field extracted from additional info value payload when resolving organization linkage. |
 | `groups.additional_info.fallback_to_org_uuid` | `true` | bool | If additional-info mapping fails, fallback to the direct organization UUID relationship. |
 | `groups.removal.mode` | `end_date` | string | Removal behavior for group memberships (`end_date` soft close vs `delete` hard delete). |
-| `groups.removal.end_date_format` | `Y-m-d\T00:00:00P` | string | Date format used when writing end dates in `end_date` removal mode. |
+| `groups.removal.end_date_format` | `Y-m-d\TH:i:s\Z` | string | Date format used when writing end dates in `end_date` removal mode. Use the default `Y-m-d\TH:i:s\Z` for canonical behavior; that value is treated as the base-plugin point-in-time UTC format and writes the actual action instant. If you override it, the library will format `now` with your custom pattern instead. |
 | `groups.ui.enable_group_profile_edit` | `true` | bool | Enables inline editing controls in group profile views. |
 | `groups.ui.use_unified_member_list` | `true` | bool | Uses unified member list rendering path for group members. |
 | `groups.ui.use_unified_member_view` | `true` | bool | Uses unified member card/view rendering path for group members. |
@@ -318,6 +318,7 @@ add_filter('wicket/acc/orgman/config', function (array $config): array {
     $config['groups']['roster_roles'] = ['member', 'observer'];
     $config['groups']['seat_limited_roles'] = ['member'];
     $config['groups']['removal']['mode'] = 'end_date'; // or 'delete'
+    $config['groups']['removal']['end_date_format'] = 'Y-m-d\TH:i:s\Z'; // keep canonical instant format
 
     // UI defaults often desired in groups mode.
     $config['groups']['ui']['use_unified_member_list'] = true;
@@ -326,6 +327,10 @@ add_filter('wicket/acc/orgman/config', function (array $config): array {
     return $config;
 });
 ```
+
+`groups.removal.end_date_format` note:
+- Keep it at `Y-m-d\TH:i:s\Z` unless the target API explicitly requires another format.
+- That default is the only value that routes through the base-plugin time helper and preserves the exact action timestamp.
 
 ### Membership Cycle Strategy Baseline
 

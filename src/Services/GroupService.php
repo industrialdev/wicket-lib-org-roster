@@ -41,6 +41,20 @@ class GroupService
     }
 
     /**
+     * Current point-in-time timestamp in UTC.
+     *
+     * @return string
+     */
+    private function currentTimestamp(): string
+    {
+        if (function_exists('wicket_time_get_current_iso8601_utc')) {
+            return wicket_time_get_current_iso8601_utc();
+        }
+
+        return (new \DateTimeImmutable('now', new \DateTimeZone('UTC')))->format('Y-m-d\TH:i:s\Z');
+    }
+
+    /**
      * Get manage roles.
      *
      * @return array
@@ -974,9 +988,7 @@ class GroupService
                 'type' => 'group_members',
                 'attributes' => [
                     'type' => $role_slug,
-                    'start_date' => function_exists('wicket_time_get_mdp_day_start_iso8601_utc')
-                        ? wicket_time_get_mdp_day_start_iso8601_utc()
-                        : (new \DateTimeImmutable('now', new \DateTimeZone('UTC')))->setTime(0, 0, 0)->format('Y-m-d\TH:i:s\Z'),
+                    'start_date' => $this->currentTimestamp(),
                     'end_date' => null,
                     'custom_data_field' => $custom_data_field,
                     'person_id' => $person_uuid,
@@ -1034,9 +1046,9 @@ class GroupService
             return new \WP_Error('delete_failed', 'Unable to delete group member.');
         }
 
-        $format = (string) ($this->getGroupsConfig()['removal']['end_date_format'] ?? 'Y-m-d\T00:00:00P');
-        if ($format === 'Y-m-d\T00:00:00P' && function_exists('wicket_time_get_mdp_day_start_iso8601_utc')) {
-            $end_date = wicket_time_get_mdp_day_start_iso8601_utc();
+        $format = (string) ($this->getGroupsConfig()['removal']['end_date_format'] ?? 'Y-m-d\TH:i:s\Z');
+        if ($format === 'Y-m-d\TH:i:s\Z') {
+            $end_date = $this->currentTimestamp();
         } else {
             $end_date = (new \DateTimeImmutable('now', wp_timezone()))->format($format);
         }

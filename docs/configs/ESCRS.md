@@ -66,7 +66,7 @@ function wicket_child_orgman_config(array $config): array
     $config['membership_cycle']['member_management']['require_explicit_membership_uuid'] = true;
     $config['membership_cycle']['member_management']['duplicate_scope']                  = 'membership_uuid_active_only';
     $config['membership_cycle']['member_management']['removal_mode']                     = 'end_date';
-    $config['membership_cycle']['member_management']['removal_end_date_format']          = 'Y-m-d\\T00:00:00P';
+    $config['membership_cycle']['member_management']['removal_end_date_format']          = 'Y-m-d\\TH:i:s\\Z';
 
     $config['membership_cycle']['bulk_upload']['enabled']         = true;
     $config['membership_cycle']['bulk_upload']['allowed_columns'] = [

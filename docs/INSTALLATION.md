@@ -268,9 +268,16 @@ add_filter('wicket/acc/orgman/config', static function (array $config): array {
     $config['roster']['strategy'] = 'membership_cycle';
     $config['ui']['member_list']['show_bulk_upload'] = true; // default false
 
+    // For groups mode, keep end-date writes on the canonical point-in-time format.
+    $config['groups']['removal']['end_date_format'] = 'Y-m-d\TH:i:s\Z';
+
     return $config;
 });
 ```
+
+Format note:
+- `groups.removal.end_date_format` should stay `Y-m-d\TH:i:s\Z` unless the downstream API requires a different string shape.
+- That value is the library's canonical "use the base-plugin instant UTC helper" marker.
 
 ## 6) Verification Checklist
 

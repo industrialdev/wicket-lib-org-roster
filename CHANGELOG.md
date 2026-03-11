@@ -2,6 +2,21 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.4.12] - 2026-03-11
+
+### Fixed
+- Standardized runtime write timestamps across roster services to use point-in-time UTC values from the base-plugin time helpers instead of day-boundary timestamps:
+  - `ConnectionService::endRelationshipToday()` now writes the action instant for connection `ends_at`.
+  - `MembershipService::endPersonMembershipToday()` now writes the action instant for membership `ends_at`.
+  - `GroupService::createGroupMember()` now writes the action instant for group member `start_date`.
+  - `GroupService::removeGroupMember()` now writes the action instant for group member `end_date` when using the canonical default format.
+- Removed the temporary cascade stale-relationship end-date retry workaround after restoring canonical instant-based connection end-dating.
+- Removed the undocumented legacy `groups.removal.end_date_format = 'Y-m-d\\T00:00:00P'` special-case from groups removal handling.
+
+### Documentation
+- Documented that `groups.removal.end_date_format` should remain `Y-m-d\\TH:i:s\\Z` unless a site explicitly requires a different API format.
+- Updated installation and configuration examples to call out the canonical groups end-date format and base-plugin helper behavior.
+
 ## [0.4.10] - 2026-03-09
 
 ### Fixed

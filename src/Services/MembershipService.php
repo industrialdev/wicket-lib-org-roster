@@ -29,6 +29,20 @@ class MembershipService
     }
 
     /**
+     * Current point-in-time timestamp in UTC.
+     *
+     * @return string
+     */
+    private function currentTimestamp(): string
+    {
+        if (function_exists('wicket_time_get_current_iso8601_utc')) {
+            return wicket_time_get_current_iso8601_utc();
+        }
+
+        return (new \DateTimeImmutable('now', new \DateTimeZone('UTC')))->format('Y-m-d\TH:i:s\Z');
+    }
+
+    /**
      * Retrieve all organization memberships for an organization.
      *
      * @param string $organizationUuid Organization identifier.
@@ -634,14 +648,7 @@ class MembershipService
             $person_membership_data = $person_membership['data'];
             $attributes = $person_membership_data['attributes'];
 
-            // End-date at MDP day start in UTC to avoid fixed-offset drift.
-            if (function_exists('wicket_time_get_mdp_day_start_iso8601_utc')) {
-                $ends_at = wicket_time_get_mdp_day_start_iso8601_utc();
-            } else {
-                $ends_at = (new \DateTimeImmutable('now', new \DateTimeZone('UTC')))
-                    ->setTime(0, 0, 0)
-                    ->format('Y-m-d\TH:i:s\Z');
-            }
+            $ends_at = $this->currentTimestamp();
 
             $update_payload = [
                 'data' => [

@@ -122,7 +122,7 @@ class ConnectionService
     }
 
     /**
-     * Current start date in site timezone.
+     * Current point-in-time timestamp in UTC.
      *
      * @return string
      */
@@ -190,14 +190,7 @@ class ConnectionService
             $connection_data = $connection['data'];
             $attributes = $connection_data['attributes'];
 
-            // End-date at MDP day start in UTC to avoid fixed-offset drift.
-            if (function_exists('wicket_time_get_mdp_day_start_iso8601_utc')) {
-                $ends_at = wicket_time_get_mdp_day_start_iso8601_utc();
-            } else {
-                $ends_at = (new DateTimeImmutable('now', new \DateTimeZone('UTC')))
-                    ->setTime(0, 0, 0)
-                    ->format('Y-m-d\TH:i:s\Z');
-            }
+            $ends_at = $this->currentStartDate();
 
             // Fix tags, if empty or null, make it an empty array
             $attributes['tags'] = !empty($attributes['tags']) ? $attributes['tags'] : [];
@@ -242,11 +235,10 @@ class ConnectionService
                 ],
             ];
 
-            // Update the connection
             $response = $client->patch("connections/{$relationship_id}", ['json' => $update_payload]);
 
             if (!empty($response['errors'])) {
-                error_log('ConnectionService::end_relationship_today() - API error: ' . json_encode($response['errors']));
+                error_log('ConnectionService::end_relationship_today() - API error: ' . wp_json_encode($response['errors']));
 
                 return new WP_Error('api_error', 'Failed to end relationship: ' . ($response['errors'][0]['detail'] ?? 'Unknown error'));
             }

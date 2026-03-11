@@ -145,7 +145,8 @@ final class OrgManConfig
                 ],
                 'removal' => [
                     'mode' => 'end_date',
-                    'end_date_format' => 'Y-m-d\\T00:00:00P',
+                    // Keep this at the base-plugin UTC instant format unless a site explicitly needs a custom API format.
+                    'end_date_format' => 'Y-m-d\\TH:i:s\\Z',
                 ],
                 'ui' => [
                     'enable_group_profile_edit' => true,

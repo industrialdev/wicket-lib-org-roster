@@ -36,7 +36,7 @@ Global `ui` keys used by groups screens:
   - `fallback_to_org_uuid`: `true`
 - `removal`:
   - `mode`: `'end_date'`
-  - `end_date_format`: `'Y-m-d\\T00:00:00P'`
+  - `end_date_format`: `'Y-m-d\\TH:i:s\\Z'`
 - `ui`:
   - `enable_group_profile_edit`: `true`
   - `use_unified_member_list`: `true`
