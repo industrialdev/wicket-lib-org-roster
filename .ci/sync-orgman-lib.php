@@ -5,14 +5,18 @@ declare(strict_types=1);
 function wicket_orgman_sync_resolve_project_root(): string
 {
     $cwd = getcwd();
-    if (is_string($cwd) && is_file($cwd . '/composer.json') && is_dir($cwd . '/web/app')) {
-        return $cwd;
+    if (is_string($cwd) && is_file($cwd . '/composer.json')) {
+        if (is_dir($cwd . '/web/app') || is_dir($cwd . '/wp-content')) {
+            return $cwd;
+        }
     }
 
     $cursor = __DIR__;
     for ($i = 0; $i < 8; $i++) {
-        if (is_file($cursor . '/composer.json') && is_dir($cursor . '/web/app')) {
-            return $cursor;
+        if (is_file($cursor . '/composer.json')) {
+            if (is_dir($cursor . '/web/app') || is_dir($cursor . '/wp-content')) {
+                return $cursor;
+            }
         }
 
         $parent = dirname($cursor);
@@ -23,12 +27,27 @@ function wicket_orgman_sync_resolve_project_root(): string
         $cursor = $parent;
     }
 
-    throw new RuntimeException('Unable to resolve Bedrock project root for OrgMan sync.');
+    throw new RuntimeException('Unable to resolve WordPress project root for OrgMan sync.');
+}
+
+function wicket_orgman_sync_resolve_target(string $root): string
+{
+    $bedrock_target = $root . '/web/app/libs/wicket-lib-org-roster';
+    if (is_dir($root . '/web/app')) {
+        return $bedrock_target;
+    }
+
+    $standard_target = $root . '/wp-content/libs/wicket-lib-org-roster';
+    if (is_dir($root . '/wp-content')) {
+        return $standard_target;
+    }
+
+    throw new RuntimeException('Unable to resolve target libs directory for OrgMan sync.');
 }
 
 $root = wicket_orgman_sync_resolve_project_root();
 $source = $root . '/vendor/industrialdev/wicket-lib-org-roster';
-$target = $root . '/web/app/libs/wicket-lib-org-roster';
+$target = wicket_orgman_sync_resolve_target($root);
 
 if (!is_dir($source)) {
     fwrite(STDERR, "[orgman-sync] Source not found: {$source}\n");
