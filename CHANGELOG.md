@@ -2,7 +2,7 @@
 
 All notable changes to this project are documented in this file.
 
-## [0.4.13] - 2026-03-12
+## [0.4.14] - 2026-03-12
 
 ### Fixed
 - Updated Add Member success handling for org and group roster flows to refresh page 1 of the background members list in the same Datastar SSE response that renders the modal success state.
