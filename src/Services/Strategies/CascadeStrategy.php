@@ -81,6 +81,43 @@ class CascadeStrategy implements RosterManagementStrategy
     }
 
     /**
+     * Assign an org role only when it is not already present.
+     *
+     * @param string $person_uuid
+     * @param string $role
+     * @param string $org_id
+     * @return true|\WP_Error
+     */
+    private function assignRoleIfMissing(string $person_uuid, string $role, string $org_id)
+    {
+        $role = sanitize_key($role);
+        if ('' === $role) {
+            return new \WP_Error('invalid_role', 'Role is required.');
+        }
+
+        if (!function_exists('wicket_assign_role')) {
+            return new \WP_Error('missing_dependency', 'Role assignment helper is unavailable.');
+        }
+
+        $current_roles = $this->getPersonCurrentRolesByOrgId($person_uuid, $org_id);
+        if (in_array($role, $current_roles, true)) {
+            return true;
+        }
+
+        try {
+            $result = wicket_assign_role($person_uuid, $role, $org_id);
+        } catch (\Throwable $e) {
+            return new \WP_Error('role_assignment_failed', $e->getMessage());
+        }
+
+        if (false === $result) {
+            return new \WP_Error('role_assignment_failed', sprintf('Failed assigning role %s.', $role));
+        }
+
+        return true;
+    }
+
+    /**
      * Lazily instantiate ConnectionService.
      *
      * @return ConnectionService
@@ -287,14 +324,30 @@ class CascadeStrategy implements RosterManagementStrategy
             $auto_assign_roles = $config['member_addition']['auto_assign_roles'] ?? [];
 
             // Assign base member role
-            wicket_assign_role($person_uuid, $base_member_role, $org_id);
+            $base_role_result = $this->assignRoleIfMissing($person_uuid, $base_member_role, $org_id);
+            if (is_wp_error($base_role_result)) {
+                $logger->error('[OrgMan] Cascade base role assignment failed', array_merge($log_context, [
+                    'role' => $base_member_role,
+                    'error' => $base_role_result->get_error_message(),
+                ]));
+
+                return $base_role_result;
+            }
             $logger->debug('[OrgMan] Cascade base role assigned', array_merge($log_context, [
                 'role' => $base_member_role,
             ]));
 
             // Assign auto-roles from config
             foreach ($auto_assign_roles as $role) {
-                wicket_assign_role($person_uuid, $role, $org_id);
+                $role_result = $this->assignRoleIfMissing($person_uuid, $role, $org_id);
+                if (is_wp_error($role_result)) {
+                    $logger->error('[OrgMan] Cascade auto-role assignment failed', array_merge($log_context, [
+                        'role' => $role,
+                        'error' => $role_result->get_error_message(),
+                    ]));
+
+                    return $role_result;
+                }
             }
             if (!empty($auto_assign_roles)) {
                 $logger->debug('[OrgMan] Cascade auto roles assigned', array_merge($log_context, [
@@ -325,7 +378,15 @@ class CascadeStrategy implements RosterManagementStrategy
 
             if (!empty($additional_roles)) {
                 foreach ($additional_roles as $role) {
-                    wicket_assign_role($person_uuid, $role, $org_id);
+                    $role_result = $this->assignRoleIfMissing($person_uuid, $role, $org_id);
+                    if (is_wp_error($role_result)) {
+                        $logger->error('[OrgMan] Cascade additional role assignment failed', array_merge($log_context, [
+                            'role' => $role,
+                            'error' => $role_result->get_error_message(),
+                        ]));
+
+                        return $role_result;
+                    }
                 }
             }
 

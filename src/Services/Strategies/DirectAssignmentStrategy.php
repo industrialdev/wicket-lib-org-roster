@@ -502,8 +502,21 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
      */
     private function assignRole(string $person_uuid, string $role, string $org_id)
     {
+        $role = sanitize_key($role);
+        if ('' === $role) {
+            return new WP_Error('invalid_role', 'Role is required.');
+        }
+
         if (!function_exists('wicket_assign_role')) {
             return new WP_Error('missing_dependency', 'Role assignment helper is unavailable.');
+        }
+
+        $permission_service = $this->permissionService();
+        if ($permission_service instanceof PermissionService) {
+            $current_roles = $permission_service->getPersonCurrentRolesByOrgId($person_uuid, $org_id);
+            if (in_array($role, $current_roles, true)) {
+                return true;
+            }
         }
 
         try {
