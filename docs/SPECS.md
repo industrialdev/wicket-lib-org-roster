@@ -23,6 +23,7 @@
   - Automatically assign base roles and relationship types.
   - Check seat limits before adding.
   - Submit-state UX uses Datastar signals to disable actions and show the standardized `wt_loader` button spinner.
+  - On success, the response keeps the modal in its completed state and patches page 1 of the members list in the background via the same Datastar SSE response.
 - **Remove Member**:
   - Remove connection/role or end-date membership.
   - Supports "end-date" removal mode for soft deletes.
@@ -68,6 +69,7 @@
 - Cycle-scoped add/remove flows validate membership-to-organization scope.
 - Cycle-scoped remove path protects owner removal and end-dates targeted person memberships.
 - Unified list/view/process flows propagate `membership_uuid` to keep refresh/search/pagination cycle-safe.
+- Add-member success responses patch the refreshed list server-side instead of relying on a follow-up client-side signal expression.
 
 ### 1.7 Organization Summary Card
 - Organization summary rendering includes Membership Tier, Membership Owner, Renewal Date, and seats.

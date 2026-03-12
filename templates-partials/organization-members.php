@@ -226,7 +226,7 @@ $members_list_endpoint = $membersListEndpoint;
 	    $membership_query_fragment = $membershipUuid ? '&membership_uuid=' . rawurlencode((string) $membershipUuid) : '';
 	    $add_member_modal_reset_actions = "(() => { const modal = document.getElementById('membersAddModal'); if (!modal) return; const form = modal.querySelector('form'); if (form) form.reset(); const messages = modal.querySelector('[id^=\"add-member-messages-\"]'); if (messages) messages.innerHTML = ''; })();";
 	    $add_member_close_actions = "\$membersLoading = false; \$addMemberSubmitting = false; \$addMemberSuccess = false; \$addMemberModalOpen = false; {$add_member_modal_reset_actions}";
-	    $add_member_success_actions = "console.log('Member added successfully'); \$addMemberSubmitting = false; \$membersLoading = false; \$addMemberSuccess = true; @get('{$membersListEndpoint}{$membersListSeparator}org_uuid={$encodedOrgUuid}{$membership_query_fragment}&page=1') >> select('#{$containerId}') | set(html);";
+	    $add_member_success_actions = "console.log('Member added successfully'); \$addMemberSubmitting = false; \$membersLoading = false; \$addMemberSuccess = true;";
 	    $add_member_error_actions = "console.error('Failed to add member'); \$addMemberSubmitting = false; \$membersLoading = false; \$addMemberSuccess = false;";
 	    $add_member_endpoint = \OrgManagement\Helpers\template_url() . 'process/add-member';
 	    ?>

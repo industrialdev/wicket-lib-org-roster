@@ -52,6 +52,10 @@ it('uses a stubbed service', function() {
 
 ### 3.3 Testing Datastar SSE
 When testing controllers that return SSE, check the output buffer for Datastar-specific headers and fragment structures (e.g., `event: datastar-patch-elements`).
+- For modal/process success handlers, assert both patch types when applicable:
+  - the success-message patch for the modal message container
+  - the follow-up members-list patch when the flow is expected to refresh background roster content
+- `DatastarSSE::renderSuccess()` now supports additional element patches in the same SSE stream; tests should verify selectors and patch modes for those extra fragments when used.
 
 ## 4. Best Practices
 - **Isolation**: Each test should be independent. Use `setUp` and `tearDown` (managed by Brain Monkey automatically in Pest) to clear mocks.

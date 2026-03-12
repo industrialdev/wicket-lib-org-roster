@@ -3,7 +3,7 @@
 This guide shows the supported way to load `industrialdev/wicket-lib-org-roster` in WordPress sites.
 
 Supported install modes:
-- Standard WordPress (root Composer install).
+- Standard WordPress (root Composer install + sync to `wp-content/libs/wicket-lib-org-roster`).
 - Bedrock (root Composer install + sync to `web/app/libs/wicket-lib-org-roster`).
 
 ## Why `after_setup_theme`
@@ -37,11 +37,11 @@ Why `@dev` stability is required:
 - `industrialdev/wicket-lib-org-roster` depends on `starfederation/datastar-php:^1@dev`.
 - Keep `"industrialdev/wicket-lib-org-roster": "^0@dev"` while that dependency chain includes pre-stable Datastar releases.
 
-## 1.1) Bedrock Only: Sync Library Into Public `libs`
+## 1.1) Sync Library Into Public `libs` For All Stacks
 
-Bedrock installs this package to root `vendor/...` by default. To serve OrgMan assets from a public path, run the library sync script after install/update.
+Composer installs this package to root `vendor/...` by default. In practice, some production deployments can leave `vendor/...` stale even when site code updates. To make runtime loading deterministic, sync the library into a public `libs` path after install/update on both Standard WordPress and Bedrock.
 
-In Bedrock `composer.json` scripts:
+In site-root `composer.json` scripts:
 
 ```json
 {
@@ -62,8 +62,13 @@ In Bedrock `composer.json` scripts:
 This syncs from:
 - `vendor/industrialdev/wicket-lib-org-roster`
 
-to:
-- `web/app/libs/wicket-lib-org-roster`
+to one of:
+- Standard WordPress: `wp-content/libs/wicket-lib-org-roster`
+- Bedrock: `web/app/libs/wicket-lib-org-roster`
+
+The sync script auto-detects the stack:
+- Bedrock target: `web/app/libs/wicket-lib-org-roster`
+- Standard WordPress target: `wp-content/libs/wicket-lib-org-roster`
 
 ## 2) Bootstrap File (`custom/org-roster.php`)
 
@@ -214,7 +219,7 @@ Example copy commands:
 
 Standard WordPress:
 ```bash
-cp vendor/industrialdev/wicket-lib-org-roster/public/css/org-roster-theme-overrides.demo.css wp-content/themes/your-theme/assets/css/org-roster.css
+cp wp-content/libs/wicket-lib-org-roster/public/css/org-roster-theme-overrides.demo.css wp-content/themes/your-theme/assets/css/org-roster.css
 ```
 
 Bedrock (after sync to `web/app/libs`):
@@ -282,7 +287,8 @@ Format note:
 ## 6) Verification Checklist
 
 1. Library exists in at least one supported location:
-   - Standard WP: `vendor/industrialdev/wicket-lib-org-roster`
+   - Standard WP preferred runtime copy: `wp-content/libs/wicket-lib-org-roster`
+   - Standard WP fallback source: `vendor/industrialdev/wicket-lib-org-roster`
    - Bedrock public copy: `web/app/libs/wicket-lib-org-roster`
 2. Composer autoloader is loaded from one of the bootstrap candidates.
 3. `OrgMan::getInstance()` runs on `after_setup_theme`.
@@ -290,9 +296,10 @@ Format note:
 5. User has relevant memberships/roles in Wicket.
 6. No fatal errors in PHP/WP logs.
 
-Bedrock-specific checks:
+Sync-specific checks:
 - `composer run-script orgman:sync-lib` succeeds.
-- Assets resolve from `/app/libs/wicket-lib-org-roster/public/...`.
+- Standard WP assets resolve from `/wp-content/libs/wicket-lib-org-roster/public/...`.
+- Bedrock assets resolve from `/app/libs/wicket-lib-org-roster/public/...`.
 
 ## Common Failure Mode
 

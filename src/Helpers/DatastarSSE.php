@@ -33,7 +33,8 @@ class DatastarSSE
         string $targetSelector,
         array $signalsToSet = [],
         int $reloadSeconds = 0,
-        string $countdownId = 'countdown'
+        string $countdownId = 'countdown',
+        array $elementPatches = []
     ): void {
         $html = sprintf(
             '<div class="wt_bg-green-100 wt_border wt_border-green-400 wt_text-green-700 wt_px-4 wt_py-3 wt_rounded-sm wt_mb-4"><p><strong>%1$s</strong></p><p>%2$s</p>%3$s</div>',
@@ -63,6 +64,21 @@ class DatastarSSE
             'selector' => $targetSelector,
             'mode' => ElementPatchMode::Inner,
         ]);
+
+        foreach ($elementPatches as $patch) {
+            $elements = isset($patch['elements']) ? (string) $patch['elements'] : '';
+            $selector = isset($patch['selector']) ? (string) $patch['selector'] : '';
+            $mode = $patch['mode'] ?? ElementPatchMode::Outer;
+
+            if ($elements === '' || $selector === '') {
+                continue;
+            }
+
+            $generator->patchElements($elements, [
+                'selector' => $selector,
+                'mode' => $mode,
+            ]);
+        }
 
         if ($reloadSeconds > 0) {
             $countdown_script = '

@@ -33,6 +33,11 @@ add_action('after_setup_theme', static function (): void {
 
 See full install guidance in `docs/INSTALLATION.md`.
 
+Deployment note:
+- Prefer syncing the package from root `vendor/...` into a public `libs/` runtime path after install/update.
+- Standard WordPress target: `wp-content/libs/wicket-lib-org-roster`
+- Bedrock target: `web/app/libs/wicket-lib-org-roster`
+
 ## Strategies
 
 Supported strategy keys:

@@ -2,6 +2,20 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.4.13] - 2026-03-12
+
+### Fixed
+- Updated Add Member success handling for org and group roster flows to refresh page 1 of the background members list in the same Datastar SSE response that renders the modal success state.
+- Removed the temporary client-side post-success refresh orchestration for add-member flows after confirming the more reliable approach is a server-driven `datastar-patch-elements` update for the list container.
+
+### Changed
+- Extended `DatastarSSE::renderSuccess()` to support optional additional element patches in the same SSE stream, allowing modal/process handlers to update related page regions without a second request.
+- Expanded `.ci/sync-orgman-lib.php` from Bedrock-only behavior to support both Standard WordPress (`wp-content/libs/...`) and Bedrock (`web/app/libs/...`) public runtime sync targets.
+
+### Documentation
+- Updated frontend/spec/testing docs to describe the current Add Member success flow: success message remains in the modal while the members list is patched server-side in the same SSE response.
+- Updated installation/runtime docs to recommend `libs/` runtime copies for both Standard WordPress and Bedrock, with root `vendor/...` treated as the source for sync rather than the preferred deployed runtime location.
+
 ## [0.4.12] - 2026-03-11
 
 ### Fixed

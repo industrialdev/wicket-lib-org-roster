@@ -8,6 +8,7 @@
 
 use OrgManagement\Services\ConfigService;
 use OrgManagement\Services\MemberService;
+use starfederation\datastar\enums\ElementPatchMode;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -220,11 +221,27 @@ if ('POST' === strtoupper($request_method)) {
             '<strong>' . esc_html($member_data['email'] ?? '') . '</strong>'
         );
 
+        $members_list_target = 'members-list-container-' . $org_dom_suffix;
+        $members_list_endpoint = OrgManagement\Helpers\template_url() . 'members-list';
+        $query = '';
+        $members = null;
+        $pagination = null;
+
+        ob_start();
+        include dirname(__DIR__) . '/members-list.php';
+        $members_list_html = (string) ob_get_clean();
+
         status_header(200);
         OrgManagement\Helpers\DatastarSSE::renderSuccess($success_message, '#add-member-messages-' . $org_dom_suffix, [
             'addMemberSubmitting' => false,
             'membersLoading' => false,
             'addMemberSuccess' => true,
+        ], 0, 'countdown', [
+            [
+                'elements' => $members_list_html,
+                'selector' => '#' . $members_list_target,
+                'mode' => ElementPatchMode::Outer,
+            ],
         ]);
 
         return;

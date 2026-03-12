@@ -198,12 +198,7 @@ include __DIR__ . '/members-list-unified.php';
     <?php endif; ?>
 
     <?php
-$add_member_success_actions = "console.log('Member added successfully'); \$addMemberSubmitting = false; \$membersLoading = false; \$addMemberSuccess = true; @get('{$members_list_endpoint}{$members_list_separator}";
-if ($mode === 'groups') {
-    $add_member_success_actions .= "group_uuid={$encoded_group_uuid}&org_uuid={$encoded_org_uuid}&page=1') >> select('#{$members_list_target}') | set(html);";
-} else {
-    $add_member_success_actions .= "org_uuid={$encoded_org_uuid}{$membership_query_fragment}&page=1') >> select('#{$members_list_target}') | set(html);";
-}
+$add_member_success_actions = "console.log('Member added successfully'); \$addMemberSubmitting = false; \$membersLoading = false; \$addMemberSuccess = true;";
 $add_member_modal_reset_actions = "(() => { const modal = document.getElementById('membersAddModal'); if (!modal) return; const form = modal.querySelector('form'); if (form) form.reset(); const messages = modal.querySelector('[id^=\"add-member-messages-\"]'); if (messages) messages.innerHTML = ''; })();";
 $add_member_close_actions = "\$membersLoading = false; \$addMemberSubmitting = false; \$addMemberSuccess = false; \$addMemberModalOpen = false; {$add_member_modal_reset_actions}";
 $add_member_error_actions = "console.error('Failed to add member'); \$addMemberSubmitting = false; \$membersLoading = false; \$addMemberSuccess = false;";

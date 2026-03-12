@@ -8,6 +8,7 @@ use OrgManagement\Services\ConfigService;
 use OrgManagement\Services\GroupService;
 use OrgManagement\Services\MemberService;
 use OrgManagement\Services\MembershipService;
+use starfederation\datastar\enums\ElementPatchMode;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -121,11 +122,52 @@ $success_message = sprintf(
     '<strong>' . esc_html($member_data['email'] ?? '') . '</strong>'
 );
 
+$original_group_uuid = $_GET['group_uuid'] ?? null;
+$original_org_uuid = $_GET['org_uuid'] ?? null;
+$original_page = $_GET['page'] ?? null;
+$original_query = $_GET['query'] ?? null;
+
+$_GET['group_uuid'] = $group_uuid;
+$_GET['org_uuid'] = $org_uuid;
+$_GET['page'] = 1;
+$_GET['query'] = '';
+
+ob_start();
+include dirname(__DIR__) . '/group-members-list-endpoint.php';
+$members_list_html = (string) ob_get_clean();
+
+if ($original_group_uuid === null) {
+    unset($_GET['group_uuid']);
+} else {
+    $_GET['group_uuid'] = $original_group_uuid;
+}
+if ($original_org_uuid === null) {
+    unset($_GET['org_uuid']);
+} else {
+    $_GET['org_uuid'] = $original_org_uuid;
+}
+if ($original_page === null) {
+    unset($_GET['page']);
+} else {
+    $_GET['page'] = $original_page;
+}
+if ($original_query === null) {
+    unset($_GET['query']);
+} else {
+    $_GET['query'] = $original_query;
+}
+
 status_header(200);
 OrgManagement\Helpers\DatastarSSE::renderSuccess($success_message, '#group-member-messages', [
     'addMemberSubmitting' => false,
     'addMemberSuccess' => true,
     'membersLoading' => false,
+], 0, 'countdown', [
+    [
+        'elements' => $members_list_html,
+        'selector' => '#group-members-list-container-' . sanitize_html_class($group_uuid),
+        'mode' => ElementPatchMode::Outer,
+    ],
 ]);
 
 return;

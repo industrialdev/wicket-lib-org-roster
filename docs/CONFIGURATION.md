@@ -251,7 +251,7 @@ These are not in the config array, but are used by runtime path/url resolution.
 | Filter | Description |
 |---|---|
 | `wicket/acc/orgman/base_path` | Overrides filesystem base path used to resolve plugin assets/templates at runtime. Default auto-detects the package root. |
-| `wicket/acc/orgman/base_url` | Overrides base URL used to enqueue/access public assets at runtime. Default auto-resolves from `WP_CONTENT_DIR` (content URL), `ABSPATH` (site URL, including Bedrock `app/libs`), or root `vendor/...` installs. |
+| `wicket/acc/orgman/base_url` | Overrides base URL used to enqueue/access public assets at runtime. Default auto-resolves from `WP_CONTENT_DIR` (content URL, including Standard WordPress `wp-content/libs`), `ABSPATH` (site URL, including Bedrock `app/libs`), or root `vendor/...` installs. |
 
 ## Strategy Setup Examples
 

@@ -17,6 +17,7 @@ Instead of returning JSON, our REST API returns SSE streams that patch the DOM d
 - **Trigger**: `data-on-click="$$post('/wp-json/org-management/v1/...')"`
 - **Response**: The server uses `DatastarSSE` to send HTML fragments.
 - **Merging**: Fragments are merged into the DOM based on the `selector` and `mode` (Inner, Outer, Append, etc.).
+- **Multi-patch responses**: A single SSE response may patch both modal feedback and background page content. For example, Add Member success now keeps the success message in the modal while also sending an `Outer` patch for page 1 of the members list behind the modal.
 
 ### 1.3 Fragments
 Fragments are small pieces of PHP templates. When an action occurs (e.g., adding a member), the server renders the "Success" fragment and the "Updated List" fragment, sending them both in a single SSE stream.
@@ -80,3 +81,4 @@ The Unified View is a search-centric interface for managing rosters.
 Modals are managed via signals and the `notifications-container.php`.
 - Action handlers patch the modal content into the container and set the `show_modal` signal to `true`.
 - Closing the modal simply sets the signal back to `false`.
+- Add Member success does not rely on a second client-side refresh expression. The process response patches the modal success message and the members-list container in the same Datastar SSE response so the background roster stays current without a manual reload.

@@ -216,7 +216,7 @@ endif;
     <?php
 $add_member_modal_reset_actions = "(() => { const modal = document.getElementById('groupMembersAddModal'); if (!modal) return; const form = modal.querySelector('form'); if (form) form.reset(); })();";
 $add_member_close_actions = "\$membersLoading = false; \$addMemberSubmitting = false; \$addMemberSuccess = false; \$addMemberModalOpen = false; {$add_member_modal_reset_actions}";
-$add_member_success_actions = "console.log('Group member added successfully'); \$addMemberSubmitting = false; \$membersLoading = false; \$addMemberSuccess = true; @get('{$members_list_endpoint}{$members_list_separator}group_uuid={$encoded_group_uuid}&org_uuid={$encoded_org_uuid}&page=1') >> select('#{$members_list_target}') | set(html);";
+$add_member_success_actions = "console.log('Group member added successfully'); \$addMemberSubmitting = false; \$membersLoading = false; \$addMemberSuccess = true;";
 $add_member_error_actions = "console.error('Failed to add group member'); \$addMemberSubmitting = false; \$membersLoading = false; \$addMemberSuccess = false;";
 $remove_member_success_actions = "console.log('Group member removed successfully'); \$removeMemberSubmitting = false; \$membersLoading = false; \$removeMemberSuccess = true; @get('{$members_list_endpoint}{$members_list_separator}group_uuid={$encoded_group_uuid}&org_uuid={$encoded_org_uuid}&page=1') >> select('#{$members_list_target}') | set(html);";
 $remove_member_error_actions = "console.error('Failed to remove group member'); \$removeMemberSubmitting = false; \$membersLoading = false;";
