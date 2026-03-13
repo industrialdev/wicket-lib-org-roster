@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.4.15] - 2026-03-13
+
+### Fixed
+- Prevented duplicate owner-role assignment by deduplicating owner role handling in roster/member flows.
+
 ## [0.4.14] - 2026-03-12
 
 ### Fixed
