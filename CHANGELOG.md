@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.4.16] - 2026-03-16
+
+### Changed
+- Centralized touchpoint logging into a dedicated `TouchpointService` to standardize how member additions and removals are recorded in the MDP.
+- Expanded touchpoint coverage to include all roster management strategies (Cascade, Groups, and Membership Cycle), ensuring consistent activity tracking across the library.
+- Refactored `DirectAssignmentStrategy` to use the new `TouchpointService`.
+
 ## [0.4.15] - 2026-03-13
 
 ### Fixed
