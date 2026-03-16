@@ -13,6 +13,7 @@ use OrgManagement\Services\NotificationService;
 use OrgManagement\Services\OrganizationService;
 use OrgManagement\Services\PermissionService;
 use OrgManagement\Services\PersonService;
+use OrgManagement\Services\TouchpointService;
 
 // Exit if accessed directly.
 if (!defined('ABSPATH')) {
@@ -63,6 +64,11 @@ class CascadeStrategy implements RosterManagementStrategy
      * @var \WC_Logger|null
      */
     private $logger = null;
+
+    /**
+     * @var TouchpointService|null
+     */
+    private $touchpointService = null;
 
     /**
      * Get person's current roles for a specific organization.
@@ -171,6 +177,20 @@ class CascadeStrategy implements RosterManagementStrategy
         }
 
         return $this->membershipService;
+    }
+
+    /**
+     * Lazily instantiate TouchpointService.
+     *
+     * @return TouchpointService
+     */
+    private function touchpointService(): TouchpointService
+    {
+        if (!isset($this->touchpointService)) {
+            $this->touchpointService = new TouchpointService();
+        }
+
+        return $this->touchpointService;
     }
 
     /**
@@ -399,6 +419,20 @@ class CascadeStrategy implements RosterManagementStrategy
                 $logger->info('[OrgMan] Cascade notification email sent', $log_context);
             }
 
+            if ($this->touchpointService()->isAvailable()) {
+                try {
+                    $touchpoint_context = array_merge($context, [
+                        'strategy' => 'cascade',
+                    ]);
+                    $this->touchpointService()->logMemberAdded($person_uuid, $org_id, $member_data, $touchpoint_context);
+                    $logger->debug('[OrgMan] Cascade touchpoint logged for member addition', $log_context);
+                } catch (\Throwable $e) {
+                    $logger->error('[OrgMan] Cascade touchpoint write failed', array_merge($log_context, [
+                        'error' => $e->getMessage(),
+                    ]));
+                }
+            }
+
             $logger->info('[OrgMan] Cascade strategy member addition completed', $log_context);
 
             return [
@@ -454,6 +488,20 @@ class CascadeStrategy implements RosterManagementStrategy
                 $roles_result = $this->permissionService()->removePersonRolesFromOrg($person_uuid, $roles_to_remove, $org_id);
                 if (is_wp_error($roles_result)) {
                     return $roles_result;
+                }
+            }
+
+            if ($this->touchpointService()->isAvailable()) {
+                try {
+                    $touchpoint_context = array_merge($context, [
+                        'strategy' => 'cascade',
+                    ]);
+                    $this->touchpointService()->logMemberRemoved($person_uuid, $org_id, $touchpoint_context);
+                    $logger->debug('[OrgMan] Cascade touchpoint logged for member removal', $log_context);
+                } catch (\Throwable $e) {
+                    $logger->error('[OrgMan] Cascade removal touchpoint write failed', array_merge($log_context, [
+                        'error' => $e->getMessage(),
+                    ]));
                 }
             }
 

@@ -11,6 +11,7 @@ use OrgManagement\Services\GroupService;
 use OrgManagement\Services\NotificationService;
 use OrgManagement\Services\OrganizationService;
 use OrgManagement\Services\PersonService;
+use OrgManagement\Services\TouchpointService;
 
 // Exit if accessed directly.
 if (!defined('ABSPATH')) {
@@ -51,6 +52,11 @@ class GroupsStrategy implements RosterManagementStrategy
      * @var \WC_Logger|null
      */
     private $logger = null;
+
+    /**
+     * @var TouchpointService|null
+     */
+    private $touchpointService = null;
 
     public function addMember($org_id, $member_data, $context = [])
     {
@@ -204,6 +210,20 @@ class GroupsStrategy implements RosterManagementStrategy
                 ]));
             }
 
+            if ($this->touchpointService()->isAvailable()) {
+                try {
+                    $touchpoint_context = array_merge($context, [
+                        'strategy' => 'groups',
+                    ]);
+                    $this->touchpointService()->logMemberAdded($person_uuid, $org_uuid ?: $org_id, $member_data, $touchpoint_context);
+                    $logger->debug('[OrgRoster] Groups strategy touchpoint logged for member addition', $log_context);
+                } catch (\Throwable $e) {
+                    $logger->error('[OrgRoster] Groups strategy touchpoint write failed', array_merge($log_context, [
+                        'error' => $e->getMessage(),
+                    ]));
+                }
+            }
+
             $logger->info('[OrgRoster] Groups strategy member addition complete', $log_context);
 
             return [
@@ -297,6 +317,20 @@ class GroupsStrategy implements RosterManagementStrategy
                 return $remove_result;
             }
 
+            if ($this->touchpointService()->isAvailable()) {
+                try {
+                    $touchpoint_context = array_merge($context, [
+                        'strategy' => 'groups',
+                    ]);
+                    $this->touchpointService()->logMemberRemoved($person_uuid, $org_uuid ?: $org_id, $touchpoint_context);
+                    $logger->debug('[OrgRoster] Groups strategy touchpoint logged for member removal', $log_context);
+                } catch (\Throwable $e) {
+                    $logger->error('[OrgRoster] Groups strategy removal touchpoint write failed', array_merge($log_context, [
+                        'error' => $e->getMessage(),
+                    ]));
+                }
+            }
+
             $logger->info('[OrgRoster] Groups strategy remove_member complete', $log_context);
 
             return ['status' => 'success', 'message' => 'Group member removed successfully.'];
@@ -322,6 +356,20 @@ class GroupsStrategy implements RosterManagementStrategy
         }
 
         return $this->connectionService;
+    }
+
+    /**
+     * Lazily instantiate TouchpointService.
+     *
+     * @return TouchpointService
+     */
+    private function touchpointService(): TouchpointService
+    {
+        if (!isset($this->touchpointService)) {
+            $this->touchpointService = new TouchpointService();
+        }
+
+        return $this->touchpointService;
     }
 
     /**

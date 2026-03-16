@@ -12,6 +12,7 @@ use OrgManagement\Services\MembershipService;
 use OrgManagement\Services\OrganizationService;
 use OrgManagement\Services\PermissionService;
 use OrgManagement\Services\PersonService;
+use OrgManagement\Services\TouchpointService;
 use WP_Error;
 
 // Exit if accessed directly.
@@ -58,6 +59,11 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
      * @var \WC_Logger|null
      */
     private $logger = null;
+
+    /**
+     * @var TouchpointService|null
+     */
+    private $touchpointService = null;
 
     public function addMember($org_id, $member_data, $context = [])
     {
@@ -275,6 +281,20 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
         }
 
         return $this->connectionService;
+    }
+
+    /**
+     * Lazily instantiate TouchpointService.
+     *
+     * @return TouchpointService
+     */
+    private function touchpointService(): TouchpointService
+    {
+        if (!isset($this->touchpointService)) {
+            $this->touchpointService = new TouchpointService();
+        }
+
+        return $this->touchpointService;
     }
 
     /**
@@ -589,31 +609,13 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
      */
     private function logTouchpoint(string $person_uuid, string $org_id, array $member_data, array $context): void
     {
-        if (!function_exists('write_touchpoint') || !function_exists('get_create_touchpoint_service_id')) {
+        if (!$this->touchpointService()->isAvailable()) {
             return;
         }
 
-        $org_name = sanitize_text_field($context['org_name'] ?? '');
-        $details = sprintf(
-            "Person was added to organization %s on %s.\n\nPerson: %s %s\n\nEmail: %s\n\nID: %s",
-            $org_name,
-            gmdate('c'),
-            sanitize_text_field($member_data['first_name'] ?? ''),
-            sanitize_text_field($member_data['last_name'] ?? ''),
-            sanitize_email($member_data['email'] ?? ''),
-            $person_uuid
-        );
-
-        $touchpoint_params = [
-            'person_id' => $person_uuid,
-            'action'    => 'Organization member added',
-            'details'   => $details,
-            'data'      => ['org_id' => $org_id],
-        ];
-
         try {
-            $service_id = get_create_touchpoint_service_id('Roster Manage', 'Added member');
-            write_touchpoint($touchpoint_params, $service_id);
+            $context['strategy'] = 'direct';
+            $this->touchpointService()->logMemberAdded($person_uuid, $org_id, $member_data, $context);
         } catch (\Throwable $e) {
             error_log('[OrgMan] Failed to write touchpoint: ' . $e->getMessage());
         }
@@ -629,45 +631,13 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
      */
     private function logRemovalTouchpoint(string $person_uuid, string $org_id, array $context): void
     {
-        if (!function_exists('write_touchpoint') || !function_exists('get_create_touchpoint_service_id')) {
+        if (!$this->touchpointService()->isAvailable()) {
             return;
         }
 
-        // Fetch person data
-        if (function_exists('wicket_get_person_by_id')) {
-            $person = wicket_get_person_by_id($person_uuid);
-            if ($person) {
-                $first_name = sanitize_text_field($person->given_name ?? '');
-                $last_name = sanitize_text_field($person->family_name ?? '');
-                $email = sanitize_email($person->primary_email_address ?? '');
-            } else {
-                $first_name = $last_name = $email = '';
-            }
-        } else {
-            $first_name = $last_name = $email = '';
-        }
-
-        $org_name = sanitize_text_field($context['org_name'] ?? '');
-        $details = sprintf(
-            "Person was removed from organization %s on %s.\n\nPerson: %s %s\n\nEmail: %s\n\nID: %s",
-            $org_name,
-            gmdate('c'),
-            $first_name,
-            $last_name,
-            $email,
-            $person_uuid
-        );
-
-        $touchpoint_params = [
-            'person_id' => $person_uuid,
-            'action'    => 'Organization member removed',
-            'details'   => $details,
-            'data'      => ['org_id' => $org_id],
-        ];
-
         try {
-            $service_id = get_create_touchpoint_service_id('Roster Manage', 'Removed member');
-            write_touchpoint($touchpoint_params, $service_id);
+            $context['strategy'] = 'direct';
+            $this->touchpointService()->logMemberRemoved($person_uuid, $org_id, $context);
         } catch (\Throwable $e) {
             error_log('[OrgMan] Failed to write removal touchpoint: ' . $e->getMessage());
         }

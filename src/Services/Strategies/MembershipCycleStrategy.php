@@ -8,6 +8,7 @@ namespace OrgManagement\Services\Strategies;
 
 use OrgManagement\Services\MembershipService;
 use OrgManagement\Services\OrganizationService;
+use OrgManagement\Services\TouchpointService;
 use WP_Error;
 
 // Exit if accessed directly.
@@ -34,6 +35,11 @@ class MembershipCycleStrategy implements RosterManagementStrategy
      * @var OrganizationService|null
      */
     private $organizationService = null;
+
+    /**
+     * @var TouchpointService|null
+     */
+    private $touchpointService = null;
 
     /**
      * Add member via direct assignment, but scoped to explicit membership cycle.
@@ -105,6 +111,17 @@ class MembershipCycleStrategy implements RosterManagementStrategy
         $remove_result = $this->membershipService()->endPersonMembershipToday($person_membership_id);
         if (is_wp_error($remove_result)) {
             return $remove_result;
+        }
+
+        if ($this->touchpointService()->isAvailable()) {
+            try {
+                $touchpoint_context = array_merge($context, [
+                    'strategy' => 'membership_cycle',
+                ]);
+                $this->touchpointService()->logMemberRemoved($person_uuid, $org_id, $touchpoint_context);
+            } catch (\Throwable $e) {
+                // Do not fail removal on touchpoint issues.
+            }
         }
 
         return ['status' => 'success', 'message' => 'Member removed successfully.'];
@@ -190,5 +207,19 @@ class MembershipCycleStrategy implements RosterManagementStrategy
         }
 
         return $this->organizationService;
+    }
+
+    /**
+     * Lazily instantiate touchpoint service.
+     *
+     * @return TouchpointService
+     */
+    private function touchpointService(): TouchpointService
+    {
+        if (!isset($this->touchpointService)) {
+            $this->touchpointService = new TouchpointService();
+        }
+
+        return $this->touchpointService;
     }
 }
