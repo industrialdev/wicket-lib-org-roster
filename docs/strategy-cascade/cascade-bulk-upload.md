@@ -1,15 +1,14 @@
 # Cascade Strategy: Bulk Upload
 
-## Current State
-- CSV bulk upload is available through shared member views when:
-  - `roster.strategy = cascade`
-  - `ui.member_list.show_bulk_upload = true`
-  - current user can add members
-- Endpoint: `templates-partials/process/bulk-upload-members.php`
-- Cascade behavior is preserved by routing each row through `MemberService->addMember()`.
+Bulk upload is available in cascade mode when:
 
-## Current Behavior
-- CSV columns expected: first name, last name, email, optional roles.
-- Additive-only workflow: no removals.
-- Duplicate active members in the target membership are skipped.
-- Summary reporting includes processed/added/skipped/failed counts.
+- `ui.member_list.show_bulk_upload = true`
+- the actor can add members
+- a target organization membership can be resolved
+
+## Current Runtime Behavior
+
+- uploads are queued through `BulkMemberUploadService`
+- processing runs in WP-Cron batches
+- duplicate file hashes are blocked
+- each row is routed back through strategy-aware add logic

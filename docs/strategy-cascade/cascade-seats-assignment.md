@@ -1,15 +1,9 @@
-# Cascade Strategy: Seat Assignment
+# Cascade Strategy: Seats
 
-## Current Contract
-- Cascade add flow does not directly assign person-membership seats.
-- Membership assignment is delegated to downstream/system cascade automation.
-- Strategy enforces seat-capacity checks before creating a new relationship.
+Cascade mode still targets organization memberships for seat consumption.
 
-## Behavior
-- Strategy resolves organization membership UUID and reads membership payload for seat counters.
-- Capacity check uses `active_assignments_count` against effective `max_assignments`.
-- When no seats are available, add mutation fails with explicit `seat_limit_reached` error.
+## Current Behavior
 
-## Additional Seats Integration
-- Cascade mode uses shared additional-seats services and UI callouts.
-- Seat purchase handling remains strategy-agnostic at integration layer.
+- add flow requires a resolvable organization membership
+- seat-limit messaging is shared with non-groups views
+- additional-seat purchase flow is shared across the library

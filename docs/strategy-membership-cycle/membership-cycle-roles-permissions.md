@@ -1,7 +1,17 @@
-# Access Roles & Permissions (to both trainees and full members' rosters)
+# Membership Cycle Strategy: Roles And Permissions
 
-To manage a roster, the membership_owner and membership_manager roles have to be granted to:
-* Add, edit, remove users from their organization's rosters
+Membership-cycle mode has strategy-local permission keys.
 
-## Success Criteria
-* Users with the Membership_Manager and membership_owner, allowing them to view, add, and remove users from their organization's rosters.
+## Relevant Keys
+
+- `membership_cycle.permissions.add_roles`
+- `membership_cycle.permissions.remove_roles`
+- `membership_cycle.permissions.purchase_seats_roles`
+- `membership_cycle.permissions.prevent_owner_removal`
+
+## Defaults
+
+- add: `membership_manager`
+- remove: `membership_manager`
+- purchase seats: `membership_owner`, `membership_manager`, `org_editor`
+- owner removal blocked: `true`

@@ -1,19 +1,9 @@
-# Groups Strategy: Seat Assignment
+# Groups Strategy: Seats
 
-## Current Contract
-- Seat-limited roles are configured by `groups.seat_limited_roles`.
-- Default seat-limited role set: `['member']`.
-- Contract is one seat-limited role assignment per organization per group.
+Groups mode has different seat semantics from non-groups strategies.
 
-## Behavior
-- Before adding a seat-limited role, strategy checks existing group members in the same group + org association.
-- If an occupied seat is found, add fails with `seat_unavailable`.
-- Non-seat-limited roles are not constrained by this rule.
+## Current Behavior
 
-## Additional Seats Integration
-- Groups strategy reuses existing additional-seats experience and callouts.
-- Seat purchases remain tied to existing membership/additional-seats infrastructure.
-
-## Known Constraint
-- Current seat check inspects the fetched member window in add flow (size 50).
-- If group population exceeds this window, stricter full-scan behavior may be required.
+- seat-limited roles are defined by `groups.seat_limited_roles`
+- default limit is effectively one matching seat-limited role per org per group
+- non-seat-limited roles are not blocked by that rule

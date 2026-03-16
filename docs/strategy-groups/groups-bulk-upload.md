@@ -1,13 +1,15 @@
 # Groups Strategy: Bulk Upload
 
-## Current State
-- Dedicated groups bulk-upload flow is not implemented in current strategy code.
-- Shared member CSV bulk upload is intentionally hidden in groups mode (`mode !== groups` guard).
-- Group member management remains explicit add/remove operations.
+Bulk upload is available in groups mode when:
 
-## If Added Later
-- Keep it strategy-scoped (`groups` only).
-- Enforce same role/tag/org-association constraints as interactive add/remove.
-- Validate role whitelist from `groups.roster_roles`.
-- Enforce seat-limited-role constraints before write.
-- Report row-level outcomes (`added`, `duplicate`, `invalid_role`, `seat_full`, `denied`, `error`).
+- `ui.member_list.show_bulk_upload = true`
+- `group_uuid` is present
+- current user can manage the group
+
+## Current Runtime Behavior
+
+- upload requests go through the shared process handler
+- the handler validates group access first
+- rows are queued into `BulkMemberUploadService`
+- processing runs in background WP-Cron batches
+- row mutations use the active groups strategy

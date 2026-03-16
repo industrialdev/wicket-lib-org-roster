@@ -1,42 +1,14 @@
-# Cascade Strategy: Config Schema (Current Code)
+# Cascade Strategy: Config Schema
 
-## Principles
-- Master switch is `roster.strategy`.
-- Cascade strategy uses shared/global config keys; there is no dedicated `cascade` namespace block.
-- Existing defaults for other strategies remain unchanged.
+Cascade mode uses shared config keys rather than a dedicated `cascade` namespace.
 
-## Strategy Switch
-- `roster.strategy`: `'cascade'`
+## Most Relevant Keys
 
-## Cascade-Relevant Configuration Keys (`src/Config/OrgManConfig.php`)
-- `permissions`:
-  - `add_members`
-  - `remove_members`
-  - `manage_members`
-  - `prevent_owner_assignment`
-  - `relationship_based_permissions`
-  - `relationship_roles_map`
-- `member_addition`:
-  - `base_member_role`
-  - `auto_assign_roles`
-- `relationships`:
-  - `default_type`
-  - `member_addition_type`
-- `ui`:
-  - `ui.member_list.show_bulk_upload` (default `false`; enable to show CSV bulk upload panel)
-
-## Runtime Context Contract
-- Add context supports:
-  - `relationship_type`
-  - `relationship_description`
-  - `roles`
-- Remove context requires:
-  - `person_membership_id`
-
-## Filter Contract
-- Filter remains `wicket/acc/orgman/config`.
-- Cascade behavior changes should be done by overriding shared keys above.
-
-## Backward-Compatible Rules
-- Keep cascade behavior compatible with legacy side-effects.
-- Avoid introducing cascade-only keys unless strictly necessary.
+- `roster.strategy = cascade`
+- `feature_flags.membership_resolution_prefer_current_cycle`
+- `member_addition.*`
+- `permissions.*`
+- `relationships.*`
+- `ui.member_list.*`
+- `ui.member_view.*`
+- `bulk_upload.*`

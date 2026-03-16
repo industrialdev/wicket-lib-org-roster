@@ -1,28 +1,11 @@
 # Groups Strategy: Card Display
 
-## Organization List Screen
-- Renders a group list in groups mode (not organization cards).
-- In groups strategy, page heading is `Manage Groups`.
-- Shows `Groups Found: N`.
-- Group list rows are built from active group memberships that match the configured roster tag.
-- Row metadata includes:
-  - Group name.
-  - Organization name label (resolved name first; identifier fallback if needed).
-  - Current user role label (`My Role`).
-- Row actions:
-  - If role is manageable: show `Group Profile` and `Manage Members`.
-  - If role is not manageable: show no management links.
-- Redirect behavior:
-  - Exactly one row: redirect directly to `organization-members` for that group.
-  - More than one row: render list and no redirect.
+Groups mode changes the top-level management surface from organizations to groups.
 
-## Group Members Screen
-- Displays group members scoped to the manager's org association within that group.
-- Supports search by member identity and pagination.
-- Uses unified member list/view by default:
-  - `groups.ui.use_unified_member_list = true`
-  - `groups.ui.use_unified_member_view = true`
+## Current Display Behavior
 
-## Member Roles in UI
-- Supports configured roster roles (default: `member`, `observer`).
-- `show_edit_permissions` is disabled by default for groups mode.
+- heading becomes `Manage Groups`
+- `organization-management` lists active tagged group memberships
+- if exactly one eligible group is found, the UI can auto-redirect to `organization-members?group_uuid=...`
+- group profile editing is controlled by `groups.ui.enable_group_profile_edit`
+- unified group member list and view are on by default

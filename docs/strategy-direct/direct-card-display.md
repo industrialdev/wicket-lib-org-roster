@@ -1,14 +1,11 @@
 # Direct Strategy: Card Display
 
-## Organization Screens
-- Direct mode uses organization-centric screens and routes.
-- Main heading remains `Manage Organizations`.
+Direct mode uses the shared non-groups organization UI.
 
-## Member List and Search
-- Member cards/lists are rendered through shared unified templates.
-- Search and pagination are available through shared member endpoints.
-- Seat callouts and purchase flows are rendered using existing shared UI logic.
+## Current Display Behavior
 
-## Role Display
-- Visible role fields follow shared `ui.member_card_fields` config.
-- Permissions edit visibility follows shared UI toggles for non-groups modes.
+- top-level screen is organization-centric
+- heading remains `Manage Organizations`
+- organization cards link to profile and member screens
+- member list and member view use shared templates
+- unified list/view is controlled by shared `ui.member_list.*` and `ui.member_view.*` config

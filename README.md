@@ -1,27 +1,34 @@
-# Org Roster Library (Composer)
+# Org Roster Library
 
-Composer library for Wicket organization/group roster management.
+Composer library for Wicket organization and roster management in WordPress.
 
-- Entrypoint: `OrgManagement\OrgMan`
-- Autoload: `OrgManagement\` => `src/`
-- Frontend: template-driven UI + Datastar interactions
+## Entrypoint
+
+- `OrgManagement\OrgMan`
+
+## What Ships Today
+
+- page injection for organization roster account pages
+- four roster strategies:
+  - `direct`
+  - `cascade`
+  - `groups`
+  - `membership_cycle`
+- Datastar-oriented template partials and process handlers
+- WooCommerce and Gravity Forms additional-seats flow
+- CSV bulk upload flow gated by config
 
 ## Quick Start
-
-Install in your theme/app:
 
 ```bash
 composer require industrialdev/wicket-lib-org-roster
 ```
-
-Load Composer autoload, then initialize OrgMan on `after_setup_theme` (recommended) after registering your config filter:
 
 ```php
 use OrgManagement\OrgMan;
 
 add_action('after_setup_theme', static function (): void {
     add_filter('wicket/acc/orgman/config', static function (array $config): array {
-        $config['ui']['member_list']['show_bulk_upload'] = true; // default false
         return $config;
     });
 
@@ -31,54 +38,23 @@ add_action('after_setup_theme', static function (): void {
 }, 20);
 ```
 
-See full install guidance in `docs/INSTALLATION.md`.
+## Runtime Notes
 
-Deployment note:
-- Prefer syncing the package from root `vendor/...` into a public `libs/` runtime path after install/update.
-- Standard WordPress target: `wp-content/libs/wicket-lib-org-roster`
-- Bedrock target: `web/app/libs/wicket-lib-org-roster`
+- default strategy is `direct`
+- unknown strategy keys fall back to `cascade`
+- bulk upload is disabled by default
+- the library resolves `base_path` and `base_url` automatically, with filters available for overrides
 
-## Strategies
+## Important Current-State Note
 
-Supported strategy keys:
-- `direct`
-- `cascade`
-- `groups`
-- `membership_cycle`
+The package contains REST controller classes, but `OrgMan` currently looks for `register_routes` while those controllers implement `registerRoutes`. In the current code, the active runtime is template injection plus hypermedia/process handlers, not registered REST routes.
 
-Strategy resolution is runtime-configured via `ConfigService::getRosterMode()`.
+## Docs
 
-## Coding Conventions
-
-- PHP code follows PSR-12.
-- Class names use PascalCase.
-- Method and property names use camelCase across services, strategies, and helpers.
-- Internal snake_case compatibility wrappers are not maintained, except `OrgMan::get_instance()` for theme compatibility.
-- External WordPress/WooCommerce/Wicket API names remain unchanged when upstream uses underscores.
-
-## Debug Markup Notes
-
-- Injected OrgMan content includes debug comments inside the `ORGMAN:BEGIN/END` block:
-  - library path
-  - library version from `Helper::getLibraryVersion()`
-
-## Documentation
-
-- [Installation](docs/INSTALLATION.md)
-- [Architecture](docs/ARCHITECTURE.md)
-- [Design](docs/DESIGN.md)
-- [Specifications](docs/SPECS.md)
-- [Strategies](docs/STRATEGIES.md)
-- [Configuration](docs/CONFIGURATION.md)
-- [Frontend](docs/FRONTEND.md)
-- [Testing](docs/TESTING.md)
-- [Changelog](CHANGELOG.md)
-
-## Assets
-
-Primary stylesheet:
-- `public/css/modern-orgman-static.css`
-
-If your library install path differs, override:
-- `wicket/acc/orgman/base_path`
-- `wicket/acc/orgman/base_url`
+- `docs/INSTALLATION.md`
+- `docs/ARCHITECTURE.md`
+- `docs/CONFIGURATION.md`
+- `docs/FRONTEND.md`
+- `docs/STRATEGIES.md`
+- `docs/SPECS.md`
+- `docs/TESTING.md`

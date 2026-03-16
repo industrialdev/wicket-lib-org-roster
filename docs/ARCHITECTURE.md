@@ -1,66 +1,72 @@
 # Architecture
 
-This document describes the high-level architecture of the `wicket-lib-org-roster` library.
+`wicket-lib-org-roster` is a WordPress library that injects roster-management UI into account pages and routes mutations through service classes and Datastar-oriented template endpoints.
 
-## 1. System Overview
-The library is designed as a modular extension for WordPress, providing organization and roster management capabilities powered by the Wicket MDP. It acts as a bridge between the Wicket API, WooCommerce, and the WordPress frontend.
+## Core Runtime Pieces
 
-## 2. Core Patterns
+- `src/OrgMan.php`
+  - singleton entrypoint
+  - loads config
+  - instantiates services and controllers
+  - injects content into supported account pages
+  - enqueues CSS and JS assets
+  - handles WooCommerce additional-seats order processing
+- `src/Config/OrgManConfig.php`
+  - defines the full default config tree
+  - all site overrides are expected through `wicket/acc/orgman/config`
+- `src/Services/*`
+  - business logic for organizations, members, memberships, groups, documents, subsidiaries, permissions, bulk upload, and additional seats
+- `src/Services/Strategies/*`
+  - roster mutation behavior for `direct`, `cascade`, `groups`, and `membership_cycle`
+- `src/Helpers/TemplateHelper.php`
+  - exposes hypermedia template endpoints under `?action=hypermedia&template=...`
+  - normalizes `org_id` to `org_uuid`
+- `templates/` and `templates-partials/`
+  - server-rendered account-page views and process handlers
 
-### 2.1 Orchestrator Pattern (`OrgMan`)
-The `OrgManagement\OrgMan` class serves as the central orchestrator. It is a singleton responsible for:
-- Initialization and dependency loading.
-- Configuration management.
-- Hook registration (Actions/Filters).
-- Asset management.
-- Runtime base path/URL resolution for assets/templates across public content/app layouts (including Standard WordPress `wp-content/libs/...`, Bedrock `web/app/libs/...`) and root `vendor/...` installs.
+## Page Injection
 
-### 2.2 Strategy Pattern (Roster Management)
-The library decouples member management logic from the `MemberService` using the Strategy pattern. This allows the system to switch between different management modes without changing the service interface:
-- **DirectAssignmentStrategy**: Standard role/connection assignment.
-- **CascadeStrategy**: Complex membership-based cascading logic.
-- **GroupsStrategy**: MDP Group-based management with tag filtering.
-- **MembershipCycleStrategy**: Membership-cycle-scoped roster management requiring explicit `organization_membership_uuid` for mutating actions.
+`OrgMan` injects library content on these page slugs:
 
-### 2.3 Service Layer
-All business logic is encapsulated in a service layer. Services are domain-specific and typically lazily instantiated to minimize overhead.
+- `organization-management`
+- `organization-profile`
+- `organization-members`
+- `organization-members-bulk`
+- `supplemental-members`
 
-Notable roster-read behaviors in `MemberService`:
-- Relationship types are normalized before allowlist/denylist checks.
-- Member rows are merged by person UUID to avoid duplicate cards when one person has multiple relationship records in the same organization.
-- Role lists used for member-card display can be filtered by configuration allowlist/denylist before template rendering.
+These map to files in `templates/`.
 
-## 3. Component Interaction
-- **Frontend**: A reactive UI built with Datastar and scoped vanilla CSS (BEM + `wt_` prefixed utility-style classes).
-- **Backend API**: WordPress REST API controllers that delegate to the service layer.
-- **Data Source**: Wicket MDP API (External).
-- **Payment/Seats**: WooCommerce integration for purchasing and updating seat limits.
+## Mutation Paths
 
-## 4. High-Level Data Flow
-1. **Request**: User action triggers a Datastar-powered REST call.
-2. **Processing**: Controllers validate permissions via `PermissionService` and invoke the appropriate business logic in the service layer.
-3. **External Sync**: Services interact with the Wicket API and/or WooCommerce to persist changes.
-4. **Response**: The system returns Server-Sent Events (SSE) to patch the frontend UI reactively.
+Most user-facing mutations do not go through registered REST routes today. The active write path is the template/hypermedia layer in `templates-partials/process/`.
 
-Bulk CSV member upload follows the same flow using the process handler:
-- `templates-partials/process/bulk-upload-members.php`
-- gated by `ui.member_list.show_bulk_upload` (default `false`)
+Important current-state detail:
 
-## 5. External Dependencies
-- **Wicket MDP**: Primary source of truth for people, organizations, and memberships.
-- **WooCommerce**: Handles seat limit transactions.
-- **Datastar**: Provides the frontend reactivity framework.
-- **Scoped CSS layer**: Vanilla CSS with `wt_` prefixed utility-style classes to prevent collisions.
+- controller classes exist in `src/Controllers/`
+- `OrgMan::registerApiRoutes()` looks for `register_routes`
+- controllers define `registerRoutes`
+- result: those controller routes are not currently registered by `OrgMan`
 
-## 6. Coding Conventions
-- PHP code follows PSR-12.
-- Class names use PascalCase.
-- Method and property names use camelCase across services, strategies, and helpers.
-- Internal snake_case compatibility wrappers are intentionally avoided, except `OrgManagement\OrgMan::get_instance()` for theme compatibility.
-- External WordPress/WooCommerce/Wicket API naming is preserved as-is when upstream uses underscores.
+Docs in this folder treat those controllers as present code, not active runtime surfaces.
 
-## 7. Runtime Debug Markup
-- OrgMan injects debug comments inside the `ORGMAN:BEGIN` and `ORGMAN:END` content block.
-- Current comments include:
-  - library filesystem path
-  - library version from `OrgManagement\Helpers\Helper::getLibraryVersion()`
+## Frontend Model
+
+- server-rendered HTML
+- Datastar-compatible partial refreshes and SSE responses
+- static CSS in `public/css/modern-orgman-static.css`
+- small JS helpers in `public/js/`
+
+The library supports both legacy member templates and unified member templates. Selection is config-driven.
+
+## Integrations
+
+- WordPress: hooks, page injection, templates, query vars, nonces
+- Wicket/MDP helpers: person, organization, membership, role, and group data
+- WooCommerce: additional seats checkout and post-order seat updates
+- Gravity Forms: additional seats form capture and checkout redirect
+
+## Current Constraints
+
+- no bundled automated test suite in this package
+- REST controller classes are not wired by `OrgMan` as noted above
+- membership-cycle mode exists for mutation scoping, but the library does not currently ship a cycle resolver or cycle-tab UI layer

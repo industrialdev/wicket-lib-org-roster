@@ -1,84 +1,66 @@
-# Frontend Development
+# Frontend
 
-This document explains the reactive frontend patterns used in the `wicket-lib-org-roster` library.
+## Runtime Surfaces
 
-## 1. Reactive Pattern (Datastar)
+The library renders into WordPress account pages with these slugs:
 
-The library uses [Datastar](https://data-star.dev/) to provide a Single Page Application (SPA) feel within WordPress without the complexity of a heavy framework like React or Vue.
+- `organization-management`
+- `organization-profile`
+- `organization-members`
+- `organization-members-bulk`
+- `supplemental-members`
 
-### 1.1 Signals
-State is stored in "signals" defined in the HTML.
-- **Initialization**: `data-signals='{ "show_modal": false, "search": "" }'`
-- **Binding**: Use `data-bind` to sync inputs with signals.
-- **Usage**: Use signals in expressions, e.g., `data-show="signals.show_modal"`.
+## Templates
 
-### 1.2 Server-Sent Events (SSE)
-Instead of returning JSON, our REST API returns SSE streams that patch the DOM directly.
-- **Trigger**: `data-on-click="$$post('/wp-json/org-management/v1/...')"`
-- **Response**: The server uses `DatastarSSE` to send HTML fragments.
-- **Merging**: Fragments are merged into the DOM based on the `selector` and `mode` (Inner, Outer, Append, etc.).
-- **Multi-patch responses**: A single SSE response may patch both modal feedback and background page content. For example, Add Member success now keeps the success message in the modal while also sending an `Outer` patch for page 1 of the members list behind the modal.
+- page templates live in `templates/`
+- reusable partials live in `templates-partials/`
+- mutating process handlers live in `templates-partials/process/`
 
-### 1.3 Fragments
-Fragments are small pieces of PHP templates. When an action occurs (e.g., adding a member), the server renders the "Success" fragment and the "Updated List" fragment, sending them both in a single SSE stream.
+Important process handlers in current use:
 
-## 2. Styling (Scoped Vanilla CSS + BEM)
+- `process/add-member.php`
+- `process/remove-member.php`
+- `process/bulk-upload-members.php`
+- `process/add-group-member.php`
+- `process/remove-group-member.php`
+- `process/update-group.php`
+- `process/update-permissions.php`
 
-### 2.1 Prefixing
-To avoid conflicts with WordPress themes and other plugins, all scoped utility-style classes **MUST** use the `wt_` prefix and component classes should follow BEM naming.
-- **Example (scoped utilities)**: `wt_bg-blue-600 wt_text-white wt_p-4`
-- **Example (BEM)**: `members-search__input members-search__actions`
+## Hypermedia Endpoint
 
-### 2.2 Source of Truth
-- **Primary stylesheet**: `public/css/modern-orgman-static.css`
-- **Build tooling**: None required at runtime (no Tailwind/NPM pipeline)
+`TemplateHelper` exposes partials through:
 
-### 2.3 Standard Loading UI
-- Use shared loader utilities from `modern-orgman-static.css` for in-flight submit states:
-  - `wt_loader`
-  - `wt_loader_button`
-- Loader colors must come from library palette variables, not hardcoded values:
-  - `--wicket-orgman-loader-track` (defaults to `--wicket-orgman-text-button-label-reversed`)
-  - `--wicket-orgman-loader-accent` (defaults to `--wicket-orgman-bg-interactive-reversed`)
-- In submit buttons (for example, Add Member / Save Permissions):
-  - hide label while submitting
-  - show `wt_loader wt_loader_button`
-  - disable both action and cancel controls while request is in flight
+- `?action=hypermedia&template=...`
 
-## 3. The "Unified View"
-The Unified View is a search-centric interface for managing rosters.
-- **Loading States**: Use the `searching` signal to show/hide loading indicators during API calls.
-- **Search Logic**: Search supports debounced input (minimum 3 chars or clear-to-empty) and explicit Search/Clear buttons in unified templates.
-- **Cycle Scope Propagation**: In `membership_cycle` mode, `membership_uuid` is propagated through list/search/pagination/add/remove refresh requests to keep operations cycle-scoped.
-- **Pagination Controls**: `Previous` is hidden on page 1; `Next` is hidden on the last page; both are hidden when only one page exists.
-- **Shared Role Visibility Toggle**: Member-card role display is controlled globally via `ui.member_card_fields.roles.enabled` across strategies.
-- **Account Status Copy**: Unconfirmed/confirmed tooltips and inline unconfirmed labels are configurable via `ui.member_list.account_status.*`.
-- **Role Label Filtering**: Member-card displayed roles can be filtered with `ui.member_list.display_roles_allowlist` and `ui.member_list.display_roles_exclude`.
-- **Duplicate Member Rows**: Unified/legacy member lists render one card per person even when multiple eligible relationships exist for the same organization.
+It also:
 
-## 3.1 Organization Management List
-- Organization cards on `organization-management` are paginated with `ui.organization_list.page_size` (default `5`).
-- Current organization page is read from `org_page` query arg; values are sanitized and clamped to valid page range.
-- In `groups` strategy, this route switches to a groups list UX:
-  - heading: `Manage Groups`
-  - summary: `Groups Found: N`
-  - rows come from active, tagged group memberships for the current user.
-  - if there is exactly one row, the user is redirected to that group's `organization-members` URL.
-- Card rendering is strategy-specific:
-  - `groups`: row shows group name, organization label, and current user role; action links are shown only for manageable roles.
-  - `direct` / `cascade` / `membership_cycle`: card shows membership + roles and group labels where available.
+- registers query vars
+- normalizes `org_id` to `org_uuid`
+- loads partial templates from the library safely
 
-## 3.2 Bulk Upload UI (CSV)
-- The member bulk-upload panel is controlled by `ui.member_list.show_bulk_upload` (default `false`).
-- The panel renders in organization member views for non-groups modes, in the same CTA region as member-management actions.
-- Datastar signals used by this flow:
-  - `bulkUploadSubmitting`
-  - `membersLoading`
-- Endpoint used by the form:
-  - `templates-partials/process/bulk-upload-members.php`
+## Assets
 
-## 4. Modals and Overlays
-Modals are managed via signals and the `notifications-container.php`.
-- Action handlers patch the modal content into the container and set the `show_modal` signal to `true`.
-- Closing the modal simply sets the signal back to `false`.
-- Add Member success does not rely on a second client-side refresh expression. The process response patches the modal success message and the members-list container in the same Datastar SSE response so the background roster stays current without a manual reload.
+- main stylesheet: `public/css/modern-orgman-static.css`
+- helper scripts:
+  - `public/js/datastar-error-handler.js`
+  - `public/js/orgman-notifications.js`
+  - `public/js/orgman-content-behaviors.js`
+
+## Config Flags That Affect Rendering
+
+- `ui.organization_list.*`
+- `ui.member_list.use_unified`
+- `ui.member_list.show_edit_permissions`
+- `ui.member_list.show_remove_button`
+- `ui.member_list.show_bulk_upload`
+- `ui.member_list.account_status.*`
+- `ui.member_list.remove_policy_callout.*`
+- `ui.member_view.use_unified`
+- `ui.member_view.search_clear_requires_submit`
+- `ui.member_card_fields.*`
+- `groups.ui.*`
+
+## Current Limits
+
+- membership-cycle mode reuses shared member pages; it does not ship a cycle-tab UI or cycle resolver
+- bulk upload UI is shared and only appears when `ui.member_list.show_bulk_upload = true`

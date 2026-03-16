@@ -1,23 +1,12 @@
-# Cascade Strategy: Roles and Permissions
+# Cascade Strategy: Roles And Permissions
 
-## Permission Gates
-- Add/remove permissions are checked in process handlers through shared permission helper gates.
-- Global permission config controls role access:
-  - `permissions.add_members`
-  - `permissions.remove_members`
-  - `permissions.manage_members`
-- Active membership is required by default.
-- Optional override: `permissions.role_only_management_access` can allow configured roles (for example `membership_owner`) to access org-management visibility surfaces without active membership (including org profile and bulk-upload links when enabled).
+Cascade mode uses shared permission config.
 
-## Role Assignment on Add
-- Base role from `member_addition.base_member_role` is assigned.
-- Auto roles from `member_addition.auto_assign_roles` are assigned.
-- Optional additional roles can be merged with relationship-mapped roles.
-- `membership_owner` can be filtered by `permissions.prevent_owner_assignment`.
+## Relevant Keys
 
-## Owner Removal Protection
-- Cascade strategy remove blocks organization owner removal.
-
-## Success Criteria
-- Cascade role assignment follows configured rules and relationship mappings.
-- Unauthorized or forbidden removals are blocked.
+- `permissions.manage_members`
+- `permissions.add_members`
+- `permissions.remove_members`
+- `permissions.prevent_owner_removal`
+- `permissions.relationship_based_permissions`
+- `permissions.relationship_roles_map`

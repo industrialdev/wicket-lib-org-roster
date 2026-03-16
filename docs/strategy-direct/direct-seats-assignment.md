@@ -1,14 +1,10 @@
-# Direct Strategy: Seat Assignment
+# Direct Strategy: Seats
 
-## Current Contract
-- Direct add flow assigns person to an organization membership seat.
-- Membership target is either explicit context UUID or org-resolved UUID.
+Direct mode assigns people to organization memberships directly.
 
-## Behavior
-- Seat assignment uses existing helper integration and membership service lookup.
-- On helper/API error, strategy verifies whether assignment already exists before failing.
-- Additional seats purchase UX/integration is shared and strategy-agnostic at service layer.
+## Current Behavior
 
-## Risk Note
-- In organizations with concurrent memberships, implicit resolver fallback may target an unintended cycle.
-- Mitigation: pass explicit `membership_uuid` in direct-mode contexts when precision is required.
+- add flow requires a resolvable target membership
+- seat assignment happens during member add
+- seat-limit messaging is rendered by shared UI config
+- additional-seat purchase flow is shared across the library through WooCommerce and Gravity Forms

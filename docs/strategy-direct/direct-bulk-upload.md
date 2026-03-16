@@ -1,15 +1,15 @@
 # Direct Strategy: Bulk Upload
 
-## Current State
-- CSV bulk upload is available through shared member views when:
-  - `roster.strategy = direct`
-  - `ui.member_list.show_bulk_upload = true`
-  - current user can add members
-- Endpoint: `templates-partials/process/bulk-upload-members.php`
-- Direct strategy processing reuses `MemberService->addMember()` with direct membership resolution behavior.
+Bulk upload is available in direct mode when:
 
-## Current Behavior
-- CSV columns expected: first name, last name, email, optional roles.
-- Additive-only workflow: no removals.
-- Duplicate active members in the target membership are skipped.
-- Summary reporting includes processed/added/skipped/failed counts.
+- `ui.member_list.show_bulk_upload = true`
+- the actor can add members
+- a target organization membership can be resolved
+
+## Current Runtime Behavior
+
+- uploads go through `templates-partials/process/bulk-upload-members.php`
+- files are queued into `BulkMemberUploadService`
+- processing runs in WP-Cron batches
+- duplicate file hashes are rejected
+- row processing reuses strategy-aware member add logic
