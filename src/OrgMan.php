@@ -981,8 +981,8 @@ final class OrgMan
     private function getDebugRosterStrategy(): string
     {
         if (
-            !isset($this->services['config']) ||
-            !$this->services['config'] instanceof Services\ConfigService
+            !isset($this->services['config'])
+            || !$this->services['config'] instanceof Services\ConfigService
         ) {
             return 'unknown';
         }
