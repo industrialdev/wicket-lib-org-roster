@@ -1,9 +1,22 @@
-# IAA Example Overrides
+# IAA Configuration
 
-IAA is a straightforward `groups` strategy example.
+Source of truth: `../iaa-website-wordpress/src/web/app/themes/wicket-child/custom/orgroster.php`
 
+## Active Strategy
+- `roster.strategy = groups`
+
+## Key Overrides
+- `groups.tag_name = Roster Management`
+- `groups.tag_case_sensitive = false`
+- `groups.manage_roles = ['president', 'delegate', 'alternate_delegate', 'council_delegate', 'council_alternate_delegate', 'correspondent']`
+- `groups.additional_info.key = association`
+- `groups.additional_info.value_field = name`
+- `groups.additional_info.fallback_to_org_uuid = true`
+
+## Copy/Paste Config Function
 ```php
-add_filter('wicket/acc/orgman/config', static function (array $config): array {
+function wicket_child_orgman_config(array $config): array
+{
     $config['roster']['strategy'] = 'groups';
     $config['groups']['tag_name'] = 'Roster Management';
     $config['groups']['tag_case_sensitive'] = false;
@@ -22,5 +35,5 @@ add_filter('wicket/acc/orgman/config', static function (array $config): array {
     ];
 
     return $config;
-});
+}
 ```

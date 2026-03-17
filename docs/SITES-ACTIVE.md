@@ -1,20 +1,25 @@
-# Site Notes
+# Active Site Config Docs
 
-This folder contains example site override notes, not runtime configuration.
+This folder contains documentation snapshots of active site override configurations. These files are not runtime configuration, but they are intended to mirror the real site override files for sites currently using `wicket-lib-org-roster`.
 
-## Current Example Mappings
+## Current Site Mappings
 
 - `docs/configs/CCHL.md`
-  - cascade-style site with CCHL-specific role normalization
+  - source of truth: `../cchl-website-wordpress/src/web/app/themes/industrial/custom/org-roster.php`
+  - `direct` strategy
 - `docs/configs/ESCRS.md`
-  - membership-cycle site using only keys that exist in the library today
+  - source of truth: `../escrs-website-wordpress/src/web/app/themes/wicket-child/custom/org-roster.php`
+  - `membership_cycle` strategy
 - `docs/configs/IAA.md`
-  - groups-strategy site
+  - source of truth: `../iaa-website-wordpress/src/web/app/themes/wicket-child/custom/orgroster.php`
+  - `groups` strategy
 - `docs/configs/MSA.md`
-  - cascade-style site with strict role and display filtering
+  - source of truth: `../msa-website-wordpress/src/web/app/themes/wicket-child/custom/org-roster.php`
+  - `cascade` strategy
 - `docs/configs/NJBIA.md`
-  - cascade-style site with relationship-driven permissions and bulk upload enabled
+  - source of truth: `../njbia-website-wordpress/src/wp-content/themes/njbia/theme/inc/org-roster.php`
+  - `cascade` strategy
 
 ## Important Rule
 
-These files are hand-maintained examples. The library does not load them, validate them, or keep them synchronized with any external site repository automatically.
+These files are manually maintained documentation. The library does not load them, validate them, or synchronize them automatically with external site repositories. When a site override changes, update the matching file in `docs/configs/` to keep the documentation aligned with the real override.
