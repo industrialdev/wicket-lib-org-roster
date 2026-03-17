@@ -11,7 +11,7 @@ This folder contains documentation snapshots of active site override configurati
   - source of truth: `../escrs-website-wordpress/src/web/app/themes/wicket-child/custom/org-roster.php`
   - `membership_cycle` strategy
 - `docs/configs/IAA.md`
-  - source of truth: `../iaa-website-wordpress/src/web/app/themes/wicket-child/custom/orgroster.php`
+  - source of truth: `../iaa-website-wordpress/src/web/app/themes/wicket-child/custom/org-roster.php`
   - `groups` strategy
 - `docs/configs/MSA.md`
   - source of truth: `../msa-website-wordpress/src/web/app/themes/wicket-child/custom/org-roster.php`
