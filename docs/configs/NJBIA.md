@@ -7,7 +7,6 @@ add_filter('wicket/acc/orgman/config', static function (array $config): array {
     $config['roster']['strategy'] = 'cascade';
     $config['relationships']['default_type'] = 'member_contact';
     $config['relationship_types']['custom_types']['employee_staff'] = __('Employee', 'wicket-acc');
-    $config['relationship_types']['custom_types']['grade_4'] = __('Grade 4', 'wicket-acc');
 
     $config['member_addition_form']['layout'] = 'simplified';
     $config['member_addition_form']['fields']['relationship_type']['enabled'] = true;
