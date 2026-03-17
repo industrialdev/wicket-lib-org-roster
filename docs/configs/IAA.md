@@ -2,11 +2,13 @@
 
 Source of truth: `../iaa-website-wordpress/src/web/app/themes/wicket-child/custom/orgroster.php`
 
+This document mirrors the current site override. If it drifts, update the site config first, then update this file.
+
 ## Active Strategy
 
 - `membership.strategy = groups`
 
-## Canonical Overrides
+## Current Override Paths
 
 ### `membership`
 
@@ -21,15 +23,7 @@ Source of truth: `../iaa-website-wordpress/src/web/app/themes/wicket-child/custo
 - `groups.additional_info.value_field = name`
 - `groups.additional_info.fallback_to_org_uuid = true`
 
-## Legacy To Canonical Map
-
-- `roster.strategy -> membership.strategy`
-- `groups.tag_name -> groups.matching.tag_name`
-- `groups.tag_case_sensitive -> groups.matching.tag_case_sensitive`
-- `groups.manage_roles -> groups.roles.management`
-- `groups.additional_info.* -> groups.additional_info.*`
-
-## Copy/Paste Config Function
+## Current Config Function
 
 ```php
 function wicket_child_orgman_config(array $config): array

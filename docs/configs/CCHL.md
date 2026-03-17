@@ -2,11 +2,13 @@
 
 Source of truth: `../cchl-website-wordpress/src/web/app/themes/industrial/custom/org-roster.php`
 
+This document mirrors the current site override. If it drifts, update the site config first, then update this file.
+
 ## Active Strategy
 
 - `membership.strategy = direct`
 
-## Canonical Overrides
+## Current Override Paths
 
 ### `access`
 
@@ -30,6 +32,9 @@ Source of truth: `../cchl-website-wordpress/src/web/app/themes/industrial/custom
 - `access.permissions.relationship_grants.roles_by_type.ceo = ['org_editor', 'membership_manager']`
 - `access.permissions.relationship_grants.roles_by_type.primary_hr_contact = ['org_editor', 'membership_manager']`
 - `access.permissions.relationship_grants.roles_by_type.member_contact = ['org_editor', 'membership_manager']`
+- `access.permissions.relationship_grants.roles_by_type.employee = []`
+- `access.permissions.relationship_grants.roles_by_type.advertising_sponsor_contact = []`
+- `access.permissions.relationship_grants.roles_by_type.advertising_sponsor_billing = []`
 
 ### `membership`
 
@@ -58,14 +63,20 @@ Source of truth: `../cchl-website-wordpress/src/web/app/themes/industrial/custom
 - `member_management.forms.add_member.layout = full`
 - `member_management.forms.add_member.fields.first_name.enabled = true`
 - `member_management.forms.add_member.fields.first_name.required = true`
+- `member_management.forms.add_member.fields.first_name.label = First Name`
 - `member_management.forms.add_member.fields.last_name.enabled = true`
 - `member_management.forms.add_member.fields.last_name.required = true`
+- `member_management.forms.add_member.fields.last_name.label = Last Name`
 - `member_management.forms.add_member.fields.email.enabled = true`
 - `member_management.forms.add_member.fields.email.required = true`
+- `member_management.forms.add_member.fields.email.label = Email Address`
 - `member_management.forms.add_member.fields.relationship_type.enabled = false`
 - `member_management.forms.add_member.fields.relationship_type.required = false`
+- `member_management.forms.add_member.fields.relationship_type.label = Relationship Type`
 - `member_management.forms.add_member.fields.permissions.enabled = true`
 - `member_management.forms.add_member.fields.permissions.required = true`
+- `member_management.forms.add_member.fields.permissions.label = Permissions`
+- `member_management.forms.add_member.fields.permissions.allowlist = []`
 - `member_management.forms.add_member.fields.permissions.denylist = ['Cchlmembercommunity', 'cchlmembercommunity']`
 - `member_management.forms.add_member.allow_relationship_type_editing = false`
 - `member_management.permissions_modal.allowlist = []`
@@ -76,9 +87,13 @@ Source of truth: `../cchl-website-wordpress/src/web/app/themes/industrial/custom
 - `presentation.relationships.show_type = false`
 - `presentation.relationships.show_special_types = false`
 - `presentation.member_card.fields.name.enabled = true`
+- `presentation.member_card.fields.name.label = Name`
 - `presentation.member_card.fields.email.enabled = true`
+- `presentation.member_card.fields.email.label = Email`
 - `presentation.member_card.fields.roles.enabled = true`
+- `presentation.member_card.fields.roles.label = Roles`
 - `presentation.member_card.fields.relationship_type.enabled = false`
+- `presentation.member_card.fields.relationship_type.label = Relationship`
 
 ### `integrations`
 
@@ -98,32 +113,7 @@ Source of truth: `../cchl-website-wordpress/src/web/app/themes/industrial/custom
 - `platform.cache.enabled = false`
 - `platform.cache.duration = 300`
 
-## Legacy To Canonical Map
-
-- `roster.strategy -> membership.strategy`
-- `roles.* -> access.roles.*`
-- `role_labels.* -> access.roles.labels.*`
-- `permissions.* -> access.permissions.*`
-- `member_addition.* -> member_management.addition.*`
-- `member_addition_form.* -> member_management.forms.add_member.*`
-- `edit_permissions_modal.* -> member_management.permissions_modal.*`
-- `relationships.default_type -> relationships.defaults.type`
-- `relationships.member_addition_type -> relationships.addition.type`
-- `relationships.allowed_relationship_types -> relationships.filters.allowlist`
-- `relationships.exclude_relationship_types -> relationships.filters.denylist`
-- `relationship_types.custom_types.* -> relationships.labels.custom.*`
-- `relationship_types.special_types.* -> relationships.labels.special.*`
-- `ui.hide_relationship_type -> presentation.relationships.show_type`
-  - Invert the value.
-- `ui.show_special_relationships -> presentation.relationships.show_special_types`
-- `ui.member_card_fields.* -> presentation.member_card.fields.*`
-- `additional_seats.* -> integrations.additional_seats.*`
-- `documents.* -> integrations.documents.*`
-- `business_info.* -> integrations.business_info.*`
-- `notifications.* -> integrations.notifications.*`
-- `cache.* -> platform.cache.*`
-
-## Copy/Paste Config Function
+## Current Config Function
 
 ```php
 function wicket_orgman_config(array $config): array
@@ -159,23 +149,7 @@ function wicket_orgman_config(array $config): array
         'advertising_sponsor_billing' => [],
     ];
 
-    $config['membership']['strategy'] = 'direct';
-
-    $config['relationships']['defaults']['type'] = 'Position';
-    $config['relationships']['addition']['type'] = 'position';
-    $config['relationships']['filters']['allowlist'] = [];
-    $config['relationships']['filters']['denylist'] = [];
-    $config['relationships']['labels']['custom'] = [
-        'ceo' => 'CEO',
-        'primary_hr_contact' => 'Primary HR Contact',
-        'employee' => 'Employee',
-        'member_contact' => 'Member Contact',
-    ];
-    $config['relationships']['labels']['special'] = [
-        'advertising_sponsor_contact' => 'Advertising/Sponsor Contact',
-        'advertising_sponsor_billing' => 'Advertising/Sponsor Billing Contact',
-    ];
-
+    // CCHL-only roles: keep explicit because shared library defaults are intentionally neutral.
     $config['member_management']['addition']['auto_assign_roles'] = [
         'supplemental_member',
         'CCHL Member Community',
@@ -186,19 +160,16 @@ function wicket_orgman_config(array $config): array
         'email' => true,
         'sublists' => ['one', 'two', 'three', 'four', 'five'],
     ];
-    $config['member_management']['forms']['add_member']['layout'] = 'full';
-    $config['member_management']['forms']['add_member']['fields']['relationship_type']['enabled'] = false;
-    $config['member_management']['forms']['add_member']['fields']['permissions']['denylist'] = ['Cchlmembercommunity', 'cchlmembercommunity'];
-    $config['member_management']['forms']['add_member']['allow_relationship_type_editing'] = false;
-    $config['member_management']['permissions_modal']['allowlist'] = [];
-    $config['member_management']['permissions_modal']['denylist'] = ['Cchlmembercommunity', 'cchlmembercommunity'];
 
-    $config['presentation']['relationships']['show_type'] = false;
-    $config['presentation']['relationships']['show_special_types'] = false;
-    $config['presentation']['member_card']['fields']['name']['enabled'] = true;
-    $config['presentation']['member_card']['fields']['email']['enabled'] = true;
-    $config['presentation']['member_card']['fields']['roles']['enabled'] = true;
-    $config['presentation']['member_card']['fields']['relationship_type']['enabled'] = false;
+    $config['platform']['cache']['enabled'] = false;
+    $config['platform']['cache']['duration'] = 5 * 60;
+
+    $config['relationships']['defaults']['type'] = 'Position';
+    $config['relationships']['addition']['type'] = 'position';
+    $config['relationships']['filters']['allowlist'] = [];
+    $config['relationships']['filters']['denylist'] = [];
+
+    $config['membership']['strategy'] = 'direct';
 
     $config['integrations']['additional_seats']['enabled'] = true;
     $config['integrations']['additional_seats']['sku'] = 'additional-seats';
@@ -206,15 +177,67 @@ function wicket_orgman_config(array $config): array
     $config['integrations']['additional_seats']['form_slug'] = 'additional-seats';
     $config['integrations']['additional_seats']['min_quantity'] = 1;
     $config['integrations']['additional_seats']['max_quantity'] = 900;
+
     $config['integrations']['documents']['allowed_types'] = [
         'pdf', 'doc', 'docx', 'xls', 'xlsx', 'jpg', 'jpeg', 'png', 'gif',
     ];
     $config['integrations']['documents']['max_size'] = 10 * 1024 * 1024;
     $config['integrations']['business_info']['seat_limit_info'] = null;
+
+    $config['presentation']['relationships']['show_type'] = false;
+    $config['presentation']['relationships']['show_special_types'] = false;
+    $config['presentation']['member_card']['fields'] = [
+        'name' => ['enabled' => true, 'label' => 'Name'],
+        'email' => ['enabled' => true, 'label' => 'Email'],
+        'roles' => ['enabled' => true, 'label' => 'Roles'],
+        'relationship_type' => ['enabled' => false, 'label' => 'Relationship'],
+    ];
+
+    $config['member_management']['forms']['add_member']['layout'] = 'full';
+    $config['member_management']['forms']['add_member']['fields']['first_name'] = [
+        'enabled' => true,
+        'required' => true,
+        'label' => __('First Name', 'wicket-acc'),
+    ];
+    $config['member_management']['forms']['add_member']['fields']['last_name'] = [
+        'enabled' => true,
+        'required' => true,
+        'label' => __('Last Name', 'wicket-acc'),
+    ];
+    $config['member_management']['forms']['add_member']['fields']['email'] = [
+        'enabled' => true,
+        'required' => true,
+        'label' => __('Email Address', 'wicket-acc'),
+    ];
+    $config['member_management']['forms']['add_member']['fields']['relationship_type'] = [
+        'enabled' => false,
+        'required' => false,
+        'label' => __('Relationship Type', 'wicket-acc'),
+    ];
+    $config['member_management']['forms']['add_member']['fields']['permissions'] = [
+        'enabled' => true,
+        'required' => true,
+        'label' => __('Permissions', 'wicket-acc'),
+        'allowlist' => [],
+        'denylist' => ['Cchlmembercommunity', 'cchlmembercommunity'],
+    ];
+    $config['member_management']['forms']['add_member']['allow_relationship_type_editing'] = false;
+
+    $config['member_management']['permissions_modal']['allowlist'] = [];
+    $config['member_management']['permissions_modal']['denylist'] = ['Cchlmembercommunity', 'cchlmembercommunity'];
+
     $config['integrations']['notifications']['confirmation_email_from'] = 'cchl@wicketcloud.com';
 
-    $config['platform']['cache']['enabled'] = false;
-    $config['platform']['cache']['duration'] = 5 * 60;
+    $config['relationships']['labels']['custom'] = [
+        'ceo' => 'CEO',
+        'primary_hr_contact' => 'Primary HR Contact',
+        'employee' => 'Employee',
+        'member_contact' => 'Member Contact',
+    ];
+    $config['relationships']['labels']['special'] = [
+        'advertising_sponsor_contact' => 'Advertising/Sponsor Contact',
+        'advertising_sponsor_billing' => 'Advertising/Sponsor Billing Contact',
+    ];
 
     return $config;
 }
