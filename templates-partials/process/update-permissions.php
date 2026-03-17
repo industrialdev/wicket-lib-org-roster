@@ -58,15 +58,33 @@ if ('POST' === strtoupper($request_method)) {
 
         // First update relationship type if provided and enabled
         $config = OrgManagement\Config\OrgManConfig::get();
-        $edit_permissions_config = $config['member_management']['permissions_modal'] ?? [];
-        $edit_allowed_roles = is_array($edit_permissions_config['allowlist'] ?? null)
-            ? $edit_permissions_config['allowlist']
+        $edit_permissions_config = $config['edit_permissions_modal'] ?? [];
+        if (!is_array($edit_permissions_config) || $edit_permissions_config === []) {
+            $edit_permissions_config = $config['member_management']['permissions_modal'] ?? [];
+        }
+        $edit_allowed_roles = is_array($edit_permissions_config['allowed_roles'] ?? null)
+            ? $edit_permissions_config['allowed_roles']
             : [];
-        $edit_excluded_roles = is_array($edit_permissions_config['denylist'] ?? null)
-            ? $edit_permissions_config['denylist']
+        if ($edit_allowed_roles === []) {
+            $edit_allowed_roles = is_array($edit_permissions_config['allowlist'] ?? null)
+                ? $edit_permissions_config['allowlist']
+                : [];
+        }
+        $edit_excluded_roles = is_array($edit_permissions_config['excluded_roles'] ?? null)
+            ? $edit_permissions_config['excluded_roles']
             : [];
-        if (!empty($config['access']['permissions']['prevent_owner_assignment'])) {
+        if ($edit_excluded_roles === []) {
+            $edit_excluded_roles = is_array($edit_permissions_config['denylist'] ?? null)
+                ? $edit_permissions_config['denylist']
+                : [];
+        }
+        if (!empty($config['permissions']['prevent_owner_assignment'])) {
             $edit_excluded_roles[] = 'membership_owner';
+        }
+        if (!empty($config['access']['permissions']['prevent_owner_assignment'])) {
+            if (!in_array('membership_owner', $edit_excluded_roles, true)) {
+                $edit_excluded_roles[] = 'membership_owner';
+            }
         }
         $roles = OrgManagement\Helpers\PermissionHelper::filter_role_submission(
             $roles,

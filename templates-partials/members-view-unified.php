@@ -170,7 +170,10 @@ $clear_action = '(' . '$membersLoading' . ' = true, ' . '$searchQuery' . " = '',
 $members_list_endpoint = $members_list_endpoint;
 $members_list_target = $members_list_target;
 $show_edit_permissions = $show_edit_permissions;
-$show_account_status = (bool) ($account_status_config['enabled'] ?? true);
+$show_account_status = (bool) (($orgman_config['ui']['member_list']['account_status']['enabled'] ?? true));
+if (array_key_exists('enabled', $account_status_config)) {
+    $show_account_status = (bool) $account_status_config['enabled'];
+}
 $show_add_member_button = $show_add_member_button;
 $show_remove_button = $show_remove_button;
 include __DIR__ . '/members-list-unified.php';

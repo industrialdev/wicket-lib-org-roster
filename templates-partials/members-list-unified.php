@@ -51,6 +51,9 @@ $presentation_config = is_array($orgman_config['presentation'] ?? null)
 $member_list_config = is_array($presentation_config['member_list'] ?? null)
     ? $presentation_config['member_list']
     : [];
+$ui_config = is_array($orgman_config['ui']['member_list'] ?? null)
+    ? $orgman_config['ui']['member_list']
+    : $member_list_config;
 $show_edit_permissions_default = (bool) ($member_list_config['show_edit_permissions'] ?? true);
 $show_remove_button_default = (bool) ($member_list_config['show_remove_button'] ?? true);
 $seat_limit_message = (string) ($member_list_config['seat_limit_message'] ?? __('All seats have been assigned. Please purchase additional seats to add more members.', 'wicket-acc'));
@@ -69,9 +72,15 @@ if ($mode === 'groups' && isset($groups_presentation_config['show_edit_permissio
     $show_edit_permissions = (bool) $groups_presentation_config['show_edit_permissions'];
 }
 
-$account_status_config = is_array($member_list_config['account_status'] ?? null)
+$account_status_config = is_array($ui_config['account_status'] ?? null)
+    ? $ui_config['account_status']
+    : [];
+$canonical_account_status_config = is_array($member_list_config['account_status'] ?? null)
     ? $member_list_config['account_status']
     : [];
+if ($canonical_account_status_config !== []) {
+    $account_status_config = $canonical_account_status_config;
+}
 $show_account_status_default = (bool) ($account_status_config['enabled'] ?? true);
 $show_account_status = isset($show_account_status) ? (bool) $show_account_status : $show_account_status_default;
 $show_unconfirmed_label = (bool) ($account_status_config['show_unconfirmed_label'] ?? true);
