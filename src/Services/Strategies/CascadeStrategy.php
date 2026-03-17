@@ -288,7 +288,7 @@ class CascadeStrategy implements RosterManagementStrategy
                     return $has_relationship;
                 }
 
-                $repair_stale_relationship = (bool) ($config['member_addition']['repair_stale_relationship_without_membership'] ?? true);
+                $repair_stale_relationship = (bool) ($config['member_management']['addition']['repair_stale_relationship_without_membership'] ?? true);
                 if ($has_relationship && $repair_stale_relationship) {
                     $logger->info('[OrgMan] Cascade stale relationship detected without membership', array_merge($log_context, [
                         'repair_enabled' => true,
@@ -340,8 +340,8 @@ class CascadeStrategy implements RosterManagementStrategy
             }
 
             // Get configuration for member addition settings
-            $base_member_role = $config['member_addition']['base_member_role'] ?? 'member';
-            $auto_assign_roles = $config['member_addition']['auto_assign_roles'] ?? [];
+            $base_member_role = $config['member_management']['addition']['base_member_role'] ?? 'member';
+            $auto_assign_roles = $config['member_management']['addition']['auto_assign_roles'] ?? [];
 
             // Assign base member role
             $base_role_result = $this->assignRoleIfMissing($person_uuid, $base_member_role, $org_id);
@@ -379,9 +379,9 @@ class CascadeStrategy implements RosterManagementStrategy
             $additional_roles = $context['roles'] ?? $member_data['roles'] ?? [];
 
             // Check for relationship-based permissions
-            if (!empty($config['permissions']['relationship_based_permissions'])) {
+            if (!empty($config['access']['permissions']['relationship_grants']['enabled'])) {
                 $relationship_type = $context['relationship_type'] ?? $member_data['relationship_type'] ?? '';
-                $relationship_roles_map = $config['permissions']['relationship_roles_map'] ?? [];
+                $relationship_roles_map = $config['access']['permissions']['relationship_grants']['roles_by_type'] ?? [];
 
                 if ($relationship_type && isset($relationship_roles_map[$relationship_type])) {
                     $mapped_roles = $relationship_roles_map[$relationship_type];
@@ -392,7 +392,7 @@ class CascadeStrategy implements RosterManagementStrategy
             }
 
             // Filter out membership_owner if configured to prevent assignment
-            if (!empty($config['permissions']['prevent_owner_assignment'])) {
+            if (!empty($config['access']['permissions']['prevent_owner_assignment'])) {
                 $additional_roles = array_values(array_diff($additional_roles, ['membership_owner']));
             }
 
@@ -561,7 +561,7 @@ class CascadeStrategy implements RosterManagementStrategy
         $relationship_type = is_string($relationship_type) ? sanitize_key($relationship_type) : '';
         $relationship_description = $context['relationship_description'] ?? $member_data['relationship_description'] ?? '';
         $relationship_description = is_string($relationship_description) ? sanitize_textarea_field($relationship_description) : '';
-        $custom_types = $config['relationship_types']['custom_types'] ?? [];
+        $custom_types = $config['relationships']['labels']['custom'] ?? [];
         if ($relationship_type && !empty($custom_types) && !array_key_exists($relationship_type, $custom_types)) {
             $relationship_type = '';
         }

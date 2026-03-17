@@ -475,8 +475,8 @@ if (empty($organizations)) {
 <div id="organization-list-container">
     <?php
     $orgman_config = \OrgManagement\Config\OrgManConfig::get();
-$org_list_config = is_array($orgman_config['ui']['organization_list'] ?? null)
-    ? $orgman_config['ui']['organization_list']
+$org_list_config = is_array($orgman_config['presentation']['organization_list'] ?? null)
+    ? $orgman_config['presentation']['organization_list']
     : [];
 $org_page_size = max(1, (int) ($org_list_config['page_size'] ?? 5));
 $org_total_items = count($organizations);

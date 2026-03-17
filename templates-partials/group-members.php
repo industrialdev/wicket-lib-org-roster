@@ -72,7 +72,19 @@ $signals = [
     'searchQuery' => $query,
     'searchSubmitted' => false,
 ];
-$use_unified_view = (bool) ($orgman_config['groups']['ui']['use_unified_member_view'] ?? false);
+$group_presentation = is_array($orgman_config['groups']['presentation'] ?? null)
+    ? $orgman_config['groups']['presentation']
+    : [];
+$member_list_config = is_array($orgman_config['presentation']['member_list'] ?? null)
+    ? $orgman_config['presentation']['member_list']
+    : [];
+$account_status_config = is_array($member_list_config['account_status'] ?? null)
+    ? $member_list_config['account_status']
+    : [];
+$group_roles = is_array($orgman_config['groups']['roles'] ?? null)
+    ? $orgman_config['groups']['roles']
+    : [];
+$use_unified_view = (bool) ($group_presentation['use_unified_member_view'] ?? false);
 if ($use_unified_view) {
     $mode = 'groups';
     $members_list_endpoint = $members_list_endpoint;
@@ -150,30 +162,30 @@ $group_pagination = $pagination;
 $group_query = $query;
 $group_members_list_endpoint = $members_list_endpoint;
 $group_members_list_target = $members_list_target;
-$use_unified_view = (bool) ($orgman_config['groups']['ui']['use_unified_member_view'] ?? false);
+$use_unified_view = (bool) ($group_presentation['use_unified_member_view'] ?? false);
 if ($use_unified_view) {
     $mode = 'groups';
     $members = $group_members;
     $pagination = $group_pagination;
     $query = $group_query;
     $membership_uuid = $membership_uuid;
-    $show_edit_permissions = (bool) ($orgman_config['groups']['ui']['show_edit_permissions'] ?? false);
-    $show_account_status = (bool) (($orgman_config['ui']['member_list']['account_status']['enabled'] ?? true));
+    $show_edit_permissions = (bool) ($group_presentation['show_edit_permissions'] ?? false);
+    $show_account_status = (bool) ($account_status_config['enabled'] ?? true);
     $show_add_member_button = true;
     $show_remove_button = true;
     $members_list_endpoint = $group_members_list_endpoint;
     $members_list_target = $group_members_list_target;
     include __DIR__ . '/members-view-unified.php';
 } else {
-    $use_unified_member_list = (bool) ($orgman_config['groups']['ui']['use_unified_member_list'] ?? false);
+    $use_unified_member_list = (bool) ($group_presentation['use_unified_member_list'] ?? false);
     if ($use_unified_member_list) {
         $mode = 'groups';
         $members = $group_members;
         $pagination = $group_pagination;
         $query = $group_query;
         $membership_uuid = $membership_uuid;
-        $show_edit_permissions = (bool) ($orgman_config['groups']['ui']['show_edit_permissions'] ?? false);
-        $show_account_status = (bool) (($orgman_config['ui']['member_list']['account_status']['enabled'] ?? true));
+        $show_edit_permissions = (bool) ($group_presentation['show_edit_permissions'] ?? false);
+        $show_account_status = (bool) ($account_status_config['enabled'] ?? true);
         $show_add_member_button = true;
         $show_remove_button = true;
         $members_list_endpoint = $group_members_list_endpoint;
@@ -223,8 +235,8 @@ $remove_member_error_actions = "console.error('Failed to remove group member'); 
 $add_member_endpoint = OrgManagement\Helpers\TemplateHelper::template_url() . 'process/add-group-member';
 $remove_member_endpoint = OrgManagement\Helpers\TemplateHelper::template_url() . 'process/remove-group-member';
 $groups_config = is_array($orgman_config['groups'] ?? null) ? $orgman_config['groups'] : [];
-$member_role = $groups_config['member_role'] ?? 'member';
-$observer_role = $groups_config['observer_role'] ?? 'observer';
+$member_role = $group_roles['member'] ?? 'member';
+$observer_role = $group_roles['observer'] ?? 'observer';
 ?>
 
     <dialog id="groupMembersAddModal"

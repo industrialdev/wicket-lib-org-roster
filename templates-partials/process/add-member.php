@@ -116,12 +116,12 @@ if ('POST' === strtoupper($request_method)) {
     }
 
     $orgman_config = OrgManagement\Config\OrgManConfig::get();
-    $permissions_field_config = $orgman_config['member_addition_form']['fields']['permissions'] ?? [];
-    $allowed_roles = is_array($permissions_field_config['allowed_roles'] ?? null)
-        ? $permissions_field_config['allowed_roles']
+    $permissions_field_config = $orgman_config['member_management']['forms']['add_member']['fields']['permissions'] ?? [];
+    $allowed_roles = is_array($permissions_field_config['allowlist'] ?? null)
+        ? $permissions_field_config['allowlist']
         : [];
-    $excluded_roles = is_array($permissions_field_config['excluded_roles'] ?? null)
-        ? $permissions_field_config['excluded_roles']
+    $excluded_roles = is_array($permissions_field_config['denylist'] ?? null)
+        ? $permissions_field_config['denylist']
         : [];
 
     $roles = OrgManagement\Helpers\PermissionHelper::filter_role_submission(
@@ -164,7 +164,7 @@ if ('POST' === strtoupper($request_method)) {
         }
 
         // Handle automatic communication opt-in if configured
-        $auto_opt_in = $orgman_config['member_addition']['auto_opt_in_communications'] ?? [];
+        $auto_opt_in = $orgman_config['member_management']['addition']['auto_opt_in_communications'] ?? [];
         if (!empty($auto_opt_in['enabled']) && !empty($result['person_uuid'])) {
             if (function_exists('wicket_person_update_communication_preferences')) {
                 $preferences = [];

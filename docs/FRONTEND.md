@@ -48,19 +48,20 @@ It also:
 
 ## Config Flags That Affect Rendering
 
-- `ui.organization_list.*`
-- `ui.member_list.use_unified`
-- `ui.member_list.show_edit_permissions`
-- `ui.member_list.show_remove_button`
-- `ui.member_list.show_bulk_upload`
-- `ui.member_list.account_status.*`
-- `ui.member_list.remove_policy_callout.*`
-- `ui.member_view.use_unified`
-- `ui.member_view.search_clear_requires_submit`
-- `ui.member_card_fields.*`
-- `groups.ui.*`
+- `presentation.organization_list.*`
+- `presentation.relationships.*`
+- `presentation.member_list.use_unified`
+- `presentation.member_list.show_edit_permissions`
+- `presentation.member_list.show_remove_button`
+- `presentation.member_list.show_bulk_upload`
+- `presentation.member_list.account_status.*`
+- `presentation.member_list.remove_policy_callout.*`
+- `presentation.member_view.use_unified`
+- `presentation.member_view.search_clear_requires_submit`
+- `presentation.member_card.fields.*`
+- `groups.presentation.*`
 
 ## Current Limits
 
 - membership-cycle mode reuses shared member pages; it does not ship a cycle-tab UI or cycle resolver
-- bulk upload UI is shared and only appears when `ui.member_list.show_bulk_upload = true`
+- bulk upload UI is shared and only appears when `presentation.member_list.show_bulk_upload = true`

@@ -18,122 +18,264 @@ final class OrgManConfig
         }
 
         $orgmanConfig = [
-            'roster' => [
-                'strategy' => 'direct',
-            ],
-            'feature_flags' => [
-                // Keep disabled by default for backwards compatibility across sites.
-                'membership_resolution_prefer_current_cycle' => false,
-            ],
-            'roles' => [
-                'owner' => 'membership_owner',
-                'manager' => 'membership_manager',
-                'editor' => 'org_editor',
-                'aliases' => [],
-            ],
-            'role_labels' => [
-                'membership_manager' => __('Membership Manager', 'wicket-acc'),
-                'org_editor'         => __('Org. Editor', 'wicket-acc'),
-                'membership_owner'   => __('Membership Owner', 'wicket-acc'),
-            ],
-            'permissions' => [
-                'edit_organization' => [
-                    'org_editor',
-                ],
-                'manage_members' => [
-                    'membership_manager',
-                    'membership_owner',
-                ],
-                'add_members' => [
-                    'membership_manager',
-                    'membership_owner',
-                ],
-                'remove_members' => [
-                    'membership_manager',
-                    'membership_owner',
-                ],
-                'purchase_seats' => [
-                    'membership_owner',
-                    'membership_manager',
-                    'org_editor',
-                ],
-                'any_management' => [
-                    'org_editor',
-                    'membership_manager',
-                    'membership_owner',
-                ],
-                'prevent_owner_removal' => false,
-                'relationship_based_permissions' => false,
-                'relationship_roles_map' => [
-                    'ceo' => [
-                        'org_editor',
-                        'membership_manager',
+            'access' => [
+                'roles' => [
+                    'owner' => 'membership_owner',
+                    'manager' => 'membership_manager',
+                    'editor' => 'org_editor',
+                    'aliases' => [],
+                    'labels' => [
+                        'membership_manager' => __('Membership Manager', 'wicket-acc'),
+                        'org_editor' => __('Org. Editor', 'wicket-acc'),
+                        'membership_owner' => __('Membership Owner', 'wicket-acc'),
                     ],
-                    'primary_hr_contact' => [
-                        'org_editor',
-                        'membership_manager',
-                    ],
-                    'member_contact' => [
-                        'org_editor',
-                        'membership_manager',
-                    ],
-                    'employee_staff' => [],
-                    'advertising_sponsor_contact' => [],
-                    'advertising_sponsor_billing' => [],
                 ],
-                'prevent_owner_assignment' => true,
-                'role_only_management_access' => [
-                    'enabled' => false,
-                    'allowed_roles' => [
+                'permissions' => [
+                    'organization_edit_roles' => [
+                        'org_editor',
+                    ],
+                    'manage_member_roles' => [
+                        'membership_manager',
                         'membership_owner',
                     ],
-                ],
-            ],
-            'member_addition' => [
-                'auto_assign_roles' => [],
-                'base_member_role' => 'member',
-                'repair_stale_relationship_without_membership' => true,
-                'auto_opt_in_communications' => [
-                    'enabled' => true,
-                    'email' => true,
-                    'sublists' => [
-                        'one',
-                        'two',
-                        'three',
-                        'four',
-                        'five',
+                    'add_member_roles' => [
+                        'membership_manager',
+                        'membership_owner',
+                    ],
+                    'remove_member_roles' => [
+                        'membership_manager',
+                        'membership_owner',
+                    ],
+                    'purchase_seat_roles' => [
+                        'membership_owner',
+                        'membership_manager',
+                        'org_editor',
+                    ],
+                    'any_management_roles' => [
+                        'org_editor',
+                        'membership_manager',
+                        'membership_owner',
+                    ],
+                    'prevent_owner_removal' => false,
+                    'prevent_owner_assignment' => true,
+                    'relationship_grants' => [
+                        'enabled' => false,
+                        'roles_by_type' => [
+                            'ceo' => [
+                                'org_editor',
+                                'membership_manager',
+                            ],
+                            'primary_hr_contact' => [
+                                'org_editor',
+                                'membership_manager',
+                            ],
+                            'member_contact' => [
+                                'org_editor',
+                                'membership_manager',
+                            ],
+                            'employee_staff' => [],
+                            'advertising_sponsor_contact' => [],
+                            'advertising_sponsor_billing' => [],
+                        ],
+                    ],
+                    'role_only_management_access' => [
+                        'enabled' => false,
+                        'allowed_roles' => [
+                            'membership_owner',
+                        ],
                     ],
                 ],
             ],
-            'cache' => [
-                'enabled' => false,
-                'duration' => 5 * 60,
+            'membership' => [
+                'strategy' => 'direct',
+                'resolution' => [
+                    'prefer_current_cycle' => false,
+                ],
+                'cycle' => [
+                    'key' => 'membership_cycle',
+                    'permissions' => [
+                        'add_member_roles' => [
+                            'membership_manager',
+                        ],
+                        'remove_member_roles' => [
+                            'membership_manager',
+                        ],
+                        'purchase_seat_roles' => [
+                            'membership_owner',
+                            'membership_manager',
+                            'org_editor',
+                        ],
+                    ],
+                    'prevent_owner_removal' => true,
+                    'require_explicit_membership_uuid' => true,
+                ],
+                'seat_limits' => [
+                    'tier_max_assignments' => [],
+                    'tier_name_case_sensitive' => false,
+                ],
             ],
             'relationships' => [
-                'default_type' => 'Position',
-                'member_addition_type' => 'position',
-                'allowed_relationship_types' => [],
-                'exclude_relationship_types' => [],
-                'member_card_active_only' => false,
+                'defaults' => [
+                    'type' => 'Position',
+                ],
+                'addition' => [
+                    'type' => 'position',
+                ],
+                'filters' => [
+                    'allowlist' => [],
+                    'denylist' => [],
+                ],
+                'display' => [
+                    'member_card_active_only' => false,
+                ],
+                'labels' => [
+                    'custom' => [
+                        'ceo' => __('CEO', 'wicket-acc'),
+                        'primary_hr_contact' => __('Primary HR Contact', 'wicket-acc'),
+                        'employee_staff' => __('Employee', 'wicket-acc'),
+                        'member_contact' => __('Member Contact', 'wicket-acc'),
+                    ],
+                    'special' => [
+                        'advertising_sponsor_contact' => __('Advertising/Sponsor Contact', 'wicket-acc'),
+                        'advertising_sponsor_billing' => __('Advertising/Sponsor Billing Contact', 'wicket-acc'),
+                    ],
+                ],
+            ],
+            'member_management' => [
+                'addition' => [
+                    'auto_assign_roles' => [],
+                    'base_member_role' => 'member',
+                    'repair_stale_relationship_without_membership' => true,
+                    'auto_opt_in_communications' => [
+                        'enabled' => true,
+                        'email' => true,
+                        'sublists' => [
+                            'one',
+                            'two',
+                            'three',
+                            'four',
+                            'five',
+                        ],
+                    ],
+                ],
+                'forms' => [
+                    'add_member' => [
+                        'layout' => 'full',
+                        'fields' => [
+                            'first_name' => [
+                                'enabled' => true,
+                                'required' => true,
+                                'label' => __('First Name', 'wicket-acc'),
+                            ],
+                            'last_name' => [
+                                'enabled' => true,
+                                'required' => true,
+                                'label' => __('Last Name', 'wicket-acc'),
+                            ],
+                            'email' => [
+                                'enabled' => true,
+                                'required' => true,
+                                'label' => __('Email Address', 'wicket-acc'),
+                            ],
+                            'relationship_type' => [
+                                'enabled' => false,
+                                'required' => false,
+                                'label' => __('Relationship Type', 'wicket-acc'),
+                            ],
+                            'description' => [
+                                'enabled' => true,
+                                'required' => false,
+                                'label' => __('Description', 'wicket-acc'),
+                                'input_type' => 'textarea',
+                            ],
+                            'permissions' => [
+                                'enabled' => true,
+                                'required' => true,
+                                'label' => __('Permissions', 'wicket-acc'),
+                                'allowlist' => [],
+                                'denylist' => [],
+                            ],
+                        ],
+                        'allow_relationship_type_editing' => false,
+                    ],
+                ],
+                'bulk_upload' => [
+                    'batch_size' => 25,
+                    'columns' => [
+                        'first_name' => [
+                            'enabled' => true,
+                            'required' => true,
+                            'header' => __('First Name', 'wicket-acc'),
+                            'aliases' => ['first name', 'firstname', 'first'],
+                        ],
+                        'last_name' => [
+                            'enabled' => true,
+                            'required' => true,
+                            'header' => __('Last Name', 'wicket-acc'),
+                            'aliases' => ['last name', 'lastname', 'last'],
+                        ],
+                        'email' => [
+                            'enabled' => true,
+                            'required' => true,
+                            'header' => __('Email Address', 'wicket-acc'),
+                            'aliases' => ['email address', 'email', 'e-mail'],
+                        ],
+                        'relationship_type' => [
+                            'enabled' => true,
+                            'required' => true,
+                            'header' => __('Relationship Type', 'wicket-acc'),
+                            'aliases' => ['relationship type', 'relationship'],
+                        ],
+                        'roles' => [
+                            'enabled' => true,
+                            'required' => false,
+                            'header' => __('Roles', 'wicket-acc'),
+                            'aliases' => ['roles', 'permissions', 'role'],
+                        ],
+                    ],
+                    'relationship_type' => [
+                        'required' => true,
+                        'allowed_types' => [
+                            'employee_staff',
+                            'grade_4',
+                        ],
+                        'aliases' => [
+                            'employee' => 'employee_staff',
+                            'grade 4' => 'grade_4',
+                            'grade_4' => 'grade_4',
+                        ],
+                    ],
+                ],
+                'permissions_modal' => [
+                    'allowlist' => [],
+                    'denylist' => [],
+                ],
+                'edit' => [
+                    'require_active_membership_for_role_updates' => false,
+                ],
             ],
             'groups' => [
-                'tag_name' => 'Roster Management',
-                'tag_case_sensitive' => false,
-                'manage_roles' => [
-                    'president',
-                    'delegate',
-                    'alternate_delegate',
-                    'council_delegate',
-                    'council_alternate_delegate',
-                    'correspondent',
+                'matching' => [
+                    'tag_name' => 'Roster Management',
+                    'tag_case_sensitive' => false,
                 ],
-                'roster_roles' => [
-                    'member',
-                    'observer',
+                'roles' => [
+                    'management' => [
+                        'president',
+                        'delegate',
+                        'alternate_delegate',
+                        'council_delegate',
+                        'council_alternate_delegate',
+                        'correspondent',
+                    ],
+                    'roster' => [
+                        'member',
+                        'observer',
+                    ],
+                    'member' => 'member',
+                    'observer' => 'observer',
+                    'seat_limited' => ['member'],
                 ],
-                'member_role' => 'member',
-                'observer_role' => 'observer',
-                'seat_limited_roles' => ['member'],
                 'list' => [
                     'page_size' => 20,
                     'member_page_size' => 15,
@@ -148,7 +290,7 @@ final class OrgManConfig
                     // Keep this at the base-plugin UTC instant format unless a site explicitly needs a custom API format.
                     'end_date_format' => 'Y-m-d\\TH:i:s\\Z',
                 ],
-                'ui' => [
+                'presentation' => [
                     'enable_group_profile_edit' => true,
                     'use_unified_member_list' => true,
                     'use_unified_member_view' => true,
@@ -160,62 +302,25 @@ final class OrgManConfig
                     ],
                 ],
             ],
-            'membership_cycle' => [
-                'strategy_key' => 'membership_cycle',
-                'permissions' => [
-                    'add_roles' => [
-                        'membership_manager',
-                    ],
-                    'remove_roles' => [
-                        'membership_manager',
-                    ],
-                    'purchase_seats_roles' => [
-                        'membership_owner',
-                        'membership_manager',
-                        'org_editor',
-                    ],
-                    'prevent_owner_removal' => true,
-                ],
-                'member_management' => [
-                    'require_explicit_membership_uuid' => true,
-                ],
-            ],
-            'additional_seats' => [
-                'enabled' => true,
-                'sku' => 'additional-seats',
-                'form_id' => 0,
-                'form_slug' => 'additional-seats',
-                'min_quantity' => 1,
-                'max_quantity' => 900,
-            ],
-            'documents' => [
-                'allowed_types' => [
-                    'pdf', 'doc', 'docx', 'xls', 'xlsx', 'jpg', 'jpeg', 'png', 'gif',
-                ],
-                'max_size' => 10 * 1024 * 1024,
-            ],
-            'business_info' => [
-                'seat_limit_info' => null,
-            ],
-            'seat_policy' => [
-                'tier_max_assignments' => [],
-                'tier_name_case_sensitive' => false,
-            ],
-            'ui' => [
+            'presentation' => [
                 'organization_list' => [
                     'page_size' => 5,
                     'use_custom_title' => false,
                     'custom_title' => '',
                 ],
-                'hide_relationship_type' => true,
-                'show_special_relationships' => false,
+                'relationships' => [
+                    'show_type' => false,
+                    'show_special_types' => false,
+                ],
                 'member_list' => [
                     'use_unified' => true,
                     'show_edit_permissions' => true,
                     'show_remove_button' => true,
                     'show_bulk_upload' => false,
-                    'display_roles_allowlist' => [],
-                    'display_roles_exclude' => [],
+                    'display_roles' => [
+                        'allowlist' => [],
+                        'denylist' => [],
+                    ],
                     'account_status' => [
                         'enabled' => true,
                         'show_unconfirmed_label' => true,
@@ -236,140 +341,62 @@ final class OrgManConfig
                     'use_unified' => true,
                     'search_clear_requires_submit' => false,
                 ],
-                'member_card_fields' => [
-                    'name' => [
-                        'enabled' => true,
-                        'label' => __('Name', 'wicket-acc'),
-                    ],
-                    'job_title' => [
-                        'enabled' => true,
-                        'label' => __('Job Title', 'wicket-acc'),
-                    ],
-                    'description' => [
-                        'enabled' => true,
-                        'label' => __('Description', 'wicket-acc'),
-                        'input_type' => 'textarea',
-                    ],
-                    'email' => [
-                        'enabled' => true,
-                        'label' => __('Email', 'wicket-acc'),
-                    ],
-                    'roles' => [
-                        'enabled' => true,
-                        'label' => __('Roles', 'wicket-acc'),
-                    ],
-                    'relationship_type' => [
-                        'enabled' => false,
-                        'label' => __('Relationship', 'wicket-acc'),
+                'member_card' => [
+                    'fields' => [
+                        'name' => [
+                            'enabled' => true,
+                            'label' => __('Name', 'wicket-acc'),
+                        ],
+                        'job_title' => [
+                            'enabled' => true,
+                            'label' => __('Job Title', 'wicket-acc'),
+                        ],
+                        'description' => [
+                            'enabled' => true,
+                            'label' => __('Description', 'wicket-acc'),
+                            'input_type' => 'textarea',
+                        ],
+                        'email' => [
+                            'enabled' => true,
+                            'label' => __('Email', 'wicket-acc'),
+                        ],
+                        'roles' => [
+                            'enabled' => true,
+                            'label' => __('Roles', 'wicket-acc'),
+                        ],
+                        'relationship_type' => [
+                            'enabled' => false,
+                            'label' => __('Relationship', 'wicket-acc'),
+                        ],
                     ],
                 ],
             ],
-            'member_addition_form' => [
-                'layout' => 'full',
-                'fields' => [
-                    'first_name' => [
-                        'enabled' => true,
-                        'required' => true,
-                        'label' => __('First Name', 'wicket-acc'),
-                    ],
-                    'last_name' => [
-                        'enabled' => true,
-                        'required' => true,
-                        'label' => __('Last Name', 'wicket-acc'),
-                    ],
-                    'email' => [
-                        'enabled' => true,
-                        'required' => true,
-                        'label' => __('Email Address', 'wicket-acc'),
-                    ],
-                    'relationship_type' => [
-                        'enabled' => false,
-                        'required' => false,
-                        'label' => __('Relationship Type', 'wicket-acc'),
-                    ],
-                    'description' => [
-                        'enabled' => true,
-                        'required' => false,
-                        'label' => __('Description', 'wicket-acc'),
-                        'input_type' => 'textarea',
-                    ],
-                    'permissions' => [
-                        'enabled' => true,
-                        'required' => true,
-                        'label' => __('Permissions', 'wicket-acc'),
-                        'allowed_roles' => [],
-                        'excluded_roles' => [],
-                    ],
+            'integrations' => [
+                'additional_seats' => [
+                    'enabled' => true,
+                    'sku' => 'additional-seats',
+                    'form_id' => 0,
+                    'form_slug' => 'additional-seats',
+                    'min_quantity' => 1,
+                    'max_quantity' => 900,
                 ],
-                'allow_relationship_type_editing' => false,
-            ],
-            'bulk_upload' => [
-                'batch_size' => 25,
-                'columns' => [
-                    'first_name' => [
-                        'enabled' => true,
-                        'required' => true,
-                        'header' => __('First Name', 'wicket-acc'),
-                        'aliases' => ['first name', 'firstname', 'first'],
-                    ],
-                    'last_name' => [
-                        'enabled' => true,
-                        'required' => true,
-                        'header' => __('Last Name', 'wicket-acc'),
-                        'aliases' => ['last name', 'lastname', 'last'],
-                    ],
-                    'email' => [
-                        'enabled' => true,
-                        'required' => true,
-                        'header' => __('Email Address', 'wicket-acc'),
-                        'aliases' => ['email address', 'email', 'e-mail'],
-                    ],
-                    'relationship_type' => [
-                        'enabled' => true,
-                        'required' => true,
-                        'header' => __('Relationship Type', 'wicket-acc'),
-                        'aliases' => ['relationship type', 'relationship'],
-                    ],
-                    'roles' => [
-                        'enabled' => true,
-                        'required' => false,
-                        'header' => __('Roles', 'wicket-acc'),
-                        'aliases' => ['roles', 'permissions', 'role'],
-                    ],
-                ],
-                'relationship_type' => [
-                    'required' => true,
+                'documents' => [
                     'allowed_types' => [
-                        'employee_staff',
-                        'grade_4',
+                        'pdf', 'doc', 'docx', 'xls', 'xlsx', 'jpg', 'jpeg', 'png', 'gif',
                     ],
-                    'aliases' => [
-                        'employee' => 'employee_staff',
-                        'grade 4' => 'grade_4',
-                        'grade_4' => 'grade_4',
-                    ],
+                    'max_size' => 10 * 1024 * 1024,
+                ],
+                'business_info' => [
+                    'seat_limit_info' => null,
+                ],
+                'notifications' => [
+                    'confirmation_email_from' => 'no-reply@wicketcloud.com',
                 ],
             ],
-            'edit_permissions_modal' => [
-                'allowed_roles' => [],
-                'excluded_roles' => [],
-            ],
-            'member_edit' => [
-                'require_active_membership_for_role_updates' => false,
-            ],
-            'notifications' => [
-                'confirmation_email_from' => 'no-reply@wicketcloud.com',
-            ],
-            'relationship_types' => [
-                'custom_types' => [
-                    'ceo' => __('CEO', 'wicket-acc'),
-                    'primary_hr_contact' => __('Primary HR Contact', 'wicket-acc'),
-                    'employee_staff' => __('Employee', 'wicket-acc'),
-                    'member_contact' => __('Member Contact', 'wicket-acc'),
-                ],
-                'special_types' => [
-                    'advertising_sponsor_contact' => __('Advertising/Sponsor Contact', 'wicket-acc'),
-                    'advertising_sponsor_billing' => __('Advertising/Sponsor Billing Contact', 'wicket-acc'),
+            'platform' => [
+                'cache' => [
+                    'enabled' => false,
+                    'duration' => 5 * 60,
                 ],
             ],
         ];

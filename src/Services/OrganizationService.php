@@ -103,7 +103,7 @@ class OrganizationService
      */
     private function getRoleOnlyAccessConfig(): array
     {
-        $permissions = $this->config['permissions'] ?? [];
+        $permissions = $this->config['access']['permissions'] ?? [];
         $role_only = $permissions['role_only_management_access'] ?? [];
 
         return is_array($role_only) ? $role_only : [];

@@ -51,7 +51,7 @@ class PermissionService
     {
         $config = \OrgManagement\Config\OrgManConfig::get();
 
-        return $config['role_labels'] ?? [];
+        return $config['access']['roles']['labels'] ?? [];
     }
 
     /**

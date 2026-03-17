@@ -76,8 +76,8 @@ if ('POST' === strtoupper($request_method)) {
         }
 
         if ($roster_mode === 'membership_cycle') {
-            $cycle_config = OrgManagement\Config\OrgManConfig::get()['membership_cycle'] ?? [];
-            $prevent_owner_removal = (bool) ($cycle_config['permissions']['prevent_owner_removal'] ?? true);
+            $cycle_config = OrgManagement\Config\OrgManConfig::get()['membership']['cycle'] ?? [];
+            $prevent_owner_removal = (bool) ($cycle_config['prevent_owner_removal'] ?? true);
             if ($prevent_owner_removal) {
                 $org_owner = $organizationService->getOrganizationOwner($org_uuid);
                 if (!is_wp_error($org_owner) && $org_owner && $org_owner->uuid === $person_uuid) {

@@ -56,7 +56,7 @@ class PermissionHelper extends Helper
     private static function get_role_only_management_access_config(): array
     {
         $config = \OrgManagement\Config\OrgManConfig::get();
-        $permissions = is_array($config['permissions'] ?? null) ? $config['permissions'] : [];
+        $permissions = is_array($config['access']['permissions'] ?? null) ? $config['access']['permissions'] : [];
         $role_only = $permissions['role_only_management_access'] ?? [];
 
         return is_array($role_only) ? $role_only : [];
@@ -375,11 +375,11 @@ class PermissionHelper extends Helper
     public static function can_add_members($org_id = null): bool
     {
         $config = \OrgManagement\Config\OrgManConfig::get();
-        $add_roles = $config['permissions']['add_members'] ?? ['membership_manager', 'membership_owner'];
-        $roster_strategy = $config['roster']['strategy'] ?? 'direct';
+        $add_roles = $config['access']['permissions']['add_member_roles'] ?? ['membership_manager', 'membership_owner'];
+        $roster_strategy = $config['membership']['strategy'] ?? 'direct';
 
         if ('membership_cycle' === $roster_strategy) {
-            $cycle_roles = $config['membership_cycle']['permissions']['add_roles'] ?? null;
+            $cycle_roles = $config['membership']['cycle']['permissions']['add_member_roles'] ?? null;
             if (is_array($cycle_roles) && !empty($cycle_roles)) {
                 $add_roles = $cycle_roles;
             }
@@ -402,11 +402,11 @@ class PermissionHelper extends Helper
     public static function can_remove_members($org_id = null): bool
     {
         $config = \OrgManagement\Config\OrgManConfig::get();
-        $remove_roles = $config['permissions']['remove_members'] ?? ['membership_manager', 'membership_owner'];
-        $roster_strategy = $config['roster']['strategy'] ?? 'direct';
+        $remove_roles = $config['access']['permissions']['remove_member_roles'] ?? ['membership_manager', 'membership_owner'];
+        $roster_strategy = $config['membership']['strategy'] ?? 'direct';
 
         if ('membership_cycle' === $roster_strategy) {
-            $cycle_roles = $config['membership_cycle']['permissions']['remove_roles'] ?? null;
+            $cycle_roles = $config['membership']['cycle']['permissions']['remove_member_roles'] ?? null;
             if (is_array($cycle_roles) && !empty($cycle_roles)) {
                 $remove_roles = $cycle_roles;
             }
@@ -470,11 +470,11 @@ class PermissionHelper extends Helper
     public static function can_purchase_seats($org_id = null): bool
     {
         $config = \OrgManagement\Config\OrgManConfig::get();
-        $purchase_roles = $config['permissions']['purchase_seats'] ?? ['membership_owner'];
-        $roster_strategy = $config['roster']['strategy'] ?? 'direct';
+        $purchase_roles = $config['access']['permissions']['purchase_seat_roles'] ?? ['membership_owner'];
+        $roster_strategy = $config['membership']['strategy'] ?? 'direct';
 
         if ('membership_cycle' === $roster_strategy) {
-            $cycle_roles = $config['membership_cycle']['permissions']['purchase_seats_roles'] ?? null;
+            $cycle_roles = $config['membership']['cycle']['permissions']['purchase_seat_roles'] ?? null;
             if (is_array($cycle_roles) && !empty($cycle_roles)) {
                 $purchase_roles = $cycle_roles;
             }

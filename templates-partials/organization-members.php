@@ -88,8 +88,11 @@ $members = $membersResult['members'] ?? [];
 $pagination = $membersResult['pagination'];
 $query = $membersResult['query'] ?? '';
 $totalMemberCount = (int) ($pagination['totalItems'] ?? count($members));
-$member_list_config = is_array($orgman_config['ui']['member_list'] ?? null)
-    ? $orgman_config['ui']['member_list']
+$presentation_config = is_array($orgman_config['presentation'] ?? null)
+    ? $orgman_config['presentation']
+    : [];
+$member_list_config = is_array($presentation_config['member_list'] ?? null)
+    ? $presentation_config['member_list']
     : [];
 $show_bulk_upload = (bool) ($member_list_config['show_bulk_upload'] ?? false);
 
@@ -118,7 +121,10 @@ if (!empty($membershipUuid)) {
 $signals = [
     'searchQuery' => $query,
 ];
-$use_unified_view = (bool) ($orgman_config['ui']['member_view']['use_unified'] ?? false);
+$member_view_config = is_array($presentation_config['member_view'] ?? null)
+    ? $presentation_config['member_view']
+    : [];
+$use_unified_view = (bool) ($member_view_config['use_unified'] ?? false);
 if ($use_unified_view) {
     $mode = (string) ($configService->getRosterMode() ?? 'direct');
     $members = $membersResult['members'] ?? [];
@@ -211,7 +217,10 @@ if (!empty($searchAction)) {
 $members_list_endpoint = $membersListEndpoint;
 	    $members_list_target = $containerId;
 	    $org_uuid_for_partial = $org_uuid;
-	    $use_unified_member_list = (bool) ($orgman_config['ui']['member_list']['use_unified'] ?? false);
+	    $member_list_config = is_array($orgman_config['presentation']['member_list'] ?? null)
+	        ? $orgman_config['presentation']['member_list']
+	        : [];
+	    $use_unified_member_list = (bool) ($member_list_config['use_unified'] ?? false);
 	    if ($use_unified_member_list) {
 	        $mode = (string) ($configService->getRosterMode() ?? 'direct');
 	        $members = $membersResult['members'] ?? [];
@@ -314,8 +323,8 @@ $members_list_endpoint = $membersListEndpoint;
 
 					<?php
 	                // Render configurable form fields
-	                $form_config = $orgman_config['member_addition_form']['fields'];
-		    $relationship_types = $orgman_config['relationship_types']['custom_types'] ?? [];
+	                $form_config = $orgman_config['member_management']['forms']['add_member']['fields'] ?? [];
+		    $relationship_types = $orgman_config['relationships']['labels']['custom'] ?? [];
 		    ?>
 
 					<?php if ($form_config['first_name']['enabled'] ?? false): ?>
@@ -378,11 +387,11 @@ $members_list_endpoint = $membersListEndpoint;
 					<?php endif; ?>
 
 					<?php
-		    $permissions_field_config = $orgman_config['member_addition_form']['fields']['permissions'] ?? [];
-		    $allowed_roles = $permissions_field_config['allowed_roles'] ?? [];
-		    $excluded_roles = $permissions_field_config['excluded_roles'] ?? [];
+		    $permissions_field_config = $orgman_config['member_management']['forms']['add_member']['fields']['permissions'] ?? [];
+		    $allowed_roles = $permissions_field_config['allowlist'] ?? [];
+		    $excluded_roles = $permissions_field_config['denylist'] ?? [];
 		    // Filter out membership_owner if configured to prevent assignment
-		    if (!empty($orgman_config['permissions']['prevent_owner_assignment'])) {
+		    if (!empty($orgman_config['access']['permissions']['prevent_owner_assignment'])) {
 		        unset($available_roles['membership_owner']);
 		    }
 		    $available_roles = \OrgManagement\Helpers\PermissionHelper::filter_role_choices(

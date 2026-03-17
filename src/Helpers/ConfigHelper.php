@@ -35,7 +35,7 @@ class ConfigHelper extends Helper
     {
         $config = self::get_config();
 
-        return $config['cache']['duration'] ?? (5 * MINUTE_IN_SECONDS);
+        return $config['platform']['cache']['duration'] ?? (5 * MINUTE_IN_SECONDS);
     }
 
     /**
@@ -47,7 +47,7 @@ class ConfigHelper extends Helper
     {
         $config = self::get_config();
 
-        return $config['roles'] ?? [];
+        return $config['access']['roles'] ?? [];
     }
 
     /**
@@ -71,11 +71,11 @@ class ConfigHelper extends Helper
     {
         $config = self::get_config();
 
-        return $config['permissions'] ?? [
-            'edit_organization' => ['org_editor'],
-            'manage_members' => ['membership_manager', 'membership_owner'],
-            'purchase_seats' => ['membership_owner', 'membership_manager', 'org_editor'],
-            'any_management' => ['org_editor', 'membership_manager', 'membership_owner'],
+        return $config['access']['permissions'] ?? [
+            'organization_edit_roles' => ['org_editor'],
+            'manage_member_roles' => ['membership_manager', 'membership_owner'],
+            'purchase_seat_roles' => ['membership_owner', 'membership_manager', 'org_editor'],
+            'any_management_roles' => ['org_editor', 'membership_manager', 'membership_owner'],
         ];
     }
 
@@ -109,7 +109,7 @@ class ConfigHelper extends Helper
     public static function get_edit_organization_roles(): array
     {
         $config = self::get_permissions_config();
-        $roles = $config['edit_organization'] ?? ['org_editor'];
+        $roles = $config['organization_edit_roles'] ?? ['org_editor'];
 
         return self::normalizeRoles($roles);
     }
@@ -122,7 +122,7 @@ class ConfigHelper extends Helper
     public static function get_manage_members_roles(): array
     {
         $config = self::get_permissions_config();
-        $roles = $config['manage_members'] ?? ['membership_manager', 'membership_owner'];
+        $roles = $config['manage_member_roles'] ?? ['membership_manager', 'membership_owner'];
 
         return self::normalizeRoles($roles);
     }
@@ -135,7 +135,7 @@ class ConfigHelper extends Helper
     public static function get_purchase_seats_roles(): array
     {
         $config = self::get_permissions_config();
-        $roles = $config['purchase_seats'] ?? ['membership_owner', 'membership_manager', 'org_editor'];
+        $roles = $config['purchase_seat_roles'] ?? ['membership_owner', 'membership_manager', 'org_editor'];
 
         return self::normalizeRoles($roles);
     }
@@ -148,7 +148,7 @@ class ConfigHelper extends Helper
     public static function get_any_management_roles(): array
     {
         $config = self::get_permissions_config();
-        $roles = $config['any_management'] ?? ['org_editor', 'membership_manager', 'membership_owner'];
+        $roles = $config['any_management_roles'] ?? ['org_editor', 'membership_manager', 'membership_owner'];
 
         return self::normalizeRoles($roles);
     }

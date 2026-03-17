@@ -14,8 +14,11 @@ $group_uuid = isset($group_uuid) ? (string) $group_uuid : '';
 $org_identifier = isset($org_identifier) ? (string) $org_identifier : '';
 
 $orgman_config = OrgManagement\Config\OrgManConfig::get();
-$view_config = $orgman_config['ui']['member_view'] ?? [];
-$groups_view_config = $orgman_config['groups']['ui'] ?? [];
+$presentation_config = is_array($orgman_config['presentation'] ?? null) ? $orgman_config['presentation'] : [];
+$view_config = is_array($presentation_config['member_view'] ?? null) ? $presentation_config['member_view'] : [];
+$member_list_config = is_array($presentation_config['member_list'] ?? null) ? $presentation_config['member_list'] : [];
+$account_status_config = is_array($member_list_config['account_status'] ?? null) ? $member_list_config['account_status'] : [];
+$groups_view_config = is_array($orgman_config['groups']['presentation'] ?? null) ? $orgman_config['groups']['presentation'] : [];
 
 $search_clear_requires_submit = (bool) ($view_config['search_clear_requires_submit'] ?? false);
 if ($mode === 'groups' && isset($groups_view_config['search_clear_requires_submit'])) {
@@ -77,13 +80,10 @@ $purchase_url = ($can_purchase_seats && $membership_uuid)
 
 $show_edit_permissions = isset($show_edit_permissions)
     ? (bool) $show_edit_permissions
-    : (bool) ($orgman_config['ui']['member_list']['show_edit_permissions'] ?? true);
+    : (bool) ($member_list_config['show_edit_permissions'] ?? true);
 if ($mode === 'groups') {
-    $show_edit_permissions = (bool) ($orgman_config['groups']['ui']['show_edit_permissions'] ?? false);
+    $show_edit_permissions = (bool) ($groups_view_config['show_edit_permissions'] ?? false);
 }
-$member_list_config = is_array($orgman_config['ui']['member_list'] ?? null)
-    ? $orgman_config['ui']['member_list']
-    : [];
 $show_remove_button_by_config = (bool) ($member_list_config['show_remove_button'] ?? true);
 $show_bulk_upload = (bool) ($member_list_config['show_bulk_upload'] ?? false);
 $show_add_member_button = true;
@@ -170,7 +170,7 @@ $clear_action = '(' . '$membersLoading' . ' = true, ' . '$searchQuery' . " = '',
 $members_list_endpoint = $members_list_endpoint;
 $members_list_target = $members_list_target;
 $show_edit_permissions = $show_edit_permissions;
-$show_account_status = (bool) (($orgman_config['ui']['member_list']['account_status']['enabled'] ?? true));
+$show_account_status = (bool) ($account_status_config['enabled'] ?? true);
 $show_add_member_button = $show_add_member_button;
 $show_remove_button = $show_remove_button;
 include __DIR__ . '/members-list-unified.php';
@@ -217,16 +217,16 @@ $remove_member_error_actions = "console.error('Failed to remove member'); \$remo
     $permissionService = new OrgManagement\Services\PermissionService();
         $available_roles = $permissionService->getAvailableRoles();
 
-        if (!empty($orgman_config['permissions']['prevent_owner_assignment'])) {
+        if (!empty($orgman_config['access']['permissions']['prevent_owner_assignment'])) {
             unset($available_roles['membership_owner']);
         }
 
-        $edit_permissions_config = $orgman_config['edit_permissions_modal'] ?? [];
-        $edit_allowed_roles = is_array($edit_permissions_config['allowed_roles'] ?? null)
-            ? $edit_permissions_config['allowed_roles']
+        $edit_permissions_config = $orgman_config['member_management']['permissions_modal'] ?? [];
+        $edit_allowed_roles = is_array($edit_permissions_config['allowlist'] ?? null)
+            ? $edit_permissions_config['allowlist']
             : [];
-        $edit_excluded_roles = is_array($edit_permissions_config['excluded_roles'] ?? null)
-            ? $edit_permissions_config['excluded_roles']
+        $edit_excluded_roles = is_array($edit_permissions_config['denylist'] ?? null)
+            ? $edit_permissions_config['denylist']
             : [];
 
         $available_roles = OrgHelpers\PermissionHelper::filter_role_choices(
@@ -235,9 +235,9 @@ $remove_member_error_actions = "console.error('Failed to remove member'); \$remo
             $edit_excluded_roles
         );
 
-        $form_config = $orgman_config['member_addition_form']['fields'] ?? [];
-        $allow_relationship_editing = $orgman_config['member_addition_form']['allow_relationship_type_editing'] ?? false;
-        $relationship_types = $orgman_config['relationship_types']['custom_types'] ?? [];
+        $form_config = $orgman_config['member_management']['forms']['add_member']['fields'] ?? [];
+        $allow_relationship_editing = $orgman_config['member_management']['forms']['add_member']['allow_relationship_type_editing'] ?? false;
+        $relationship_types = $orgman_config['relationships']['labels']['custom'] ?? [];
         $update_permissions_endpoint = OrgHelpers\template_url() . 'process/update-permissions';
         $members_list_separator = str_contains($members_list_endpoint, '?') ? '&' : '?';
         $update_permissions_local_sync_actions = "(() => { const modal = document.getElementById('editPermissionsModal'); if (!modal) return; const selected = Array.from(modal.querySelectorAll('input[name=\"roles[]\"]:checked')).map((node) => node.value); const selectedJson = JSON.stringify(selected); document.querySelectorAll('.edit-permissions-button[data-member-uuid=\"' + \$currentMemberUuid + '\"]').forEach((btn) => { btn.dataset.memberRoles = selectedJson; }); \$currentMemberRoles = selected; })();";
@@ -496,8 +496,8 @@ $remove_member_error_actions = "console.error('Failed to remove member'); \$remo
                     <input type="hidden" name="nonce" value="<?php echo esc_attr(wp_create_nonce('wicket-orgman-add-member')); ?>">
 
                     <?php
-                    $form_config = $orgman_config['member_addition_form']['fields'] ?? [];
-                $relationship_types = $orgman_config['relationship_types']['custom_types'] ?? [];
+                    $form_config = $orgman_config['member_management']['forms']['add_member']['fields'] ?? [];
+                $relationship_types = $orgman_config['relationships']['labels']['custom'] ?? [];
                 ?>
 
                     <?php if ($form_config['first_name']['enabled'] ?? false) : ?>
@@ -576,12 +576,12 @@ $remove_member_error_actions = "console.error('Failed to remove member'); \$remo
                     <?php endif; ?>
 
                     <?php
-                $permissions_field_config = $orgman_config['member_addition_form']['fields']['permissions'] ?? [];
-$allowed_roles = $permissions_field_config['allowed_roles'] ?? [];
-$excluded_roles = $permissions_field_config['excluded_roles'] ?? [];
+                $permissions_field_config = $orgman_config['member_management']['forms']['add_member']['fields']['permissions'] ?? [];
+$allowed_roles = $permissions_field_config['allowlist'] ?? [];
+$excluded_roles = $permissions_field_config['denylist'] ?? [];
 $permissionService = new OrgManagement\Services\PermissionService();
 $available_roles = $permissionService->getAvailableRoles();
-if (!empty($orgman_config['permissions']['prevent_owner_assignment'])) {
+if (!empty($orgman_config['access']['permissions']['prevent_owner_assignment'])) {
     unset($available_roles['membership_owner']);
 }
 $available_roles = OrgHelpers\PermissionHelper::filter_role_choices(

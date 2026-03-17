@@ -28,7 +28,7 @@ class RelationshipHelper extends Helper
     {
         $config = self::get_config();
 
-        return $config['relationships']['default_type'] ?? 'employee_staff';
+        return $config['relationships']['defaults']['type'] ?? 'employee_staff';
     }
 
     /**

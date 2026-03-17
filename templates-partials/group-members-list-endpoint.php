@@ -52,7 +52,16 @@ $group_members_list_endpoint = \OrgManagement\Helpers\template_url() . 'group-me
 $group_members_list_target = 'group-members-list-container-' . sanitize_html_class($group_uuid);
 
 $orgman_config = OrgManagement\Config\OrgManConfig::get();
-$use_unified_member_list = (bool) ($orgman_config['groups']['ui']['use_unified_member_list'] ?? false);
+$group_presentation = is_array($orgman_config['groups']['presentation'] ?? null)
+    ? $orgman_config['groups']['presentation']
+    : [];
+$member_list_config = is_array($orgman_config['presentation']['member_list'] ?? null)
+    ? $orgman_config['presentation']['member_list']
+    : [];
+$account_status_config = is_array($member_list_config['account_status'] ?? null)
+    ? $member_list_config['account_status']
+    : [];
+$use_unified_member_list = (bool) ($group_presentation['use_unified_member_list'] ?? false);
 if ($use_unified_member_list) {
     $mode = 'groups';
     $members = $group_members;
@@ -62,8 +71,8 @@ if ($use_unified_member_list) {
     $members_list_target = $group_members_list_target;
     $membershipService = new OrgManagement\Services\MembershipService();
     $membership_uuid = $org_uuid ? $membershipService->getMembershipForOrganization($org_uuid) : '';
-    $show_edit_permissions = (bool) ($orgman_config['groups']['ui']['show_edit_permissions'] ?? false);
-    $show_account_status = (bool) (($orgman_config['ui']['member_list']['account_status']['enabled'] ?? true));
+    $show_edit_permissions = (bool) ($group_presentation['show_edit_permissions'] ?? false);
+    $show_account_status = (bool) ($account_status_config['enabled'] ?? true);
     $show_add_member_button = true;
     $show_remove_button = true;
     include __DIR__ . '/members-list-unified.php';

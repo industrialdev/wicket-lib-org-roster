@@ -182,7 +182,7 @@ abstract class Helper
     {
         $config = self::get_config();
 
-        return $config['cache']['enabled'] ?? true;
+        return $config['platform']['cache']['enabled'] ?? true;
     }
 
     /**
@@ -194,7 +194,7 @@ abstract class Helper
     {
         $config = self::get_config();
 
-        return $config['ui']['hide_relationship_type'] ?? false;
+        return !($config['presentation']['relationships']['show_type'] ?? false);
     }
 
     /**
@@ -206,7 +206,7 @@ abstract class Helper
     {
         $config = self::get_config();
 
-        return $config['ui']['member_card_fields']['job_title']['enabled'] ?? true;
+        return $config['presentation']['member_card']['fields']['job_title']['enabled'] ?? true;
     }
 
     /**
@@ -218,7 +218,7 @@ abstract class Helper
     {
         $config = self::get_config();
 
-        return $config['ui']['member_card_fields']['description']['enabled'] ?? true;
+        return $config['presentation']['member_card']['fields']['description']['enabled'] ?? true;
     }
 
     /**
@@ -230,7 +230,7 @@ abstract class Helper
     {
         $config = self::get_config();
 
-        return $config['ui']['member_card_fields']['roles']['enabled'] ?? true;
+        return $config['presentation']['member_card']['fields']['roles']['enabled'] ?? true;
     }
 
     /**

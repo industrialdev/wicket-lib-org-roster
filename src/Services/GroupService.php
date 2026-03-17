@@ -61,7 +61,7 @@ class GroupService
      */
     public function getManageRoles(): array
     {
-        $roles = $this->getGroupsConfig()['manage_roles'] ?? [];
+        $roles = $this->getGroupsConfig()['roles']['management'] ?? [];
         if (!is_array($roles)) {
             $roles = [];
         }
@@ -81,7 +81,7 @@ class GroupService
      */
     public function getRosterRoles(): array
     {
-        $roles = $this->getGroupsConfig()['roster_roles'] ?? [];
+        $roles = $this->getGroupsConfig()['roles']['roster'] ?? [];
         if (!is_array($roles)) {
             $roles = [];
         }
@@ -101,7 +101,7 @@ class GroupService
      */
     public function getRosterTagName(): string
     {
-        $tag = (string) ($this->getGroupsConfig()['tag_name'] ?? '');
+        $tag = (string) ($this->getGroupsConfig()['matching']['tag_name'] ?? '');
         $tag = trim($tag);
         $this->getLogger()->debug('[OrgRoster] Roster tag name', [
             'source' => 'wicket-orgman',

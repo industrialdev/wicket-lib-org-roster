@@ -35,8 +35,8 @@ $message_dom_suffix_source = $org_uuid !== '' ? $org_uuid : ($group_uuid !== '' 
 $org_dom_suffix = sanitize_html_class($message_dom_suffix_source);
 $message_target = '#bulk-upload-messages-' . $org_dom_suffix;
 $orgman_config = OrgManagement\Config\OrgManConfig::get();
-$member_list_config = is_array($orgman_config['ui']['member_list'] ?? null)
-    ? $orgman_config['ui']['member_list']
+$member_list_config = is_array($orgman_config['presentation']['member_list'] ?? null)
+    ? $orgman_config['presentation']['member_list']
     : [];
 $bulk_upload_enabled = (bool) ($member_list_config['show_bulk_upload'] ?? false);
 

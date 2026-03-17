@@ -81,7 +81,7 @@ class MembershipService
             return null;
         }
 
-        $preferCurrentCycle = (bool) ($this->config['feature_flags']['membership_resolution_prefer_current_cycle'] ?? false);
+        $preferCurrentCycle = (bool) ($this->config['membership']['resolution']['prefer_current_cycle'] ?? false);
         if ($preferCurrentCycle) {
             $currentCycleUuid = $this->resolveCurrentCycleMembershipUuid($memberships);
             if ($currentCycleUuid !== null) {
@@ -241,7 +241,7 @@ class MembershipService
         $cached_data = false;
 
         // Only check cache if enabled
-        if ($this->config['cache']['enabled'] ?? true) {
+        if ($this->config['platform']['cache']['enabled'] ?? true) {
             $cached_data = get_transient($cache_key);
         }
 
@@ -252,8 +252,8 @@ class MembershipService
         $resolved = $this->getOrganizationMembershipUuid($organizationUuid);
         if ($resolved) {
             // Only cache if enabled
-            if ($this->config['cache']['enabled'] ?? true) {
-                $cache_duration = $this->config['cache']['duration'] ?? (5 * MINUTE_IN_SECONDS);
+            if ($this->config['platform']['cache']['enabled'] ?? true) {
+                $cache_duration = $this->config['platform']['cache']['duration'] ?? (5 * MINUTE_IN_SECONDS);
                 set_transient($cache_key, $resolved, $cache_duration);
             }
 
@@ -262,8 +262,8 @@ class MembershipService
 
         if (empty($organizationUuid) || !function_exists('wicket_get_current_person_memberships')) {
             // Only cache if enabled
-            if ($this->config['cache']['enabled'] ?? true) {
-                $cache_duration = $this->config['cache']['duration'] ?? (5 * MINUTE_IN_SECONDS);
+            if ($this->config['platform']['cache']['enabled'] ?? true) {
+                $cache_duration = $this->config['platform']['cache']['duration'] ?? (5 * MINUTE_IN_SECONDS);
                 set_transient($cache_key, null, $cache_duration);
             }
 
@@ -273,8 +273,8 @@ class MembershipService
         $memberships = wicket_get_current_person_memberships();
         if (empty($memberships['included']) || !is_array($memberships['included'])) {
             // Only cache if enabled
-            if ($this->config['cache']['enabled'] ?? true) {
-                $cache_duration = $this->config['cache']['duration'] ?? (5 * MINUTE_IN_SECONDS);
+            if ($this->config['platform']['cache']['enabled'] ?? true) {
+                $cache_duration = $this->config['platform']['cache']['duration'] ?? (5 * MINUTE_IN_SECONDS);
                 set_transient($cache_key, null, $cache_duration);
             }
 
@@ -291,8 +291,8 @@ class MembershipService
                 $isActive = $included['attributes']['active'] ?? null;
                 if ($isActive) {
                     // Only cache if enabled
-                    if ($this->config['cache']['enabled'] ?? true) {
-                        $cache_duration = $this->config['cache']['duration'] ?? (5 * MINUTE_IN_SECONDS);
+                    if ($this->config['platform']['cache']['enabled'] ?? true) {
+                        $cache_duration = $this->config['platform']['cache']['duration'] ?? (5 * MINUTE_IN_SECONDS);
                         set_transient($cache_key, $included['id'], $cache_duration);
                     }
 
@@ -305,8 +305,8 @@ class MembershipService
         }
 
         // Only cache if enabled
-        if ($this->config['cache']['enabled'] ?? true) {
-            $cache_duration = $this->config['cache']['duration'] ?? (5 * MINUTE_IN_SECONDS);
+        if ($this->config['platform']['cache']['enabled'] ?? true) {
+            $cache_duration = $this->config['platform']['cache']['duration'] ?? (5 * MINUTE_IN_SECONDS);
             set_transient($cache_key, $fallback, $cache_duration);
         }
 
@@ -330,7 +330,7 @@ class MembershipService
         $cached_data = false;
 
         // Only check cache if enabled
-        if ($this->config['cache']['enabled'] ?? true) {
+        if ($this->config['platform']['cache']['enabled'] ?? true) {
             $cached_data = get_transient($cache_key);
         }
 
@@ -340,8 +340,8 @@ class MembershipService
 
         if (!function_exists('wicket_api_client')) {
             // Only cache if enabled
-            if ($this->config['cache']['enabled'] ?? true) {
-                $cache_duration = $this->config['cache']['duration'] ?? (5 * MINUTE_IN_SECONDS);
+            if ($this->config['platform']['cache']['enabled'] ?? true) {
+                $cache_duration = $this->config['platform']['cache']['duration'] ?? (5 * MINUTE_IN_SECONDS);
                 set_transient($cache_key, null, $cache_duration);
             }
 
@@ -355,16 +355,16 @@ class MembershipService
             $data = isset($response['data']) ? $response : null;
 
             // Cache the results using configured duration
-            if ($this->config['cache']['enabled'] ?? true) {
-                $cache_duration = $this->config['cache']['duration'] ?? (5 * MINUTE_IN_SECONDS);
+            if ($this->config['platform']['cache']['enabled'] ?? true) {
+                $cache_duration = $this->config['platform']['cache']['duration'] ?? (5 * MINUTE_IN_SECONDS);
                 set_transient($cache_key, $data, $cache_duration);
             }
 
             return $data;
         } catch (\Throwable $e) {
             // Only cache if enabled
-            if ($this->config['cache']['enabled'] ?? true) {
-                $cache_duration = $this->config['cache']['duration'] ?? (5 * MINUTE_IN_SECONDS);
+            if ($this->config['platform']['cache']['enabled'] ?? true) {
+                $cache_duration = $this->config['platform']['cache']['duration'] ?? (5 * MINUTE_IN_SECONDS);
                 set_transient($cache_key, null, $cache_duration);
             }
 
@@ -460,7 +460,7 @@ class MembershipService
      */
     private function getTierMappedMaxAssignments(array $membershipData): ?int
     {
-        $tierMap = $this->config['seat_policy']['tier_max_assignments'] ?? [];
+        $tierMap = $this->config['membership']['seat_limits']['tier_max_assignments'] ?? [];
         if (!is_array($tierMap) || empty($tierMap)) {
             return null;
         }
@@ -470,7 +470,7 @@ class MembershipService
             return null;
         }
 
-        $caseSensitive = (bool) ($this->config['seat_policy']['tier_name_case_sensitive'] ?? false);
+        $caseSensitive = (bool) ($this->config['membership']['seat_limits']['tier_name_case_sensitive'] ?? false);
         if ($caseSensitive) {
             if (!array_key_exists($tierName, $tierMap)) {
                 return null;

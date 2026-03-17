@@ -31,8 +31,8 @@ if ($content_dir !== '' && strpos($library_base_path, $content_dir) === 0) {
 $library_base_url = trailingslashit((string) apply_filters('wicket/acc/orgman/base_url', $library_base_url));
 $csv_template_url = $library_base_url . 'public/templates/roster_template.csv';
 $orgman_config = OrgManagement\Config\OrgManConfig::get();
-$bulk_upload_config = is_array($orgman_config['bulk_upload'] ?? null)
-    ? $orgman_config['bulk_upload']
+$bulk_upload_config = is_array($orgman_config['member_management']['bulk_upload'] ?? null)
+    ? $orgman_config['member_management']['bulk_upload']
     : [];
 $bulk_columns_config = is_array($bulk_upload_config['columns'] ?? null)
     ? $bulk_upload_config['columns']

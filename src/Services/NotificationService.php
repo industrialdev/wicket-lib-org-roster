@@ -262,7 +262,7 @@ class NotificationService
 
             // Get configuration for email
             $config = \OrgManagement\Config\OrgManConfig::get();
-            $confirmation_email_from = $config['notifications']['confirmation_email_from'] ?? 'no-reply@wicketcloud.com';
+            $confirmation_email_from = $config['integrations']['notifications']['confirmation_email_from'] ?? 'no-reply@wicketcloud.com';
 
             $first_name = $person->given_name ?? '';
             $last_name = $person->family_name ?? '';
@@ -425,7 +425,7 @@ class NotificationService
 
             // Get configuration for email
             $config = \OrgManagement\Config\OrgManConfig::get();
-            $confirmation_email_from = $config['notifications']['confirmation_email_from'] ?? 'no-reply@wicketcloud.com';
+            $confirmation_email_from = $config['integrations']['notifications']['confirmation_email_from'] ?? 'no-reply@wicketcloud.com';
 
             // Generate email content based on notification type
             switch ($notification_type) {

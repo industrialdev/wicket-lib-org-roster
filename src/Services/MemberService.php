@@ -609,7 +609,7 @@ class MemberService
      */
     private function getRoleSlugAliases(): array
     {
-        $configuredAliases = (array) ($this->config['roles']['aliases'] ?? []);
+        $configuredAliases = (array) ($this->config['access']['roles']['aliases'] ?? []);
 
         $aliases = [];
         foreach ($configuredAliases as $sourceRole => $targetRole) {
@@ -954,11 +954,11 @@ class MemberService
             }
         }
 
-        $allowedTypes = $this->normalizeRelationshipTypeList((array) ($this->config['relationships']['allowed_relationship_types'] ?? []));
-        $excludedTypes = $this->normalizeRelationshipTypeList((array) ($this->config['relationships']['exclude_relationship_types'] ?? []));
-        $displayRoleAllowlist = $this->normalizeRoleList((array) ($this->config['ui']['member_list']['display_roles_allowlist'] ?? []));
-        $displayRoleExcludes = $this->normalizeRoleList((array) ($this->config['ui']['member_list']['display_roles_exclude'] ?? []));
-        $relationshipTypeLabels = (array) ($this->config['relationship_types']['custom_types'] ?? []);
+        $allowedTypes = $this->normalizeRelationshipTypeList((array) ($this->config['relationships']['filters']['allowlist'] ?? []));
+        $excludedTypes = $this->normalizeRelationshipTypeList((array) ($this->config['relationships']['filters']['denylist'] ?? []));
+        $displayRoleAllowlist = $this->normalizeRoleList((array) ($this->config['presentation']['member_list']['display_roles']['allowlist'] ?? []));
+        $displayRoleExcludes = $this->normalizeRoleList((array) ($this->config['presentation']['member_list']['display_roles']['denylist'] ?? []));
+        $relationshipTypeLabels = (array) ($this->config['relationships']['labels']['custom'] ?? []);
 
         $membersByPerson = [];
         $membersWithoutPerson = [];
@@ -1060,7 +1060,7 @@ class MemberService
             if ($personUuid) {
                 try {
                     $connections = $this->connectionService()->getPersonConnectionsById($personUuid);
-                    $activeOnlyConnections = (bool) ($this->config['relationships']['member_card_active_only'] ?? false);
+                    $activeOnlyConnections = (bool) ($this->config['relationships']['display']['member_card_active_only'] ?? false);
                     if (is_array($connections) && !empty($connections['data'])) {
                         foreach ($connections['data'] as $conn) {
                             $orgId = $conn['relationships']['organization']['data']['id'] ?? null;
@@ -1532,7 +1532,7 @@ class MemberService
                 return new \WP_Error('membership_not_found', 'Person membership not found in this organization.');
             }
 
-            $require_active_membership = (bool) ($this->config['member_edit']['require_active_membership_for_role_updates'] ?? false);
+            $require_active_membership = (bool) ($this->config['member_management']['edit']['require_active_membership_for_role_updates'] ?? false);
             if ($require_active_membership) {
                 $has_active_row = false;
                 foreach ($person_memberships as $membership) {
@@ -1729,11 +1729,11 @@ class MemberService
 
             // Check if we should automatically update roles based on relationship type
             $config = \OrgManagement\Config\OrgManConfig::get();
-            $relationship_based_permissions = $config['permissions']['relationship_based_permissions'] ?? false;
+            $relationship_based_permissions = $config['access']['permissions']['relationship_grants']['enabled'] ?? false;
 
             if ($relationship_based_permissions) {
                 // Get the role mapping for this relationship type
-                $relationship_roles_map = $config['permissions']['relationship_roles_map'] ?? [];
+                $relationship_roles_map = $config['access']['permissions']['relationship_grants']['roles_by_type'] ?? [];
                 $new_roles = $relationship_roles_map[$relationshipType] ?? [];
 
                 // Get all possible relationship-type-based roles

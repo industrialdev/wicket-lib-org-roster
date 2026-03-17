@@ -129,7 +129,7 @@ class GroupsStrategy implements RosterManagementStrategy
                     $relationship_type = is_string($relationship_type) ? sanitize_key($relationship_type) : '';
                     $relationship_description = $context['relationship_description'] ?? $member_data['relationship_description'] ?? '';
                     $relationship_description = is_string($relationship_description) ? sanitize_textarea_field($relationship_description) : '';
-                    $custom_types = $config['relationship_types']['custom_types'] ?? [];
+                    $custom_types = $config['relationships']['labels']['custom'] ?? [];
                     if ($relationship_type && !empty($custom_types) && !array_key_exists($relationship_type, $custom_types)) {
                         $relationship_type = '';
                     }
@@ -159,9 +159,10 @@ class GroupsStrategy implements RosterManagementStrategy
 
             $orgman_config = \OrgManagement\Config\OrgManConfig::get();
             $groups_config = is_array($orgman_config['groups'] ?? null) ? $orgman_config['groups'] : [];
-            $seat_limited_roles = is_array($groups_config['seat_limited_roles'] ?? null)
-                ? $groups_config['seat_limited_roles']
-                : [$groups_config['member_role'] ?? 'member'];
+            $group_roles = is_array($groups_config['roles'] ?? null) ? $groups_config['roles'] : [];
+            $seat_limited_roles = is_array($group_roles['seat_limited'] ?? null)
+                ? $group_roles['seat_limited']
+                : [$group_roles['member'] ?? 'member'];
 
             if (in_array($role_slug, $seat_limited_roles, true)) {
                 $existing_members = $this->groupService()->getGroupMembers($group_uuid, $org_identifier, [
@@ -289,7 +290,8 @@ class GroupsStrategy implements RosterManagementStrategy
 
             $orgman_config = \OrgManagement\Config\OrgManConfig::get();
             $groups_config = is_array($orgman_config['groups'] ?? null) ? $orgman_config['groups'] : [];
-            $manage_roles = is_array($groups_config['manage_roles'] ?? null) ? $groups_config['manage_roles'] : [];
+            $group_roles = is_array($groups_config['roles'] ?? null) ? $groups_config['roles'] : [];
+            $manage_roles = is_array($group_roles['management'] ?? null) ? $group_roles['management'] : [];
             if ($role_slug && in_array($role_slug, $manage_roles, true)) {
                 $logger->warning('[OrgRoster] Groups strategy attempted to remove managing role', array_merge($log_context, [
                     'role' => $role_slug,

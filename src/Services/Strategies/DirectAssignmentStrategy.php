@@ -91,18 +91,18 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
 
             // Get configuration for member addition settings
             $config = \OrgManagement\Config\OrgManConfig::get();
-            $base_member_role = $config['member_addition']['base_member_role'] ?? 'member';
-            $auto_assign_roles = $config['member_addition']['auto_assign_roles'] ?? [];
+            $base_member_role = $config['member_management']['addition']['base_member_role'] ?? 'member';
+            $auto_assign_roles = $config['member_management']['addition']['auto_assign_roles'] ?? [];
 
             // Use relationship type from context if provided, otherwise use config default
             $relationship_type = !empty($context['relationship_type'])
                 ? $context['relationship_type']
-                : ($config['relationships']['member_addition_type'] ?? 'position');
+                : ($config['relationships']['addition']['type'] ?? 'position');
             $relationship_description = $context['relationship_description'] ?? $member_data['relationship_description'] ?? '';
             $relationship_description = is_string($relationship_description) ? sanitize_textarea_field($relationship_description) : '';
 
             // Map custom relationship types to Wicket API types if needed
-            $custom_types = $config['relationship_types']['custom_types'] ?? [];
+            $custom_types = $config['relationships']['labels']['custom'] ?? [];
             if (isset($custom_types[$relationship_type])) {
                 // This is a custom relationship type - we'll use it as-is
                 // Future enhancement: map to actual Wicket relationship types if needed
@@ -349,7 +349,7 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
 
         // Filter out membership_owner if configured to prevent assignment
         $config = \OrgManagement\Config\OrgManConfig::get();
-        if (!empty($config['permissions']['prevent_owner_assignment'])) {
+        if (!empty($config['access']['permissions']['prevent_owner_assignment'])) {
             $roles = array_values(array_diff($roles, ['membership_owner']));
         }
 
@@ -714,7 +714,7 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
 
         // Get configuration for email
         $config = \OrgManagement\Config\OrgManConfig::get();
-        $confirmation_email_from = $config['notifications']['confirmation_email_from'] ?? 'no-reply@wicketcloud.com';
+        $confirmation_email_from = $config['integrations']['notifications']['confirmation_email_from'] ?? 'no-reply@wicketcloud.com';
 
         $body = sprintf(
             "Hi %s,<br>

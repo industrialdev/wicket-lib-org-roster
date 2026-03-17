@@ -44,26 +44,33 @@ $total_pages = max(1, $total_pages);
 $page = min(max(1, $page), $total_pages);
 
 $orgman_config = OrgManagement\Config\OrgManConfig::get();
-$role_display_map = $orgman_config['role_labels'] ?? [];
-$ui_config = $orgman_config['ui']['member_list'] ?? [];
-$show_edit_permissions_default = (bool) ($ui_config['show_edit_permissions'] ?? true);
-$show_remove_button_default = (bool) ($ui_config['show_remove_button'] ?? true);
-$seat_limit_message = (string) ($ui_config['seat_limit_message'] ?? __('All seats have been assigned. Please purchase additional seats to add more members.', 'wicket-acc'));
-$remove_policy_callout = is_array($ui_config['remove_policy_callout'] ?? null)
-    ? $ui_config['remove_policy_callout']
+$role_display_map = $orgman_config['access']['roles']['labels'] ?? [];
+$presentation_config = is_array($orgman_config['presentation'] ?? null)
+    ? $orgman_config['presentation']
+    : [];
+$member_list_config = is_array($presentation_config['member_list'] ?? null)
+    ? $presentation_config['member_list']
+    : [];
+$show_edit_permissions_default = (bool) ($member_list_config['show_edit_permissions'] ?? true);
+$show_remove_button_default = (bool) ($member_list_config['show_remove_button'] ?? true);
+$seat_limit_message = (string) ($member_list_config['seat_limit_message'] ?? __('All seats have been assigned. Please purchase additional seats to add more members.', 'wicket-acc'));
+$remove_policy_callout = is_array($member_list_config['remove_policy_callout'] ?? null)
+    ? $member_list_config['remove_policy_callout']
     : [];
 $remove_policy_callout_placement = (string) ($remove_policy_callout['placement'] ?? 'above_members');
 $show_edit_permissions = isset($show_edit_permissions)
     ? (bool) $show_edit_permissions
     : $show_edit_permissions_default;
 
-$groups_ui_config = $orgman_config['groups']['ui'] ?? [];
-if ($mode === 'groups' && isset($groups_ui_config['show_edit_permissions'])) {
-    $show_edit_permissions = (bool) $groups_ui_config['show_edit_permissions'];
+$groups_presentation_config = is_array($orgman_config['groups']['presentation'] ?? null)
+    ? $orgman_config['groups']['presentation']
+    : [];
+if ($mode === 'groups' && isset($groups_presentation_config['show_edit_permissions'])) {
+    $show_edit_permissions = (bool) $groups_presentation_config['show_edit_permissions'];
 }
 
-$account_status_config = is_array($ui_config['account_status'] ?? null)
-    ? $ui_config['account_status']
+$account_status_config = is_array($member_list_config['account_status'] ?? null)
+    ? $member_list_config['account_status']
     : [];
 $show_account_status_default = (bool) ($account_status_config['enabled'] ?? true);
 $show_account_status = isset($show_account_status) ? (bool) $show_account_status : $show_account_status_default;
@@ -75,7 +82,7 @@ $show_add_member_button = isset($show_add_member_button) ? (bool) $show_add_memb
 $show_remove_button = isset($show_remove_button) ? (bool) $show_remove_button : $show_remove_button_default;
 $show_bulk_upload = isset($show_bulk_upload)
     ? (bool) $show_bulk_upload
-    : (bool) ($ui_config['show_bulk_upload'] ?? false);
+    : (bool) ($member_list_config['show_bulk_upload'] ?? false);
 
 $base_query_args = [
     'org_uuid' => $org_uuid,

@@ -52,7 +52,7 @@ class ConfigurationController
             // Get config value directly to avoid recursion
             $config_data = \OrgManagement\Config\OrgManConfig::get();
 
-            return $config_data['additional_seats']['enabled'] ?? true;
+            return $config_data['integrations']['additional_seats']['enabled'] ?? true;
         });
 
         // Set the SKU for additional seats product
@@ -60,16 +60,16 @@ class ConfigurationController
             // Get config value directly to avoid recursion
             $config_data = \OrgManagement\Config\OrgManConfig::get();
 
-            return $config_data['additional_seats']['sku'] ?? 'additional-seats';
+            return $config_data['integrations']['additional_seats']['sku'] ?? 'additional-seats';
         });
 
         // Set the Gravity Form ID for additional seats purchase
         add_filter('wicket/acc/orgman/additional_seats_form_id', function ($form_id) use ($config) {
             // Get config value directly to avoid recursion, but still support auto-detection if set to 0
             $config_data = \OrgManagement\Config\OrgManConfig::get();
-            $default_form_id = $config_data['additional_seats']['form_id'] ?? 0;
+            $default_form_id = $config_data['integrations']['additional_seats']['form_id'] ?? 0;
             if ($default_form_id === 0 && function_exists('wicket_gf_get_form_id_by_slug')) {
-                $slug = $config_data['additional_seats']['form_slug'] ?? 'additional-seats';
+                $slug = $config_data['integrations']['additional_seats']['form_slug'] ?? 'additional-seats';
                 $slug = is_string($slug) ? trim($slug) : '';
                 $detected_form_id = $slug !== '' ? wicket_gf_get_form_id_by_slug($slug) : 0;
 
@@ -84,7 +84,7 @@ class ConfigurationController
             // Get config value directly to avoid recursion
             $config_data = \OrgManagement\Config\OrgManConfig::get();
 
-            return $config_data['additional_seats']['min_quantity'] ?? 1;
+            return $config_data['integrations']['additional_seats']['min_quantity'] ?? 1;
         });
 
         // Set a maximum quantity for additional seats purchase
@@ -92,7 +92,7 @@ class ConfigurationController
             // Get config value directly to avoid recursion
             $config_data = \OrgManagement\Config\OrgManConfig::get();
 
-            return $config_data['additional_seats']['max_quantity'] ?? 100;
+            return $config_data['integrations']['additional_seats']['max_quantity'] ?? 100;
         });
     }
 

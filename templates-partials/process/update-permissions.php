@@ -58,14 +58,14 @@ if ('POST' === strtoupper($request_method)) {
 
         // First update relationship type if provided and enabled
         $config = OrgManagement\Config\OrgManConfig::get();
-        $edit_permissions_config = $config['edit_permissions_modal'] ?? [];
-        $edit_allowed_roles = is_array($edit_permissions_config['allowed_roles'] ?? null)
-            ? $edit_permissions_config['allowed_roles']
+        $edit_permissions_config = $config['member_management']['permissions_modal'] ?? [];
+        $edit_allowed_roles = is_array($edit_permissions_config['allowlist'] ?? null)
+            ? $edit_permissions_config['allowlist']
             : [];
-        $edit_excluded_roles = is_array($edit_permissions_config['excluded_roles'] ?? null)
-            ? $edit_permissions_config['excluded_roles']
+        $edit_excluded_roles = is_array($edit_permissions_config['denylist'] ?? null)
+            ? $edit_permissions_config['denylist']
             : [];
-        if (!empty($config['permissions']['prevent_owner_assignment'])) {
+        if (!empty($config['access']['permissions']['prevent_owner_assignment'])) {
             $edit_excluded_roles[] = 'membership_owner';
         }
         $roles = OrgManagement\Helpers\PermissionHelper::filter_role_submission(
@@ -74,8 +74,8 @@ if ('POST' === strtoupper($request_method)) {
             $edit_excluded_roles
         );
 
-        $allow_relationship_editing = $config['member_addition_form']['allow_relationship_type_editing'] ?? false;
-        $form_fields = $config['member_addition_form']['fields'] ?? [];
+        $allow_relationship_editing = $config['member_management']['forms']['add_member']['allow_relationship_type_editing'] ?? false;
+        $form_fields = $config['member_management']['forms']['add_member']['fields'] ?? [];
         $allow_description_editing = $form_fields['description']['enabled'] ?? false;
 
         if ($allow_relationship_editing && !empty($relationship_type)) {

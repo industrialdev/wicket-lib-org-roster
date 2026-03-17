@@ -68,8 +68,11 @@ $update_permissions_success_actions = "console.log('Permissions updated successf
 $remove_member_success_actions = "console.log('Member removed successfully'); $removeMemberSubmitting = false; $removeMemberSuccess = true; $membersLoading = false; @get('{$members_list_endpoint}{$members_list_separator}org_uuid={$encodedOrgUuid}{$membership_query_fragment}&page=1') >> select('#{$members_list_target}') | set(html);";
 
 $orgman_config = OrgManagement\Config\OrgManConfig::get();
-$member_list_config = is_array($orgman_config['ui']['member_list'] ?? null)
-    ? $orgman_config['ui']['member_list']
+$presentation_config = is_array($orgman_config['presentation'] ?? null)
+    ? $orgman_config['presentation']
+    : [];
+$member_list_config = is_array($presentation_config['member_list'] ?? null)
+    ? $presentation_config['member_list']
     : [];
 $show_remove_button_by_config = (bool) ($member_list_config['show_remove_button'] ?? true);
 $show_bulk_upload = (bool) ($member_list_config['show_bulk_upload'] ?? false);
@@ -86,7 +89,7 @@ $show_unconfirmed_label = (bool) ($account_status_config['show_unconfirmed_label
 $confirmed_tooltip = (string) ($account_status_config['confirmed_tooltip'] ?? __('Account confirmed', 'wicket-acc'));
 $unconfirmed_tooltip = (string) ($account_status_config['unconfirmed_tooltip'] ?? __('Account not confirmed', 'wicket-acc'));
 $unconfirmed_label = (string) ($account_status_config['unconfirmed_label'] ?? __('Account not confirmed', 'wicket-acc'));
-$use_unified_member_list = (bool) ($orgman_config['ui']['member_list']['use_unified'] ?? false);
+$use_unified_member_list = (bool) ($member_list_config['use_unified'] ?? false);
 
 if ((!isset($members) || !is_array($members)) && !empty($org_uuid)) {
     $configService = new OrgManagement\Services\ConfigService();
@@ -159,19 +162,19 @@ $permissionService = new OrgManagement\Services\PermissionService();
 $available_roles = $permissionService->getAvailableRoles();
 
 // Load config for relationship type editing
-$role_display_map = $orgman_config['role_labels'] ?? [];
+$role_display_map = $orgman_config['access']['roles']['labels'] ?? [];
 
 // Filter out membership_owner if configured to prevent assignment
-if (!empty($orgman_config['permissions']['prevent_owner_assignment'])) {
+if (!empty($orgman_config['access']['permissions']['prevent_owner_assignment'])) {
     unset($available_roles['membership_owner']);
 }
 
-$edit_permissions_config = $orgman_config['edit_permissions_modal'] ?? [];
-$edit_allowed_roles = is_array($edit_permissions_config['allowed_roles'] ?? null)
-    ? $edit_permissions_config['allowed_roles']
+$edit_permissions_config = $orgman_config['member_management']['permissions_modal'] ?? [];
+$edit_allowed_roles = is_array($edit_permissions_config['allowlist'] ?? null)
+    ? $edit_permissions_config['allowlist']
     : [];
-$edit_excluded_roles = is_array($edit_permissions_config['excluded_roles'] ?? null)
-    ? $edit_permissions_config['excluded_roles']
+$edit_excluded_roles = is_array($edit_permissions_config['denylist'] ?? null)
+    ? $edit_permissions_config['denylist']
     : [];
 
 $available_roles = OrgHelpers\PermissionHelper::filter_role_choices(
@@ -180,8 +183,8 @@ $available_roles = OrgHelpers\PermissionHelper::filter_role_choices(
     $edit_excluded_roles
 );
 
-$allow_relationship_editing = $orgman_config['member_addition_form']['allow_relationship_type_editing'] ?? false;
-$relationship_types = $orgman_config['relationship_types']['custom_types'] ?? [];
+$allow_relationship_editing = $orgman_config['member_management']['forms']['add_member']['allow_relationship_type_editing'] ?? false;
+$relationship_types = $orgman_config['relationships']['labels']['custom'] ?? [];
 $show_remove_button = $show_remove_button_by_config && OrgHelpers\PermissionHelper::can_remove_members($org_uuid);
 $show_remove_policy_callout = (
     !$show_remove_button

@@ -66,8 +66,8 @@ class BulkMemberUploadService
         string $group_uuid = ''
     ) {
         $config = \OrgManagement\Config\OrgManConfig::get();
-        $bulk_upload_config = is_array($config['bulk_upload'] ?? null)
-            ? $config['bulk_upload']
+        $bulk_upload_config = is_array($config['member_management']['bulk_upload'] ?? null)
+            ? $config['member_management']['bulk_upload']
             : [];
         $bulk_column_definitions = $this->getBulkColumnDefinitions($bulk_upload_config);
 
@@ -326,20 +326,20 @@ class BulkMemberUploadService
         }
 
         $config = \OrgManagement\Config\OrgManConfig::get();
-        $bulk_upload_config = is_array($config['bulk_upload'] ?? null)
-            ? $config['bulk_upload']
+        $bulk_upload_config = is_array($config['member_management']['bulk_upload'] ?? null)
+            ? $config['member_management']['bulk_upload']
             : [];
         $bulk_column_definitions = $this->getBulkColumnDefinitions($bulk_upload_config);
         $relationship_bulk_config = is_array($bulk_upload_config['relationship_type'] ?? null)
             ? $bulk_upload_config['relationship_type']
             : [];
 
-        $permissions_field_config = $config['member_addition_form']['fields']['permissions'] ?? [];
-        $allowed_roles = is_array($permissions_field_config['allowed_roles'] ?? null)
-            ? $permissions_field_config['allowed_roles']
+        $permissions_field_config = $config['member_management']['forms']['add_member']['fields']['permissions'] ?? [];
+        $allowed_roles = is_array($permissions_field_config['allowlist'] ?? null)
+            ? $permissions_field_config['allowlist']
             : [];
-        $excluded_roles = is_array($permissions_field_config['excluded_roles'] ?? null)
-            ? $permissions_field_config['excluded_roles']
+        $excluded_roles = is_array($permissions_field_config['denylist'] ?? null)
+            ? $permissions_field_config['denylist']
             : [];
 
         $relationship_column_enabled = (bool) ($bulk_column_definitions['relationship_type']['enabled'] ?? false);
@@ -356,8 +356,8 @@ class BulkMemberUploadService
         $relationship_aliases = is_array($relationship_bulk_config['aliases'] ?? null)
             ? $relationship_bulk_config['aliases']
             : [];
-        $relationship_types_map = is_array($config['relationship_types']['custom_types'] ?? null)
-            ? $config['relationship_types']['custom_types']
+        $relationship_types_map = is_array($config['relationships']['labels']['custom'] ?? null)
+            ? $config['relationships']['labels']['custom']
             : [];
         $relationship_lookup = $this->buildRelationshipLookup($relationship_types_map, $relationship_aliases);
 
@@ -506,7 +506,7 @@ class BulkMemberUploadService
 
             if ((string) ($job['roster_mode'] ?? '') === 'groups') {
                 $group_uuid = (string) ($job['group_uuid'] ?? '');
-                $default_group_role = sanitize_key((string) (($config['groups']['member_role'] ?? 'member')));
+                $default_group_role = sanitize_key((string) (($config['groups']['roles']['member'] ?? 'member')));
                 $roster_roles = $group_service_instance instanceof GroupService
                     ? $group_service_instance->getRosterRoles()
                     : [];
