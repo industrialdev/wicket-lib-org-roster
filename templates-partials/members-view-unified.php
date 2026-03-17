@@ -201,9 +201,20 @@ include __DIR__ . '/members-list-unified.php';
     <?php endif; ?>
 
     <?php
-$add_member_success_actions = "console.log('Member added successfully'); \$addMemberSubmitting = false; \$membersLoading = false; \$addMemberSuccess = true;";
-$add_member_modal_reset_actions = "(() => { const modal = document.getElementById('membersAddModal'); if (!modal) return; const form = modal.querySelector('form'); if (form) form.reset(); const messages = modal.querySelector('[id^=\"add-member-messages-\"]'); if (messages) messages.innerHTML = ''; })();";
+$groups_config = is_array($orgman_config['groups'] ?? null) ? $orgman_config['groups'] : [];
+$groups_presentation = is_array($groups_config['presentation'] ?? null)
+    ? $groups_config['presentation']
+    : (is_array($groups_config['ui'] ?? null) ? $groups_config['ui'] : []);
+$group_add_member_auto_close_on_success = (bool) ($groups_presentation['add_member_auto_close_on_success'] ?? false);
+$group_add_member_auto_close_delay_seconds = max(0, (int) ($groups_presentation['add_member_auto_close_delay_seconds'] ?? 7));
+$group_add_member_auto_close_delay_ms = $group_add_member_auto_close_delay_seconds * 1000;
+$add_member_modal_reset_actions = "(() => { const modal = document.getElementById('membersAddModal'); if (!modal) return; if (modal.orgmanAutoCloseTimer) { window.clearTimeout(modal.orgmanAutoCloseTimer); modal.orgmanAutoCloseTimer = null; } const form = modal.querySelector('form'); if (form) form.reset(); const messages = modal.querySelector('[id^=\"add-member-messages-\"]'); if (messages) messages.innerHTML = ''; })();";
 $add_member_close_actions = "\$membersLoading = false; \$addMemberSubmitting = false; \$addMemberSuccess = false; \$addMemberModalOpen = false; {$add_member_modal_reset_actions}";
+$add_member_success_actions = "console.log('Member added successfully'); \$addMemberSubmitting = false; \$membersLoading = false; \$addMemberSuccess = true;";
+$group_add_member_success_actions = "console.log('Group member added successfully'); \$addMemberSubmitting = false; \$membersLoading = false; \$addMemberSuccess = true;";
+if ($group_add_member_auto_close_on_success && $group_add_member_auto_close_delay_ms > 0) {
+    $group_add_member_success_actions .= "(() => { const modal = document.getElementById('membersAddModal'); if (!modal) return; if (modal.orgmanAutoCloseTimer) { window.clearTimeout(modal.orgmanAutoCloseTimer); } modal.orgmanAutoCloseTimer = window.setTimeout(() => { {$add_member_close_actions} }, {$group_add_member_auto_close_delay_ms}); })();";
+}
 $add_member_error_actions = "console.error('Failed to add member'); \$addMemberSubmitting = false; \$membersLoading = false; \$addMemberSuccess = false;";
 
 $remove_member_success_actions = "console.log('Member removed successfully'); \$removeMemberSubmitting = false; \$membersLoading = false; \$removeMemberSuccess = true; @get('{$members_list_endpoint}{$members_list_separator}";
@@ -415,7 +426,7 @@ $remove_member_error_actions = "console.error('Failed to remove member'); \$remo
                     data-show="!$addMemberSuccess"
                     data-on:submit="if(!$addMemberSubmitting){ $addMemberSubmitting = true; $membersLoading = true; @post('<?php echo esc_js($add_member_endpoint); ?>', { contentType: 'form' }); }"
                     data-on:submit__prevent-default="true"
-                    data-on:success="<?php echo esc_attr($add_member_success_actions); ?>"
+                    data-on:success="<?php echo esc_attr($group_add_member_success_actions); ?>"
                     data-on:error="<?php echo esc_attr($add_member_error_actions); ?>"
                     data-on:reset="$addMemberSubmitting = false">
                     <input type="hidden" name="group_uuid" value="<?php echo esc_attr($group_uuid); ?>">
@@ -452,8 +463,9 @@ $remove_member_error_actions = "console.error('Failed to remove member'); \$remo
                             class="wt_w-full wt_border wt_border-color wt_rounded-md wt_p-2">
                             <?php
                         $groups_config = is_array($orgman_config['groups'] ?? null) ? $orgman_config['groups'] : [];
-                $member_role = $groups_config['member_role'] ?? 'member';
-                $observer_role = $groups_config['observer_role'] ?? 'observer';
+                $group_roles = is_array($groups_config['roles'] ?? null) ? $groups_config['roles'] : [];
+                $member_role = $group_roles['member'] ?? ($groups_config['member_role'] ?? 'member');
+                $observer_role = $group_roles['observer'] ?? ($groups_config['observer_role'] ?? 'observer');
                 ?>
                             <option value="<?php echo esc_attr($member_role); ?>"><?php esc_html_e('Member', 'wicket-acc'); ?></option>
                             <option value="<?php echo esc_attr($observer_role); ?>"><?php esc_html_e('Observer', 'wicket-acc'); ?></option>

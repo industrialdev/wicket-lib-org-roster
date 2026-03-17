@@ -2,6 +2,32 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.5.0] - 2026-03-17
+
+### Changed
+- Reorganized the library configuration schema around canonical sections: `access`, `membership`, `relationships`, `member_management`, `groups`, `presentation`, `integrations`, and `platform`.
+- Migrated runtime config consumers across templates, services, helpers, and strategies to the canonical config paths.
+- Updated active site override files to the canonical config shape while preserving their current site-specific values.
+
+### Fixed
+- Restored legacy config-path fallbacks in member list and update-permissions flows so existing regression coverage continues to pass during the config migration.
+- Removed undefined site override keys from active-site configs and matching site configuration docs.
+- Prevented duplicate group-member additions for the same person, role, group, and organization scope in groups strategy, returning a `group_member_exists` error instead of creating a second active assignment.
+- Preserved legacy groups seat-limit config fallback while honoring the canonical `groups.roles.seat_limited` path during the config migration.
+- Updated group add-member success handling so the modal can remain in a success state for an optional delayed auto-close instead of forcing an immediate close.
+
+### Added
+- Added `.ci/update-active-sites.sh` and the Composer shortcut `composer update:active-sites` to update `industrialdev/wicket-lib-org-roster` across all known active site Composer roots under `site-folder/src/`.
+- Added configurable group add-member modal auto-close controls:
+  - `groups.presentation.add_member_auto_close_on_success` (default `false`)
+  - `groups.presentation.add_member_auto_close_delay_seconds` (default `7`)
+- Added legacy-path compatibility for the same group add-member modal auto-close controls under `groups.ui.*` during the config migration.
+
+### Documentation
+- Rewrote configuration documentation around the canonical schema and added a dedicated reorganization plan with migration mappings.
+- Updated `docs/configs/*.md` so the active-site config docs mirror the real `org-roster.php` overrides as the source of truth.
+- Updated the stored IAA config reference to match the renamed `org-roster.php` site override and document its enabled 7-second delayed group add-member auto-close behavior.
+
 ## [0.4.16] - 2026-03-16
 
 ### Changed

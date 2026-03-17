@@ -121,6 +121,22 @@ class GroupsStrategy implements RosterManagementStrategy
             $log_context['person_uuid'] = $person_uuid;
             $logger->debug('[OrgRoster] Groups strategy resolved person', $log_context);
 
+            $existing_group_member_id = $this->groupService()->findGroupMemberId(
+                $group_uuid,
+                $person_uuid,
+                $org_identifier,
+                [$role_slug],
+                $org_uuid
+            );
+            if ($existing_group_member_id !== '') {
+                $logger->info('[OrgRoster] Groups strategy duplicate group member blocked', array_merge($log_context, [
+                    'role' => $role_slug,
+                    'existing_group_member_id' => $existing_group_member_id,
+                ]));
+
+                return new \WP_Error('group_member_exists', 'This member already has this role in the group.');
+            }
+
             if (!empty($org_uuid)) {
                 $has_relationship = $this->connectionService()->personHasRelationship($person_uuid, $org_uuid);
                 $config = \OrgManagement\Config\OrgManConfig::get();
@@ -162,7 +178,11 @@ class GroupsStrategy implements RosterManagementStrategy
             $group_roles = is_array($groups_config['roles'] ?? null) ? $groups_config['roles'] : [];
             $seat_limited_roles = is_array($group_roles['seat_limited'] ?? null)
                 ? $group_roles['seat_limited']
-                : [$group_roles['member'] ?? 'member'];
+                : (
+                    is_array($groups_config['seat_limited_roles'] ?? null)
+                        ? $groups_config['seat_limited_roles']
+                        : [$group_roles['member'] ?? ($groups_config['member_role'] ?? 'member')]
+                );
 
             if (in_array($role_slug, $seat_limited_roles, true)) {
                 $existing_members = $this->groupService()->getGroupMembers($group_uuid, $org_identifier, [

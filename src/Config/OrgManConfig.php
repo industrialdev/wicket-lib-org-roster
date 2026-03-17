@@ -295,6 +295,8 @@ final class OrgManConfig
                     'use_unified_member_list' => true,
                     'use_unified_member_view' => true,
                     'show_edit_permissions' => false,
+                    'add_member_auto_close_on_success' => false,
+                    'add_member_auto_close_delay_seconds' => 7,
                     'search_clear_requires_submit' => true,
                     'editable_fields' => [
                         'name',

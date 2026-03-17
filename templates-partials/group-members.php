@@ -226,17 +226,27 @@ endif;
 ?>
 
     <?php
-$add_member_modal_reset_actions = "(() => { const modal = document.getElementById('groupMembersAddModal'); if (!modal) return; const form = modal.querySelector('form'); if (form) form.reset(); })();";
+$groups_config = is_array($orgman_config['groups'] ?? null) ? $orgman_config['groups'] : [];
+$groups_presentation = is_array($groups_config['presentation'] ?? null)
+    ? $groups_config['presentation']
+    : (is_array($groups_config['ui'] ?? null) ? $groups_config['ui'] : []);
+$add_member_auto_close_on_success = (bool) ($groups_presentation['add_member_auto_close_on_success'] ?? false);
+$add_member_auto_close_delay_seconds = max(0, (int) ($groups_presentation['add_member_auto_close_delay_seconds'] ?? 7));
+$add_member_auto_close_delay_ms = $add_member_auto_close_delay_seconds * 1000;
+$add_member_modal_reset_actions = "(() => { const modal = document.getElementById('groupMembersAddModal'); if (!modal) return; if (modal.orgmanAutoCloseTimer) { window.clearTimeout(modal.orgmanAutoCloseTimer); modal.orgmanAutoCloseTimer = null; } const form = modal.querySelector('form'); if (form) form.reset(); const messages = modal.querySelector('#group-member-messages'); if (messages) messages.innerHTML = ''; })();";
 $add_member_close_actions = "\$membersLoading = false; \$addMemberSubmitting = false; \$addMemberSuccess = false; \$addMemberModalOpen = false; {$add_member_modal_reset_actions}";
 $add_member_success_actions = "console.log('Group member added successfully'); \$addMemberSubmitting = false; \$membersLoading = false; \$addMemberSuccess = true;";
+if ($add_member_auto_close_on_success && $add_member_auto_close_delay_ms > 0) {
+    $add_member_success_actions .= "(() => { const modal = document.getElementById('groupMembersAddModal'); if (!modal) return; if (modal.orgmanAutoCloseTimer) { window.clearTimeout(modal.orgmanAutoCloseTimer); } modal.orgmanAutoCloseTimer = window.setTimeout(() => { {$add_member_close_actions} }, {$add_member_auto_close_delay_ms}); })();";
+}
 $add_member_error_actions = "console.error('Failed to add group member'); \$addMemberSubmitting = false; \$membersLoading = false; \$addMemberSuccess = false;";
 $remove_member_success_actions = "console.log('Group member removed successfully'); \$removeMemberSubmitting = false; \$membersLoading = false; \$removeMemberSuccess = true; @get('{$members_list_endpoint}{$members_list_separator}group_uuid={$encoded_group_uuid}&org_uuid={$encoded_org_uuid}&page=1') >> select('#{$members_list_target}') | set(html);";
 $remove_member_error_actions = "console.error('Failed to remove group member'); \$removeMemberSubmitting = false; \$membersLoading = false;";
 $add_member_endpoint = OrgManagement\Helpers\TemplateHelper::template_url() . 'process/add-group-member';
 $remove_member_endpoint = OrgManagement\Helpers\TemplateHelper::template_url() . 'process/remove-group-member';
-$groups_config = is_array($orgman_config['groups'] ?? null) ? $orgman_config['groups'] : [];
-$member_role = $group_roles['member'] ?? 'member';
-$observer_role = $group_roles['observer'] ?? 'observer';
+$group_roles = is_array($groups_config['roles'] ?? null) ? $groups_config['roles'] : [];
+$member_role = $group_roles['member'] ?? ($groups_config['member_role'] ?? 'member');
+$observer_role = $group_roles['observer'] ?? ($groups_config['observer_role'] ?? 'observer');
 ?>
 
     <dialog id="groupMembersAddModal"
