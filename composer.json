@@ -30,6 +30,7 @@
       "@cs:lint"
     ],
     "cs:fix": "php-cs-fixer fix",
+    "update:active-sites": "bash .ci/update-active-sites.sh",
     "version-bump": "echo 'Use wicket-cli-tools: wicket plugin version-bump'"
   },
   "config": {
