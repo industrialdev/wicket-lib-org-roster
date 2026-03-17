@@ -79,19 +79,6 @@ Source of truth: `../msa-website-wordpress/src/web/app/themes/wicket-child/custo
 
 - `integrations.notifications.confirmation_email_from = associationmanagement@microscopy.org`
 
-## Site Extensions To Carry Forward
-
-These appeared in the site config but are not part of the current library canonical schema yet.
-
-- `relationships.organization_list_include_active_connections = true`
-- `relationships.organization_list_active_connection_types = ['company_admin']`
-- `relationships.management_access_via_active_connections = true`
-- `relationships.management_access_active_connection_types = ['company_admin']`
-- `integrations.notifications.email_templates.person_to_org_assignment.*`
-- `integrations.notifications.email_templates.group_assignment.*`
-
-Keep these as site-level extensions until the library grows a canonical home for them.
-
 ## Legacy To Canonical Map
 
 - `roster.strategy -> membership.strategy`
@@ -177,14 +164,6 @@ function wicket_child_orgman_config(array $config): array
     ];
 
     $config['integrations']['notifications']['confirmation_email_from'] = 'associationmanagement@microscopy.org';
-
-    // Site extensions not yet standardized in the library.
-    $config['relationships']['organization_list_include_active_connections'] = true;
-    $config['relationships']['organization_list_active_connection_types'] = ['company_admin'];
-    $config['relationships']['management_access_via_active_connections'] = true;
-    $config['relationships']['management_access_active_connection_types'] = ['company_admin'];
-    $config['integrations']['notifications']['email_templates']['person_to_org_assignment']['subject'] = 'Welcome to Microscopy Society of America';
-    $config['integrations']['notifications']['email_templates']['group_assignment']['subject'] = 'Welcome to Microscopy Society of America';
 
     return $config;
 }
