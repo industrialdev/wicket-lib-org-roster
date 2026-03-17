@@ -7,6 +7,7 @@
 use OrgManagement\Services\ConfigService;
 use OrgManagement\Services\GroupService;
 use OrgManagement\Services\MemberService;
+use starfederation\datastar\enums\ElementPatchMode;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -87,7 +88,39 @@ if (is_wp_error($result)) {
 
 $logger->info('[OrgRoster] Remove group member succeeded', $log_context);
 
+$members_list_target = 'group-members-list-container-' . sanitize_html_class($group_uuid);
+$list_html = '';
+$original_get = $_GET;
+$_GET['group_uuid'] = $group_uuid;
+$_GET['org_uuid'] = $org_uuid;
+$_GET['page'] = '1';
+$_GET['query'] = '';
+ob_start();
+include dirname(__DIR__) . '/group-members-list-endpoint.php';
+$list_html = (string) ob_get_clean();
+$_GET = $original_get;
+
+$element_patches = [];
+if ($list_html !== '') {
+    $element_patches[] = [
+        'selector' => '#' . $members_list_target,
+        'elements' => $list_html,
+        'mode' => ElementPatchMode::Outer,
+    ];
+}
+
 status_header(200);
-OrgManagement\Helpers\DatastarSSE::renderSuccess(__('Group member removed successfully.', 'wicket-acc'), '#remove-member-messages', ['removeMemberSubmitting' => false, 'membersLoading' => false]);
+OrgManagement\Helpers\DatastarSSE::renderSuccess(
+    __('Group member removed successfully.', 'wicket-acc'),
+    '#remove-member-messages',
+    [
+        'removeMemberSubmitting' => false,
+        'removeMemberSuccess' => true,
+        'membersLoading' => false,
+    ],
+    0,
+    'countdown',
+    $element_patches
+);
 
 return;

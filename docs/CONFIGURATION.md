@@ -20,6 +20,7 @@ Use `docs/INSTALLATION.md` for setup wiring.
 - `relationships`
 - `member_management`
 - `groups`
+- `removal`
 - `presentation`
 - `integrations`
 - `platform`
@@ -115,6 +116,9 @@ Use `docs/INSTALLATION.md` for setup wiring.
   - Default: `true`
 - `membership.cycle.require_explicit_membership_uuid`
   - Default: `true`
+- `membership.cycle.removal.end_date_anchor`
+  - Default: inherits `removal.end_date_anchor`
+  - Allowed: `action_time`, `day_start_utc`
 
 #### `membership.seat_limits`
 
@@ -132,6 +136,12 @@ Use `docs/INSTALLATION.md` for setup wiring.
   - Default: `Position`
 - `relationships.addition.type`
   - Default: `position`
+
+#### `relationships.removal`
+
+- `relationships.removal.end_date_anchor`
+  - Default: inherits `removal.end_date_anchor`
+  - Allowed: `action_time`, `day_start_utc`
 
 #### `relationships.filters`
 
@@ -341,6 +351,9 @@ Use `docs/INSTALLATION.md` for setup wiring.
 
 - `groups.removal.mode`
   - Default: `end_date`
+- `groups.removal.end_date_anchor`
+  - Default: inherits `removal.end_date_anchor`
+  - Allowed: `action_time`, `day_start_utc`
 - `groups.removal.end_date_format`
   - Default: `Y-m-d\\TH:i:s\\Z`
 
@@ -358,6 +371,13 @@ Use `docs/INSTALLATION.md` for setup wiring.
   - Default: `true`
 - `groups.presentation.editable_fields`
   - Default: `['name', 'description']`
+
+### `removal`
+
+- `removal.end_date_anchor`
+  - Default: `action_time`
+  - Allowed: `action_time`, `day_start_utc`
+  - Shared default for membership, relationship, and group end-dating. Strategy-specific configs may override it.
 
 ### `presentation`
 
@@ -639,8 +659,10 @@ The runtime still uses the current paths below. These are the target destination
 - `groups.additional_info.key -> groups.additional_info.key`
 - `groups.additional_info.value_field -> groups.additional_info.value_field`
 - `groups.additional_info.fallback_to_org_uuid -> groups.additional_info.fallback_to_org_uuid`
+- `groups.removal.end_date_anchor -> groups.removal.end_date_anchor`
 - `groups.removal.mode -> groups.removal.mode`
 - `groups.removal.end_date_format -> groups.removal.end_date_format`
+- `removal.end_date_anchor -> removal.end_date_anchor`
 - `groups.ui.enable_group_profile_edit -> groups.presentation.enable_group_profile_edit`
 - `groups.ui.use_unified_member_list -> groups.presentation.use_unified_member_list`
 - `groups.ui.use_unified_member_view -> groups.presentation.use_unified_member_view`

@@ -118,6 +118,7 @@ final class OrgManConfig
                 'defaults' => [
                     'type' => 'Position',
                 ],
+                'removal' => [],
                 'addition' => [
                     'type' => 'position',
                 ],
@@ -400,6 +401,9 @@ final class OrgManConfig
                     'enabled' => false,
                     'duration' => 5 * 60,
                 ],
+            ],
+            'removal' => [
+                'end_date_anchor' => 'action_time',
             ],
         ];
 

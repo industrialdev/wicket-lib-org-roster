@@ -1,6 +1,6 @@
 # IAA Configuration
 
-Source of truth: `../iaa-website-wordpress/src/web/app/themes/wicket-child/custom/org-roster.php`
+Source of truth: `../iaa-website-wordpress/src/web/app/themes/wicket-child/custom/orgroster.php`
 
 This document mirrors the current site override. If it drifts, update the site config first, then update this file.
 
@@ -24,6 +24,7 @@ This document mirrors the current site override. If it drifts, update the site c
 - `groups.additional_info.fallback_to_org_uuid = true`
 - `groups.ui.add_member_auto_close_on_success = true`
 - `groups.ui.add_member_auto_close_delay_seconds = 7`
+- `groups.removal.end_date_anchor = day_start_utc`
 - `groups.presentation.add_member_auto_close_on_success = true`
 - `groups.presentation.add_member_auto_close_delay_seconds = 7`
 
@@ -50,6 +51,7 @@ function wicket_child_orgman_config(array $config): array
     ];
     $config['groups']['ui']['add_member_auto_close_on_success'] = true;
     $config['groups']['ui']['add_member_auto_close_delay_seconds'] = 7;
+    $config['groups']['removal']['end_date_anchor'] = 'day_start_utc';
     $config['groups']['presentation']['add_member_auto_close_on_success'] = true;
     $config['groups']['presentation']['add_member_auto_close_delay_seconds'] = 7;
 

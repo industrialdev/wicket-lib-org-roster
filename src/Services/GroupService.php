@@ -55,6 +55,36 @@ class GroupService
     }
 
     /**
+     * Current UTC day-start timestamp.
+     *
+     * @return string
+     */
+    private function currentDayStartTimestamp(): string
+    {
+        if (function_exists('wicket_time_get_mdp_day_start_iso8601_utc')) {
+            return wicket_time_get_mdp_day_start_iso8601_utc();
+        }
+
+        return (new \DateTimeImmutable('today', new \DateTimeZone('UTC')))->format('Y-m-d\TH:i:s\Z');
+    }
+
+    /**
+     * Resolve group-member removal anchor.
+     *
+     * @return string
+     */
+    private function getRemovalAnchor(): string
+    {
+        $groups_config = $this->getGroupsConfig();
+        $group_anchor = $groups_config['removal']['end_date_anchor'] ?? null;
+        if (is_string($group_anchor) && trim($group_anchor) !== '') {
+            return sanitize_key($group_anchor);
+        }
+
+        return sanitize_key((string) ($this->config['removal']['end_date_anchor'] ?? 'action_time'));
+    }
+
+    /**
      * Get manage roles.
      *
      * @return array
@@ -1046,9 +1076,13 @@ class GroupService
             return new \WP_Error('delete_failed', 'Unable to delete group member.');
         }
 
-        $format = (string) ($this->getGroupsConfig()['removal']['end_date_format'] ?? 'Y-m-d\TH:i:s\Z');
+        $removal_config = $this->getGroupsConfig()['removal'] ?? [];
+        $format = (string) ($removal_config['end_date_format'] ?? 'Y-m-d\TH:i:s\Z');
+        $anchor = $this->getRemovalAnchor();
         if ($format === 'Y-m-d\TH:i:s\Z') {
-            $end_date = $this->currentTimestamp();
+            $end_date = $anchor === 'day_start_utc'
+                ? $this->currentDayStartTimestamp()
+                : $this->currentTimestamp();
         } else {
             $end_date = (new \DateTimeImmutable('now', wp_timezone()))->format($format);
         }

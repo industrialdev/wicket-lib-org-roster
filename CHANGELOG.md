@@ -2,6 +2,17 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.5.1] - 2026-03-17
+
+### Fixed
+- Fixed group-strategy member removal so successful remove actions now drive modal success state and refresh the rendered group member list from the remove endpoint response.
+
+### Added
+- Added shared `removal.end_date_anchor` config with default `action_time`, plus strategy-level override support for membership-cycle, relationships, and groups end-dating flows.
+
+### Documentation
+- Updated configuration documentation and the stored IAA site config reference to reflect shared removal anchor defaults and the explicit IAA group-removal override.
+
 ## [0.5.0] - 2026-03-17
 
 ### Changed

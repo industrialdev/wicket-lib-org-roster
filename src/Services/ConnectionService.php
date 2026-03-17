@@ -21,6 +21,16 @@ if (!defined('ABSPATH')) {
 class ConnectionService
 {
     /**
+     * @var array
+     */
+    private array $config;
+
+    public function __construct()
+    {
+        $this->config = \OrgManagement\Config\OrgManConfig::get();
+    }
+
+    /**
      * Determine if a person belongs to a given organization membership.
      *
      * @param string $personUuid
@@ -136,6 +146,35 @@ class ConnectionService
     }
 
     /**
+     * Current UTC day-start timestamp.
+     *
+     * @return string
+     */
+    private function currentDayStartDate(): string
+    {
+        if (function_exists('wicket_time_get_mdp_day_start_iso8601_utc')) {
+            return wicket_time_get_mdp_day_start_iso8601_utc();
+        }
+
+        return (new DateTimeImmutable('today', new \DateTimeZone('UTC')))->format('Y-m-d\TH:i:s\Z');
+    }
+
+    /**
+     * Resolve relationship-removal anchor.
+     *
+     * @return string
+     */
+    private function getRemovalAnchor(): string
+    {
+        $relationship_anchor = $this->config['relationships']['removal']['end_date_anchor'] ?? null;
+        if (is_string($relationship_anchor) && trim($relationship_anchor) !== '') {
+            return sanitize_key($relationship_anchor);
+        }
+
+        return sanitize_key((string) ($this->config['removal']['end_date_anchor'] ?? 'action_time'));
+    }
+
+    /**
      * Get person connections by UUID.
      *
      * @param string $person_uuid The person UUID
@@ -190,7 +229,9 @@ class ConnectionService
             $connection_data = $connection['data'];
             $attributes = $connection_data['attributes'];
 
-            $ends_at = $this->currentStartDate();
+            $ends_at = $this->getRemovalAnchor() === 'day_start_utc'
+                ? $this->currentDayStartDate()
+                : $this->currentStartDate();
 
             // Fix tags, if empty or null, make it an empty array
             $attributes['tags'] = !empty($attributes['tags']) ? $attributes['tags'] : [];

@@ -43,6 +43,35 @@ class MembershipService
     }
 
     /**
+     * Current UTC day-start timestamp.
+     *
+     * @return string
+     */
+    private function currentDayStartTimestamp(): string
+    {
+        if (function_exists('wicket_time_get_mdp_day_start_iso8601_utc')) {
+            return wicket_time_get_mdp_day_start_iso8601_utc();
+        }
+
+        return (new \DateTimeImmutable('today', new \DateTimeZone('UTC')))->format('Y-m-d\TH:i:s\Z');
+    }
+
+    /**
+     * Resolve person-membership removal anchor.
+     *
+     * @return string
+     */
+    private function getRemovalAnchor(): string
+    {
+        $cycle_anchor = $this->config['membership']['cycle']['removal']['end_date_anchor'] ?? null;
+        if (is_string($cycle_anchor) && trim($cycle_anchor) !== '') {
+            return sanitize_key($cycle_anchor);
+        }
+
+        return sanitize_key((string) ($this->config['removal']['end_date_anchor'] ?? 'action_time'));
+    }
+
+    /**
      * Retrieve all organization memberships for an organization.
      *
      * @param string $organizationUuid Organization identifier.
@@ -648,7 +677,9 @@ class MembershipService
             $person_membership_data = $person_membership['data'];
             $attributes = $person_membership_data['attributes'];
 
-            $ends_at = $this->currentTimestamp();
+            $ends_at = $this->getRemovalAnchor() === 'day_start_utc'
+                ? $this->currentDayStartTimestamp()
+                : $this->currentTimestamp();
 
             $update_payload = [
                 'data' => [
