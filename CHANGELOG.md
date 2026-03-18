@@ -2,6 +2,25 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.5.2] - 2026-03-18
+
+### Added
+- Added `member_management.removal.direct.preserve_relationship` config option so direct strategy can optionally keep the org relationship active and only strip roles on member removal.
+- Added `ConnectionService::endRelationshipAtActionTime()` to end relationships at the precise action time instead of end-of-day.
+- Added server-driven member list refresh after remove: the remove-member SSE response now includes a Datastar element patch that re-renders the members list, replacing the client-side `@get()` refetch.
+
+### Fixed
+- Prevented double-submission on remove-member and bulk-upload forms with `if(!$submitting)` guards.
+- Fixed stale/ended group memberships appearing in `GroupService::getManageRoles()` by post-filtering results through `isGroupMembershipActiveRecord()` when requesting active records.
+- Fixed remove-member modal retaining previous success/error state when reopened by resetting signals and clearing the messages container on button click.
+- Extended add-member modal reset selector to also clear `#group-member-messages`.
+
+### Changed
+- Replaced inline SVG spinners with the CSS-based `wt_loader` / `wt_button_submit_async` pattern across remove-member and bulk-upload buttons and switched from `data-attr:disabled` to `aria-disabled` with pointer-events.
+
+### Documentation
+- Documented `member_management.removal.direct.preserve_relationship` in `CONFIGURATION.md` and `direct-add-remove.md`.
+
 ## [0.5.1] - 2026-03-17
 
 ### Fixed

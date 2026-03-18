@@ -81,7 +81,7 @@ $expected_columns_text = implode(', ', $expected_columns);
     <form
         method="POST"
         enctype="multipart/form-data"
-        data-on:submit="$bulkUploadSubmitting = true; $membersLoading = true; @post('<?php echo esc_js($bulk_upload_endpoint); ?>', { contentType: 'form' })"
+        data-on:submit="if(!$bulkUploadSubmitting){ $bulkUploadSubmitting = true; $membersLoading = true; @post('<?php echo esc_js($bulk_upload_endpoint); ?>', { contentType: 'form' }); }"
         data-on:submit__prevent-default="true"
         data-on:error="$bulkUploadSubmitting = false; $membersLoading = false">
         <input type="hidden" name="org_uuid" value="<?php echo esc_attr($org_uuid); ?>">
@@ -118,10 +118,15 @@ $expected_columns_text = implode(', ', $expected_columns);
         <div class="wt_flex wt_justify-end">
             <button
                 type="submit"
-                class="button button--primary component-button"
-                data-attr:disabled="$bulkUploadSubmitting || $membersLoading"
-                data-text="$bulkUploadSubmitting ? '<?php echo esc_js(__('Uploading...', 'wicket-acc')); ?>' : '<?php echo esc_js(__('Upload and Add Members', 'wicket-acc')); ?>'">
-                <?php esc_html_e('Upload and Add Members', 'wicket-acc'); ?>
+                class="button button--primary wt_button_submit_async wt_inline-flex wt_items-center wt_gap-2 component-button"
+                data-class="{ 'wt_pointer-events-none': $bulkUploadSubmitting, 'wt_opacity-50': $bulkUploadSubmitting, 'wt_is-loading': $bulkUploadSubmitting }"
+                data-attr:aria-disabled="$bulkUploadSubmitting ? 'true' : 'false'">
+                <span class="wt_submit_label" data-show="!$bulkUploadSubmitting">
+                    <?php esc_html_e('Upload and Add Members', 'wicket-acc'); ?>
+                </span>
+                <span class="wt_loader wt_loader_button wt_submit_loader"
+                    data-show="$bulkUploadSubmitting"
+                    aria-hidden="true"></span>
             </button>
         </div>
     </form>

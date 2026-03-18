@@ -65,7 +65,7 @@ if (!empty($membership_uuid)) {
 }
 $update_permissions_local_sync_actions = "(() => { const modal = document.getElementById('editPermissionsModal'); if (!modal) return; const selected = Array.from(modal.querySelectorAll('input[name=\"roles[]\"]:checked')).map((node) => node.value); const selectedJson = JSON.stringify(selected); document.querySelectorAll('.edit-permissions-button[data-member-uuid=\"' + \$currentMemberUuid + '\"]').forEach((btn) => { btn.dataset.memberRoles = selectedJson; }); \$currentMemberRoles = selected; })();";
 $update_permissions_success_actions = "console.log('Permissions updated successfully'); $editPermissionsSubmitting = false; $editPermissionsSuccess = true; $membersLoading = false; {$update_permissions_local_sync_actions} @get('{$members_list_endpoint}{$members_list_separator}org_uuid={$encodedOrgUuid}{$membership_query_fragment}&page=1') >> select('#{$members_list_target}') | set(html);";
-$remove_member_success_actions = "console.log('Member removed successfully'); $removeMemberSubmitting = false; $removeMemberSuccess = true; $membersLoading = false; @get('{$members_list_endpoint}{$members_list_separator}org_uuid={$encodedOrgUuid}{$membership_query_fragment}&page=1') >> select('#{$members_list_target}') | set(html);";
+$remove_member_success_actions = "console.log('Member removed successfully'); $removeMemberSubmitting = false; $removeMemberSuccess = true; $membersLoading = false;";
 
 $orgman_config = OrgManagement\Config\OrgManConfig::get();
 $presentation_config = is_array($orgman_config['presentation'] ?? null)
@@ -372,6 +372,9 @@ $no_members_message = __('No members found.', 'wicket-acc');
                         <?php if ($show_remove_button && !$is_current_user_owner): ?>
                             <button type="button" class="acc-remove-button remove-member-button button button--secondary wt_inline-flex wt_items-center wt_justify-between wt_gap-2 wt_px-4 wt_py-2 wt_bg-light-neutral wt_text-sm wt_border wt_border-bg-interactive wt_transition-colors wt_whitespace-nowrap component-button"
                                 data-on:click="
+                                    $removeMemberSuccess = false;
+                                    $removeMemberSubmitting = false;
+                                    (() => { const el = document.getElementById('remove-member-messages'); if (el) el.innerHTML = ''; })();
                                     $currentRemoveMemberUuid = '<?php echo esc_js($member_uuid ?? ''); ?>';
                                     $currentRemoveMemberName = '<?php echo esc_js($member['full_name'] ?? ''); ?>';
                                     $currentRemoveMemberEmail = '<?php echo esc_js($member['email'] ?? ''); ?>';
@@ -653,7 +656,7 @@ $no_members_message = __('No members found.', 'wicket-acc');
 
                 <form
                     method="POST"
-                    data-on:submit="$removeMemberSubmitting = true; $membersLoading = true; @post('<?php echo esc_js($remove_member_endpoint); ?>', { contentType: 'form' })"
+                    data-on:submit="if(!$removeMemberSubmitting){ $removeMemberSubmitting = true; $membersLoading = true; @post('<?php echo esc_js($remove_member_endpoint); ?>', { contentType: 'form' }); }"
                     data-on:submit__prevent-default="true"
                     data-on:success="<?php echo esc_attr($remove_member_success_actions); ?>"
                     data-on:error="<?php echo esc_attr($remove_member_error_actions); ?>"
@@ -673,38 +676,33 @@ $no_members_message = __('No members found.', 'wicket-acc');
                             type="button"
                             data-on:click="$removeMemberModalOpen = false"
                             class="button button--secondary wt_px-4 wt_py-2 wt_text-sm component-button"
-                            data-class:disabled="$removeMemberSubmitting"
-                            data-attr:disabled="$removeMemberSubmitting"
+                            data-class="{ 'wt_pointer-events-none': $removeMemberSubmitting, 'wt_opacity-50': $removeMemberSubmitting }"
+                            data-attr:aria-disabled="$removeMemberSubmitting ? 'true' : 'false'"
                         ><?php esc_html_e('Cancel', 'wicket-acc'); ?></button>
                         <button
                             type="submit"
-                            class="button button--danger wt_inline-flex wt_items-center wt_gap-2 wt_px-4 wt_py-2 wt_text-sm component-button"
-                            data-class:disabled="$removeMemberSubmitting"
-                            data-attr:disabled="$removeMemberSubmitting"
+                            class="button button--danger wt_button_submit_async wt_inline-flex wt_items-center wt_gap-2 wt_px-4 wt_py-2 wt_text-sm component-button"
+                            data-class="{ 'wt_pointer-events-none': $removeMemberSubmitting, 'wt_opacity-50': $removeMemberSubmitting, 'wt_is-loading': $removeMemberSubmitting }"
+                            data-attr:aria-disabled="$removeMemberSubmitting ? 'true' : 'false'"
                         >
-                            <span data-class_wt_hidden="$removeMemberSubmitting">
+                            <span class="wt_submit_label" data-show="!$removeMemberSubmitting">
                                 <?php esc_html_e('Remove Member', 'wicket-acc'); ?>
                             </span>
-                            <svg
-                                class="wt_h-4 wt_w-4 wt_text-white wt_hidden"
-                                data-class_wt_hidden="!$removeMemberSubmitting"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                            >
-                                <circle class="wt_opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="wt_opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
+                            <span
+                                class="wt_loader wt_loader_button wt_submit_loader"
+                                data-show="$removeMemberSubmitting"
+                                aria-hidden="true"
+                            ></span>
                         </button>
                     </div>
                 </form>
-                <div class="wt_flex wt_justify-end wt_pt-4" data-show="$removeMemberSuccess">
-                    <button
-                        type="button"
-                        class="button button--primary wt_px-4 wt_py-2 wt_text-sm component-button"
-                        data-on:click="$removeMemberModalOpen = false; $removeMemberSuccess = false; $removeMemberSubmitting = false"
-                    ><?php esc_html_e('Close', 'wicket-acc'); ?></button>
-                </div>
+            </div>
+            <div class="wt_flex wt_justify-end wt_pt-4" data-show="$removeMemberSuccess">
+                <button
+                    type="button"
+                    class="button button--primary wt_px-4 wt_py-2 wt_text-sm component-button"
+                    data-on:click="$removeMemberModalOpen = false; $removeMemberSuccess = false; $removeMemberSubmitting = false"
+                ><?php esc_html_e('Close', 'wicket-acc'); ?></button>
             </div>
         </div>
     </dialog>

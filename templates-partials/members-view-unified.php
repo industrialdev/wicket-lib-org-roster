@@ -208,7 +208,7 @@ $groups_presentation = is_array($groups_config['presentation'] ?? null)
 $group_add_member_auto_close_on_success = (bool) ($groups_presentation['add_member_auto_close_on_success'] ?? false);
 $group_add_member_auto_close_delay_seconds = max(0, (int) ($groups_presentation['add_member_auto_close_delay_seconds'] ?? 7));
 $group_add_member_auto_close_delay_ms = $group_add_member_auto_close_delay_seconds * 1000;
-$add_member_modal_reset_actions = "(() => { const modal = document.getElementById('membersAddModal'); if (!modal) return; if (modal.orgmanAutoCloseTimer) { window.clearTimeout(modal.orgmanAutoCloseTimer); modal.orgmanAutoCloseTimer = null; } const form = modal.querySelector('form'); if (form) form.reset(); const messages = modal.querySelector('[id^=\"add-member-messages-\"]'); if (messages) messages.innerHTML = ''; })();";
+$add_member_modal_reset_actions = "(() => { const modal = document.getElementById('membersAddModal'); if (!modal) return; if (modal.orgmanAutoCloseTimer) { window.clearTimeout(modal.orgmanAutoCloseTimer); modal.orgmanAutoCloseTimer = null; } const form = modal.querySelector('form'); if (form) form.reset(); const messages = modal.querySelector('[id^=\"add-member-messages-\"], #group-member-messages'); if (messages) messages.innerHTML = ''; })();";
 $add_member_close_actions = "\$membersLoading = false; \$addMemberSubmitting = false; \$addMemberSuccess = false; \$addMemberModalOpen = false; {$add_member_modal_reset_actions}";
 $add_member_success_actions = "console.log('Member added successfully'); \$addMemberSubmitting = false; \$membersLoading = false; \$addMemberSuccess = true;";
 $group_add_member_success_actions = "console.log('Group member added successfully'); \$addMemberSubmitting = false; \$membersLoading = false; \$addMemberSuccess = true;";
@@ -217,12 +217,7 @@ if ($group_add_member_auto_close_on_success && $group_add_member_auto_close_dela
 }
 $add_member_error_actions = "console.error('Failed to add member'); \$addMemberSubmitting = false; \$membersLoading = false; \$addMemberSuccess = false;";
 
-$remove_member_success_actions = "console.log('Member removed successfully'); \$removeMemberSubmitting = false; \$membersLoading = false; \$removeMemberSuccess = true; @get('{$members_list_endpoint}{$members_list_separator}";
-if ($mode === 'groups') {
-    $remove_member_success_actions .= "group_uuid={$encoded_group_uuid}&org_uuid={$encoded_org_uuid}&page=1') >> select('#{$members_list_target}') | set(html);";
-} else {
-    $remove_member_success_actions .= "org_uuid={$encoded_org_uuid}{$membership_query_fragment}&page=1') >> select('#{$members_list_target}') | set(html);";
-}
+$remove_member_success_actions = "console.log('Member removed successfully'); \$removeMemberSubmitting = false; \$membersLoading = false; \$removeMemberSuccess = true;";
 $remove_member_error_actions = "console.error('Failed to remove member'); \$removeMemberSubmitting = false; \$membersLoading = false;";
 ?>
 
@@ -420,6 +415,7 @@ $remove_member_error_actions = "console.error('Failed to remove member'); \$remo
             </h2>
 
             <?php if ($mode === 'groups') : ?>
+                <div id="group-member-messages" class="wt_mb-3"></div>
                 <form
                     method="post"
                     class="wt_flex wt_flex-col wt_gap-4"
@@ -694,7 +690,7 @@ $available_roles = OrgHelpers\PermissionHelper::filter_role_choices(
         ?>
 
                 <form method="POST"
-                    data-on:submit="$removeMemberSubmitting = true; $membersLoading = true; @post('<?php echo esc_js($remove_member_endpoint); ?>', { contentType: 'form' })"
+                    data-on:submit="if(!$removeMemberSubmitting){ $removeMemberSubmitting = true; $membersLoading = true; @post('<?php echo esc_js($remove_member_endpoint); ?>', { contentType: 'form' }); }"
                     data-on:submit__prevent-default="true"
                     data-on:success="<?php echo esc_attr($remove_member_success_actions); ?>"
                     data-on:error="<?php echo esc_attr($remove_member_error_actions); ?>"
@@ -721,27 +717,24 @@ $available_roles = OrgHelpers\PermissionHelper::filter_role_choices(
                     <div class="wt_flex wt_justify-end wt_gap-3">
                         <button type="button" data-on:click="$removeMemberModalOpen = false"
                             class="button button--secondary wt_px-4 wt_py-2 wt_text-sm component-button"
-                            data-class:disabled="$removeMemberSubmitting"
-                            data-attr:disabled="$removeMemberSubmitting"><?php esc_html_e('Cancel', 'wicket-acc'); ?></button>
-                        <button type="submit" class="button button--danger wt_inline-flex wt_items-center wt_gap-2 wt_px-4 wt_py-2 wt_text-sm component-button"
-                            data-class:disabled="$removeMemberSubmitting"
-                            data-attr:disabled="$removeMemberSubmitting">
-                            <span data-class_wt_hidden="$removeMemberSubmitting"><?php esc_html_e('Remove Member', 'wicket-acc'); ?></span>
-                            <svg class="wt_h-4 wt_w-4 wt_text-white wt_hidden"
-                                data-class_wt_hidden="!$removeMemberSubmitting" viewBox="0 0 24 24" fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <circle class="wt_opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="wt_opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
+                            data-class="{ 'wt_pointer-events-none': $removeMemberSubmitting, 'wt_opacity-50': $removeMemberSubmitting }"
+                            data-attr:aria-disabled="$removeMemberSubmitting ? 'true' : 'false'"><?php esc_html_e('Cancel', 'wicket-acc'); ?></button>
+                        <button type="submit" class="button button--danger wt_button_submit_async wt_inline-flex wt_items-center wt_gap-2 wt_px-4 wt_py-2 wt_text-sm component-button"
+                            data-class="{ 'wt_pointer-events-none': $removeMemberSubmitting, 'wt_opacity-50': $removeMemberSubmitting, 'wt_is-loading': $removeMemberSubmitting }"
+                            data-attr:aria-disabled="$removeMemberSubmitting ? 'true' : 'false'">
+                            <span class="wt_submit_label" data-show="!$removeMemberSubmitting"><?php esc_html_e('Remove Member', 'wicket-acc'); ?></span>
+                            <span class="wt_loader wt_loader_button wt_submit_loader"
+                                data-show="$removeMemberSubmitting"
+                                aria-hidden="true"></span>
                         </button>
                     </div>
                 </form>
-                <div class="wt_flex wt_justify-end wt_pt-4" data-show="$removeMemberSuccess">
-                    <button type="button" class="button button--primary wt_px-4 wt_py-2 wt_text-sm component-button"
-                        data-on:click="$removeMemberModalOpen = false; $removeMemberSuccess = false; $removeMemberSubmitting = false;">
-                        <?php esc_html_e('Close', 'wicket-acc'); ?>
-                    </button>
-                </div>
+            </div>
+            <div class="wt_flex wt_justify-end wt_pt-4" data-show="$removeMemberSuccess">
+                <button type="button" class="button button--primary wt_px-4 wt_py-2 wt_text-sm component-button"
+                    data-on:click="$removeMemberModalOpen = false; $removeMemberSuccess = false; $removeMemberSubmitting = false;">
+                    <?php esc_html_e('Close', 'wicket-acc'); ?>
+                </button>
             </div>
         </div>
     </dialog>

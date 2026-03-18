@@ -8,6 +8,7 @@
 
 use OrgManagement\Services\ConfigService;
 use OrgManagement\Services\ConnectionService;
+use starfederation\datastar\enums\ElementPatchMode;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -60,6 +61,8 @@ if ('POST' === strtoupper($request_method)) {
     try {
         $configService = new ConfigService();
         $roster_mode = (string) $configService->getRosterMode();
+        $orgman_config = OrgManagement\Config\OrgManConfig::get();
+        $preserve_direct_relationship = (bool) ($orgman_config['member_management']['removal']['direct']['preserve_relationship'] ?? false);
         $membershipService = new OrgManagement\Services\MembershipService();
         $permissionService = new OrgManagement\Services\PermissionService();
         $organizationService = new OrgManagement\Services\OrganizationService();
@@ -188,6 +191,39 @@ if ('POST' === strtoupper($request_method)) {
 
         OrgManagement\Helpers\Helper::log_debug('[OrgMan Debug] Member removal roster mode', ['roster_mode' => $roster_mode, 'person_uuid' => $person_uuid]);
 
+        $build_members_list_patches = static function () use ($org_uuid, $membership_uuid): array {
+            if ($org_uuid === '') {
+                return [];
+            }
+
+            $members_list_target = 'members-list-container-' . sanitize_html_class($org_uuid ?: 'default');
+            $original_get = $_GET;
+            $_GET['org_uuid'] = $org_uuid;
+            $_GET['page'] = '1';
+            $_GET['query'] = '';
+
+            if ($membership_uuid !== '') {
+                $_GET['membership_uuid'] = $membership_uuid;
+            } else {
+                unset($_GET['membership_uuid']);
+            }
+
+            ob_start();
+            include dirname(__DIR__) . '/members-list.php';
+            $members_list_html = (string) ob_get_clean();
+            $_GET = $original_get;
+
+            if ($members_list_html === '') {
+                return [];
+            }
+
+            return [[
+                'elements' => $members_list_html,
+                'selector' => '#' . $members_list_target,
+                'mode' => ElementPatchMode::Outer,
+            ]];
+        };
+
         if ($roster_mode === 'membership_cycle') {
             if (!$removal_success) {
                 status_header(200);
@@ -209,19 +245,23 @@ if ('POST' === strtoupper($request_method)) {
                 esc_html__('Successfully removed %1$s from the organization.', 'wicket-acc'),
                 '<strong>' . esc_html($member_name) . '</strong>'
             );
+            $element_patches = $build_members_list_patches();
 
             status_header(200);
             OrgManagement\Helpers\DatastarSSE::renderSuccess($success_message, '#remove-member-messages', [
                 'removeMemberSubmitting' => false,
                 'removeMemberSuccess' => true,
                 'membersLoading' => false,
-            ], 'remove-countdown');
+            ], 0, 'remove-countdown', $element_patches);
 
             return;
         }
 
+        $should_end_relationships = $roster_mode !== 'direct' || !$preserve_direct_relationship;
+        $use_direct_action_time_relationship_end = $roster_mode === 'direct' && !$preserve_direct_relationship;
+
         // 3. End ALL connections for this person to this organization
-        if (!empty($person_uuid) && $roster_mode !== 'direct') {
+        if (!empty($person_uuid) && $should_end_relationships) {
             OrgManagement\Helpers\Helper::log_info('[OrgMan Debug] Searching for person connections', ['person_uuid' => $person_uuid, 'org_uuid' => $org_uuid]);
             $connections = $connection_service->getPersonConnectionsById($person_uuid);
             if (!empty($connections['data'])) {
@@ -234,7 +274,9 @@ if ('POST' === strtoupper($request_method)) {
                     OrgManagement\Helpers\Helper::log_info('[OrgMan Debug] Processing extra connection', ['id' => $conn_id, 'org_id' => $conn_org_id, 'active' => $conn_active]);
 
                     if ($conn_org_id === $org_uuid && $conn_id && $conn_active) {
-                        $result = $connection_service->endRelationshipToday($person_uuid, $conn_id, $org_uuid);
+                        $result = $use_direct_action_time_relationship_end
+                            ? $connection_service->endRelationshipAtActionTime($person_uuid, $conn_id, $org_uuid)
+                            : $connection_service->endRelationshipToday($person_uuid, $conn_id, $org_uuid);
                         if (!is_wp_error($result)) {
                             $removal_success = true;
                             OrgManagement\Helpers\Helper::log_info('[OrgMan] Successfully ended extra relationship', [
@@ -251,12 +293,14 @@ if ('POST' === strtoupper($request_method)) {
         }
 
         // 4. Fallback or explicit removal of the provided connection IDs
-        if (!empty($connection_ids) && $roster_mode !== 'direct') {
+        if (!empty($connection_ids) && $should_end_relationships) {
             foreach ($connection_ids as $connection_id) {
                 if (empty($connection_id)) {
                     continue;
                 }
-                $result = $connection_service->endRelationshipToday($person_uuid, $connection_id, $org_uuid);
+                $result = $use_direct_action_time_relationship_end
+                    ? $connection_service->endRelationshipAtActionTime($person_uuid, $connection_id, $org_uuid)
+                    : $connection_service->endRelationshipToday($person_uuid, $connection_id, $org_uuid);
 
                 if (is_wp_error($result)) {
                     OrgManagement\Helpers\Helper::log_error('[OrgMan] Failed to end primary relationship', [
@@ -316,13 +360,14 @@ if ('POST' === strtoupper($request_method)) {
             $orgman_instance = OrgManagement\OrgMan::get_instance();
             $orgman_instance->clearMembersCache($membership_uuid);
         }
+        $element_patches = $build_members_list_patches();
 
         status_header(200);
         OrgManagement\Helpers\DatastarSSE::renderSuccess($success_message, '#remove-member-messages', [
             'removeMemberSubmitting' => false,
             'removeMemberSuccess' => true,
             'membersLoading' => false,
-        ], 'remove-countdown');
+        ], 0, 'remove-countdown', $element_patches);
 
         return;
 

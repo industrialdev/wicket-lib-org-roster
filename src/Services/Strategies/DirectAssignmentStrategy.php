@@ -789,8 +789,42 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
                 return new WP_Error('missing_person_membership_id', 'Person membership ID is required to remove a member.');
             }
 
-            // For direct strategy (non-cascading), do not end membership to keep relationship active
-            // Only remove org-scoped roles
+            $config = \OrgManagement\Config\OrgManConfig::get();
+            $preserve_relationship = (bool) ($config['member_management']['removal']['direct']['preserve_relationship'] ?? false);
+
+            if (!$preserve_relationship) {
+                $connection_ids = [];
+                if (isset($context['connection_id'])) {
+                    $raw_connection_ids = is_string($context['connection_id'])
+                        ? explode(',', $context['connection_id'])
+                        : [(string) $context['connection_id']];
+                    $connection_ids = array_values(array_filter(array_map('trim', $raw_connection_ids)));
+                }
+
+                if (empty($connection_ids)) {
+                    $connections = $this->connectionService()->getPersonConnectionsById($person_uuid);
+                    if (is_array($connections) && !empty($connections['data'])) {
+                        foreach ($connections['data'] as $connection) {
+                            $connection_org_id = (string) ($connection['relationships']['organization']['data']['id'] ?? '');
+                            $connection_id = (string) ($connection['id'] ?? '');
+                            $connection_active = (bool) ($connection['attributes']['active'] ?? false);
+
+                            if ($connection_org_id !== (string) $org_id || $connection_id === '' || !$connection_active) {
+                                continue;
+                            }
+
+                            $connection_ids[] = $connection_id;
+                        }
+                    }
+                }
+
+                foreach (array_values(array_unique($connection_ids)) as $connection_id) {
+                    $result = $this->connectionService()->endRelationshipAtActionTime($person_uuid, $connection_id, $org_id);
+                    if (is_wp_error($result)) {
+                        return $result;
+                    }
+                }
+            }
 
             // Remove all org-scoped roles
             $roles_to_remove = $this->permissionService()->getPersonCurrentRolesByOrgId($person_uuid, $org_id);

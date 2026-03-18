@@ -85,6 +85,67 @@ class GroupService
     }
 
     /**
+     * Resolve the timestamp used to evaluate whether a group membership is still active.
+     *
+     * @return \DateTimeImmutable
+     */
+    private function getActiveBoundary(): \DateTimeImmutable
+    {
+        $timestamp = $this->getRemovalAnchor() === 'day_start_utc'
+            ? $this->currentDayStartTimestamp()
+            : $this->currentTimestamp();
+
+        try {
+            return new \DateTimeImmutable($timestamp);
+        } catch (\Throwable $e) {
+            return new \DateTimeImmutable('now', new \DateTimeZone('UTC'));
+        }
+    }
+
+    /**
+     * Parse a group membership date value into a comparable timestamp.
+     *
+     * @param mixed $value
+     * @return \DateTimeImmutable|null
+     */
+    private function parseGroupMembershipDate($value): ?\DateTimeImmutable
+    {
+        if (!is_string($value) || trim($value) === '') {
+            return null;
+        }
+
+        try {
+            return new \DateTimeImmutable(trim($value));
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
+    /**
+     * Determine whether a group membership record should be considered active for this site config.
+     *
+     * @param array $membership
+     * @return bool
+     */
+    private function isGroupMembershipActiveRecord(array $membership): bool
+    {
+        $attributes = is_array($membership['attributes'] ?? null) ? $membership['attributes'] : [];
+        $boundary = $this->getActiveBoundary();
+        $start_at = $this->parseGroupMembershipDate($attributes['start_date'] ?? ($attributes['starts_at'] ?? null));
+        $end_at = $this->parseGroupMembershipDate($attributes['end_date'] ?? ($attributes['ends_at'] ?? null));
+
+        if ($start_at instanceof \DateTimeImmutable && $start_at > $boundary) {
+            return false;
+        }
+
+        if ($end_at instanceof \DateTimeImmutable && $end_at <= $boundary) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * Get manage roles.
      *
      * @return array
@@ -302,7 +363,17 @@ class GroupService
                 'active' => $active,
             ]);
 
-            return $client->get($endpoint, ['query' => $query]);
+            $response = $client->get($endpoint, ['query' => $query]);
+            if ($active && is_array($response) && !empty($response['data']) && is_array($response['data'])) {
+                $response['data'] = array_values(array_filter($response['data'], function ($item): bool {
+                    return is_array($item) && $this->isGroupMembershipActiveRecord($item);
+                }));
+                if (isset($response['meta']['page']) && is_array($response['meta']['page'])) {
+                    $response['meta']['page']['total_items'] = count($response['data']);
+                }
+            }
+
+            return $response;
         } catch (\Throwable $e) {
             $this->getLogger()->error('[OrgRoster] Failed fetching group memberships', [
                 'source' => 'wicket-orgman',
@@ -812,6 +883,7 @@ class GroupService
         $size = max(1, (int) ($args['size'] ?? $this->getGroupMemberPageSize()));
         $query = isset($args['query']) ? sanitize_text_field((string) $args['query']) : '';
         $org_uuid = isset($args['org_uuid']) ? sanitize_text_field((string) $args['org_uuid']) : '';
+        $active = isset($args['active']) ? (bool) $args['active'] : true;
 
         $roles = $this->getRosterRoles();
         $role_param = implode(',', $roles);
@@ -848,6 +920,7 @@ class GroupService
             'size' => $size,
             'query' => $query,
             'org_uuid' => $org_uuid,
+            'active' => $active,
         ]);
     }
 
@@ -889,6 +962,10 @@ class GroupService
         }
 
         foreach ($response['data'] as $item) {
+            if (($context['active'] ?? true) && !$this->isGroupMembershipActiveRecord($item)) {
+                continue;
+            }
+
             $member_person = $item['relationships']['person']['data']['id'] ?? '';
             if ($member_person !== $person_uuid) {
                 continue;
@@ -918,6 +995,7 @@ class GroupService
         $size = (int) ($context['size'] ?? $this->getGroupMemberPageSize());
         $query = (string) ($context['query'] ?? '');
         $org_uuid = (string) ($context['org_uuid'] ?? '');
+        $active = isset($context['active']) ? (bool) $context['active'] : true;
 
         $members = [];
         $pagination = [
@@ -944,6 +1022,10 @@ class GroupService
         $data = $response['data'] ?? [];
 
         foreach ($data as $item) {
+            if ($active && !$this->isGroupMembershipActiveRecord($item)) {
+                continue;
+            }
+
             $person_id = $item['relationships']['person']['data']['id'] ?? '';
             if (!$person_id) {
                 continue;

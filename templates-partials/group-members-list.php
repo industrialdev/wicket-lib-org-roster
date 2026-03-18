@@ -167,6 +167,9 @@ $refresh_action = "@get('" . $build_url(1) . "') >> select('#" . $members_list_t
                     <div class="wt_flex wt_flex-col sm_wt_flex-row wt_items-stretch sm_wt_items-start wt_gap-2 wt_justify-between md_wt_auto wt_shrink-0">
                         <button type="button" class="acc-remove-button remove-member-button button button--secondary wt_inline-flex wt_items-center wt_justify-between wt_gap-2 wt_px-4 wt_py-2 wt_bg-light-neutral wt_text-sm wt_border wt_border-bg-interactive wt_transition-colors wt_whitespace-nowrap component-button"
                             data-on:click="
+                                $removeMemberSuccess = false;
+                                $removeMemberSubmitting = false;
+                                (() => { const el = document.getElementById('remove-member-messages'); if (el) el.innerHTML = ''; })();
                                 $currentRemoveMemberUuid = '<?php echo esc_js($member_uuid); ?>';
                                 $currentRemoveMemberName = '<?php echo esc_js($member_name); ?>';
                                 $currentRemoveMemberEmail = '<?php echo esc_js($member_email); ?>';

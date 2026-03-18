@@ -294,6 +294,79 @@ class ConnectionService
     }
 
     /**
+     * End a person's relationship with an organization at the current action time.
+     *
+     * @param string $person_uuid The UUID of the person.
+     * @param string $relationship_id The ID of the relationship to end.
+     * @param string $org_id The ID of the organization.
+     * @return array|WP_Error The updated connection data or WP_Error on failure.
+     */
+    public function endRelationshipAtActionTime($person_uuid, $relationship_id, $org_id)
+    {
+        if (empty($person_uuid) || empty($relationship_id) || empty($org_id)) {
+            return new WP_Error('invalid_params', 'Person UUID, relationship ID, and organization ID are required.');
+        }
+
+        try {
+            $client = wicket_api_client();
+
+            $connection = wicket_get_connection_by_id($relationship_id);
+            if (!$connection || empty($connection['data'])) {
+                return new WP_Error('connection_not_found', 'Connection not found.');
+            }
+
+            $connection_data = $connection['data'];
+            $attributes = $connection_data['attributes'];
+            $ends_at = $this->currentStartDate();
+
+            $attributes['tags'] = !empty($attributes['tags']) ? $attributes['tags'] : [];
+            if ($attributes['tags'] === null) {
+                $attributes['tags'] = [];
+            }
+
+            $attributes['description'] = !empty($attributes['description']) ? $attributes['description'] : null;
+            $attributes['custom_data_field'] = !empty($attributes['custom_data_field']) ? $attributes['custom_data_field'] : null;
+
+            $update_payload = [
+                'data' => [
+                    'type'          => $connection_data['type'],
+                    'id'            => $relationship_id,
+                    'attributes'    => [
+                        'type'              => $attributes['type'],
+                        'starts_at'         => $attributes['starts_at'],
+                        'ends_at'           => $ends_at,
+                        'description'       => $attributes['description'],
+                        'tags'              => $attributes['tags'],
+                        'custom_data_field' => $attributes['custom_data_field'],
+                    ],
+                    'relationships' => [
+                        'from' => [
+                            'data' => [
+                                'type' => $connection_data['relationships']['from']['data']['type'],
+                                'id'   => $connection_data['relationships']['from']['data']['id'],
+                                'meta' => [
+                                    'can_manage' => true,
+                                    'can_update' => true,
+                                ],
+                            ],
+                        ],
+                        'to'   => [
+                            'data' => [
+                                'type' => $connection_data['relationships']['to']['data']['type'],
+                                'id'   => $connection_data['relationships']['to']['data']['id'],
+                            ],
+                        ],
+                    ],
+                ],
+            ];
+
+            return $client->patch("connections/{$relationship_id}", ['json' => $update_payload]);
+        } catch (\Throwable $e) {
+            return new WP_Error('update_connection_exception', $e->getMessage());
+        }
+    }
+
+    /**
      * Builds a payload for creating a new connection between a person and an organization.
      *
      * This method provides backward compatibility with the legacy function signature.
