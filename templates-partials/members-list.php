@@ -42,7 +42,7 @@ $encodedOrgUuid = rawurlencode((string) $org_uuid);
 
 $update_permissions_endpoint = OrgHelpers\template_url() . 'process/update-permissions';
 $update_permissions_error_actions = "console.error('Failed to update permissions'); $editPermissionsSubmitting = false; $membersLoading = false;";
-$edit_permissions_reset_actions = "$editPermissionsSuccess = false; $editPermissionsSubmitting = false; $currentMemberUuid = ''; $currentMemberName = ''; $currentMemberRoles = []; $currentMemberRelationshipType = ''; (() => { const el = document.getElementById('update-permissions-messages'); if (el) el.innerHTML = ''; })();";
+$edit_permissions_reset_actions = "$editPermissionsSuccess = false; $editPermissionsSubmitting = false; $currentMemberUuid = ''; $currentMemberName = ''; $currentMemberRoles = []; $currentMemberRelationshipType = ''; \$updatePermissionsMessages.innerHTML = '';";
 $remove_member_endpoint = OrgHelpers\template_url() . 'process/remove-member';
 $remove_member_error_actions = "console.error('Failed to remove member'); $removeMemberSubmitting = false; $membersLoading = false;";
 
@@ -344,14 +344,7 @@ $no_members_message = __('No members found.', 'wicket-acc');
                                 data-on:click="
                                 $editPermissionsSuccess = false;
                                 $editPermissionsSubmitting = false;
-                                (() => {
-                                    const el = document.getElementById('update-permissions-messages');
-                                    if (el) el.innerHTML = '';
-                                })();
-                                $currentMemberUuid = '';
-                                $currentMemberName = '';
-                                $currentMemberRoles = [];
-                                $currentMemberRelationshipType = '';
+                                $updatePermissionsMessages.innerHTML = '';
                                 $currentMemberUuid = '<?php echo esc_js($member_uuid ?? ''); ?>';
                                 $currentMemberName = '<?php echo esc_js($member['full_name'] ?? ''); ?>';
                                 (() => { try { $currentMemberRoles = JSON.parse(evt.currentTarget.dataset.memberRoles || '[]'); } catch (e) { $currentMemberRoles = []; } })();
@@ -374,7 +367,7 @@ $no_members_message = __('No members found.', 'wicket-acc');
                                 data-on:click="
                                     $removeMemberSuccess = false;
                                     $removeMemberSubmitting = false;
-                                    (() => { const el = document.getElementById('remove-member-messages'); if (el) el.innerHTML = ''; })();
+                                    $removeMemberMessages.innerHTML = '';
                                     $currentRemoveMemberUuid = '<?php echo esc_js($member_uuid ?? ''); ?>';
                                     $currentRemoveMemberName = '<?php echo esc_js($member['full_name'] ?? ''); ?>';
                                     $currentRemoveMemberEmail = '<?php echo esc_js($member['email'] ?? ''); ?>';
@@ -454,7 +447,7 @@ $no_members_message = __('No members found.', 'wicket-acc');
             <?php if ($has_seats_available): ?>
                 <button type="button"
                     class="button button--primary add-member-button wt_w-full wt_py-2 component-button"
-                    data-on:click="$addMemberSuccess = false; $addMemberSubmitting = false; (() => { const modal = document.getElementById('membersAddModal'); if (!modal) return; const form = modal.querySelector('form'); if (form) form.reset(); const messages = modal.querySelector(`[id^='add-member-messages-']`); if (messages) messages.innerHTML = ''; })(); $addMemberModalOpen = true"><?php esc_html_e('Add Member', 'wicket-acc'); ?></button>
+                    data-on:click="$addMemberSuccess = false; $addMemberSubmitting = false; $addMemberForm.reset(); $addMemberModalOpen = true"><?php esc_html_e('Add Member', 'wicket-acc'); ?></button>
                 <?php if ($show_bulk_upload) : ?>
                     <div class="wt_mt-3">
                         <button type="button"
@@ -510,7 +503,9 @@ $no_members_message = __('No members found.', 'wicket-acc');
                 data-on:click="
                     $editPermissionsModalOpen = false;
                     <?php echo esc_attr($edit_permissions_reset_actions); ?>
-                " data-show="!$editPermissionsSuccess">
+                " data-show="!$editPermissionsSuccess"
+                data-class="{ 'wt_pointer-events-none': $editPermissionsSubmitting, 'wt_opacity-50': $editPermissionsSubmitting }"
+                data-attr:aria-disabled="$editPermissionsSubmitting ? 'true' : 'false'">
                 ×
             </button>
 
@@ -521,7 +516,7 @@ $no_members_message = __('No members found.', 'wicket-acc');
                 </span>
             </h2>
 
-            <div id="update-permissions-messages">
+            <div id="update-permissions-messages" data-ref="updatePermissionsMessages">
                 <!-- Messages will be inserted here by Datastar -->
             </div>
 
@@ -546,8 +541,7 @@ $no_members_message = __('No members found.', 'wicket-acc');
                         <?php esc_html_e('Relationship Type', 'wicket-acc'); ?>
                     </label>
                     <select id="edit-member-relationship-type" name="relationship_type"
-                        data-attr:value="$currentMemberRelationshipType"
-                        data-effect="el.value = $currentMemberRelationshipType || ''"
+                        data-bind="currentMemberRelationshipType"
                         class="wt_w-full wt_border wt_border-color wt_rounded-md wt_p-2">
                         <option value=""><?php esc_html_e('Select a relationship type', 'wicket-acc'); ?></option>
                         <?php foreach ($relationship_types as $type_key => $type_label): ?>
@@ -571,7 +565,7 @@ $no_members_message = __('No members found.', 'wicket-acc');
                                             name="roles[]"
                                             value="<?php echo esc_attr($slug); ?>"
                                             class="form-checkbox wt_h-4 wt_w-4 wt_text-bg-interactive wt_rounded wt_focus_ring-bg-interactive"
-                                            data-effect="(() => { const __currentMemberUuid = $currentMemberUuid; el.checked = $currentMemberRoles.includes('<?php echo esc_js($slug); ?>'); })()"
+                                            data-attr:checked="$currentMemberRoles.includes('<?php echo esc_js($slug); ?>')"
                                         >
                                         <span class="wt_text-sm wt_text-content"><?php echo esc_html($role); ?></span>
                                     </label>
@@ -632,11 +626,13 @@ $no_members_message = __('No members found.', 'wicket-acc');
         data-on:close="($membersLoading = false); $removeMemberModalOpen = false">
         <div class="wt_bg-white wt_p-6 wt_relative">
             <button type="button" class="orgman-modal__close wt_absolute wt_right-4 wt_top-4 wt_text-lg wt_font-semibold"
-                data-on:click="$removeMemberModalOpen = false" data-show="!$removeMemberSuccess">
+                data-on:click="$removeMemberModalOpen = false" data-show="!$removeMemberSuccess"
+                data-class="{ 'wt_pointer-events-none': $removeMemberSubmitting, 'wt_opacity-50': $removeMemberSubmitting }"
+                data-attr:aria-disabled="$removeMemberSubmitting ? 'true' : 'false'">
                 ×
             </button>
             <h2 class="wt_text-2xl wt_font-semibold wt_mb-4"><?php esc_html_e('Remove Member', 'wicket-acc'); ?></h2>
-            <div id="remove-member-messages">
+            <div id="remove-member-messages" data-ref="removeMemberMessages">
                 <!-- Messages will be inserted here by Datastar -->
             </div>
 

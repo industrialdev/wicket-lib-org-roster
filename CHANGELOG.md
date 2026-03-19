@@ -2,6 +2,25 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.5.3] - 2026-03-19
+
+### Fixed
+- Prevented all modals (add member, remove member, edit permissions, bulk upload) from being dismissed by clicking the backdrop. Removed `data-on:click__outside__capture` handlers across `members-view-unified.php`, `group-members.php`, and `organization-members.php`; modals now close only via their X or Cancel/Close buttons.
+- Disabled the modal X (close) button while a server request is in-flight, matching the existing Cancel/action button behavior. Applied `wt_pointer-events-none`, `wt_opacity-50`, and `aria-disabled` bound to the relevant `*Submitting` signal on all 10 modal close buttons across `members-view-unified.php`, `group-members.php`, `organization-members.php`, and `members-list.php`.
+
+### Added
+- Extended the add-member auto-close-on-success feature to org-level (non-group) flows via two new config keys under `presentation.member_view`:
+  - `add_member_auto_close_on_success` (default `false`)
+  - `add_member_auto_close_delay_seconds` (default `7`)
+- Added a visible countdown message inside the add-member modal success state when auto-close is enabled. The message displays "This dialog will close automatically in N seconds." with a live-updating second counter, giving users clear feedback before the modal dismisses itself.
+
+### Changed
+- Refactored the add-member auto-close countdown from imperative JS (`setTimeout`/`setInterval` + DOM queries) to idiomatic Datastar using `data-on-interval__duration.1000`, `data-text`, and `data-show` bound to an `autoCloseCountdown` signal. Eliminated all manual timer management (`orgmanAutoCloseTimer`, `orgmanAutoCloseInterval`) and DOM element lookups from the auto-close logic.
+- Replaced IIFE form-reset patterns (`getElementById` + `querySelector('form').reset()`) with `data-ref="addMemberForm"` + `$addMemberForm.reset()` across all add-member modals in `members-view-unified.php`, `group-members.php`, `organization-members.php`, and `members-list.php`.
+- Replaced `data-effect="el.checked = $currentMemberRoles.includes('...')"` IIFEs on role checkboxes with declarative `data-attr:checked` in `members-view-unified.php` and `members-list.php`.
+- Replaced `data-effect="el.value = $signal"` on relationship-type selects and description inputs/textareas with `data-bind` two-way binding in `members-view-unified.php` and `members-list.php`.
+- Replaced `getElementById('...').innerHTML = ''` IIFEs for clearing message containers with `data-ref` + `$ref.innerHTML = ''` across edit-permissions and remove-member flows in `members-view-unified.php` and `members-list.php`.
+
 ## [0.5.2] - 2026-03-18
 
 ### Added

@@ -139,7 +139,7 @@ if ($use_unified_view) {
 }
 ?>
 	<div class="members-list wt_relative"
-	data-signals:='{"membersLoading": false, "bulkUploadModalOpen": false, "bulkUploadSubmitting": false, "addMemberModalOpen": false, "addMemberSubmitting": false, "addMemberSuccess": false}'
+	data-signals:='{"membersLoading": false, "bulkUploadModalOpen": false, "bulkUploadSubmitting": false, "addMemberModalOpen": false, "addMemberSubmitting": false, "addMemberSuccess": false, "autoCloseCountdown": 0}'
 	data-on:datastar-fetch="evt.detail.type === 'started' && ($membersLoading = true); (evt.detail.type === 'finished' || evt.detail.type === 'error') && ($membersLoading = false)">
 	<div class="members-loading-overlay wt_hidden wt_absolute wt_inset-0 wt_z-10 wt_bg-light-neutral-85 wt_backdrop-blur-xs"
 		data-class:hidden="!$membersLoading" data-class:is-active="$membersLoading">
@@ -233,10 +233,16 @@ $members_list_endpoint = $membersListEndpoint;
 	    }
 
 	    $membership_query_fragment = $membershipUuid ? '&membership_uuid=' . rawurlencode((string) $membershipUuid) : '';
-	    $add_member_modal_reset_actions = "(() => { const modal = document.getElementById('membersAddModal'); if (!modal) return; const form = modal.querySelector('form'); if (form) form.reset(); const messages = modal.querySelector('[id^=\"add-member-messages-\"]'); if (messages) messages.innerHTML = ''; })();";
-	    $add_member_close_actions = "\$membersLoading = false; \$addMemberSubmitting = false; \$addMemberSuccess = false; \$addMemberModalOpen = false; {$add_member_modal_reset_actions}";
+	    $add_member_modal_reset_actions = "\$addMemberForm.reset();";
+	    $add_member_close_actions = "\$membersLoading = false; \$addMemberSubmitting = false; \$addMemberSuccess = false; \$autoCloseCountdown = 0; \$addMemberModalOpen = false; {$add_member_modal_reset_actions}";
 	    $add_member_success_actions = "console.log('Member added successfully'); \$addMemberSubmitting = false; \$membersLoading = false; \$addMemberSuccess = true;";
-	    $add_member_error_actions = "console.error('Failed to add member'); \$addMemberSubmitting = false; \$membersLoading = false; \$addMemberSuccess = false;";
+	    $org_view_config = is_array($presentation_config['member_view'] ?? null) ? $presentation_config['member_view'] : [];
+	    $org_add_member_auto_close_on_success = (bool) ($org_view_config['add_member_auto_close_on_success'] ?? false);
+	    $org_add_member_auto_close_delay_seconds = max(0, (int) ($org_view_config['add_member_auto_close_delay_seconds'] ?? 7));
+	    if ($org_add_member_auto_close_on_success && $org_add_member_auto_close_delay_seconds > 0) {
+	        $add_member_success_actions .= " \$autoCloseCountdown = {$org_add_member_auto_close_delay_seconds};";
+	    }
+	    $add_member_error_actions = "console.error('Failed to add member'); \$addMemberSubmitting = false; \$membersLoading = false; \$addMemberSuccess = false; \$autoCloseCountdown = 0;";
 	    $add_member_endpoint = \OrgManagement\Helpers\template_url() . 'process/add-member';
 	    ?>
 
@@ -288,9 +294,11 @@ $members_list_endpoint = $membersListEndpoint;
 			class="modal wt_m-auto max_wt_3xl wt_rounded-md wt_shadow-md backdrop_wt_bg-black-50"
 			data-show="$addMemberModalOpen" data-effect="if ($addMemberModalOpen) el.showModal(); else el.close();"
 			data-on:close="<?php echo esc_attr($add_member_close_actions); ?>">
-			<div class="wt_bg-white wt_p-6 wt_relative" data-on:click__outside__capture="<?php echo esc_attr($add_member_close_actions); ?>">
+			<div class="wt_bg-white wt_p-6 wt_relative">
 				<button type="button" class="orgman-modal__close wt_absolute wt_right-4 wt_top-4 wt_text-lg wt_font-semibold"
-					data-on:click="<?php echo esc_attr($add_member_close_actions); ?>" data-show="!$addMemberSuccess">
+					data-on:click="<?php echo esc_attr($add_member_close_actions); ?>" data-show="!$addMemberSuccess"
+					data-class="{ 'wt_pointer-events-none': $addMemberSubmitting, 'wt_opacity-50': $addMemberSubmitting }"
+					data-attr:aria-disabled="$addMemberSubmitting ? 'true' : 'false'">
 					×
 				</button>
 
@@ -304,6 +312,7 @@ $members_list_endpoint = $membersListEndpoint;
 
 				<form name="add_new_person_membership_form" id="add_new_person_membership_form"
 					class="wt_flex wt_flex-col wt_gap-4" method="POST"
+					data-ref="addMemberForm"
 					data-show="!$addMemberSuccess"
 					data-on:submit="if(!$addMemberSubmitting){ $addMemberSubmitting = true; $membersLoading = true; @post('<?php echo esc_js($add_member_endpoint); ?>', { contentType: 'form' }); }"
 					data-on:submit__prevent-default="true"
@@ -434,11 +443,21 @@ $members_list_endpoint = $membersListEndpoint;
 						</button>
 					</div>
 				</form>
-					<div class="wt_flex wt_justify-end wt_pt-4" data-show="$addMemberSuccess">
-					<button type="button" class="button button--primary component-button"
-						data-on:click="<?php echo esc_attr($add_member_close_actions); ?>">
+				<div class="wt_pt-4" data-show="$addMemberSuccess">
+					<?php if ($org_add_member_auto_close_on_success) : ?>
+						<p class="wt_text-sm wt_text-content wt_mb-3" data-show="$autoCloseCountdown > 0"
+							data-on-interval__duration.1000="if ($autoCloseCountdown > 1) { $autoCloseCountdown-- } else if ($autoCloseCountdown === 1) { <?php echo esc_attr($add_member_close_actions); ?> }">
+							<?php esc_html_e('This dialog will close automatically in', 'wicket-acc'); ?>
+							<span class="wt_font-semibold" data-text="$autoCloseCountdown"></span>
+							<?php esc_html_e('seconds.', 'wicket-acc'); ?>
+						</p>
+					<?php endif; ?>
+					<div class="wt_flex wt_justify-end">
+						<button type="button" class="button button--primary component-button"
+							data-on:click="<?php echo esc_attr($add_member_close_actions); ?>">
 							<?php esc_html_e('Close', 'wicket-acc'); ?>
-					</button>
+						</button>
+					</div>
 				</div>
 			</div>
 		</dialog>
@@ -455,9 +474,11 @@ $members_list_endpoint = $membersListEndpoint;
 			data-show="$bulkUploadModalOpen"
 			data-effect="if ($bulkUploadModalOpen) el.showModal(); else el.close();"
 			data-on:close="($membersLoading = false); $bulkUploadModalOpen = false">
-			<div class="wt_bg-white wt_p-6 wt_relative" data-on:click__outside__capture="$bulkUploadModalOpen = false">
+			<div class="wt_bg-white wt_p-6 wt_relative">
 				<button type="button" class="orgman-modal__close wt_absolute wt_right-4 wt_top-4 wt_text-lg wt_font-semibold"
-					data-on:click="$bulkUploadModalOpen = false">
+					data-on:click="$bulkUploadModalOpen = false"
+					data-class="{ 'wt_pointer-events-none': $bulkUploadSubmitting, 'wt_opacity-50': $bulkUploadSubmitting }"
+					data-attr:aria-disabled="$bulkUploadSubmitting ? 'true' : 'false'">
 					×
 				</button>
 				<?php include __DIR__ . '/members-bulk-upload.php'; ?>

@@ -348,6 +348,8 @@ final class OrgManConfig
                 'member_view' => [
                     'use_unified' => true,
                     'search_clear_requires_submit' => false,
+                    'add_member_auto_close_on_success' => false,
+                    'add_member_auto_close_delay_seconds' => 7,
                 ],
                 'member_card' => [
                     'fields' => [

@@ -103,7 +103,7 @@ $clear_action = '(' . '$membersLoading' . ' = true, ' . '$searchQuery' . " = '',
 
 ?>
 <div class="members-list wt_relative" data-member-view="unified"
-    data-signals:='{"membersLoading": false, "bulkUploadModalOpen": false, "bulkUploadSubmitting": false, "addMemberModalOpen": false, "addMemberSubmitting": false, "addMemberSuccess": false, "removeMemberModalOpen": false, "removeMemberSubmitting": false, "removeMemberSuccess": false, "currentRemoveMemberUuid": "", "currentRemoveMemberName": "", "currentRemoveMemberEmail": "", "currentRemoveMemberConnectionId": "", "currentRemoveMemberPersonMembershipId": "", "currentRemoveMemberGroupMemberId": "", "currentRemoveMemberRole": "", "editPermissionsModalOpen": false, "editPermissionsSubmitting": false, "editPermissionsSuccess": false, "currentMemberUuid": "", "currentMemberName": "", "currentMemberRoles": [], "currentMemberRelationshipType": "", "currentMemberDescription": ""}'
+    data-signals:='{"membersLoading": false, "bulkUploadModalOpen": false, "bulkUploadSubmitting": false, "addMemberModalOpen": false, "addMemberSubmitting": false, "addMemberSuccess": false, "autoCloseCountdown": 0, "removeMemberModalOpen": false, "removeMemberSubmitting": false, "removeMemberSuccess": false, "currentRemoveMemberUuid": "", "currentRemoveMemberName": "", "currentRemoveMemberEmail": "", "currentRemoveMemberConnectionId": "", "currentRemoveMemberPersonMembershipId": "", "currentRemoveMemberGroupMemberId": "", "currentRemoveMemberRole": "", "editPermissionsModalOpen": false, "editPermissionsSubmitting": false, "editPermissionsSuccess": false, "currentMemberUuid": "", "currentMemberName": "", "currentMemberRoles": [], "currentMemberRelationshipType": "", "currentMemberDescription": ""}'
     data-on:datastar-fetch="evt.detail.type === 'started' && ($membersLoading = true); (evt.detail.type === 'finished' || evt.detail.type === 'error') && ($membersLoading = false)">
 
     <div class="members-loading-overlay wt_hidden wt_absolute wt_inset-0 wt_z-10 wt_bg-light-neutral-85 wt_backdrop-blur-xs"
@@ -208,14 +208,22 @@ $groups_presentation = is_array($groups_config['presentation'] ?? null)
 $group_add_member_auto_close_on_success = (bool) ($groups_presentation['add_member_auto_close_on_success'] ?? false);
 $group_add_member_auto_close_delay_seconds = max(0, (int) ($groups_presentation['add_member_auto_close_delay_seconds'] ?? 7));
 $group_add_member_auto_close_delay_ms = $group_add_member_auto_close_delay_seconds * 1000;
-$add_member_modal_reset_actions = "(() => { const modal = document.getElementById('membersAddModal'); if (!modal) return; if (modal.orgmanAutoCloseTimer) { window.clearTimeout(modal.orgmanAutoCloseTimer); modal.orgmanAutoCloseTimer = null; } const form = modal.querySelector('form'); if (form) form.reset(); const messages = modal.querySelector('[id^=\"add-member-messages-\"], #group-member-messages'); if (messages) messages.innerHTML = ''; })();";
-$add_member_close_actions = "\$membersLoading = false; \$addMemberSubmitting = false; \$addMemberSuccess = false; \$addMemberModalOpen = false; {$add_member_modal_reset_actions}";
+$add_member_modal_reset_actions = "\$addMemberForm.reset();";
+$add_member_close_actions = "\$membersLoading = false; \$addMemberSubmitting = false; \$addMemberSuccess = false; \$autoCloseCountdown = 0; \$addMemberModalOpen = false; {$add_member_modal_reset_actions}";
+$org_add_member_auto_close_on_success = (bool) ($view_config['add_member_auto_close_on_success'] ?? false);
+$org_add_member_auto_close_delay_seconds = max(0, (int) ($view_config['add_member_auto_close_delay_seconds'] ?? 7));
 $add_member_success_actions = "console.log('Member added successfully'); \$addMemberSubmitting = false; \$membersLoading = false; \$addMemberSuccess = true;";
-$group_add_member_success_actions = "console.log('Group member added successfully'); \$addMemberSubmitting = false; \$membersLoading = false; \$addMemberSuccess = true;";
-if ($group_add_member_auto_close_on_success && $group_add_member_auto_close_delay_ms > 0) {
-    $group_add_member_success_actions .= "(() => { const modal = document.getElementById('membersAddModal'); if (!modal) return; if (modal.orgmanAutoCloseTimer) { window.clearTimeout(modal.orgmanAutoCloseTimer); } modal.orgmanAutoCloseTimer = window.setTimeout(() => { {$add_member_close_actions} }, {$group_add_member_auto_close_delay_ms}); })();";
+if ($org_add_member_auto_close_on_success && $org_add_member_auto_close_delay_seconds > 0) {
+    $add_member_success_actions .= " \$autoCloseCountdown = {$org_add_member_auto_close_delay_seconds};";
 }
-$add_member_error_actions = "console.error('Failed to add member'); \$addMemberSubmitting = false; \$membersLoading = false; \$addMemberSuccess = false;";
+$group_add_member_success_actions = "console.log('Group member added successfully'); \$addMemberSubmitting = false; \$membersLoading = false; \$addMemberSuccess = true;";
+if ($group_add_member_auto_close_on_success && $group_add_member_auto_close_delay_seconds > 0) {
+    $group_add_member_success_actions .= " \$autoCloseCountdown = {$group_add_member_auto_close_delay_seconds};";
+}
+$add_member_error_actions = "console.error('Failed to add member'); \$addMemberSubmitting = false; \$membersLoading = false; \$addMemberSuccess = false; \$autoCloseCountdown = 0;";
+$add_member_auto_close_enabled = ($mode === 'groups')
+    ? $group_add_member_auto_close_on_success
+    : $org_add_member_auto_close_on_success;
 
 $remove_member_success_actions = "console.log('Member removed successfully'); \$removeMemberSubmitting = false; \$membersLoading = false; \$removeMemberSuccess = true;";
 $remove_member_error_actions = "console.error('Failed to remove member'); \$removeMemberSubmitting = false; \$membersLoading = false;";
@@ -252,7 +260,7 @@ $remove_member_error_actions = "console.error('Failed to remove member'); \$remo
         $update_permissions_local_sync_actions = "(() => { const modal = document.getElementById('editPermissionsModal'); if (!modal) return; const selected = Array.from(modal.querySelectorAll('input[name=\"roles[]\"]:checked')).map((node) => node.value); const selectedJson = JSON.stringify(selected); document.querySelectorAll('.edit-permissions-button[data-member-uuid=\"' + \$currentMemberUuid + '\"]').forEach((btn) => { btn.dataset.memberRoles = selectedJson; }); \$currentMemberRoles = selected; })();";
         $update_permissions_success_actions = "console.log('Permissions updated successfully'); \$editPermissionsSubmitting = false; \$editPermissionsSuccess = true; \$membersLoading = false; {$update_permissions_local_sync_actions} @get('{$members_list_endpoint}{$members_list_separator}org_uuid={$encoded_org_uuid}{$membership_query_fragment}&page=1') >> select('#{$members_list_target}') | set(html);";
         $update_permissions_error_actions = "console.error('Failed to update permissions'); \$editPermissionsSubmitting = false; \$membersLoading = false;";
-        $edit_permissions_reset_actions = "\$editPermissionsSuccess = false; \$editPermissionsSubmitting = false; \$currentMemberUuid = ''; \$currentMemberName = ''; \$currentMemberRoles = []; \$currentMemberRelationshipType = ''; \$currentMemberDescription = ''; (() => { const el = document.getElementById('update-permissions-messages'); if (el) el.innerHTML = ''; })();";
+        $edit_permissions_reset_actions = "\$editPermissionsSuccess = false; \$editPermissionsSubmitting = false; \$currentMemberUuid = ''; \$currentMemberName = ''; \$currentMemberRoles = []; \$currentMemberRelationshipType = ''; \$currentMemberDescription = ''; \$updatePermissionsMessages.innerHTML = '';";
         ?>
         <div class="wt_mt-6" data-signals='{"editPermissionsModalOpen": false, "editPermissionsSubmitting": false, "editPermissionsSuccess": false, "currentMemberUuid": "", "currentMemberName": "", "currentMemberRoles": [], "currentMemberRelationshipType": "", "currentMemberDescription": "", "removeMemberModalOpen": false, "removeMemberSubmitting": false, "removeMemberSuccess": false, "currentRemoveMemberUuid": "", "currentRemoveMemberName": "", "currentRemoveMemberEmail": "", "currentRemoveMemberConnectionId": "", "currentRemoveMemberPersonMembershipId": ""}'>
             <dialog id="editPermissionsModal" class="modal wt_m-auto max_wt_3xl wt_rounded-md wt_shadow-md backdrop_wt_bg-black-50"
@@ -268,7 +276,9 @@ $remove_member_error_actions = "console.error('Failed to remove member'); \$remo
                         data-on:click="
                             $editPermissionsModalOpen = false;
                             <?php echo esc_attr($edit_permissions_reset_actions); ?>
-                        " data-show="!$editPermissionsSuccess">
+                        " data-show="!$editPermissionsSuccess"
+                        data-class="{ 'wt_pointer-events-none': $editPermissionsSubmitting, 'wt_opacity-50': $editPermissionsSubmitting }"
+                        data-attr:aria-disabled="$editPermissionsSubmitting ? 'true' : 'false'">
                         ×
                     </button>
 
@@ -279,7 +289,7 @@ $remove_member_error_actions = "console.error('Failed to remove member'); \$remo
                         </span>
                     </h2>
 
-                    <div id="update-permissions-messages"></div>
+                    <div id="update-permissions-messages" data-ref="updatePermissionsMessages"></div>
 
                     <form
                         method="POST"
@@ -301,8 +311,7 @@ $remove_member_error_actions = "console.error('Failed to remove member'); \$remo
                                     <?php esc_html_e('Relationship Type', 'wicket-acc'); ?>
                                 </label>
                                 <select id="edit-member-relationship-type" name="relationship_type"
-                                    data-attr:value="$currentMemberRelationshipType"
-                                    data-effect="el.value = $currentMemberRelationshipType || ''"
+                                    data-bind="currentMemberRelationshipType"
                                     class="wt_w-full wt_border wt_border-color wt_rounded-md wt_p-2">
                                     <option value=""><?php esc_html_e('Select a relationship type', 'wicket-acc'); ?></option>
                                     <?php foreach ($relationship_types as $type_key => $type_label) : ?>
@@ -321,11 +330,11 @@ $remove_member_error_actions = "console.error('Failed to remove member'); \$remo
                                 </label>
                                 <?php if (($form_config['description']['input_type'] ?? 'textarea') === 'text'): ?>
                                     <input type="text" id="edit-member-description" name="description"
-                                        data-effect="el.value = $currentMemberDescription || ''"
+                                        data-bind="currentMemberDescription"
                                         class="wt_w-full wt_border wt_border-color wt_rounded-md wt_p-2">
                                 <?php else: ?>
                                     <textarea id="edit-member-description" name="description"
-                                        data-effect="el.value = $currentMemberDescription || ''"
+                                        data-bind="currentMemberDescription"
                                         class="wt_w-full wt_border wt_border-color wt_rounded-md wt_p-2"
                                         rows="3"></textarea>
                                 <?php endif; ?>
@@ -344,7 +353,7 @@ $remove_member_error_actions = "console.error('Failed to remove member'); \$remo
                                                     name="roles[]"
                                                     value="<?php echo esc_attr($slug); ?>"
                                                     class="form-checkbox wt_h-4 wt_w-4 wt_text-bg-interactive wt_rounded wt_focus_ring-bg-interactive"
-                                                    data-effect="(() => { const __currentMemberUuid = $currentMemberUuid; el.checked = $currentMemberRoles.includes('<?php echo esc_js($slug); ?>'); })()">
+                                                    data-attr:checked="$currentMemberRoles.includes('<?php echo esc_js($slug); ?>')">
                                                 <span class="wt_text-sm wt_text-content"><?php echo esc_html($role); ?></span>
                                             </label>
                                         </div>
@@ -404,9 +413,11 @@ $remove_member_error_actions = "console.error('Failed to remove member'); \$remo
         data-show="$addMemberModalOpen"
         data-effect="if ($addMemberModalOpen) el.showModal(); else el.close();"
         data-on:close="<?php echo esc_attr($add_member_close_actions); ?>">
-        <div class="wt_bg-white wt_p-6 wt_relative" data-on:click__outside__capture="<?php echo esc_attr($add_member_close_actions); ?>">
+        <div class="wt_bg-white wt_p-6 wt_relative">
             <button type="button" class="orgman-modal__close wt_absolute wt_right-4 wt_top-4 wt_text-lg wt_font-semibold"
-                data-on:click="<?php echo esc_attr($add_member_close_actions); ?>" data-show="!$addMemberSuccess">
+                data-on:click="<?php echo esc_attr($add_member_close_actions); ?>" data-show="!$addMemberSuccess"
+                data-class="{ 'wt_pointer-events-none': $addMemberSubmitting, 'wt_opacity-50': $addMemberSubmitting }"
+                data-attr:aria-disabled="$addMemberSubmitting ? 'true' : 'false'">
                 ×
             </button>
 
@@ -419,6 +430,7 @@ $remove_member_error_actions = "console.error('Failed to remove member'); \$remo
                 <form
                     method="post"
                     class="wt_flex wt_flex-col wt_gap-4"
+                    data-ref="addMemberForm"
                     data-show="!$addMemberSuccess"
                     data-on:submit="if(!$addMemberSubmitting){ $addMemberSubmitting = true; $membersLoading = true; @post('<?php echo esc_js($add_member_endpoint); ?>', { contentType: 'form' }); }"
                     data-on:submit__prevent-default="true"
@@ -484,16 +496,27 @@ $remove_member_error_actions = "console.error('Failed to remove member'); \$remo
                         </button>
                     </div>
                 </form>
-                <div class="wt_flex wt_justify-end wt_pt-4" data-show="$addMemberSuccess">
-                    <button type="button" class="button button--primary component-button"
-                        data-on:click="<?php echo esc_attr($add_member_close_actions); ?>">
-                        <?php esc_html_e('Close', 'wicket-acc'); ?>
-                    </button>
+                <div class="wt_pt-4" data-show="$addMemberSuccess">
+                    <?php if ($add_member_auto_close_enabled) : ?>
+                        <p class="wt_text-sm wt_text-content wt_mb-3" data-show="$autoCloseCountdown > 0"
+                            data-on-interval__duration.1000="if ($autoCloseCountdown > 1) { $autoCloseCountdown-- } else if ($autoCloseCountdown === 1) { <?php echo esc_attr($add_member_close_actions); ?> }">
+                            <?php esc_html_e('This dialog will close automatically in', 'wicket-acc'); ?>
+                            <span class="wt_font-semibold" data-text="$autoCloseCountdown"></span>
+                            <?php esc_html_e('seconds.', 'wicket-acc'); ?>
+                        </p>
+                    <?php endif; ?>
+                    <div class="wt_flex wt_justify-end">
+                        <button type="button" class="button button--primary component-button"
+                            data-on:click="<?php echo esc_attr($add_member_close_actions); ?>">
+                            <?php esc_html_e('Close', 'wicket-acc'); ?>
+                        </button>
+                    </div>
                 </div>
             <?php else : ?>
                 <div id="add-member-messages-<?php echo esc_attr(sanitize_html_class($org_uuid ?: 'default')); ?>"></div>
                 <form name="add_new_person_membership_form" id="add_new_person_membership_form"
                     class="wt_flex wt_flex-col wt_gap-4" method="POST"
+                    data-ref="addMemberForm"
                     data-show="!$addMemberSuccess"
                     data-on:submit="if(!$addMemberSubmitting){ $addMemberSubmitting = true; $membersLoading = true; @post('<?php echo esc_js($add_member_endpoint); ?>', { contentType: 'form' }); }"
                     data-on:submit__prevent-default="true"
@@ -628,11 +651,21 @@ $available_roles = OrgHelpers\PermissionHelper::filter_role_choices(
                         </button>
                     </div>
                 </form>
-                <div class="wt_flex wt_justify-end wt_pt-4" data-show="$addMemberSuccess">
-                    <button type="button" class="button button--primary component-button"
-                        data-on:click="<?php echo esc_attr($add_member_close_actions); ?>">
-                        <?php esc_html_e('Close', 'wicket-acc'); ?>
-                    </button>
+                <div class="wt_pt-4" data-show="$addMemberSuccess">
+                    <?php if ($add_member_auto_close_enabled) : ?>
+                        <p class="wt_text-sm wt_text-content wt_mb-3" data-show="$autoCloseCountdown > 0"
+                            data-on-interval__duration.1000="if ($autoCloseCountdown > 1) { $autoCloseCountdown-- } else if ($autoCloseCountdown === 1) { <?php echo esc_attr($add_member_close_actions); ?> }">
+                            <?php esc_html_e('This dialog will close automatically in', 'wicket-acc'); ?>
+                            <span class="wt_font-semibold" data-text="$autoCloseCountdown"></span>
+                            <?php esc_html_e('seconds.', 'wicket-acc'); ?>
+                        </p>
+                    <?php endif; ?>
+                    <div class="wt_flex wt_justify-end">
+                        <button type="button" class="button button--primary component-button"
+                            data-on:click="<?php echo esc_attr($add_member_close_actions); ?>">
+                            <?php esc_html_e('Close', 'wicket-acc'); ?>
+                        </button>
+                    </div>
                 </div>
             <?php endif; ?>
         </div>
@@ -648,9 +681,11 @@ $available_roles = OrgHelpers\PermissionHelper::filter_role_choices(
             data-show="$bulkUploadModalOpen"
             data-effect="if ($bulkUploadModalOpen) el.showModal(); else el.close();"
             data-on:close="($membersLoading = false); $bulkUploadModalOpen = false">
-            <div class="wt_bg-white wt_p-6 wt_relative" data-on:click__outside__capture="$bulkUploadModalOpen = false">
+            <div class="wt_bg-white wt_p-6 wt_relative">
                 <button type="button" class="orgman-modal__close wt_absolute wt_right-4 wt_top-4 wt_text-lg wt_font-semibold"
-                    data-on:click="$bulkUploadModalOpen = false">
+                    data-on:click="$bulkUploadModalOpen = false"
+                    data-class="{ 'wt_pointer-events-none': $bulkUploadSubmitting, 'wt_opacity-50': $bulkUploadSubmitting }"
+                    data-attr:aria-disabled="$bulkUploadSubmitting ? 'true' : 'false'">
                     ×
                 </button>
                 <?php include __DIR__ . '/members-bulk-upload.php'; ?>
@@ -665,7 +700,9 @@ $available_roles = OrgHelpers\PermissionHelper::filter_role_choices(
         data-on:close="($membersLoading = false); $removeMemberModalOpen = false">
         <div class="wt_bg-white wt_p-6 wt_relative">
             <button type="button" class="orgman-modal__close wt_absolute wt_right-4 wt_top-4 wt_text-lg wt_font-semibold"
-                data-on:click="$removeMemberModalOpen = false" data-show="!$removeMemberSuccess">×</button>
+                data-on:click="$removeMemberModalOpen = false" data-show="!$removeMemberSuccess"
+                data-class="{ 'wt_pointer-events-none': $removeMemberSubmitting, 'wt_opacity-50': $removeMemberSubmitting }"
+                data-attr:aria-disabled="$removeMemberSubmitting ? 'true' : 'false'">×</button>
             <h2 class="wt_text-2xl wt_font-semibold wt_mb-4"><?php esc_html_e('Remove Member', 'wicket-acc'); ?></h2>
             <div id="remove-member-messages"></div>
 
