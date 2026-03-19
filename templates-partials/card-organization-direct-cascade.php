@@ -96,7 +96,7 @@
                         }
                         ?>
                         <a href="<?php echo esc_url(add_query_arg($profile_params, $profile_url_base)); ?>"
-                            class="button button--secondary component-button wt_flex-1 wt_text-center">
+                            class="wt_inline-flex wt_items-center wt_text-primary-600 wt_hover_text-primary-700 underline underline-offset-4">
                             <?php esc_html_e('Edit Organization', 'wicket-acc'); ?>
                         </a>
                     <?php endif; ?>
@@ -117,7 +117,7 @@
                         }
                         ?>
                         <a href="<?php echo esc_url(add_query_arg($members_params, $members_url_base)); ?>"
-                            class="button button--secondary component-button wt_flex-1 wt_text-center">
+                            class="wt_inline-flex wt_items-center wt_text-primary-600 wt_hover_text-primary-700 underline underline-offset-4">
                             <?php esc_html_e('Manage Members', 'wicket-acc'); ?>
                         </a>
                     <?php endif; ?>
