@@ -78,7 +78,7 @@ $build_url = static function (int $page_number) use ($members_list_endpoint, $ba
 };
 
 $build_action = static function (int $page_number) use ($build_url) {
-    return "@get('" . $build_url($page_number) . "')";
+    return '$listLoading = true; @get(\'' . $build_url($page_number) . '\')';
 };
 
 $remove_member_endpoint = OrgManagement\Helpers\TemplateHelper::template_url() . 'process/remove-group-member';
@@ -89,7 +89,17 @@ $refresh_action = "@get('" . $build_url(1) . "') >> select('#" . $members_list_t
     id="<?php echo esc_attr($members_list_target); ?>"
     class="wt_mt-6 wt_flex wt_flex-col wt_gap-1 wt_relative"
     data-page="<?php echo esc_attr((string) $page); ?>"
-    data-attr:aria-busy="$membersLoading">
+    data-attr:aria-busy="$listLoading">
+    <div class="members-loading-state wt_flex wt_flex-col wt_items-center wt_justify-center wt_gap-4 wt_rounded-card wt_border wt_border-color wt_bg-white wt_shadow-sm wt_text-center"
+        data-show="$listLoading"
+        style="display: none;">
+        <span class="wt_loader" aria-hidden="true"></span>
+        <p class="members-loading-state__message wt_text-base wt_font-semibold wt_text-content wt_leading-normal" role="status" aria-live="polite">
+            <?php esc_html_e('Processing. Please wait...', 'wicket-acc'); ?>
+        </p>
+    </div>
+
+    <div data-show="!$listLoading">
     <div id="group-member-messages" class="wt_mb-3"></div>
     <div class="wt_text-xl wt_font-semibold wt_mb-3">
         <?php if ($max_seats !== null) : ?>
@@ -207,9 +217,8 @@ $refresh_action = "@get('" . $build_url(1) . "') >> select('#" . $members_list_t
                     class="members-pagination__btn members-pagination__btn--prev button button--secondary wt_px-3 wt_py-2 wt_text-sm component-button"
                     <?php if ($prev_disabled) : ?>disabled<?php endif; ?>
                     <?php if (!$prev_disabled) : ?>data-on:click="<?php echo esc_attr($build_action($page - 1)); ?>" <?php endif; ?>
-                    data-on:success="<?php echo esc_attr(wp_sprintf("select('#%s') | set(html)", $members_list_target)); ?>"
-                    data-indicator:members-loading
-                    data-attr:disabled="$membersLoading">
+                    data-on:success="<?php echo esc_attr('$listLoading = false; ' . wp_sprintf("select('#%s') | set(html)", $members_list_target)); ?>"
+                    data-indicator:members-loading>
                     <?php esc_html_e('Previous', 'wicket-acc'); ?>
                 </button>
                 <div class="members-pagination__pages wt_flex wt_items-center wt_gap-1">
@@ -220,9 +229,8 @@ $refresh_action = "@get('" . $build_url(1) . "') >> select('#" . $members_list_t
                             class="members-pagination__btn members-pagination__btn--page button wt_px-3 wt_py-2 wt_text-sm <?php echo $is_current ? 'button--primary' : 'button--secondary'; ?> component-button"
                             <?php if ($is_current) : ?>disabled<?php endif; ?>
                             <?php if (!$is_current) : ?>data-on:click="<?php echo esc_attr($build_action($i)); ?>" <?php endif; ?>
-                            data-on:success="<?php echo esc_attr(wp_sprintf("select('#%s') | set(html)", $members_list_target)); ?>"
-                            data-indicator:members-loading
-                            data-attr:disabled="$membersLoading">
+                            data-on:success="<?php echo esc_attr('$listLoading = false; ' . wp_sprintf("select('#%s') | set(html)", $members_list_target)); ?>"
+                            data-indicator:members-loading>
                             <?php echo esc_html((string) $i); ?>
                         </button>
                     <?php endfor; ?>
@@ -232,9 +240,8 @@ $refresh_action = "@get('" . $build_url(1) . "') >> select('#" . $members_list_t
                     class="members-pagination__btn members-pagination__btn--next button button--secondary wt_px-3 wt_py-2 wt_text-sm component-button"
                     <?php if ($next_disabled) : ?>disabled<?php endif; ?>
                     <?php if (!$next_disabled) : ?>data-on:click="<?php echo esc_attr($build_action($page + 1)); ?>" <?php endif; ?>
-                    data-on:success="<?php echo esc_attr(wp_sprintf("select('#%s') | set(html)", $members_list_target)); ?>"
-                    data-indicator:members-loading
-                    data-attr:disabled="$membersLoading">
+                    data-on:success="<?php echo esc_attr('$listLoading = false; ' . wp_sprintf("select('#%s') | set(html)", $members_list_target)); ?>"
+                    data-indicator:members-loading>
                     <?php esc_html_e('Next', 'wicket-acc'); ?>
                 </button>
             </div>
@@ -245,7 +252,7 @@ $refresh_action = "@get('" . $build_url(1) . "') >> select('#" . $members_list_t
         <?php if ($has_seats_available) : ?>
             <button type="button"
                 class="button button--primary add-member-button wt_w-full wt_py-2 component-button"
-                data-on:click="$addMemberSuccess = false; $addMemberSubmitting = false; (() => { const modal = document.getElementById('groupMembersAddModal'); if (!modal) return; const form = modal.querySelector('form'); if (form) form.reset(); })(); $addMemberModalOpen = true"><?php esc_html_e('Add Member', 'wicket-acc'); ?></button>
+                data-on:click="$addMemberSuccess = false; $addMemberSubmitting = false; $addMemberSuccessMessage = ''; (() => { const modal = document.getElementById('groupMembersAddModal'); if (!modal) return; const form = modal.querySelector('form'); if (form) form.reset(); const messages = modal.querySelector('#group-member-add-messages'); if (messages) messages.innerHTML = ''; })(); $addMemberModalOpen = true"><?php esc_html_e('Add Member', 'wicket-acc'); ?></button>
         <?php endif; ?>
         <?php if (!$has_seats_available) : ?>
             <div class="wt_mt-2 wt_p-3 wt_bg-yellow-50 wt_border wt_border-yellow-200 wt_rounded-md wt_text-yellow-800 wt_text-sm">
@@ -257,5 +264,6 @@ $refresh_action = "@get('" . $build_url(1) . "') >> select('#" . $members_list_t
                 </div>
             </div>
         <?php endif; ?>
+    </div>
     </div>
 </div>

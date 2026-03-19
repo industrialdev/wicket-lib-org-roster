@@ -51,6 +51,10 @@ Use `docs/INSTALLATION.md` for setup wiring.
   - Default: `Membership Owner`
 - `access.roles.labels.*`
   - Extra display labels for any role slug surfaced in the UI.
+- `access.roles.descriptions.*`
+  - Optional descriptions shown alongside role checkboxes in Add Member and Edit Permissions modals.
+  - Useful for explaining what each role does (e.g., `'org_editor' => 'Ability to edit Organization\'s profile'`).
+  - The description appears in lighter grey text next to the role label.
 
 #### `access.permissions`
 
@@ -246,6 +250,10 @@ Use `docs/INSTALLATION.md` for setup wiring.
   - Default: `[]`
 - `member_management.forms.add_member.allow_relationship_type_editing`
   - Default: `false`
+- `member_management.forms.add_member.clear_form_on_error`
+  - Default: `false`
+  - When enabled, the Add Member form will be cleared/reset when an error occurs during submission.
+  - Useful for sites that want to clear potentially invalid data from the form on failure.
 
 #### `member_management.permissions_modal`
 

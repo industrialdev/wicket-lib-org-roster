@@ -62,6 +62,10 @@ if ('POST' === strtoupper($request_method)) {
         $configService = new ConfigService();
         $roster_mode = (string) $configService->getRosterMode();
         $orgman_config = OrgManagement\Config\OrgManConfig::get();
+        $presentation_config = is_array($orgman_config['presentation'] ?? null) ? $orgman_config['presentation'] : [];
+        $member_view_config = is_array($presentation_config['member_view'] ?? null) ? $presentation_config['member_view'] : [];
+        $remove_auto_close_on_success = (bool) ($member_view_config['add_member_auto_close_on_success'] ?? false);
+        $remove_auto_close_delay_seconds = max(0, (int) ($member_view_config['add_member_auto_close_delay_seconds'] ?? 7));
         $preserve_direct_relationship = (bool) ($orgman_config['member_management']['removal']['direct']['preserve_relationship'] ?? false);
         $membershipService = new OrgManagement\Services\MembershipService();
         $permissionService = new OrgManagement\Services\PermissionService();
@@ -252,6 +256,7 @@ if ('POST' === strtoupper($request_method)) {
                 'removeMemberSubmitting' => false,
                 'removeMemberSuccess' => true,
                 'membersLoading' => false,
+                'autoCloseCountdown' => $remove_auto_close_on_success ? $remove_auto_close_delay_seconds : 0,
             ], 0, 'remove-countdown', $element_patches);
 
             return;
@@ -367,6 +372,7 @@ if ('POST' === strtoupper($request_method)) {
             'removeMemberSubmitting' => false,
             'removeMemberSuccess' => true,
             'membersLoading' => false,
+            'autoCloseCountdown' => $remove_auto_close_on_success ? $remove_auto_close_delay_seconds : 0,
         ], 0, 'remove-countdown', $element_patches);
 
         return;

@@ -65,6 +65,7 @@ if (!empty($membership_uuid)) {
 }
 $update_permissions_local_sync_actions = "(() => { const modal = document.getElementById('editPermissionsModal'); if (!modal) return; const selected = Array.from(modal.querySelectorAll('input[name=\"roles[]\"]:checked')).map((node) => node.value); const selectedJson = JSON.stringify(selected); document.querySelectorAll('.edit-permissions-button[data-member-uuid=\"' + \$currentMemberUuid + '\"]').forEach((btn) => { btn.dataset.memberRoles = selectedJson; }); \$currentMemberRoles = selected; })();";
 $update_permissions_success_actions = "console.log('Permissions updated successfully'); $editPermissionsSubmitting = false; $editPermissionsSuccess = true; $membersLoading = false; {$update_permissions_local_sync_actions} @get('{$members_list_endpoint}{$members_list_separator}org_uuid={$encodedOrgUuid}{$membership_query_fragment}&page=1') >> select('#{$members_list_target}') | set(html);";
+$remove_member_reset_actions = "(() => { const modal = document.getElementById('removeMemberModal'); const messages = modal ? modal.querySelector('#remove-member-messages') : document.getElementById('remove-member-messages'); if (messages) messages.innerHTML = ''; if (modal && modal.open) modal.close(); })(); \$removeMemberModalOpen = false; \$removeMemberSubmitting = false; \$removeMemberSuccess = false; \$membersLoading = false; \$autoCloseCountdown = 0; \$currentRemoveMemberUuid = ''; \$currentRemoveMemberName = ''; \$currentRemoveMemberEmail = ''; \$currentRemoveMemberConnectionId = ''; \$currentRemoveMemberPersonMembershipId = '';";
 $remove_member_success_actions = "console.log('Member removed successfully'); $removeMemberSubmitting = false; $removeMemberSuccess = true; $membersLoading = false;";
 
 $orgman_config = OrgManagement\Config\OrgManConfig::get();
@@ -73,6 +74,9 @@ $presentation_config = is_array($orgman_config['presentation'] ?? null)
     : [];
 $member_list_config = is_array($presentation_config['member_list'] ?? null)
     ? $presentation_config['member_list']
+    : [];
+$member_view_config = is_array($presentation_config['member_view'] ?? null)
+    ? $presentation_config['member_view']
     : [];
 $show_remove_button_by_config = (bool) ($member_list_config['show_remove_button'] ?? true);
 $show_bulk_upload = (bool) ($member_list_config['show_bulk_upload'] ?? false);
@@ -89,6 +93,8 @@ $show_unconfirmed_label = (bool) ($account_status_config['show_unconfirmed_label
 $confirmed_tooltip = (string) ($account_status_config['confirmed_tooltip'] ?? __('Account confirmed', 'wicket-acc'));
 $unconfirmed_tooltip = (string) ($account_status_config['unconfirmed_tooltip'] ?? __('Account not confirmed', 'wicket-acc'));
 $unconfirmed_label = (string) ($account_status_config['unconfirmed_label'] ?? __('Account not confirmed', 'wicket-acc'));
+$remove_member_auto_close_on_success = (bool) ($member_view_config['add_member_auto_close_on_success'] ?? false);
+$remove_member_auto_close_delay_seconds = max(0, (int) ($member_view_config['add_member_auto_close_delay_seconds'] ?? 7));
 $use_unified_member_list = (bool) ($member_list_config['use_unified'] ?? false);
 
 if ((!isset($members) || !is_array($members)) && !empty($org_uuid)) {
@@ -163,6 +169,7 @@ $available_roles = $permissionService->getAvailableRoles();
 
 // Load config for relationship type editing
 $role_display_map = $orgman_config['access']['roles']['labels'] ?? [];
+$role_descriptions = $orgman_config['access']['roles']['descriptions'] ?? [];
 
 // Filter out membership_owner if configured to prevent assignment
 if (!empty($orgman_config['access']['permissions']['prevent_owner_assignment'])) {
@@ -215,7 +222,7 @@ $build_url = static function (int $page_number) use ($members_list_endpoint, $ba
 $build_action = static function (int $page_number) use ($build_url) {
     $url = $build_url($page_number);
 
-    return "@get('" . $url . "')";
+    return '$listLoading = true; @get(\'' . $url . '\')';
 };
 
 $no_members_message = __('No members found.', 'wicket-acc');
@@ -225,7 +232,17 @@ $no_members_message = __('No members found.', 'wicket-acc');
     id="<?php echo esc_attr($members_list_target); ?>"
     class="wt_mt-6 wt_flex wt_flex-col wt_gap-1 wt_relative"
     data-page="<?php echo esc_attr((string) $page); ?>"
-    data-attr:aria-busy="$membersLoading">
+    data-attr:aria-busy="$listLoading">
+    <div class="members-loading-state wt_flex wt_flex-col wt_items-center wt_justify-center wt_gap-4 wt_rounded-card wt_border wt_border-color wt_bg-white wt_shadow-sm wt_text-center"
+        data-show="$listLoading"
+        style="display: none;">
+        <span class="wt_loader" aria-hidden="true"></span>
+        <p class="members-loading-state__message wt_text-base wt_font-semibold wt_text-content wt_leading-normal" role="status" aria-live="polite">
+            <?php esc_html_e('Processing. Please wait...', 'wicket-acc'); ?>
+        </p>
+    </div>
+
+    <div data-show="!$listLoading">
 
     <div class="wt_text-xl wt_font-semibold wt_mb-3">
         <?php if ($max_seats !== null): ?>
@@ -406,9 +423,8 @@ $no_members_message = __('No members found.', 'wicket-acc');
                     <button type="button"
                         class="members-pagination__btn members-pagination__btn--prev button button--secondary wt_px-3 wt_py-2 wt_text-sm component-button"
                         data-on:click="<?php echo esc_attr($build_action($page - 1)); ?>"
-                        data-on:success="<?php echo esc_attr(wp_sprintf("select('#%s') | set(html)", $members_list_target)); ?>"
-                        data-indicator:members-loading
-                        data-attr:disabled="$membersLoading">
+                        data-on:success="<?php echo esc_attr('$listLoading = false; ' . wp_sprintf("select('#%s') | set(html)", $members_list_target)); ?>"
+                        data-indicator:members-loading>
                         <?php esc_html_e('Previous', 'wicket-acc'); ?>
                     </button>
                 <?php endif; ?>
@@ -420,9 +436,8 @@ $no_members_message = __('No members found.', 'wicket-acc');
                             class="members-pagination__btn members-pagination__btn--page button wt_px-3 wt_py-2 wt_text-sm <?php echo $is_current ? 'button--primary' : 'button--secondary'; ?> component-button"
                             <?php if ($is_current) : ?>disabled<?php endif; ?>
                             <?php if (!$is_current) : ?>data-on:click="<?php echo esc_attr($build_action($i)); ?>" <?php endif; ?>
-                            data-on:success="<?php echo esc_attr(wp_sprintf("select('#%s') | set(html)", $members_list_target)); ?>"
-                            data-indicator:members-loading
-                            data-attr:disabled="$membersLoading">
+                            data-on:success="<?php echo esc_attr('$listLoading = false; ' . wp_sprintf("select('#%s') | set(html)", $members_list_target)); ?>"
+                            data-indicator:members-loading>
                             <?php echo esc_html((string) $i); ?>
                         </button>
                     <?php endfor; ?>
@@ -432,9 +447,8 @@ $no_members_message = __('No members found.', 'wicket-acc');
                     <button type="button"
                         class="members-pagination__btn members-pagination__btn--next button button--secondary wt_px-3 wt_py-2 wt_text-sm component-button"
                         data-on:click="<?php echo esc_attr($build_action($page + 1)); ?>"
-                        data-on:success="<?php echo esc_attr(wp_sprintf("select('#%s') | set(html)", $members_list_target)); ?>"
-                        data-indicator:members-loading
-                        data-attr:disabled="$membersLoading">
+                        data-on:success="<?php echo esc_attr('$listLoading = false; ' . wp_sprintf("select('#%s') | set(html)", $members_list_target)); ?>"
+                        data-indicator:members-loading>
                         <?php esc_html_e('Next', 'wicket-acc'); ?>
                     </button>
                 <?php endif; ?>
@@ -447,7 +461,7 @@ $no_members_message = __('No members found.', 'wicket-acc');
             <?php if ($has_seats_available): ?>
                 <button type="button"
                     class="button button--primary add-member-button wt_w-full wt_py-2 component-button"
-                    data-on:click="$addMemberSuccess = false; $addMemberSubmitting = false; $addMemberForm.reset(); $addMemberModalOpen = true"><?php esc_html_e('Add Member', 'wicket-acc'); ?></button>
+                    data-on:click="$addMemberSuccess = false; $addMemberSubmitting = false; $addMemberSuccessMessage = ''; $addMemberForm.reset(); (() => { const messages = document.querySelector('[id^=\'add-member-messages-\']'); if (messages) messages.innerHTML = ''; })(); $addMemberModalOpen = true"><?php esc_html_e('Add Member', 'wicket-acc'); ?></button>
                 <?php if ($show_bulk_upload) : ?>
                     <div class="wt_mt-3">
                         <button type="button"
@@ -486,6 +500,7 @@ $no_members_message = __('No members found.', 'wicket-acc');
             </p>
         </div>
     <?php endif; ?>
+    </div>
 </div>
 
 <!-- Edit Permissions Modal - Single modal using pure Datastar -->
@@ -568,6 +583,9 @@ $no_members_message = __('No members found.', 'wicket-acc');
                                             data-attr:checked="$currentMemberRoles.includes('<?php echo esc_js($slug); ?>')"
                                         >
                                         <span class="wt_text-sm wt_text-content"><?php echo esc_html($role); ?></span>
+                                        <?php if (!empty($role_descriptions[$slug])): ?>
+                                            <span class="wt_text-sm wt_text-content-secondary wt_ml-1"><?php echo esc_html($role_descriptions[$slug]); ?></span>
+                                        <?php endif; ?>
                                     </label>
                                 </div>
                             <?php endforeach; ?>
@@ -623,10 +641,10 @@ $no_members_message = __('No members found.', 'wicket-acc');
     <dialog id="removeMemberModal" class="modal wt_m-auto max_wt_md wt_rounded-md wt_shadow-md backdrop_wt_bg-black-50"
         data-show="$removeMemberModalOpen"
         data-effect="if ($removeMemberModalOpen) el.showModal(); else el.close();"
-        data-on:close="($membersLoading = false); $removeMemberModalOpen = false">
+        data-on:close="<?php echo esc_attr($remove_member_reset_actions); ?>">
         <div class="wt_bg-white wt_p-6 wt_relative">
             <button type="button" class="orgman-modal__close wt_absolute wt_right-4 wt_top-4 wt_text-lg wt_font-semibold"
-                data-on:click="$removeMemberModalOpen = false" data-show="!$removeMemberSuccess"
+                data-on:click="<?php echo esc_attr($remove_member_reset_actions); ?>" data-show="!$removeMemberSuccess"
                 data-class="{ 'wt_pointer-events-none': $removeMemberSubmitting, 'wt_opacity-50': $removeMemberSubmitting }"
                 data-attr:aria-disabled="$removeMemberSubmitting ? 'true' : 'false'">
                 ×
@@ -670,7 +688,7 @@ $no_members_message = __('No members found.', 'wicket-acc');
                     <div class="wt_flex wt_justify-end wt_gap-3">
                         <button
                             type="button"
-                            data-on:click="$removeMemberModalOpen = false"
+                            data-on:click="<?php echo esc_attr($remove_member_reset_actions); ?>"
                             class="button button--secondary wt_px-4 wt_py-2 wt_text-sm component-button"
                             data-class="{ 'wt_pointer-events-none': $removeMemberSubmitting, 'wt_opacity-50': $removeMemberSubmitting }"
                             data-attr:aria-disabled="$removeMemberSubmitting ? 'true' : 'false'"
@@ -693,12 +711,22 @@ $no_members_message = __('No members found.', 'wicket-acc');
                     </div>
                 </form>
             </div>
-            <div class="wt_flex wt_justify-end wt_pt-4" data-show="$removeMemberSuccess">
-                <button
-                    type="button"
-                    class="button button--primary wt_px-4 wt_py-2 wt_text-sm component-button"
-                    data-on:click="$removeMemberModalOpen = false; $removeMemberSuccess = false; $removeMemberSubmitting = false"
-                ><?php esc_html_e('Close', 'wicket-acc'); ?></button>
+            <div class="wt_pt-4" data-show="$removeMemberSuccess">
+                <?php if ($remove_member_auto_close_on_success) : ?>
+                    <p class="wt_text-sm wt_text-content wt_mb-3" data-show="$autoCloseCountdown > 0"
+                        data-on-interval__duration.1000="if ($autoCloseCountdown > 1) { $autoCloseCountdown-- } else if ($autoCloseCountdown === 1) { <?php echo esc_attr($remove_member_reset_actions); ?> }">
+                        <?php esc_html_e('This dialog will close automatically in', 'wicket-acc'); ?>
+                        <span class="wt_font-semibold" data-text="$autoCloseCountdown"></span>
+                        <?php esc_html_e('seconds.', 'wicket-acc'); ?>
+                    </p>
+                <?php endif; ?>
+                <div class="wt_flex wt_justify-end">
+                    <button
+                        type="button"
+                        class="button button--primary wt_px-4 wt_py-2 wt_text-sm component-button"
+                        data-on:click="<?php echo esc_attr($remove_member_reset_actions); ?>"
+                    ><?php esc_html_e('Close', 'wicket-acc'); ?></button>
+                </div>
             </div>
         </div>
     </dialog>

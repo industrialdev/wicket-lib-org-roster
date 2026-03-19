@@ -9,6 +9,7 @@
 use OrgManagement\Services\ConfigService;
 use OrgManagement\Services\MemberService;
 use starfederation\datastar\enums\ElementPatchMode;
+use starfederation\datastar\ServerSentEventGenerator;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -158,7 +159,7 @@ if ('POST' === strtoupper($request_method)) {
 
         if (is_wp_error($result)) {
             status_header(200);
-            OrgManagement\Helpers\DatastarSSE::renderError($result->get_error_message(), '#add-member-messages-' . $org_dom_suffix, ['addMemberSubmitting' => false, 'membersLoading' => false]);
+            OrgManagement\Helpers\DatastarSSE::renderError($result->get_error_message(), '#add-member-messages-' . $org_dom_suffix, ['addMemberSubmitting' => false, 'membersLoading' => false, 'addMemberFormError' => true]);
 
             return;
         }
@@ -215,10 +216,11 @@ if ('POST' === strtoupper($request_method)) {
 
         // Success message
         $full_name = trim(($member_data['first_name'] ?? '') . ' ' . ($member_data['last_name'] ?? ''));
-        $success_message = sprintf(
-            esc_html__('Successfully added %1$s with email %2$s.', 'wicket-acc'),
-            '<strong>' . esc_html($full_name) . '</strong>',
-            '<strong>' . esc_html($member_data['email'] ?? '') . '</strong>'
+        $success_message = wp_sprintf(
+            /* translators: 1: member full name, 2: member email address */
+            __('Successfully added %1$s with email %2$s.', 'wicket-acc'),
+            $full_name !== '' ? $full_name : __('the member', 'wicket-acc'),
+            (string) ($member_data['email'] ?? '')
         );
 
         $members_list_target = 'members-list-container-' . $org_dom_suffix;
@@ -232,16 +234,23 @@ if ('POST' === strtoupper($request_method)) {
         $members_list_html = (string) ob_get_clean();
 
         status_header(200);
-        OrgManagement\Helpers\DatastarSSE::renderSuccess($success_message, '#add-member-messages-' . $org_dom_suffix, [
+        $orgman_config = OrgManagement\Config\OrgManConfig::get();
+        $presentation_config = is_array($orgman_config['presentation'] ?? null) ? $orgman_config['presentation'] : [];
+        $member_view_config = is_array($presentation_config['member_view'] ?? null) ? $presentation_config['member_view'] : [];
+        $auto_close_on_success = (bool) ($member_view_config['add_member_auto_close_on_success'] ?? false);
+        $auto_close_delay_seconds = max(0, (int) ($member_view_config['add_member_auto_close_delay_seconds'] ?? 7));
+        $generator = new ServerSentEventGenerator();
+        $generator->sendHeaders();
+        $generator->patchSignals([
             'addMemberSubmitting' => false,
             'membersLoading' => false,
             'addMemberSuccess' => true,
-        ], 0, 'countdown', [
-            [
-                'elements' => $members_list_html,
-                'selector' => '#' . $members_list_target,
-                'mode' => ElementPatchMode::Outer,
-            ],
+            'addMemberSuccessMessage' => $success_message,
+            'autoCloseCountdown' => $auto_close_on_success ? $auto_close_delay_seconds : 0,
+        ]);
+        $generator->patchElements($members_list_html, [
+            'selector' => '#' . $members_list_target,
+            'mode' => ElementPatchMode::Outer,
         ]);
 
         return;

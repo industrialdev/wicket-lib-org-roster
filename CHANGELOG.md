@@ -2,6 +2,25 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.5.4] - 2026-03-19
+
+### Fixed
+- Fixed group members pagination: the API paginates before org-scope filtering, which could leave sparse first pages when unrelated memberships occupy the raw page window. Now fetch all pages, filter locally by org scope, then paginate the filtered set.
+
+### Added
+- Added `$listLoading` signal with visible loading spinner for member list pagination. Applied to `members-list.php`, replacing the old `$membersLoading` state management pattern.
+- Added `access.roles.descriptions.*` config option for role descriptions shown alongside role checkboxes in Add Member and Edit Permissions modals.
+- Added `member_management.forms.add_member.clear_form_on_error` config option.
+
+### Changed
+- Refactored `GroupService::getManageRoles()` to use `getFilteredGroupMembersPage()` which fetches all pages locally then filters and paginates.
+- Replaced `data-attr:disabled="$membersLoading"` with proper `$listLoading` state and Datastar loading indicators across pagination controls.
+- Organization details template now only fetches membership data in non-groups mode, avoiding unnecessary API calls when viewing groups.
+
+### Documentation
+- Updated `CONFIGURATION.md` with new role descriptions config and clear_form_on_error option.
+- Updated `AGENTS.md` with Datastar interactivity guideline.
+
 ## [0.5.3] - 2026-03-19
 
 ### Fixed

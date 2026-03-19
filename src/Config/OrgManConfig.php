@@ -29,6 +29,9 @@ final class OrgManConfig
                         'org_editor' => __('Org. Editor', 'wicket-acc'),
                         'membership_owner' => __('Membership Owner', 'wicket-acc'),
                     ],
+                    'descriptions' => [
+                        'org_editor' => __('Ability to edit Organization\'s profile', 'wicket-acc'),
+                    ],
                 ],
                 'permissions' => [
                     'organization_edit_roles' => [
@@ -203,6 +206,7 @@ final class OrgManConfig
                             ],
                         ],
                         'allow_relationship_type_editing' => false,
+                        'clear_form_on_error' => false,
                     ],
                 ],
                 'bulk_upload' => [

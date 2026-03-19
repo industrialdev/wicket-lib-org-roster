@@ -9,6 +9,7 @@ use OrgManagement\Services\GroupService;
 use OrgManagement\Services\MemberService;
 use OrgManagement\Services\MembershipService;
 use starfederation\datastar\enums\ElementPatchMode;
+use starfederation\datastar\ServerSentEventGenerator;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -18,6 +19,8 @@ $request_method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 if ('POST' !== strtoupper($request_method)) {
     return;
 }
+
+$message_target = '#group-member-add-messages';
 
 $logger = wc_get_logger();
 $log_context = [
@@ -30,7 +33,7 @@ $nonce = isset($_POST['nonce']) ? sanitize_text_field(wp_unslash($_POST['nonce']
 if (!$nonce || !wp_verify_nonce($nonce, 'wicket-orgman-add-group-member')) {
     $logger->warning('[OrgRoster] Add group member invalid nonce', $log_context);
     status_header(200);
-    OrgManagement\Helpers\DatastarSSE::renderError(__('Invalid or missing security token. Please refresh and try again.', 'wicket-acc'), '#group-member-messages', ['addMemberSubmitting' => false, 'addMemberSuccess' => false, 'membersLoading' => false]);
+    OrgManagement\Helpers\DatastarSSE::renderError(__('Invalid or missing security token. Please refresh and try again.', 'wicket-acc'), $message_target, ['addMemberSubmitting' => false, 'addMemberSuccess' => false, 'membersLoading' => false]);
 
     return;
 }
@@ -47,7 +50,7 @@ $logger->info('[OrgRoster] Add group member request received', $log_context);
 if (empty($group_uuid)) {
     $logger->error('[OrgRoster] Add group member missing group_uuid', $log_context);
     status_header(200);
-    OrgManagement\Helpers\DatastarSSE::renderError(__('Group identifier missing.', 'wicket-acc'), '#group-member-messages', ['addMemberSubmitting' => false, 'addMemberSuccess' => false, 'membersLoading' => false]);
+    OrgManagement\Helpers\DatastarSSE::renderError(__('Group identifier missing.', 'wicket-acc'), $message_target, ['addMemberSubmitting' => false, 'addMemberSuccess' => false, 'membersLoading' => false]);
 
     return;
 }
@@ -66,7 +69,7 @@ $access = $group_service->canManageGroup($group_uuid, (string) $current_user->us
 if (empty($access['allowed'])) {
     $logger->warning('[OrgRoster] Add group member access denied', $log_context);
     status_header(200);
-    OrgManagement\Helpers\DatastarSSE::renderError(__('You do not have permission to manage this group.', 'wicket-acc'), '#group-member-messages', ['addMemberSubmitting' => false, 'addMemberSuccess' => false, 'membersLoading' => false]);
+    OrgManagement\Helpers\DatastarSSE::renderError(__('You do not have permission to manage this group.', 'wicket-acc'), $message_target, ['addMemberSubmitting' => false, 'addMemberSuccess' => false, 'membersLoading' => false]);
 
     return;
 }
@@ -86,7 +89,7 @@ if (!empty($org_uuid)) {
                     'active_seats' => $active_seats,
                 ]));
                 status_header(200);
-                OrgManagement\Helpers\DatastarSSE::renderError(__('No seats available for this organization.', 'wicket-acc'), '#group-member-messages', ['addMemberSubmitting' => false, 'addMemberSuccess' => false, 'membersLoading' => false]);
+                OrgManagement\Helpers\DatastarSSE::renderError(__('No seats available for this organization.', 'wicket-acc'), $message_target, ['addMemberSubmitting' => false, 'addMemberSuccess' => false, 'membersLoading' => false]);
 
                 return;
             }
@@ -108,7 +111,7 @@ if (is_wp_error($result)) {
         'error' => $result->get_error_message(),
     ]));
     status_header(200);
-    OrgManagement\Helpers\DatastarSSE::renderError($result->get_error_message(), '#group-member-messages', ['addMemberSubmitting' => false, 'addMemberSuccess' => false, 'membersLoading' => false]);
+    OrgManagement\Helpers\DatastarSSE::renderError($result->get_error_message(), $message_target, ['addMemberSubmitting' => false, 'addMemberSuccess' => false, 'membersLoading' => false, 'addMemberFormError' => true]);
 
     return;
 }
@@ -116,10 +119,11 @@ if (is_wp_error($result)) {
 $logger->info('[OrgRoster] Add group member succeeded', $log_context);
 
 $full_name = trim(($member_data['first_name'] ?? '') . ' ' . ($member_data['last_name'] ?? ''));
-$success_message = sprintf(
-    esc_html__('Successfully added %1$s with email %2$s.', 'wicket-acc'),
-    '<strong>' . esc_html($full_name) . '</strong>',
-    '<strong>' . esc_html($member_data['email'] ?? '') . '</strong>'
+$success_message = wp_sprintf(
+    /* translators: 1: member full name, 2: member email address */
+    __('Successfully added %1$s with email %2$s.', 'wicket-acc'),
+    $full_name !== '' ? $full_name : __('the member', 'wicket-acc'),
+    (string) ($member_data['email'] ?? '')
 );
 
 $original_group_uuid = $_GET['group_uuid'] ?? null;
@@ -158,16 +162,25 @@ if ($original_query === null) {
 }
 
 status_header(200);
-OrgManagement\Helpers\DatastarSSE::renderSuccess($success_message, '#group-member-messages', [
+$orgman_config = OrgManagement\Config\OrgManConfig::get();
+$groups_config = is_array($orgman_config['groups'] ?? null) ? $orgman_config['groups'] : [];
+$groups_presentation = is_array($groups_config['presentation'] ?? null)
+    ? $groups_config['presentation']
+    : (is_array($groups_config['ui'] ?? null) ? $groups_config['ui'] : []);
+$auto_close_on_success = (bool) ($groups_presentation['add_member_auto_close_on_success'] ?? false);
+$auto_close_delay_seconds = max(0, (int) ($groups_presentation['add_member_auto_close_delay_seconds'] ?? 7));
+$generator = new ServerSentEventGenerator();
+$generator->sendHeaders();
+$generator->patchSignals([
     'addMemberSubmitting' => false,
     'addMemberSuccess' => true,
+    'addMemberSuccessMessage' => $success_message,
     'membersLoading' => false,
-], 0, 'countdown', [
-    [
-        'elements' => $members_list_html,
-        'selector' => '#group-members-list-container-' . sanitize_html_class($group_uuid),
-        'mode' => ElementPatchMode::Outer,
-    ],
+    'autoCloseCountdown' => $auto_close_on_success ? $auto_close_delay_seconds : 0,
+]);
+$generator->patchElements($members_list_html, [
+    'selector' => '#group-members-list-container-' . sanitize_html_class($group_uuid),
+    'mode' => ElementPatchMode::Outer,
 ]);
 
 return;

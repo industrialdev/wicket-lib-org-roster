@@ -67,6 +67,13 @@ if (empty($access['allowed'])) {
 }
 
 $configService = new ConfigService();
+$orgman_config = OrgManagement\Config\OrgManConfig::get();
+$groups_config = is_array($orgman_config['groups'] ?? null) ? $orgman_config['groups'] : [];
+$groups_presentation = is_array($groups_config['presentation'] ?? null)
+    ? $groups_config['presentation']
+    : (is_array($groups_config['ui'] ?? null) ? $groups_config['ui'] : []);
+$remove_auto_close_on_success = (bool) ($groups_presentation['add_member_auto_close_on_success'] ?? false);
+$remove_auto_close_delay_seconds = max(0, (int) ($groups_presentation['add_member_auto_close_delay_seconds'] ?? 7));
 $member_service = new MemberService($configService);
 
 $context = [
@@ -117,6 +124,7 @@ OrgManagement\Helpers\DatastarSSE::renderSuccess(
         'removeMemberSubmitting' => false,
         'removeMemberSuccess' => true,
         'membersLoading' => false,
+        'autoCloseCountdown' => $remove_auto_close_on_success ? $remove_auto_close_delay_seconds : 0,
     ],
     0,
     'countdown',

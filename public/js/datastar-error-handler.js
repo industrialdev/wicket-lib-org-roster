@@ -35,6 +35,4 @@
             configurable: false
         });
     }
-
-    console.log('Datastar error handlers loaded');
 })();

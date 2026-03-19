@@ -40,6 +40,7 @@
 - **Compatibility policy**: Do not add broad snake_case compatibility wrappers for internal library methods. Keep only the `OrgMan::get_instance()` theme bridge alias.
 - **External API exceptions**: Keep upstream WordPress/WooCommerce/Wicket API function and method names exactly as provided, even when they use underscores.
 - **Datastar Signals**: Use descriptive signal names in templates (e.g., `signals.show_modal`).
+- **Datastar interactivity**: Prefer Datastar state to swap content or drive visibility. Do not rely on boolean attribute toggling for core interactivity such as `disabled` on primary search, pagination, or modal controls.
 - **Utility classes (`wt_` prefixed)**: Do not assume Tailwind-like utilities exist. Any new `wt_` utility class added in templates must be declared in `public/css/modern-orgman-static.css` in the utility section (or reuse an existing declared utility).
 
 ## Testing Guidelines

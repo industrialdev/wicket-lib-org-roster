@@ -888,23 +888,6 @@ class GroupService
         $roles = $this->getRosterRoles();
         $role_param = implode(',', $roles);
 
-        $response = null;
-        if ($query !== '' && function_exists('wicket_search_group_members')) {
-            $response = wicket_search_group_members($group_uuid, $query, [
-                'per_page' => $size,
-                'page' => $page,
-                'active' => true,
-                'role' => $role_param,
-            ]);
-        } elseif (function_exists('wicket_get_group_members')) {
-            $response = wicket_get_group_members($group_uuid, [
-                'per_page' => $size,
-                'page' => $page,
-                'active' => true,
-                'role' => $role_param,
-            ]);
-        }
-
         $this->getLogger()->debug('[OrgRoster] Group members fetch', [
             'source' => 'wicket-orgman',
             'group_uuid' => $group_uuid,
@@ -915,13 +898,117 @@ class GroupService
             'org_uuid' => $org_uuid,
         ]);
 
-        return $this->normalizeGroupMembersResponse($response, $org_identifier, [
+        return $this->getFilteredGroupMembersPage($group_uuid, $org_identifier, [
             'page' => $page,
             'size' => $size,
             'query' => $query,
             'org_uuid' => $org_uuid,
             'active' => $active,
+            'role_param' => $role_param,
         ]);
+    }
+
+    /**
+     * Fetch all relevant raw group-member pages, filter locally, then paginate the filtered set.
+     *
+     * The upstream API paginates before this library filters by org scope. That can leave
+     * sparse first pages when unrelated memberships occupy the raw page window. Re-page
+     * after filtering so UI pagination matches what users actually see.
+     *
+     * @param string $group_uuid
+     * @param string $org_identifier
+     * @param array  $context
+     * @return array
+     */
+    private function getFilteredGroupMembersPage(string $group_uuid, string $org_identifier, array $context): array
+    {
+        $page = (int) ($context['page'] ?? 1);
+        $size = (int) ($context['size'] ?? $this->getGroupMemberPageSize());
+        $query = (string) ($context['query'] ?? '');
+        $org_uuid = (string) ($context['org_uuid'] ?? '');
+        $active = isset($context['active']) ? (bool) $context['active'] : true;
+        $role_param = (string) ($context['role_param'] ?? '');
+
+        $page = max(1, $page);
+        $size = max(1, $size);
+
+        $raw_page = 1;
+        $raw_total_pages = 1;
+        $filtered_members = [];
+
+        do {
+            $response = null;
+            if ($query !== '' && function_exists('wicket_search_group_members')) {
+                $response = wicket_search_group_members($group_uuid, $query, [
+                    'per_page' => $size,
+                    'page' => $raw_page,
+                    'active' => true,
+                    'role' => $role_param,
+                ]);
+            } elseif (function_exists('wicket_get_group_members')) {
+                $response = wicket_get_group_members($group_uuid, [
+                    'per_page' => $size,
+                    'page' => $raw_page,
+                    'active' => true,
+                    'role' => $role_param,
+                ]);
+            }
+
+            if (is_wp_error($response) || !is_array($response)) {
+                $this->getLogger()->warning('[OrgRoster] Group members response error', [
+                    'source' => 'wicket-orgman',
+                    'error' => is_wp_error($response) ? $response->get_error_message() : 'invalid_response',
+                    'group_uuid' => $group_uuid,
+                    'page' => $raw_page,
+                ]);
+
+                return [
+                    'members' => [],
+                    'pagination' => [
+                        'currentPage' => $page,
+                        'totalPages' => 1,
+                        'pageSize' => $size,
+                        'totalItems' => 0,
+                    ],
+                    'query' => $query,
+                ];
+            }
+
+            $filtered_members = array_merge(
+                $filtered_members,
+                $this->extractFilteredGroupMembers($response, $org_identifier, $org_uuid, $active)
+            );
+
+            $page_meta = $response['meta']['page'] ?? [];
+            $raw_total_pages = is_array($page_meta)
+                ? max(1, (int) ($page_meta['total_pages'] ?? $raw_total_pages))
+                : 1;
+            $raw_page++;
+        } while ($raw_page <= $raw_total_pages);
+
+        $total_items = count($filtered_members);
+        $total_pages = max(1, (int) ceil($total_items / $size));
+        $page = min($page, $total_pages);
+        $offset = ($page - 1) * $size;
+
+        $this->getLogger()->info('[OrgRoster] Group members normalized', [
+            'source' => 'wicket-orgman',
+            'count' => count($filtered_members),
+            'page' => $page,
+            'total_pages' => $total_pages,
+            'raw_total_pages' => $raw_total_pages,
+        ]);
+
+        return [
+            'members' => array_slice($filtered_members, $offset, $size),
+            'pagination' => [
+                'currentPage' => $page,
+                'totalPages' => $total_pages,
+                'pageSize' => $size,
+                'totalItems' => $total_items,
+            ],
+            'query' => $query,
+        ];
     }
 
     /**
@@ -1078,6 +1165,59 @@ class GroupService
             'pagination' => $pagination,
             'query' => $query,
         ];
+    }
+
+    /**
+     * Extract UI-ready group members from a raw API response using local filtering rules.
+     *
+     * @param array  $response
+     * @param string $org_identifier
+     * @param string $org_uuid
+     * @param bool   $active
+     * @return array<int, array<string, mixed>>
+     */
+    private function extractFilteredGroupMembers(array $response, string $org_identifier, string $org_uuid, bool $active): array
+    {
+        $members = [];
+        $included_lookup = $this->buildIncludedLookup($response['included'] ?? []);
+        $data = is_array($response['data'] ?? null) ? $response['data'] : [];
+
+        foreach ($data as $item) {
+            if ($active && !$this->isGroupMembershipActiveRecord($item)) {
+                continue;
+            }
+
+            $person_id = $item['relationships']['person']['data']['id'] ?? '';
+            if ($person_id === '') {
+                continue;
+            }
+
+            if (!$this->memberMatchesOrgScope($item, $org_identifier, $org_uuid)) {
+                continue;
+            }
+
+            $person = $included_lookup['people'][$person_id] ?? null;
+            $attributes = is_array($person) ? ($person['attributes'] ?? []) : [];
+            $given = (string) ($attributes['given_name'] ?? '');
+            $family = (string) ($attributes['family_name'] ?? '');
+            $full_name = trim(trim($given) . ' ' . trim($family));
+
+            $email = (string) ($attributes['email'] ?? '');
+            if ($email === '' && isset($attributes['primary_email'])) {
+                $email = (string) $attributes['primary_email'];
+            }
+
+            $members[] = [
+                'group_member_id' => $item['id'] ?? '',
+                'person_uuid' => $person_id,
+                'full_name' => $full_name,
+                'email' => $email,
+                'role' => $item['attributes']['type'] ?? '',
+                'custom_data_field' => $item['attributes']['custom_data_field'] ?? null,
+            ];
+        }
+
+        return $members;
     }
 
     /**
