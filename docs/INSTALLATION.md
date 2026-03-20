@@ -12,6 +12,45 @@ Optional integrations:
 - Gravity Forms for the additional seats purchase form
 - Wicket/MDP helper functions supplied by the host application
 
+## Repository Configuration
+
+Add this repository entry to your `composer.json`:
+
+```json
+{
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "git@github.com:industrialdev/wicket-lib-org-roster.git"
+    }
+  ]
+}
+```
+
+## Composer Sync Scripts
+
+Templates and assets must be publicly accessible under the content path. Add these scripts to your `composer.json` to automatically sync the library after install/update:
+
+```json
+{
+  "scripts": {
+    "orgman:sync-lib": [
+      "@php vendor/industrialdev/wicket-lib-org-roster/.ci/sync-orgman-lib.php"
+    ],
+    "post-install-cmd": [
+      "@orgman:sync-lib"
+    ],
+    "post-update-cmd": [
+      "@orgman:sync-lib"
+    ]
+  }
+}
+```
+
+This syncs the package to:
+- `web/app/libs/wicket-lib-org-roster` (Bedrock-style)
+- `wp-content/libs/wicket-lib-org-roster` (standard WordPress)
+
 ## Basic Setup
 
 ```bash
@@ -57,4 +96,4 @@ You can override this with:
 
 ## Deployment Note
 
-Many installations sync the Composer package into a public `libs/` directory after install or update so templates and assets are available under the content path.
+The sync script (see "Composer Sync Scripts" above) is required because templates and assets must be publicly accessible under the content path (`web/app/libs/` or `wp-content/libs/`).
