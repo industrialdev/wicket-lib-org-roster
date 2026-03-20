@@ -2,6 +2,15 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.5.6] - 2026-03-20
+
+### Fixed
+- Fixed organization details action button layout to properly stretch and center content across different container widths.
+- Added `.wt_flex-equal` utility class with consistent flex behavior and `min-width: 0` to prevent overflow issues.
+
+### Added
+- Added legacy ACC slug compatibility to OrgMan content routing: `org-management`, `org-management-profile`, `org-management-members`, and `org-management-roster` now map to their respective templates for backwards compatibility with existing Account Centre installations.
+
 ## [0.5.4] - 2026-03-19
 
 ### Fixed

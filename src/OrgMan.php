@@ -1043,6 +1043,11 @@ final class OrgMan
             'organization-members'              => $base_path . '/templates/content-organization-members.php',
             'organization-members-bulk'         => $base_path . '/templates/content-organization-members-bulk.php',
             'supplemental-members'              => $base_path . '/templates/content-supplemental-members.php',
+            // Legacy ACC slug compatibility.
+            'org-management'                    => $base_path . '/templates/content-organization-index.php',
+            'org-management-profile'            => $base_path . '/templates/content-organization-profile.php',
+            'org-management-members'            => $base_path . '/templates/content-organization-members.php',
+            'org-management-roster'             => $base_path . '/templates/content-organization-members.php',
         ];
 
         return $this->content_map;

@@ -209,7 +209,7 @@ if ($roster_mode !== 'groups') {
         <?php endif; ?>
     </div>
 
-    <div class="org-details__actions wt_flex wt_items-stretch wt_gap-4 wt_mt-4">
+    <div class="org-details__actions wt_w-full wt_flex wt_items-stretch wt_gap-4 wt_mt-4">
         <?php
         // Check user permissions for this organization
         if ($roster_mode === 'groups' && $group_uuid !== '') {
@@ -242,12 +242,12 @@ if ($roster_mode === 'groups' && $group_uuid !== '') {
 
         <?php if ($can_edit_org): ?>
             <a href="<?php echo esc_url(add_query_arg($profile_params, $profile_url)); ?>"
-                class="button button--secondary component-button wt_flex-1 wt_text-center"><?php esc_html_e('Org. Profile', 'wicket-acc'); ?></a>
+                class="button button--secondary component-button wt_flex-equal wt_inline-flex wt_items-center wt_justify-center wt_text-center"><?php esc_html_e('Org. Profile', 'wicket-acc'); ?></a>
         <?php endif; ?>
 
         <?php if ($is_membership_manager): ?>
             <a href="<?php echo esc_url(add_query_arg($members_params, $members_url)); ?>"
-                class="button button--secondary component-button wt_flex-1 wt_text-center"><?php esc_html_e('Manage Members', 'wicket-acc'); ?></a>
+                class="button button--secondary component-button wt_flex-equal wt_inline-flex wt_items-center wt_justify-center wt_text-center"><?php esc_html_e('Manage Members', 'wicket-acc'); ?></a>
         <?php endif; ?>
 
         <?php
@@ -256,7 +256,7 @@ $show_bulk_upload = (bool) ($member_list_config['show_bulk_upload'] ?? false);
 if ($show_bulk_upload && $can_bulk_upload):
     ?>
             <a href="<?php echo esc_url(add_query_arg($members_params, $members_bulk_url)); ?>"
-                class="button button--secondary component-button wt_flex-1 wt_text-center"><?php esc_html_e('Bulk Upload', 'wicket-acc'); ?></a>
+                class="button button--secondary component-button wt_flex-equal wt_inline-flex wt_items-center wt_justify-center wt_text-center"><?php esc_html_e('Bulk Upload', 'wicket-acc'); ?></a>
         <?php endif; ?>
     </div>
 </div>
