@@ -59,33 +59,29 @@ if (!is_dir(dirname($target)) && !mkdir(dirname($target), 0775, true) && !is_dir
     exit(1);
 }
 
-$removeTree = static function (string $path) use (&$removeTree): void {
-    if (!file_exists($path)) {
+$removeTree = static function (string $path): void {
+    if (!file_exists($path) && !is_link($path)) {
         return;
     }
 
-    if (is_link($path) || is_file($path)) {
-        if (!unlink($path)) {
-            throw new RuntimeException("Failed to remove file: {$path}");
-        }
-
-        return;
-    }
-
-    $items = scandir($path);
-    if ($items === false) {
-        throw new RuntimeException("Failed to scan directory: {$path}");
-    }
+    $items = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($path, RecursiveDirectoryIterator::SKIP_DOTS),
+        RecursiveIteratorIterator::CHILD_FIRST
+    );
 
     foreach ($items as $item) {
-        if ($item === '.' || $item === '..') {
-            continue;
+        if ($item->isLink() || $item->isFile()) {
+            if (!unlink($item->getPathname())) {
+                throw new RuntimeException("Failed to remove file: {$item->getPathname()}");
+            }
+        } elseif ($item->isDir()) {
+            if (!rmdir($item->getPathname())) {
+                throw new RuntimeException("Failed to remove directory: {$item->getPathname()}");
+            }
         }
-
-        $removeTree($path . DIRECTORY_SEPARATOR . $item);
     }
 
-    if (!@rmdir($path)) {
+    if (!rmdir($path)) {
         throw new RuntimeException("Failed to remove directory: {$path}");
     }
 };
@@ -132,39 +128,16 @@ $copyTree = static function (string $from, string $to) use (&$copyTree): void {
     }
 };
 
-$swapTarget = static function (string $stagedPath, string $targetPath) use (&$removeTree): void {
-    if (!file_exists($targetPath)) {
-        if (!rename($stagedPath, $targetPath)) {
-            throw new RuntimeException("Failed to move staged directory into place: {$stagedPath} -> {$targetPath}");
-        }
-
-        return;
+$swapTarget = static function (string $stagedPath, string $targetPath) use ($removeTree): void {
+    // 1. Delete the old copy while the staged copy already exists under a temp name.
+    //    The library is live until the rename in step 2 — minimum downtime window.
+    if (file_exists($targetPath)) {
+        $removeTree($targetPath);
     }
 
-    $backupPath = $targetPath . '.bak-' . date('YmdHis') . '-' . bin2hex(random_bytes(3));
-    if (!rename($targetPath, $backupPath)) {
-        throw new RuntimeException(
-            "Failed to move existing target out of the way: {$targetPath}. " .
-            "Check ownership/permissions on web/app/libs and try again."
-        );
-    }
-
-    try {
-        if (!rename($stagedPath, $targetPath)) {
-            throw new RuntimeException("Failed to move staged directory into place: {$stagedPath} -> {$targetPath}");
-        }
-    } catch (Throwable $e) {
-        @rename($backupPath, $targetPath);
-        throw $e;
-    }
-
-    try {
-        $removeTree($backupPath);
-    } catch (Throwable $cleanupError) {
-        fwrite(
-            STDERR,
-            "[orgman-sync] Warning: unable to delete backup folder {$backupPath}: " . $cleanupError->getMessage() . "\n"
-        );
+    // 2. Near-atomic: rename the fully-copied staging dir into the final path.
+    if (!rename($stagedPath, $targetPath)) {
+        throw new RuntimeException("Failed to move staged directory into place: {$stagedPath} -> {$targetPath}");
     }
 };
 
@@ -175,6 +148,13 @@ try {
     fwrite(STDOUT, "[orgman-sync] Synced wicket-lib-org-roster to {$target}\n");
     exit(0);
 } catch (Throwable $e) {
+    if (isset($staging) && file_exists($staging)) {
+        try {
+            $removeTree($staging);
+        } catch (Throwable) {
+            // best-effort cleanup; original error takes priority
+        }
+    }
     fwrite(STDERR, '[orgman-sync] ' . $e->getMessage() . "\n");
     exit(1);
 }

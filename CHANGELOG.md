@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.5.9] - 2026-03-23
+
+### Fixed
+- Rewrote `sync-orgman-lib.php` swap logic to use a near-atomic copy-then-replace strategy: the new library is fully copied from vendor under a temporary name while the existing copy remains live, the old copy is then deleted, and the new copy is renamed into the final path in a single near-atomic operation. Eliminates leftover backup directories and minimises the downtime window during sync.
+- Replaced manual recursive `scandir` deletion with `RecursiveDirectoryIterator` + `CHILD_FIRST` traversal, fixing failures on directories containing hidden files (e.g. `.DS_Store`).
+
 ## [0.5.6] - 2026-03-20
 
 ### Fixed
