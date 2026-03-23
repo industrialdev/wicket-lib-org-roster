@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.5.11] - 2026-03-23
+
+### Fixed
+- Fixed unified org-mode Add Member modal success state to render the success message (`$addMemberSuccessMessage`) instead of showing an empty modal with only the Close button.
+- Fixed unified org-mode Add Member error handling to explicitly reset modal success signals (`addMemberSuccess`, `addMemberSuccessMessage`, `autoCloseCountdown`) on all server-side error responses, ensuring validation/permission/API errors remain visible instead of collapsing into an empty success-state modal.
+
 ## [0.5.10] - 2026-03-23
 
 ### Fixed

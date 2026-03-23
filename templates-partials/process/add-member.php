@@ -18,11 +18,26 @@ if (!defined('ABSPATH')) {
 // Handle POST submissions
 $request_method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 if ('POST' === strtoupper($request_method)) {
+    $posted_org_dom_suffix = isset($_POST['org_dom_suffix'])
+        ? sanitize_html_class((string) wp_unslash($_POST['org_dom_suffix']))
+        : sanitize_html_class((string) ($_POST['org_uuid'] ?? 'default'));
+    $error_signals = [
+        'addMemberSubmitting' => false,
+        'membersLoading' => false,
+        'addMemberSuccess' => false,
+        'addMemberSuccessMessage' => '',
+        'autoCloseCountdown' => 0,
+    ];
+
     // Validate nonce.
     $nonce = isset($_POST['nonce']) ? sanitize_text_field(wp_unslash($_POST['nonce'])) : '';
     if (!$nonce || !wp_verify_nonce($nonce, 'wicket-orgman-add-member')) {
         status_header(200);
-        OrgManagement\Helpers\DatastarSSE::renderError(__('Invalid or missing security token. Please refresh and try again.', 'wicket-acc'), '#add-member-messages-' . ($_POST['org_uuid'] ?? ''), ['addMemberSubmitting' => false, 'membersLoading' => false]);
+        OrgManagement\Helpers\DatastarSSE::renderError(
+            __('Invalid or missing security token. Please refresh and try again.', 'wicket-acc'),
+            '#add-member-messages-' . $posted_org_dom_suffix,
+            $error_signals
+        );
 
         return;
     }
@@ -35,7 +50,11 @@ if ('POST' === strtoupper($request_method)) {
 
     if (empty($org_uuid)) {
         status_header(200);
-        OrgManagement\Helpers\DatastarSSE::renderError(__('Organization identifier missing.', 'wicket-acc'), '#add-member-messages-' . $org_dom_suffix, ['addMemberSubmitting' => false, 'membersLoading' => false]);
+        OrgManagement\Helpers\DatastarSSE::renderError(
+            __('Organization identifier missing.', 'wicket-acc'),
+            '#add-member-messages-' . $org_dom_suffix,
+            $error_signals
+        );
 
         return;
     }
@@ -45,7 +64,7 @@ if ('POST' === strtoupper($request_method)) {
         OrgManagement\Helpers\DatastarSSE::renderError(
             __('You do not have permission to add members to this organization.', 'wicket-acc'),
             '#add-member-messages-' . $org_dom_suffix,
-            ['addMemberSubmitting' => false, 'membersLoading' => false]
+            $error_signals
         );
 
         return;
@@ -57,7 +76,7 @@ if ('POST' === strtoupper($request_method)) {
         OrgManagement\Helpers\DatastarSSE::renderError(
             __('Membership UUID is required for membership cycle additions.', 'wicket-acc'),
             '#add-member-messages-' . $org_dom_suffix,
-            ['addMemberSubmitting' => false, 'membersLoading' => false]
+            $error_signals
         );
 
         return;
@@ -93,7 +112,7 @@ if ('POST' === strtoupper($request_method)) {
                         OrgManagement\Helpers\DatastarSSE::renderError(
                             sprintf(__('A member with the email %s already exists in this membership.', 'wicket-acc'), '<strong>' . esc_html($member_data['email']) . '</strong>'),
                             '#add-member-messages-' . $org_dom_suffix,
-                            ['addMemberSubmitting' => false, 'membersLoading' => false]
+                            $error_signals
                         );
 
                         return;
@@ -159,7 +178,11 @@ if ('POST' === strtoupper($request_method)) {
 
         if (is_wp_error($result)) {
             status_header(200);
-            OrgManagement\Helpers\DatastarSSE::renderError($result->get_error_message(), '#add-member-messages-' . $org_dom_suffix, ['addMemberSubmitting' => false, 'membersLoading' => false, 'addMemberFormError' => true]);
+            OrgManagement\Helpers\DatastarSSE::renderError(
+                $result->get_error_message(),
+                '#add-member-messages-' . $org_dom_suffix,
+                array_merge($error_signals, ['addMemberFormError' => true])
+            );
 
             return;
         }
@@ -262,7 +285,11 @@ if ('POST' === strtoupper($request_method)) {
             'error_file' => $e->getFile(),
             'error_line' => $e->getLine(),
         ]);
-        OrgManagement\Helpers\DatastarSSE::renderError(__('An unexpected error occurred. Please try again.', 'wicket-acc'), '#add-member-messages-' . $org_dom_suffix, ['addMemberSubmitting' => false, 'membersLoading' => false]);
+        OrgManagement\Helpers\DatastarSSE::renderError(
+            __('An unexpected error occurred. Please try again.', 'wicket-acc'),
+            '#add-member-messages-' . $org_dom_suffix,
+            $error_signals
+        );
 
         return;
     }

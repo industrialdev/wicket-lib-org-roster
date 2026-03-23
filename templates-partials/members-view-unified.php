@@ -696,6 +696,10 @@ $available_roles = OrgHelpers\PermissionHelper::filter_role_choices(
                             <?php esc_html_e('seconds.', 'wicket-acc'); ?>
                         </p>
                     <?php endif; ?>
+                    <div class="wt_mb-4 wt_bg-green-100 wt_border wt_border-green-400 wt_text-green-700 wt_px-4 wt_py-3 wt_rounded-sm" data-show="$addMemberSuccessMessage !== ''">
+                        <p><strong><?php esc_html_e('Success!', 'wicket-acc'); ?></strong></p>
+                        <p data-text="$addMemberSuccessMessage"></p>
+                    </div>
                     <div class="wt_flex wt_justify-end">
                         <button type="button" class="button button--primary component-button"
                             data-on:click="<?php echo esc_attr($add_member_request_close_actions); ?>">
