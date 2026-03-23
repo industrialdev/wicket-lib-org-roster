@@ -15,6 +15,7 @@ declare -a active_sites=(
   "iaa-website-wordpress"
   "msa-website-wordpress"
   "njbia-website-wordpress"
+  "pace-website-wordpress"
 )
 
 declare -a requested_sites=()
