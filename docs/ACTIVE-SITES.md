@@ -19,6 +19,9 @@ This folder contains documentation snapshots of active site override configurati
 - `docs/configs/NJBIA.md`
   - source of truth: `../njbia-website-wordpress/src/wp-content/themes/njbia/theme/inc/org-roster.php`
   - `cascade` strategy
+- `docs/configs/PACE.md`
+  - source of truth: `../pace-website-wordpress/src/web/app/themes/wicket-child/custom/org-roster.php`
+  - `cascade` strategy
 
 ## Important Rule
 
