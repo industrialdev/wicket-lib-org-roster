@@ -85,7 +85,7 @@ $removeTree = static function (string $path) use (&$removeTree): void {
         $removeTree($path . DIRECTORY_SEPARATOR . $item);
     }
 
-    if (!rmdir($path)) {
+    if (!@rmdir($path)) {
         throw new RuntimeException("Failed to remove directory: {$path}");
     }
 };
