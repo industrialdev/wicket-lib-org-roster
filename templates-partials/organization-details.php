@@ -185,6 +185,7 @@ if ($roster_mode !== 'groups') {
             <h2 class="org-details__title wt_text-lg wt_mb-2 wt_text-heading-color wt_font-bold"><?php echo esc_html($group_name); ?></h2>
             <?php if ($org_name): ?>
                 <p class="org-details__summary-item wt_leading-normal wt_text-content mb-1">
+                    <?php esc_html_e('Organization:', 'wicket-acc'); ?>
                     <?php echo esc_html($org_name); ?>
                 </p>
             <?php endif; ?>

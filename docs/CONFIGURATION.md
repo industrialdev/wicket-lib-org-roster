@@ -423,6 +423,9 @@ Use `docs/INSTALLATION.md` for setup wiring.
   - Default: `true`
 - `presentation.member_list.show_bulk_upload`
   - Default: `false`
+- `presentation.member_list.show_assignment_info`
+  - Controls whether the seat/assignment summary (Seats assigned: X / Y or Number of assigned people: N) is displayed above the member list.
+  - Default: `true`
 - `presentation.member_list.display_roles.allowlist`
   - Default: `[]`
 - `presentation.member_list.display_roles.denylist`

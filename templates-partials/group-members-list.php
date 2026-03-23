@@ -84,6 +84,9 @@ $build_action = static function (int $page_number) use ($build_url) {
 $remove_member_endpoint = OrgManagement\Helpers\TemplateHelper::template_url() . 'process/remove-group-member';
 $refresh_action = "@get('" . $build_url(1) . "') >> select('#" . $members_list_target . "') | set(html)";
 
+$orgman_config = OrgManagement\Config\OrgManConfig::get();
+$show_assignment_info = (bool) ($orgman_config['presentation']['member_list']['show_assignment_info'] ?? true);
+
 ?>
 <div
     id="<?php echo esc_attr($members_list_target); ?>"
@@ -101,6 +104,7 @@ $refresh_action = "@get('" . $build_url(1) . "') >> select('#" . $members_list_t
 
     <div data-show="!$listLoading">
     <div id="group-member-messages" class="wt_mb-3"></div>
+    <?php if ($show_assignment_info): ?>
     <div class="wt_text-xl wt_font-semibold wt_mb-3">
         <?php if ($max_seats !== null) : ?>
             <?php printf(esc_html__('Seats assigned: %1$d / %2$d', 'wicket-acc'), (int) $active_seats, (int) $max_seats); ?>
@@ -109,6 +113,7 @@ $refresh_action = "@get('" . $build_url(1) . "') >> select('#" . $members_list_t
             <?php echo (int) $total_items; ?>
         <?php endif; ?>
     </div>
+    <?php endif; ?>
 
     <?php if (!$has_seats_available) : ?>
         <div class="wt_rounded-md wt_bg-light-neutral wt_p-4">

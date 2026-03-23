@@ -1,6 +1,6 @@
 {
   "name": "industrialdev/wicket-lib-org-roster",
-  "version": "0.5.9",
+  "version": "0.5.10",
   "description": "Organization & Roster management library for Wicket Inc.",
   "type": "library",
   "license": "GPL-2.0-or-later",
@@ -35,6 +35,7 @@
   },
   "config": {
     "allow-plugins": {
+      "pestphp/pest-plugin": true
     }
   }
 }

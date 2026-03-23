@@ -41,6 +41,7 @@ return array(
     'OrgManagement\\Services\\Strategies\\MembershipCycleStrategy' => $baseDir . '/src/Services/Strategies/MembershipCycleStrategy.php',
     'OrgManagement\\Services\\Strategies\\RosterManagementStrategy' => $baseDir . '/src/Services/Strategies/RosterManagementStrategy.php',
     'OrgManagement\\Services\\SubsidiaryService' => $baseDir . '/src/Services/SubsidiaryService.php',
+    'OrgManagement\\Services\\TouchpointService' => $baseDir . '/src/Services/TouchpointService.php',
     'starfederation\\datastar\\Consts' => $vendorDir . '/starfederation/datastar-php/src/Consts.php',
     'starfederation\\datastar\\ServerSentEventData' => $vendorDir . '/starfederation/datastar-php/src/ServerSentEventData.php',
     'starfederation\\datastar\\ServerSentEventGenerator' => $vendorDir . '/starfederation/datastar-php/src/ServerSentEventGenerator.php',

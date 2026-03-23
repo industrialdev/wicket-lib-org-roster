@@ -244,6 +244,7 @@ $no_members_message = __('No members found.', 'wicket-acc');
 
     <div data-show="!$listLoading">
 
+    <?php if ((bool) ($member_list_config['show_assignment_info'] ?? true)): ?>
     <div class="wt_text-xl wt_font-semibold wt_mb-3">
         <?php if ($max_seats !== null): ?>
             <?php printf(esc_html__('Seats assigned: %1$d / %2$d', 'wicket-acc'), (int) $active_seats, (int) $max_seats); ?>
@@ -252,6 +253,7 @@ $no_members_message = __('No members found.', 'wicket-acc');
             <?php echo (int) $total_items; ?>
         <?php endif; ?>
     </div>
+    <?php endif; ?>
 
     <?php if ($show_remove_policy_callout && $remove_policy_callout_placement === 'above_members') : ?>
         <div class="wt_mt-1 wt_mb-3 wt_p-4 wt_border wt_border-yellow-200 wt_bg-yellow-50 wt_rounded-md wt_text-sm wt_text-yellow-900">

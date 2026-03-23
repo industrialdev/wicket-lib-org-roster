@@ -28,6 +28,10 @@ This document mirrors the current site override. If it drifts, update the site c
 - `groups.presentation.add_member_auto_close_on_success = true`
 - `groups.presentation.add_member_auto_close_delay_seconds = 7`
 
+### `presentation.member_list`
+
+- `presentation.member_list.show_assignment_info = false` — hides the seats/assignment count summary above the member list.
+
 ### `presentation.member_view`
 
 - `presentation.member_view.add_member_auto_close_on_success = true`
@@ -63,6 +67,7 @@ function wicket_child_orgman_config(array $config): array
     $config['groups']['presentation']['add_member_auto_close_on_success'] = true;
     $config['groups']['presentation']['add_member_auto_close_delay_seconds'] = 7;
     $config['member_management']['forms']['add_member']['clear_form_on_error'] = true;
+    $config['presentation']['member_list']['show_assignment_info'] = false;
 
     return $config;
 }

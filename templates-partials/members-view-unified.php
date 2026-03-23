@@ -218,7 +218,7 @@ $group_add_member_auto_close_on_success = (bool) ($groups_presentation['add_memb
 $group_add_member_auto_close_delay_seconds = max(0, (int) ($groups_presentation['add_member_auto_close_delay_seconds'] ?? 7));
 $group_add_member_auto_close_delay_ms = $group_add_member_auto_close_delay_seconds * 1000;
 $add_member_modal_reset_actions = "(() => { const modal = document.getElementById('membersAddModal'); const directMessages = modal ? modal.querySelector('[id^=\"add-member-messages-\"]') : document.querySelector('[id^=\"add-member-messages-\"]'); const groupMessages = modal ? modal.querySelector('#group-member-add-messages') : document.getElementById('group-member-add-messages'); if (directMessages) directMessages.innerHTML = ''; if (groupMessages) groupMessages.innerHTML = ''; if (typeof \$addMemberForm !== 'undefined' && \$addMemberForm) \$addMemberForm.reset(); })(); \$membersLoading = false; \$addMemberSubmitting = false; \$addMemberSuccess = false; \$autoCloseCountdown = 0; \$addMemberModalOpen = false; \$addMemberSuccessMessage = '';";
-$add_member_request_close_actions = "\$addMemberModalOpen = false;";
+$add_member_request_close_actions = '$addMemberModalOpen = false;';
 $org_add_member_auto_close_on_success = (bool) ($view_config['add_member_auto_close_on_success'] ?? false);
 $org_add_member_auto_close_delay_seconds = max(0, (int) ($view_config['add_member_auto_close_delay_seconds'] ?? 7));
 $add_member_success_actions = "console.log('Member added successfully'); \$addMemberSubmitting = false; \$membersLoading = false; \$addMemberSuccess = true;";
@@ -244,7 +244,7 @@ if ($mode === 'groups') {
     $remove_member_modal_id = 'membersRemoveModal';
 }
 $remove_member_reset_actions = "(() => { const modal = document.getElementById('{$remove_member_modal_id}'); const messages = modal ? modal.querySelector('#remove-member-messages') : document.getElementById('remove-member-messages'); if (messages) messages.innerHTML = ''; })(); \$removeMemberModalOpen = false; \$removeMemberSubmitting = false; \$removeMemberSuccess = false; \$membersLoading = false; \$autoCloseCountdown = 0; \$currentRemoveMemberUuid = ''; \$currentRemoveMemberName = ''; \$currentRemoveMemberEmail = ''; \$currentRemoveMemberConnectionId = ''; \$currentRemoveMemberPersonMembershipId = ''; \$currentRemoveMemberGroupMemberId = ''; \$currentRemoveMemberRole = '';";
-$remove_member_request_close_actions = "\$removeMemberModalOpen = false;";
+$remove_member_request_close_actions = '$removeMemberModalOpen = false;';
 $remove_member_auto_close_enabled = ($mode === 'groups')
     ? $group_add_member_auto_close_on_success
     : $org_add_member_auto_close_on_success;

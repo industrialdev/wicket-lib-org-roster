@@ -340,6 +340,7 @@ final class OrgManConfig
                         'unconfirmed_tooltip' => __('Account not confirmed', 'wicket-acc'),
                         'unconfirmed_label' => __('Account not confirmed', 'wicket-acc'),
                     ],
+                    'show_assignment_info' => true,
                     'seat_limit_message' => __('All seats have been assigned. Please purchase additional seats to add more members.', 'wicket-acc'),
                     'remove_policy_callout' => [
                         'enabled' => false,

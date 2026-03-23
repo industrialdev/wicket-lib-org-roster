@@ -167,6 +167,7 @@ $show_remove_policy_callout = (
 
     <div data-show="!$listLoading">
 
+    <?php if ((bool) ($member_list_config['show_assignment_info'] ?? true)): ?>
     <div class="members-seat-summary wt_text-xl wt_font-semibold wt_mb-3">
         <?php if ($max_seats !== null): ?>
             <span class="members-seat-summary__label"><?php esc_html_e('Seats assigned:', 'wicket-acc'); ?></span><span class="members-seat-summary__value"><?php echo esc_html((string) (int) $active_seats); ?></span><span class="members-seat-summary__separator">/</span><span class="members-seat-summary__max"><?php echo esc_html((string) (int) $max_seats); ?></span>
@@ -174,6 +175,7 @@ $show_remove_policy_callout = (
             <span class="members-seat-summary__label"><?php esc_html_e('Number of assigned people:', 'wicket-acc'); ?></span><span class="members-seat-summary__value"><?php echo esc_html((string) (int) $total_items); ?></span>
         <?php endif; ?>
     </div>
+    <?php endif; ?>
 
     <?php if ($show_remove_policy_callout && $remove_policy_callout_placement === 'above_members') : ?>
         <div class="wt_mt-1 wt_mb-3 wt_p-4 wt_border wt_border-yellow-200 wt_bg-yellow-50 wt_rounded-md wt_text-sm wt_text-yellow-900">

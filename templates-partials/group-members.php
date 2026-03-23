@@ -235,7 +235,7 @@ $add_member_auto_close_on_success = (bool) ($groups_presentation['add_member_aut
 $add_member_auto_close_delay_seconds = max(0, (int) ($groups_presentation['add_member_auto_close_delay_seconds'] ?? 7));
 $add_member_auto_close_delay_ms = $add_member_auto_close_delay_seconds * 1000;
 $add_member_modal_reset_actions = "(() => { const modal = document.getElementById('groupMembersAddModal'); const messages = modal ? modal.querySelector('#group-member-add-messages') : document.getElementById('group-member-add-messages'); if (messages) messages.innerHTML = ''; if (typeof \$addMemberForm !== 'undefined' && \$addMemberForm) \$addMemberForm.reset(); })(); \$membersLoading = false; \$addMemberSubmitting = false; \$addMemberSuccess = false; \$autoCloseCountdown = 0; \$addMemberModalOpen = false; \$addMemberSuccessMessage = '';";
-$add_member_request_close_actions = "\$addMemberModalOpen = false;";
+$add_member_request_close_actions = '$addMemberModalOpen = false;';
 $add_member_success_actions = "console.log('Group member added successfully'); \$addMemberSubmitting = false; \$membersLoading = false; \$addMemberSuccess = true;";
 if ($add_member_auto_close_on_success && $add_member_auto_close_delay_seconds > 0) {
     $add_member_success_actions .= " \$autoCloseCountdown = {$add_member_auto_close_delay_seconds};";
@@ -247,7 +247,7 @@ if ($clear_form_on_error) {
 $remove_member_success_actions = "console.log('Group member removed successfully'); \$removeMemberSubmitting = false; \$membersLoading = false; \$removeMemberSuccess = true;";
 $remove_member_error_actions = "console.error('Failed to remove group member'); \$removeMemberSubmitting = false; \$membersLoading = false;";
 $remove_member_reset_actions = "(() => { const modal = document.getElementById('groupMembersRemoveModal'); const messages = modal ? modal.querySelector('#remove-member-messages') : document.getElementById('remove-member-messages'); if (messages) messages.innerHTML = ''; })(); \$removeMemberModalOpen = false; \$removeMemberSubmitting = false; \$removeMemberSuccess = false; \$membersLoading = false; \$autoCloseCountdown = 0; \$currentRemoveMemberUuid = ''; \$currentRemoveMemberName = ''; \$currentRemoveMemberEmail = ''; \$currentRemoveMemberGroupMemberId = ''; \$currentRemoveMemberRole = '';";
-$remove_member_request_close_actions = "\$removeMemberModalOpen = false;";
+$remove_member_request_close_actions = '$removeMemberModalOpen = false;';
 $add_member_endpoint = OrgManagement\Helpers\TemplateHelper::template_url() . 'process/add-group-member';
 $remove_member_endpoint = OrgManagement\Helpers\TemplateHelper::template_url() . 'process/remove-group-member';
 $group_roles = is_array($groups_config['roles'] ?? null) ? $groups_config['roles'] : [];

@@ -141,18 +141,18 @@ if ($use_unified_view) {
 ?>
 	<div class="members-list wt_relative"
 	data-signals:='<?php echo wp_json_encode([
-        'membersLoading' => false,
-        'listLoading' => false,
-        'bulkUploadModalOpen' => false,
-        'bulkUploadSubmitting' => false,
-        'addMemberModalOpen' => false,
-        'addMemberSubmitting' => false,
-        'addMemberSuccess' => false,
-        'addMemberSuccessMessage' => '',
-        'autoCloseCountdown' => 0,
-        'searchQuery' => $query,
-        'searchSubmitted' => false,
-    ], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT); ?>'
+	    'membersLoading' => false,
+	    'listLoading' => false,
+	    'bulkUploadModalOpen' => false,
+	    'bulkUploadSubmitting' => false,
+	    'addMemberModalOpen' => false,
+	    'addMemberSubmitting' => false,
+	    'addMemberSuccess' => false,
+	    'addMemberSuccessMessage' => '',
+	    'autoCloseCountdown' => 0,
+	    'searchQuery' => $query,
+	    'searchSubmitted' => false,
+	], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT); ?>'
 	data-on:datastar-fetch="if ((evt.detail.type === 'finished' || evt.detail.type === 'error') && evt.detail.el && evt.detail.el.closest('.members-search, .members-pagination')) { $listLoading = false }">
 	<?php /* Seat count moved to members-list.php for dynamic refresh */ ?>
 	<div id="org-members-search-form-<?php echo esc_attr($org_uuid); ?>"
@@ -166,7 +166,7 @@ if ($use_unified_view) {
 				</svg>
 			</div>
 			<?php
-$searchSubmitAction = !empty($searchAction) ? "\$listLoading = true; \$searchSubmitted = true; " . $searchAction : '';
+$searchSubmitAction = !empty($searchAction) ? '$listLoading = true; $searchSubmitted = true; ' . $searchAction : '';
 ?>
 			<input type="text"
 				id="search-input-<?php echo esc_attr($org_uuid); ?>"
@@ -232,7 +232,7 @@ $members_list_endpoint = $membersListEndpoint;
 
 	    $membership_query_fragment = $membershipUuid ? '&membership_uuid=' . rawurlencode((string) $membershipUuid) : '';
 	    $add_member_modal_reset_actions = "(() => { const modal = document.getElementById('membersAddModal'); const messages = modal ? modal.querySelector('[id^=\"add-member-messages-\"]') : document.querySelector('[id^=\"add-member-messages-\"]'); if (messages) messages.innerHTML = ''; if (typeof \$addMemberForm !== 'undefined' && \$addMemberForm) \$addMemberForm.reset(); })(); \$membersLoading = false; \$addMemberSubmitting = false; \$addMemberSuccess = false; \$autoCloseCountdown = 0; \$addMemberModalOpen = false; \$addMemberSuccessMessage = '';";
-	    $add_member_request_close_actions = "\$addMemberModalOpen = false;";
+	    $add_member_request_close_actions = '$addMemberModalOpen = false;';
 	    $add_member_success_actions = "console.log('Member added successfully'); \$addMemberSubmitting = false; \$membersLoading = false; \$addMemberSuccess = true;";
 	    $org_view_config = is_array($presentation_config['member_view'] ?? null) ? $presentation_config['member_view'] : [];
 	    $org_add_member_auto_close_on_success = (bool) ($org_view_config['add_member_auto_close_on_success'] ?? false);
@@ -241,9 +241,9 @@ $members_list_endpoint = $membersListEndpoint;
 	        $add_member_success_actions .= " \$autoCloseCountdown = {$org_add_member_auto_close_delay_seconds};";
 	    }
 	    $add_member_error_actions = "console.error('Failed to add member'); \$addMemberSubmitting = false; \$membersLoading = false; \$addMemberSuccess = false; \$autoCloseCountdown = 0;";
-		    if ($clear_form_on_error) {
-		        $add_member_error_actions .= " el.closest('form').reset();";
-		    }
+	    if ($clear_form_on_error) {
+	        $add_member_error_actions .= " el.closest('form').reset();";
+	    }
 	    $add_member_endpoint = \OrgManagement\Helpers\template_url() . 'process/add-member';
 	    ?>
 
