@@ -254,6 +254,12 @@ class GravityFormsHelper extends Helper
     {
         $configService = new \OrgManagement\Services\ConfigService();
         $additional_seats_form_id = $configService->getAdditionalSeatsFormId();
+        $logger = wc_get_logger();
+        $context = [
+            'source' => 'wicket-orgman',
+            'form_id' => $form['id'] ?? null,
+            'user_id' => get_current_user_id() ?: null,
+        ];
 
         if ((int) ($form['id'] ?? 0) !== (int) $additional_seats_form_id) {
             return $form;
@@ -292,6 +298,12 @@ class GravityFormsHelper extends Helper
 
         $quantity = absint($seat_quantity);
         if ($org_uuid === '' || $membership_id === '' || $quantity < 1) {
+            $logger->warning('[OrgMan] Ignoring additional seats capture: invalid payload', array_merge($context, [
+                'org_uuid_present' => $org_uuid !== '',
+                'membership_id_present' => $membership_id !== '',
+                'seat_quantity' => $quantity,
+            ]));
+
             return $form;
         }
 
@@ -303,12 +315,20 @@ class GravityFormsHelper extends Helper
 
         $user_id = get_current_user_id();
         if ($user_id) {
-            update_user_meta($user_id, 'orgman_additional_seats_pending', [
+            $saved_pending = update_user_meta($user_id, 'orgman_additional_seats_pending', [
                 'org_uuid' => sanitize_text_field($org_uuid),
                 'membership_id' => sanitize_text_field($membership_id),
                 'seat_quantity' => $quantity,
                 'created_at' => current_time('mysql'),
             ]);
+            if (!$saved_pending) {
+                $logger->error('[OrgMan] Failed to store pending additional seats user meta', array_merge($context, [
+                    'user_id' => (int) $user_id,
+                    'org_uuid' => sanitize_text_field($org_uuid),
+                    'membership_id' => sanitize_text_field($membership_id),
+                    'seat_quantity' => (int) $quantity,
+                ]));
+            }
         }
 
         return $form;
@@ -656,7 +676,15 @@ class GravityFormsHelper extends Helper
         if (!WC()->cart->is_empty()) {
             $user_id = get_current_user_id();
             if ($user_id) {
-                delete_user_meta($user_id, 'orgman_additional_seats_pending');
+                $deleted_pending = delete_user_meta($user_id, 'orgman_additional_seats_pending');
+                if (!$deleted_pending) {
+                    $logger->warning('[OrgMan] Failed to clear pending additional seats user meta while cart is non-empty', [
+                        'source' => 'wicket-orgman',
+                        'user_id' => (int) $user_id,
+                        'is_cart' => $is_cart_page,
+                        'is_checkout' => $is_checkout_page,
+                    ]);
+                }
             }
 
             return;
@@ -730,6 +758,17 @@ class GravityFormsHelper extends Helper
                 wp_safe_redirect(self::get_localized_checkout_url());
                 exit;
             }
+        } else {
+            $logger->error('[OrgMan] Failed to restore additional seats cart item', [
+                'source' => 'wicket-orgman',
+                'user_id' => (int) $user_id,
+                'product_id' => (int) $product_id,
+                'org_uuid' => $org_uuid,
+                'membership_id' => $membership_id,
+                'seat_quantity' => (int) $seat_quantity,
+                'is_cart' => $is_cart_page,
+                'is_checkout' => $is_checkout_page,
+            ]);
         }
     }
 

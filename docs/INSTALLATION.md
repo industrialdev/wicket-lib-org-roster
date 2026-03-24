@@ -18,6 +18,8 @@ Optional integrations:
 - Gravity Forms for the additional seats purchase form
 - Wicket/MDP helper functions supplied by the host application
 
+For product setup and operational behavior of the additional seats flow, see `docs/ADDITIONAL-SEATS.md`.
+
 ## Why `after_setup_theme`
 
 Initialize OrgMan on `after_setup_theme` (priority `20`), not `plugins_loaded`.

@@ -52,6 +52,7 @@ The package contains REST controller classes, but `OrgMan` currently looks for `
 ## Docs
 
 - `docs/INSTALLATION.md`
+- `docs/ADDITIONAL-SEATS.md`
 - `docs/ARCHITECTURE.md`
 - `docs/CONFIGURATION.md`
 - `docs/FRONTEND.md`
