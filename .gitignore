@@ -4,3 +4,10 @@ legacy-reference-only/
 /vendor/pestphp/pest/.temp
 *.cache
 composer.json.bak
+
+# Yarn PnP and cache artifacts
+.pnp.cjs
+.pnp.loader.mjs
+.yarn/releases/
+.yarn/install-state.gz
+.yarn/unplugged/
