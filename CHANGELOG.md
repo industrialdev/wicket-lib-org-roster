@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.5.14] - 2026-03-25
+
+### Fixed
+- Hardened add-member duplicate checks to fail closed when duplicate verification cannot be completed, preventing ambiguous re-add attempts.
+- Treated `in_grace` person-membership records as existing during add-member duplicate checks.
+- Hardened person lookup before creation to use a fallback API email search when helper lookup misses, reducing duplicate person creation when matching emails are not primary.
+
 ## [0.5.12] - 2026-03-25
 
 ### Added

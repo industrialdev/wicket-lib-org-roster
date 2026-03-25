@@ -36,11 +36,11 @@ class PersonService
             return new WP_Error('invalid_member_data', 'First name, last name, and a valid email are required.');
         }
 
-        if (!function_exists('wicket_get_person_by_email') || !function_exists('wicket_create_person')) {
-            return new WP_Error('missing_dependency', 'Person helper functions are unavailable.');
+        if (!function_exists('wicket_create_person')) {
+            return new WP_Error('missing_dependency', 'Person creation helper function is unavailable.');
         }
 
-        $person = wicket_get_person_by_email($email);
+        $person = $this->findPersonByEmail($email);
         if (!$person) {
             $person = wicket_create_person($firstName, $lastName, $email);
 
@@ -57,6 +57,43 @@ class PersonService
         $this->maybeUpdatePersonProfile($personUuid, $personData);
 
         return $personUuid;
+    }
+
+    /**
+     * Locate a person record by email.
+     *
+     * We first try the legacy helper for backwards compatibility, then fall back to
+     * a direct API lookup to avoid duplicate person creation when an email exists but
+     * is not flagged as the primary email in upstream data.
+     *
+     * @param string $email
+     * @return mixed
+     */
+    private function findPersonByEmail(string $email)
+    {
+        if (function_exists('wicket_get_person_by_email')) {
+            $person = wicket_get_person_by_email($email);
+            if (!empty($person)) {
+                return $person;
+            }
+        }
+
+        if (!function_exists('wicket_api_client')) {
+            return false;
+        }
+
+        try {
+            $client = wicket_api_client();
+            $response = $client->get('/people?filter[emails_address_eq]=' . rawurlencode($email));
+
+            if (!empty($response['data'][0])) {
+                return $response['data'][0];
+            }
+        } catch (\Throwable $e) {
+            error_log('[OrgMan] Fallback person lookup by email failed: ' . $e->getMessage());
+        }
+
+        return false;
     }
 
     /**
