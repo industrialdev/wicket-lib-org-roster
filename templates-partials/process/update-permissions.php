@@ -91,6 +91,16 @@ if ('POST' === strtoupper($request_method)) {
             $edit_allowed_roles,
             $edit_excluded_roles
         );
+        if ($logger) {
+            $logger->debug('[OrgMan] update-permissions role payload prepared', $log_context + [
+                'org_uuid' => $org_uuid,
+                'person_uuid' => $person_uuid,
+                'submitted_roles' => isset($_POST['roles']) && is_array($_POST['roles']) ? array_values($_POST['roles']) : [],
+                'allowed_roles' => array_values($edit_allowed_roles),
+                'excluded_roles' => array_values(array_unique($edit_excluded_roles)),
+                'filtered_roles' => array_values($roles),
+            ]);
+        }
 
         $allow_relationship_editing = $config['member_management']['forms']['add_member']['allow_relationship_type_editing'] ?? false;
         $form_fields = $config['member_management']['forms']['add_member']['fields'] ?? [];
@@ -163,6 +173,14 @@ if ('POST' === strtoupper($request_method)) {
             esc_html__('Successfully updated permissions for %1$s.', 'wicket-acc'),
             '<strong>' . esc_html($full_name) . '</strong>'
         );
+        if ($logger) {
+            $logger->info('[OrgMan] update-permissions completed successfully', $log_context + [
+                'org_uuid' => $org_uuid,
+                'person_uuid' => $person_uuid,
+                'membership_uuid' => $effective_membership_uuid,
+                'applied_roles' => array_values($roles),
+            ]);
+        }
 
         status_header(200);
         OrgManagement\Helpers\DatastarSSE::renderSuccess($success_message, '#update-permissions-messages', [

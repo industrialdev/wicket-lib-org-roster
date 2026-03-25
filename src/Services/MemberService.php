@@ -1607,82 +1607,87 @@ class MemberService
             // Update roles using the correct API approach
             // Based on legacy wicket_assign_role and wicket_remove_role functions
 
-            // Get current person data to find existing role IDs
-            $person_data = $this->getPersonById($personUuid);
-            if (is_wp_error($person_data)) {
-                return new \WP_Error('person_not_found', 'Unable to retrieve person data');
-            }
-
-            // Build a map of current role IDs for lookup
-            $current_role_ids = [];
-            if (!empty($person_data['included'])) {
-                foreach ($person_data['included'] as $included) {
-                    if ($included['type'] === 'roles') {
-                        $role_name = $included['attributes']['name'] ?? '';
-                        if ($role_name) {
-                            $current_role_ids[$role_name] = $included['id'];
-                        }
-                    }
-                }
-            }
-
             // Define which roles we can manage (organization-specific roles only)
             $manageable_roles = ['membership_manager', 'org_editor'];
 
-            // Only consider manageable roles for add/remove operations
-            $desired_manageable_roles = array_intersect($roles, $manageable_roles);
-            $current_manageable_roles = array_intersect(array_keys($current_role_ids), $manageable_roles);
+            // Only consider manageable roles for add/remove operations. Compare against org-scoped
+            // role assignments to avoid false positives from roles held in other organizations.
+            $desired_manageable_roles = array_values(array_intersect($roles, $manageable_roles));
+            $current_manageable_roles = array_values(array_intersect(
+                $this->getPersonCurrentRolesByOrgId($personUuid, $orgUuid),
+                $manageable_roles
+            ));
 
             // Determine which manageable roles to add and which to remove
             $roles_to_add = array_diff($desired_manageable_roles, $current_manageable_roles);
             $roles_to_remove = array_diff($current_manageable_roles, $desired_manageable_roles);
+            if ($logger) {
+                $logger->debug('[OrgMan] update_member_roles role diff', $log_context + [
+                    'org_uuid' => $orgUuid,
+                    'membership_uuid' => $membershipUuid,
+                    'person_uuid' => $personUuid,
+                    'requested_roles' => array_values($roles),
+                    'manageable_roles' => $manageable_roles,
+                    'current_manageable_roles' => array_values($current_manageable_roles),
+                    'desired_manageable_roles' => array_values($desired_manageable_roles),
+                    'roles_to_add' => array_values($roles_to_add),
+                    'roles_to_remove' => array_values($roles_to_remove),
+                ]);
+            }
 
             // Remove roles that are no longer needed
             foreach ($roles_to_remove as $role_name) {
-                if (isset($current_role_ids[$role_name])) {
-                    $role_id = $current_role_ids[$role_name];
-                    $remove_payload = [
-                        'data' => [
-                            [
-                                'type' => 'roles',
-                                'id' => $role_id,
-                            ],
-                        ],
-                    ];
+                if ($logger) {
+                    $logger->debug('[OrgMan] update_member_roles removing role', $log_context + [
+                        'org_uuid' => $orgUuid,
+                        'membership_uuid' => $membershipUuid,
+                        'person_uuid' => $personUuid,
+                        'role' => $role_name,
+                    ]);
+                }
 
-                    try {
-                        $client->delete("people/$personUuid/relationships/roles", ['json' => $remove_payload]);
-                    } catch (\Exception $e) {
-                        error_log("[OrgMan] Failed to remove role '$role_name' from person $personUuid: " . $e->getMessage());
-                        // Continue with other roles even if one fails
+                if (!function_exists('wicket_remove_role') || !wicket_remove_role($personUuid, $role_name)) {
+                    if ($logger) {
+                        $logger->error('[OrgMan] update_member_roles failed removing role', $log_context + [
+                            'org_uuid' => $orgUuid,
+                            'membership_uuid' => $membershipUuid,
+                            'person_uuid' => $personUuid,
+                            'role' => $role_name,
+                        ]);
                     }
+
+                    return new \WP_Error(
+                        'role_remove_failed',
+                        sprintf("Failed to remove role '%s'.", $role_name)
+                    );
                 }
             }
 
             // Add new roles
             foreach ($roles_to_add as $role_name) {
-                $add_payload = [
-                    'data' => [
-                        'type' => 'roles',
-                        'attributes' => [
-                            'name' => $role_name,
-                        ],
-                    ],
-                ];
-
-                // Include organization context if provided
-                if (!empty($orgUuid)) {
-                    $add_payload['data']['relationships']['resource']['data'] = [
-                        'id' => $orgUuid,
-                        'type' => 'organizations',
-                    ];
+                if ($logger) {
+                    $logger->debug('[OrgMan] update_member_roles adding role', $log_context + [
+                        'org_uuid' => $orgUuid,
+                        'membership_uuid' => $membershipUuid,
+                        'person_uuid' => $personUuid,
+                        'role' => $role_name,
+                    ]);
                 }
 
-                try {
-                    $client->post("people/$personUuid/roles", ['json' => $add_payload]);
-                } catch (\Exception $e) {
-                    error_log("[OrgMan] Failed to add role '$role_name' to person $personUuid: " . $e->getMessage());
-                    // Continue with other roles even if one fails
+                if (!function_exists('wicket_assign_role') || !wicket_assign_role($personUuid, $role_name, $orgUuid)) {
+                    if ($logger) {
+                        $logger->error('[OrgMan] update_member_roles failed adding role', $log_context + [
+                            'org_uuid' => $orgUuid,
+                            'membership_uuid' => $membershipUuid,
+                            'person_uuid' => $personUuid,
+                            'role' => $role_name,
+                        ]);
+                    }
+
+                    return new \WP_Error(
+                        'role_add_failed',
+                        sprintf("Failed to add role '%s'.", $role_name)
+                    );
                 }
             }
 
@@ -1697,6 +1702,16 @@ class MemberService
             ];
 
         } catch (\Exception $e) {
+            if (isset($logger) && $logger) {
+                $logger->error('[OrgMan] update_member_roles exception', $log_context + [
+                    'org_uuid' => $orgUuid,
+                    'membership_uuid' => $membershipUuid,
+                    'person_uuid' => $personUuid,
+                    'requested_roles' => is_array($roles) ? array_values($roles) : [],
+                    'error' => $e->getMessage(),
+                ]);
+            }
+
             return new \WP_Error('update_exception', 'Failed to update member roles: ' . $e->getMessage());
         }
     }

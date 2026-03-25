@@ -2,6 +2,15 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.5.15] - 2026-03-25
+
+### Fixed
+- Fixed Edit Permissions role-diff logic to compare against organization-scoped roles only, preventing false no-op updates when the same role exists on a different organization.
+- Updated role mutation flow to fail explicitly when role add/remove calls fail, instead of continuing with a false-success outcome.
+
+### Added
+- Added diagnostic logs to the update-permissions flow and `MemberService::updateMemberRoles()` for submitted/filtered roles, membership UUID resolution, role-diff decisions, per-role add/remove attempts, and failure/success outcomes.
+
 ## [0.5.14] - 2026-03-25
 
 ### Fixed
