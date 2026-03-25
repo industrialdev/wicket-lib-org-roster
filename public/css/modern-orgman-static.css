@@ -2441,6 +2441,12 @@ input:where([type="button"], [type="reset"], [type="submit"]) {
 .wicket-orgman-supplemental .gform_footer {
   text-align: center;
 }
+.wicket-orgman-supplemental #field_59_3 {
+  border: var(--wicket-orgman-border-sm) solid var(--wicket-orgman-border-color);
+  border-radius: var(--wicket-orgman-input-fields-corner-radius-md);
+  padding: var(--wicket-orgman-space-200);
+  background-color: var(--wicket-orgman-bg-card);
+}
 .wicket-orgman-supplemental .ginput_container_number input[type='number'] {
   border: 2px solid #ddd !important;
   border-radius: 6px !important;
