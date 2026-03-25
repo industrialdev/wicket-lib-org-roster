@@ -102,12 +102,27 @@ if ('POST' === strtoupper($request_method)) {
             ];
 
             $response = $client->post('/person_memberships/query', ['json' => $filter_data]);
+            if (is_wp_error($response) || !empty($response['errors'])) {
+                OrgManagement\Helpers\Helper::log_error('[OrgMan Debug] Duplicate check returned an API error', [
+                    'membership_uuid' => $membership_uuid,
+                    'member_email' => $member_data['email'],
+                ]);
+                status_header(200);
+                OrgManagement\Helpers\DatastarSSE::renderError(
+                    __('Could not verify whether this person already exists. Please try again.', 'wicket-acc'),
+                    '#add-member-messages-' . $org_dom_suffix,
+                    array_merge($error_signals, ['addMemberFormError' => true])
+                );
 
-            if (!is_wp_error($response) && !empty($response['data'])) {
+                return;
+            }
+
+            if (!empty($response['data'])) {
                 // Check for active memberships
                 foreach ($response['data'] as $p_membership) {
                     $is_active = $p_membership['attributes']['active'] ?? false;
-                    if ($is_active) {
+                    $is_in_grace = $p_membership['attributes']['in_grace'] ?? false;
+                    if ($is_active || $is_in_grace) {
                         status_header(200);
                         OrgManagement\Helpers\DatastarSSE::renderError(
                             sprintf(__('A member with the email %s already exists in this membership.', 'wicket-acc'), '<strong>' . esc_html($member_data['email']) . '</strong>'),
@@ -121,6 +136,14 @@ if ('POST' === strtoupper($request_method)) {
             }
         } catch (Throwable $e) {
             OrgManagement\Helpers\Helper::log_error('[OrgMan Debug] Duplicate check failed', ['error' => $e->getMessage()]);
+            status_header(200);
+            OrgManagement\Helpers\DatastarSSE::renderError(
+                __('Could not verify whether this person already exists. Please try again.', 'wicket-acc'),
+                '#add-member-messages-' . $org_dom_suffix,
+                array_merge($error_signals, ['addMemberFormError' => true])
+            );
+
+            return;
         }
     }
 
