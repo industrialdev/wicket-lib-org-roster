@@ -2,6 +2,18 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.5.12] - 2026-03-25
+
+### Added
+- Added `AdditionalSeatsService::getAdditionalSeatsSetupIssues()`: performs prerequisite checks for the additional seats feature (WooCommerce product SKU, Gravity Form slug mapping, `supplemental-members` my-account page) and returns structured issue descriptors.
+- Added implementer setup warning callout in `members-view-unified.php` and `organization-members.php`: visible to WordPress administrators only, rendered independently of org role so implementers see it regardless of membership permissions. Lists each missing prerequisite with actionable instructions.
+- Copyable token chips in the setup warning: SKUs (`additional-seats`, `corporate-seats`), the Gravity Forms slug, and the my-account page slug are rendered as clickable `<code>` elements. Clicking copies the value to the clipboard and displays a "✓ Copied!" confirmation inline for 1.5 seconds.
+- Guarded `getPurchaseFormUrl()` behind `canPurchaseAdditionalSeats()` to avoid unnecessary Wicket API calls and user-meta side effects for users without the purchase role.
+
+### Fixed
+- Fixed missing space between member name and "from this organization/group?" in the Remove Member confirmation modal across `members-view-unified.php`, `members-list.php`, and `group-members.php`.
+- Fixed missing space after "Seats assigned:" and "Number of assigned people:" labels in the seat summary row in `members-list-unified.php`.
+
 ## [0.5.11] - 2026-03-23
 
 ### Fixed

@@ -383,8 +383,7 @@ $observer_role = $group_roles['observer'] ?? ($groups_config['observer_role'] ??
                     </span>
                     <span data-class_wt_hidden="$currentRemoveMemberName !== ''">
                         <?php echo esc_html__('Are you sure you want to remove', 'wicket-acc'); ?>
-                        <span data-text="$currentRemoveMemberName"></span>
-                        <?php echo esc_html__('from this group?', 'wicket-acc'); ?>
+                        <span data-text="$currentRemoveMemberName"></span>&nbsp;<?php echo esc_html__('from this group?', 'wicket-acc'); ?>
                     </span>
                     <br>
                     <?php esc_html_e('This action cannot be undone.', 'wicket-acc'); ?>

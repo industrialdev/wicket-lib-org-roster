@@ -32,6 +32,97 @@ class AdditionalSeatsService
     }
 
     /**
+     * Check whether all prerequisites for the additional seats feature are in place.
+     *
+     * Returns an empty array when everything is configured correctly.
+     * Returns a list of structured issue descriptors when one or more items are missing.
+     *
+     * Each descriptor is an array with:
+     *   'parts' => array of segments, each either:
+     *              ['type' => 'text',  'value' => string]  — plain translatable text
+     *              ['type' => 'token', 'value' => string]  — copyable code token (SKU / slug)
+     *
+     * Checks performed:
+     *  1. WooCommerce product with the configured SKU (and fallback SKU) exists and is purchasable.
+     *  2. A Gravity Form is resolvable (by explicit form_id or by slug).
+     *  3. A 'my-account' CPT post with slug 'supplemental-members' exists.
+     *
+     * @return array[] Empty array = all good; non-empty = list of structured issue descriptors.
+     */
+    public function getAdditionalSeatsSetupIssues(): array
+    {
+        $issues = [];
+
+        // --- 1. WooCommerce product ---
+        if (!function_exists('wc_get_product_id_by_sku') || !function_exists('wc_get_product')) {
+            $issues[] = ['parts' => [
+                ['type' => 'text', 'value' => __('WooCommerce is not active. The additional seats feature requires WooCommerce.', 'wicket-acc')],
+            ]];
+        } else {
+            $primary_sku = $this->configService->getAdditionalSeatsSku();
+            $fallback_sku = 'corporate-seats';
+            $skus_to_check = array_values(array_unique(array_filter([$primary_sku, $fallback_sku])));
+
+            $found_product = false;
+            foreach ($skus_to_check as $sku) {
+                $product_id = wc_get_product_id_by_sku($sku);
+                if ($product_id) {
+                    $product = wc_get_product($product_id);
+                    if ($product && $product->is_purchasable()) {
+                        $found_product = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!$found_product) {
+                $parts = [
+                    ['type' => 'text', 'value' => __('No purchasable WooCommerce product found. Create a Simple product with SKU ', 'wicket-acc')],
+                ];
+                foreach ($skus_to_check as $i => $sku) {
+                    if ($i > 0) {
+                        $parts[] = ['type' => 'text', 'value' => __(' or ', 'wicket-acc')];
+                    }
+                    $parts[] = ['type' => 'token', 'value' => $sku];
+                }
+                $parts[] = ['type' => 'text', 'value' => __(' and set it to Published/Purchasable.', 'wicket-acc')];
+                $issues[] = ['parts' => $parts];
+            }
+        }
+
+        // --- 2. Gravity Form ---
+        $form_id = $this->configService->getAdditionalSeatsFormId();
+        if (empty($form_id)) {
+            $config = \OrgManagement\Config\OrgManConfig::get();
+            $form_slug = $config['integrations']['additional_seats']['form_slug'] ?? 'additional-seats';
+            $issues[] = ['parts' => [
+                ['type' => 'text',  'value' => __('No Gravity Form configured for additional seats. Create a Gravity Form and map its slug ', 'wicket-acc')],
+                ['type' => 'token', 'value' => $form_slug],
+                ['type' => 'text',  'value' => __(' via Gravity Forms > Wicket Settings > Form Slug ID Mapping.', 'wicket-acc')],
+            ]];
+        }
+
+        // --- 3. supplemental-members page ---
+        $page_posts = get_posts([
+            'post_type'   => 'my-account',
+            'name'        => 'supplemental-members',
+            'numberposts' => 1,
+            'post_status' => 'publish',
+        ]);
+        if (empty($page_posts)) {
+            $issues[] = ['parts' => [
+                ['type' => 'text',  'value' => __('The ', 'wicket-acc')],
+                ['type' => 'token', 'value' => 'supplemental-members'],
+                ['type' => 'text',  'value' => __(' my-account page is missing. Create a "my-account" CPT entry with slug ', 'wicket-acc')],
+                ['type' => 'token', 'value' => 'supplemental-members'],
+                ['type' => 'text',  'value' => __(' and embed the additional seats Gravity Form on it.', 'wicket-acc')],
+            ]];
+        }
+
+        return $issues;
+    }
+
+    /**
      * Check if the current user is authorized to purchase additional seats for an organization.
      * Requires roles configured in 'purchase_seats' permission (membership_owner, membership_manager, or org_editor by default).
      *
@@ -40,37 +131,21 @@ class AdditionalSeatsService
      */
     public function canPurchaseAdditionalSeats($org_uuid)
     {
-        $logger = wc_get_logger();
-        $context = [
-            'source' => 'wicket-orgman',
-            'org_uuid' => is_string($org_uuid) ? $org_uuid : null,
-            'user_id' => get_current_user_id() ?: null,
-        ];
-
         // Check if additional seats functionality is enabled
         $enabled = $this->configService->isAdditionalSeatsEnabled();
 
         if (!$enabled) {
-            $logger->debug('[OrgMan] Additional seats purchase denied: feature disabled', $context);
-
             return false;
         }
 
         // Check if user is logged in
         if (!is_user_logged_in()) {
-            $logger->debug('[OrgMan] Additional seats purchase denied: user not logged in', $context);
-
             return false;
         }
 
         // Use PermissionHelper to check if user has purchase_seats permission for this organization
         // This includes active membership requirement and proper role checking
-        $allowed = \OrgManagement\Helpers\PermissionHelper::can_purchase_seats($org_uuid);
-        if (!$allowed) {
-            $logger->warning('[OrgMan] Additional seats purchase denied: permission check failed', $context);
-        }
-
-        return $allowed;
+        return \OrgManagement\Helpers\PermissionHelper::can_purchase_seats($org_uuid);
     }
 
     /**
@@ -83,34 +158,7 @@ class AdditionalSeatsService
         $primary_sku = $this->configService->getAdditionalSeatsSku();
         $fallback_skus = ['corporate-seats'];
         $skus = array_values(array_unique(array_filter(array_merge([$primary_sku], $fallback_skus))));
-        $product = $this->resolvePurchasableProductBySkus($skus, 'Additional seats product');
 
-        return (int) ($product['product_id'] ?? 0) ?: null;
-    }
-
-    /**
-     * Get the discount product used to offset additional seat pricing on renewal.
-     *
-     * @return int|null The product ID or null if not found.
-     */
-    public function getAdditionalSeatsDiscountProduct()
-    {
-        $discount_sku = $this->configService->getAdditionalSeatsDiscountSku();
-        $skus = array_values(array_unique(array_filter([$discount_sku])));
-        $product = $this->resolvePurchasableProductBySkus($skus, 'Additional seats discount product');
-
-        return (int) ($product['product_id'] ?? 0) ?: null;
-    }
-
-    /**
-     * Resolve a purchasable product by one or more candidate SKUs.
-     *
-     * @param array<int, string> $skus Candidate SKUs in preferred order.
-     * @param string $product_context Product label used in logs.
-     * @return array{product_id:int, resolved_sku:string}|null
-     */
-    private function resolvePurchasableProductBySkus(array $skus, $product_context = 'Product')
-    {
         $logger = wc_get_logger();
 
         if (empty($skus)) {
@@ -164,7 +212,7 @@ class AdditionalSeatsService
         if (!$product_id && $fallback_id) {
             $product_id = $fallback_id;
             $resolved_sku = $fallback_sku;
-            $logger->warning('[OrgMan] ' . $product_context . ' translation missing, using default language product', [
+            $logger->warning('[OrgMan] Additional seats product translation missing, using default language product', [
                 'source' => 'wicket-orgman',
                 'product_id' => (int) $product_id,
                 'sku' => $resolved_sku,
@@ -174,7 +222,7 @@ class AdditionalSeatsService
         }
 
         if (!$product_id) {
-            $logger->warning('[OrgMan] ' . $product_context . ' not found for configured SKUs', [
+            $logger->warning('[OrgMan] Additional seats product not found for configured SKUs', [
                 'source' => 'wicket-orgman',
                 'skus' => $skus,
                 'language' => is_string($current_lang) ? $current_lang : null,
@@ -183,25 +231,23 @@ class AdditionalSeatsService
             return null;
         }
 
+        // Verify product exists and is purchasable.
         $product = wc_get_product($product_id);
 
         if (!$product || !$product->is_purchasable()) {
-            $logger->error('[OrgMan] ' . $product_context . ' is not purchasable: ' . $product_id, ['source' => 'wicket-orgman']);
+            $logger->error('[OrgMan] Additional seats product is not purchasable: ' . $product_id, ['source' => 'wicket-orgman']);
 
             return null;
         }
 
-        $logger->info('[OrgMan] ' . $product_context . ' resolved for purchase', [
+        $logger->info('[OrgMan] Additional seats product resolved for purchase', [
             'source' => 'wicket-orgman',
             'product_id' => (int) $product_id,
             'sku' => $resolved_sku,
             'language' => is_string($current_lang) ? $current_lang : null,
         ]);
 
-        return [
-            'product_id' => (int) $product_id,
-            'resolved_sku' => (string) $resolved_sku,
-        ];
+        return (int) $product_id;
     }
 
     /**
@@ -570,31 +616,15 @@ class AdditionalSeatsService
      */
     public function getPurchaseUserMeta($user_id = 0)
     {
-        $logger = wc_get_logger();
-
         if (!$user_id) {
             $user_id = get_current_user_id();
         }
 
         if (!$user_id) {
-            $logger->warning('[OrgMan] Cannot read purchase user meta: missing user id', [
-                'source' => 'wicket-orgman',
-            ]);
-
             return null;
         }
 
-        $purchase_meta = get_user_meta($user_id, 'orgman_additional_seats_data', true);
-        if (empty($purchase_meta) || !is_array($purchase_meta)) {
-            $logger->debug('[OrgMan] Purchase user meta not found', [
-                'source' => 'wicket-orgman',
-                'user_id' => (int) $user_id,
-            ]);
-
-            return null;
-        }
-
-        return $purchase_meta;
+        return get_user_meta($user_id, 'orgman_additional_seats_data', true);
     }
 
     /**
@@ -605,29 +635,15 @@ class AdditionalSeatsService
      */
     public function clearPurchaseUserMeta($user_id = 0)
     {
-        $logger = wc_get_logger();
-
         if (!$user_id) {
             $user_id = get_current_user_id();
         }
 
         if (!$user_id) {
-            $logger->warning('[OrgMan] Cannot clear purchase user meta: missing user id', [
-                'source' => 'wicket-orgman',
-            ]);
-
             return false;
         }
 
-        $deleted = delete_user_meta($user_id, 'orgman_additional_seats_data');
-        if (!$deleted) {
-            $logger->warning('[OrgMan] Failed to clear purchase user meta', [
-                'source' => 'wicket-orgman',
-                'user_id' => (int) $user_id,
-            ]);
-        }
-
-        return (bool) $deleted;
+        return delete_user_meta($user_id, 'orgman_additional_seats_data');
     }
 
     /**
@@ -723,18 +739,9 @@ class AdditionalSeatsService
      */
     public function getPurchaseFormUrl($org_uuid, $membership_id)
     {
-        $logger = wc_get_logger();
-        $context = [
-            'source' => 'wicket-orgman',
-            'org_uuid' => is_string($org_uuid) ? $org_uuid : null,
-            'membership_id' => is_string($membership_id) ? $membership_id : null,
-        ];
-
         $form_id = $this->configService->getAdditionalSeatsFormIdForCurrentLanguage();
 
         if (empty($form_id)) {
-            $logger->error('[OrgMan] Unable to build purchase form URL: additional seats form id is empty', $context);
-
             return '';
         }
 
@@ -774,18 +781,11 @@ class AdditionalSeatsService
         $membership_data = $this->getMembershipDataForMdp($org_uuid, $membership_id);
 
         if (!$membership_data) {
-            $logger->error('[OrgMan] Unable to build purchase form URL: membership data unavailable', $context);
-
             return '';
         }
 
         // Store data in user meta for later use
-        $stored = $this->storePurchaseUserMeta($org_uuid, $membership_id, $membership_data);
-        if (!$stored) {
-            $logger->error('[OrgMan] Unable to build purchase form URL: failed to persist purchase user meta', $context);
-
-            return '';
-        }
+        $this->storePurchaseUserMeta($org_uuid, $membership_id, $membership_data);
 
         $args = [
             'org_uuid' => $org_uuid,

@@ -73,6 +73,14 @@ if ($mode !== 'groups') {
     $search_action = "@get('{$members_list_endpoint}{$members_list_separator}org_uuid={$encoded_org_uuid}{$membership_query_fragment}&page=1&query=' + encodeURIComponent(" . '$searchQuery' . '))';
 }
 
+// Implementer setup warning: computed before role checks so admins always see it
+// regardless of their org role.
+$is_admin = current_user_can('administrator');
+$additional_seats_enabled = $configService->isAdditionalSeatsEnabled();
+$setup_issues = ($additional_seats_enabled && $is_admin)
+    ? $additional_seats_service->getAdditionalSeatsSetupIssues()
+    : [];
+
 $can_purchase_seats = $org_uuid ? $additional_seats_service->canPurchaseAdditionalSeats($org_uuid) : false;
 $purchase_url = ($can_purchase_seats && $membership_uuid)
     ? $additional_seats_service->getPurchaseFormUrl($org_uuid, $membership_uuid)
@@ -188,6 +196,54 @@ $show_remove_button = $show_remove_button;
 include __DIR__ . '/members-list-unified.php';
 ?>
 
+    <?php if (!empty($setup_issues)) : ?>
+    <div class="orgman-setup-warning wt_mt-4 wt_p-4 wt_rounded-md" style="background:#fff8e1;border:2px solid #f9a825;color:#5d4037;">
+        <p class="wt_font-semibold wt_mb-2">
+            ⚠️ <?php esc_html_e('Additional Seats: Setup Incomplete (visible to administrators only)', 'wicket-acc'); ?>
+        </p>
+        <p class="wt_mb-2"><?php esc_html_e('The "Purchase Additional Seats" button is hidden because the following items are not yet configured:', 'wicket-acc'); ?></p>
+        <ul style="list-style:disc;padding-left:1.25rem;margin:0 0 0.5rem;">
+            <?php foreach ($setup_issues as $issue) : ?>
+            <li><?php
+                foreach ($issue['parts'] as $part) {
+                    if ($part['type'] === 'token') {
+                        echo '<code class="orgman-copy-token" data-copy-value="' . esc_attr($part['value']) . '" title="' . esc_attr__('Click to copy', 'wicket-acc') . '" style="cursor:pointer;background:#fff3cd;border:1px solid #f9a825;border-radius:3px;padding:1px 5px;font-family:monospace;font-size:0.9em;">' . esc_html($part['value']) . '</code>';
+                    } else {
+                        echo esc_html($part['value']);
+                    }
+                }
+                ?></li>
+            <?php endforeach; ?>
+        </ul>
+    </div>
+    <script>
+    (function () {
+        if (window.__orgmanCopyTokenBound) return;
+        window.__orgmanCopyTokenBound = true;
+        document.addEventListener('click', function (e) {
+            var token = e.target.closest('.orgman-copy-token');
+            if (!token) return;
+            var value = token.dataset.copyValue || token.textContent;
+            if (!navigator.clipboard) return;
+            navigator.clipboard.writeText(value).then(function () {
+                var existing = token.querySelector('.orgman-copy-feedback');
+                if (existing) existing.remove();
+                var tip = document.createElement('span');
+                tip.className = 'orgman-copy-feedback';
+                tip.textContent = '✓ Copied!';
+                tip.style.cssText = 'margin-left:6px;font-size:0.8em;color:#155724;font-family:sans-serif;font-weight:600;';
+                token.appendChild(tip);
+                token.style.background = '#d4edda';
+                setTimeout(function () {
+                    tip.remove();
+                    token.style.background = '#fff3cd';
+                }, 1500);
+            });
+        });
+    }());
+    </script>
+    <?php endif; ?>
+
     <?php if ($can_purchase_seats && !empty($purchase_url)) : ?>
         <?php
     get_component('card-call-out', [
@@ -195,14 +251,14 @@ include __DIR__ . '/members-list-unified.php';
         'description' => __('Purchase additional seats for your organization membership to accommodate more team members.', 'wicket-acc'),
         'style' => 'secondary',
         'links' => [
-            [
-                'link' => [
-                    'title' => __('Purchase Additional Seats', 'wicket-acc'),
-                    'url' => $purchase_url,
-                    'target' => '_self',
+                [
+                    'link' => [
+                        'title' => __('Purchase Additional Seats', 'wicket-acc'),
+                        'url' => $purchase_url,
+                        'target' => '_self',
+                    ],
+                    'link_style' => 'secondary',
                 ],
-                'link_style' => 'secondary',
-            ],
         ],
         'classes' => ['my-3'],
     ]);
@@ -753,8 +809,7 @@ $available_roles = OrgHelpers\PermissionHelper::filter_role_choices(
                     </span>
                     <span data-class_wt_hidden="$currentRemoveMemberName !== ''">
                         <?php echo esc_html__('Are you sure you want to remove', 'wicket-acc'); ?>
-                        <span data-text="$currentRemoveMemberName"></span>
-                        <?php echo esc_html__('from this organization?', 'wicket-acc'); ?>
+                        <span data-text="$currentRemoveMemberName"></span>&nbsp;<?php echo esc_html__('from this organization?', 'wicket-acc'); ?>
                     </span>
                     <br>
                     <?php esc_html_e('This action cannot be undone.', 'wicket-acc'); ?>

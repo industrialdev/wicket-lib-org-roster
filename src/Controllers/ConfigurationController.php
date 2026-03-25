@@ -63,14 +63,6 @@ class ConfigurationController
             return $config_data['integrations']['additional_seats']['sku'] ?? 'additional-seats';
         });
 
-        // Set the SKU for additional seats discount product
-        add_filter('wicket/acc/orgman/additional_seats_discount_sku', function ($sku) use ($config) {
-            // Get config value directly to avoid recursion
-            $config_data = \OrgManagement\Config\OrgManConfig::get();
-
-            return $config_data['integrations']['additional_seats']['discount_sku'] ?? 'corporate-seat-discount';
-        });
-
         // Set the Gravity Form ID for additional seats purchase
         add_filter('wicket/acc/orgman/additional_seats_form_id', function ($form_id) use ($config) {
             // Get config value directly to avoid recursion, but still support auto-detection if set to 0
@@ -244,7 +236,6 @@ class ConfigurationController
         return [
             'enabled' => apply_filters('wicket/acc/orgman/additional_seats_enabled', true),
             'sku' => apply_filters('wicket/acc/orgman/additional_seats_sku', 'additional-seats'),
-            'discount_sku' => apply_filters('wicket/acc/orgman/additional_seats_discount_sku', 'corporate-seat-discount'),
             'form_id' => apply_filters('wicket/acc/orgman/additional_seats_form_id', 0),
             'min_quantity' => apply_filters('wicket/acc/orgman/additional_seats_min_quantity', 1),
             'max_quantity' => apply_filters('wicket/acc/orgman/additional_seats_max_quantity', 100),
@@ -269,16 +260,6 @@ class ConfigurationController
     public function getAdditionalSeatsSku(): string
     {
         return (string) apply_filters('wicket/acc/orgman/additional_seats_sku', 'additional-seats');
-    }
-
-    /**
-     * Get additional seats discount product SKU.
-     *
-     * @return string The SKU.
-     */
-    public function getAdditionalSeatsDiscountSku(): string
-    {
-        return (string) apply_filters('wicket/acc/orgman/additional_seats_discount_sku', 'corporate-seat-discount');
     }
 
     /**

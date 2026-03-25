@@ -251,43 +251,103 @@ $members_list_endpoint = $membersListEndpoint;
 		<?php /* Add Member button moved to members-list.php for dynamic refresh */ ?>
 
 		<?php
-	        // Check if user can purchase additional seats
-	        $can_purchase_seats = $additional_seats_service->canPurchaseAdditionalSeats($org_uuid);
-	    $purchase_url = $additional_seats_service->getPurchaseFormUrl($org_uuid, $membershipUuid);
-
-	    // Debug logging for administrators
-	    if (current_user_can('administrator')) {
-	        \OrgManagement\Helpers\Helper::log_debug('[OrgMan Debug] CTA visibility check', [
-	            'org_uuid' => $org_uuid,
-	            'membershipUuid' => $membershipUuid,
-	            'can_purchase_seats' => $can_purchase_seats,
-	            'purchase_url' => $purchase_url,
-	            'additional_seats_enabled' => $configService->isAdditionalSeatsEnabled(),
-	            'current_user_roles' => wp_get_current_user()->roles,
-	            'current_user_login' => wp_get_current_user()->user_login,
-	        ]);
+	    // Implementer setup warning: runs first, independently of role checks, so
+	    // administrators always see missing-prerequisite messages regardless of whether
+	    // they hold a membership_owner role on this org.
+	    $is_admin = current_user_can('administrator');
+	    $additional_seats_enabled = $configService->isAdditionalSeatsEnabled();
+	    $setup_issues = [];
+	    if ($additional_seats_enabled && $is_admin) {
+	        $setup_issues = $additional_seats_service->getAdditionalSeatsSetupIssues();
 	    }
 
-	    if ($can_purchase_seats && !empty($purchase_url)):
+	    if (!empty($setup_issues)):
 	        ?>
+		<div class="orgman-setup-warning wt_mt-4 wt_p-4 wt_rounded-md" style="background:#fff8e1;border:2px solid #f9a825;color:#5d4037;">
+			<p class="wt_font-semibold wt_mb-2">
+				⚠️ <?php esc_html_e('Additional Seats: Setup Incomplete (visible to administrators only)', 'wicket-acc'); ?>
+			</p>
+			<p class="wt_mb-2"><?php esc_html_e('The "Purchase Additional Seats" button is hidden because the following items are not yet configured:', 'wicket-acc'); ?></p>
+			<ul style="list-style:disc;padding-left:1.25rem;margin:0 0 0.5rem;">
+				<?php foreach ($setup_issues as $issue): ?>
+				<li><?php
+	                    foreach ($issue['parts'] as $part) {
+	                        if ($part['type'] === 'token') {
+	                            echo '<code class="orgman-copy-token" data-copy-value="' . esc_attr($part['value']) . '" title="' . esc_attr__('Click to copy', 'wicket-acc') . '" style="cursor:pointer;background:#fff3cd;border:1px solid #f9a825;border-radius:3px;padding:1px 5px;font-family:monospace;font-size:0.9em;">' . esc_html($part['value']) . '</code>';
+	                        } else {
+	                            echo esc_html($part['value']);
+	                        }
+	                    }
+				    ?></li>
+				<?php endforeach; ?>
+			</ul>
+		</div>
+		<script>
+		(function () {
+		    if (window.__orgmanCopyTokenBound) return;
+		    window.__orgmanCopyTokenBound = true;
+		    document.addEventListener('click', function (e) {
+		        var token = e.target.closest('.orgman-copy-token');
+		        if (!token) return;
+		        var value = token.dataset.copyValue || token.textContent;
+		        if (!navigator.clipboard) return;
+		        navigator.clipboard.writeText(value).then(function () {
+		            var existing = token.querySelector('.orgman-copy-feedback');
+		            if (existing) existing.remove();
+		            var tip = document.createElement('span');
+		            tip.className = 'orgman-copy-feedback';
+		            tip.textContent = '✓ Copied!';
+		            tip.style.cssText = 'margin-left:6px;font-size:0.8em;color:#155724;font-family:sans-serif;font-weight:600;';
+		            token.appendChild(tip);
+		            token.style.background = '#d4edda';
+		            setTimeout(function () {
+		                tip.remove();
+		                token.style.background = '#fff3cd';
+		            }, 1500);
+		        });
+		    });
+		}());
+		</script>
+		<?php endif; ?>
+
 		<?php
-	            get_component('card-call-out', [
-	                'title' => __('Need More Seats?', 'wicket-acc'),
-	                'description' => __('Purchase additional seats for your organization membership to accommodate more team members.', 'wicket-acc'),
-	                'style' => 'secondary',
-	                'links' => [
-	                    [
-	                        'link' => [
-	                            'title' => __('Purchase Additional Seats', 'wicket-acc'),
-	                            'url' => $purchase_url,
-	                            'target' => '_self',
-	                        ],
-	                        'link_style' => 'secondary',
-	                    ],
-	                ],
-	                'classes' => ['my-3'],
-	            ]);
-	        ?>
+            // Check if user can purchase additional seats (requires membership_owner role on this org).
+            $can_purchase_seats = $additional_seats_service->canPurchaseAdditionalSeats($org_uuid);
+$purchase_url = $can_purchase_seats ? $additional_seats_service->getPurchaseFormUrl($org_uuid, $membershipUuid) : '';
+
+// Debug logging for administrators
+if ($is_admin) {
+    \OrgManagement\Helpers\Helper::log_debug('[OrgMan Debug] CTA visibility check', [
+        'org_uuid' => $org_uuid,
+        'membershipUuid' => $membershipUuid,
+        'can_purchase_seats' => $can_purchase_seats,
+        'purchase_url' => $purchase_url,
+        'additional_seats_enabled' => $additional_seats_enabled,
+        'current_user_roles' => wp_get_current_user()->roles,
+        'current_user_login' => wp_get_current_user()->user_login,
+    ]);
+}
+
+if ($can_purchase_seats && !empty($purchase_url)):
+    ?>
+		<?php
+        get_component('card-call-out', [
+            'title' => __('Need More Seats?', 'wicket-acc'),
+            'description' => __('Purchase additional seats for your organization membership to accommodate more team members.', 'wicket-acc'),
+            'style' => 'secondary',
+            'links' => [
+                [
+                    'link' => [
+                        'title' => __('Purchase Additional Seats', 'wicket-acc'),
+                        'url' => $purchase_url,
+                        'target' => '_self',
+                    ],
+                    'link_style' => 'secondary',
+                ],
+            ],
+            'classes' => ['my-3'],
+        ]);
+    ?>
 		<?php endif; ?>
 
 		<?php if (\OrgManagement\Helpers\PermissionHelper::can_add_members($org_uuid)): ?>
@@ -333,8 +393,8 @@ $members_list_endpoint = $membersListEndpoint;
 						value="<?php echo esc_attr(wp_create_nonce('wicket-orgman-add-member')); ?>">
 
 					<?php
-	                // Render configurable form fields
-	                $form_config = $orgman_config['member_management']['forms']['add_member']['fields'] ?? [];
+            // Render configurable form fields
+            $form_config = $orgman_config['member_management']['forms']['add_member']['fields'] ?? [];
 		    $clear_form_on_error = $orgman_config['member_management']['forms']['add_member']['clear_form_on_error'] ?? false;
 		    $relationship_types = $orgman_config['relationships']['labels']['custom'] ?? [];
 		    ?>

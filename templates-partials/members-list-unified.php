@@ -170,9 +170,9 @@ $show_remove_policy_callout = (
     <?php if ((bool) ($member_list_config['show_assignment_info'] ?? true)): ?>
     <div class="members-seat-summary wt_text-xl wt_font-semibold wt_mb-3">
         <?php if ($max_seats !== null): ?>
-            <span class="members-seat-summary__label"><?php esc_html_e('Seats assigned:', 'wicket-acc'); ?></span><span class="members-seat-summary__value"><?php echo esc_html((string) (int) $active_seats); ?></span><span class="members-seat-summary__separator">/</span><span class="members-seat-summary__max"><?php echo esc_html((string) (int) $max_seats); ?></span>
+            <span class="members-seat-summary__label"><?php esc_html_e('Seats assigned:', 'wicket-acc'); ?></span>&nbsp;<span class="members-seat-summary__value"><?php echo esc_html((string) (int) $active_seats); ?></span><span class="members-seat-summary__separator">/</span><span class="members-seat-summary__max"><?php echo esc_html((string) (int) $max_seats); ?></span>
         <?php else: ?>
-            <span class="members-seat-summary__label"><?php esc_html_e('Number of assigned people:', 'wicket-acc'); ?></span><span class="members-seat-summary__value"><?php echo esc_html((string) (int) $total_items); ?></span>
+            <span class="members-seat-summary__label"><?php esc_html_e('Number of assigned people:', 'wicket-acc'); ?></span>&nbsp;<span class="members-seat-summary__value"><?php echo esc_html((string) (int) $total_items); ?></span>
         <?php endif; ?>
     </div>
     <?php endif; ?>
