@@ -56,6 +56,19 @@ class ConfigService
     }
 
     /**
+     * Get the SKU for additional seats discount product.
+     *
+     * @return string The SKU for the additional seats discount product.
+     */
+    public function getAdditionalSeatsDiscountSku()
+    {
+        $config = \OrgManagement\Config\OrgManConfig::get();
+        $default_sku = $config['integrations']['additional_seats']['discount_sku'] ?? 'corporate-seat-discount';
+
+        return apply_filters('wicket/acc/orgman/additional_seats_discount_sku', $default_sku);
+    }
+
+    /**
      * Get the Gravity Form ID for additional seats purchase.
      *
      * @return int The Gravity Form ID.

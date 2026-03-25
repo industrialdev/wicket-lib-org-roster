@@ -158,7 +158,34 @@ class AdditionalSeatsService
         $primary_sku = $this->configService->getAdditionalSeatsSku();
         $fallback_skus = ['corporate-seats'];
         $skus = array_values(array_unique(array_filter(array_merge([$primary_sku], $fallback_skus))));
+        $product = $this->resolvePurchasableProductBySkus($skus, 'Additional seats product');
 
+        return (int) ($product['product_id'] ?? 0) ?: null;
+    }
+
+    /**
+     * Get the discount product used to offset additional seat pricing on renewal.
+     *
+     * @return int|null The product ID or null if not found.
+     */
+    public function getAdditionalSeatsDiscountProduct()
+    {
+        $discount_sku = $this->configService->getAdditionalSeatsDiscountSku();
+        $skus = array_values(array_unique(array_filter([$discount_sku])));
+        $product = $this->resolvePurchasableProductBySkus($skus, 'Additional seats discount product');
+
+        return (int) ($product['product_id'] ?? 0) ?: null;
+    }
+
+    /**
+     * Resolve a purchasable product by one or more candidate SKUs.
+     *
+     * @param array<int, string> $skus Candidate SKUs in preferred order.
+     * @param string $product_context Product label used in logs.
+     * @return array{product_id:int, resolved_sku:string}|null
+     */
+    private function resolvePurchasableProductBySkus(array $skus, $product_context = 'Product')
+    {
         $logger = wc_get_logger();
 
         if (empty($skus)) {
@@ -212,7 +239,7 @@ class AdditionalSeatsService
         if (!$product_id && $fallback_id) {
             $product_id = $fallback_id;
             $resolved_sku = $fallback_sku;
-            $logger->warning('[OrgMan] Additional seats product translation missing, using default language product', [
+            $logger->warning('[OrgMan] ' . $product_context . ' translation missing, using default language product', [
                 'source' => 'wicket-orgman',
                 'product_id' => (int) $product_id,
                 'sku' => $resolved_sku,
@@ -222,7 +249,7 @@ class AdditionalSeatsService
         }
 
         if (!$product_id) {
-            $logger->warning('[OrgMan] Additional seats product not found for configured SKUs', [
+            $logger->warning('[OrgMan] ' . $product_context . ' not found for configured SKUs', [
                 'source' => 'wicket-orgman',
                 'skus' => $skus,
                 'language' => is_string($current_lang) ? $current_lang : null,
@@ -231,23 +258,25 @@ class AdditionalSeatsService
             return null;
         }
 
-        // Verify product exists and is purchasable.
         $product = wc_get_product($product_id);
 
         if (!$product || !$product->is_purchasable()) {
-            $logger->error('[OrgMan] Additional seats product is not purchasable: ' . $product_id, ['source' => 'wicket-orgman']);
+            $logger->error('[OrgMan] ' . $product_context . ' is not purchasable: ' . $product_id, ['source' => 'wicket-orgman']);
 
             return null;
         }
 
-        $logger->info('[OrgMan] Additional seats product resolved for purchase', [
+        $logger->info('[OrgMan] ' . $product_context . ' resolved for purchase', [
             'source' => 'wicket-orgman',
             'product_id' => (int) $product_id,
             'sku' => $resolved_sku,
             'language' => is_string($current_lang) ? $current_lang : null,
         ]);
 
-        return (int) $product_id;
+        return [
+            'product_id' => (int) $product_id,
+            'resolved_sku' => (string) $resolved_sku,
+        ];
     }
 
     /**
@@ -785,7 +814,17 @@ class AdditionalSeatsService
         }
 
         // Store data in user meta for later use
-        $this->storePurchaseUserMeta($org_uuid, $membership_id, $membership_data);
+        $stored = $this->storePurchaseUserMeta($org_uuid, $membership_id, $membership_data);
+        if (!$stored) {
+            $logger = wc_get_logger();
+            $logger->error('[OrgMan] Unable to build purchase form URL: failed to persist purchase user meta', [
+                'source' => 'wicket-orgman',
+                'org_uuid' => is_string($org_uuid) ? $org_uuid : null,
+                'membership_id' => is_string($membership_id) ? $membership_id : null,
+            ]);
+
+            return '';
+        }
 
         $args = [
             'org_uuid' => $org_uuid,

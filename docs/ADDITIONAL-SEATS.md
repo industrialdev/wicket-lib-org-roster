@@ -96,6 +96,8 @@ Purchase permissions are checked with org management permissions:
 - Handler runs on multiple WooCommerce order lifecycle hooks and is idempotent using order meta (`additional_seats_processed`).
 - Product resolution is WPML-aware and resolves translated products when available.
 - If discount SKU cannot be resolved, seat update continues and a warning is logged.
+- Purchase form URL generation fails closed when purchase context user-meta cannot be persisted.
+- WordPress administrators see an in-page setup warning when additional-seats prerequisites are incomplete (missing purchasable SKU product, form mapping, or `supplemental-members` page).
 
 ## Validation Checklist (Implementation Teams)
 
@@ -146,6 +148,10 @@ This section is for implementation teams who configure sites in WooCommerce and 
 
 4. WooCommerce Subscriptions active
 - The customer must have an active subscription containing the seat product line item.
+
+5. Supplemental members account page
+- A `my-account` post with slug `supplemental-members` must exist.
+- It should host the additional seats form route for checkout entry.
 
 ### Pre-launch admin checklist
 

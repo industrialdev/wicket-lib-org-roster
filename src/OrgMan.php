@@ -508,6 +508,7 @@ final class OrgMan
         }
 
         $membership_product_id = (int) get_post_meta($membership_post_id, 'membership_product_id', true);
+        $subscription_changed = false;
         if ($membership_product_id) {
             $updated_subscription_item = false;
             foreach ($subscription->get_items() as $subscription_item) {
@@ -522,6 +523,7 @@ final class OrgMan
                         'subscription_item_id' => $subscription_item->get_id(),
                         'new_qty' => (int) $new_seats,
                     ]));
+                    $subscription_changed = true;
                 }
             }
 
@@ -534,19 +536,87 @@ final class OrgMan
             }
 
             $subscription->update_meta_data('seat_limit', $new_seats);
-            $subscription->calculate_totals(false);
-            $subscription->save();
-
-            $logger->info('[OrgMan] Saved subscription after seat update', array_merge($context, [
-                'order_id' => $order_id,
-                'subscription_id' => (int) $subscription_id,
-                'seat_limit' => (int) $new_seats,
-            ]));
+            $subscription_changed = true;
         } else {
             $logger->warning('[OrgMan] Membership product id missing; cannot update subscription item quantity', array_merge($context, [
                 'order_id' => $order_id,
                 'membership_post_id' => (int) $membership_post_id,
                 'subscription_id' => (int) $subscription_id,
+            ]));
+        }
+
+        $discount_product_id = $additional_seats_service->getAdditionalSeatsDiscountProduct();
+        if ($discount_product_id) {
+            $updated_discount_item = false;
+            foreach ($subscription->get_items() as $subscription_item) {
+                $item_product_id = (int) $subscription_item->get_product_id();
+                if ($item_product_id === (int) $discount_product_id) {
+                    $current_discount_qty = (int) $subscription_item->get_quantity();
+                    $new_discount_qty = $current_discount_qty + (int) $total_additional_seats;
+                    $subscription_item->set_quantity($new_discount_qty);
+                    $updated_discount_item = true;
+                    $subscription_changed = true;
+
+                    $logger->info('[OrgMan] Updated discount subscription item quantity', array_merge($context, [
+                        'order_id' => $order_id,
+                        'subscription_id' => (int) $subscription_id,
+                        'discount_product_id' => (int) $discount_product_id,
+                        'subscription_item_id' => $subscription_item->get_id(),
+                        'previous_qty' => (int) $current_discount_qty,
+                        'added_qty' => (int) $total_additional_seats,
+                        'new_qty' => (int) $new_discount_qty,
+                    ]));
+                    break;
+                }
+            }
+
+            if (!$updated_discount_item) {
+                $discount_product = wc_get_product($discount_product_id);
+
+                if ($discount_product) {
+                    $added_item = $subscription->add_product($discount_product, (int) $total_additional_seats);
+                    if (!is_wp_error($added_item) && !empty($added_item)) {
+                        $subscription_changed = true;
+
+                        $logger->info('[OrgMan] Added discount product to subscription', array_merge($context, [
+                            'order_id' => $order_id,
+                            'subscription_id' => (int) $subscription_id,
+                            'discount_product_id' => (int) $discount_product_id,
+                            'added_qty' => (int) $total_additional_seats,
+                        ]));
+                    } else {
+                        $error_message = is_wp_error($added_item) ? $added_item->get_error_message() : 'unknown_error';
+                        $logger->error('[OrgMan] Failed to add discount product to subscription', array_merge($context, [
+                            'order_id' => $order_id,
+                            'subscription_id' => (int) $subscription_id,
+                            'discount_product_id' => (int) $discount_product_id,
+                            'added_qty' => (int) $total_additional_seats,
+                            'error' => $error_message,
+                        ]));
+                    }
+                } else {
+                    $logger->error('[OrgMan] Discount product could not be loaded', array_merge($context, [
+                        'order_id' => $order_id,
+                        'subscription_id' => (int) $subscription_id,
+                        'discount_product_id' => (int) $discount_product_id,
+                    ]));
+                }
+            }
+        } else {
+            $logger->warning('[OrgMan] Additional seats discount product not found by SKU; skipping discount line update', array_merge($context, [
+                'order_id' => $order_id,
+                'subscription_id' => (int) $subscription_id,
+            ]));
+        }
+
+        if ($subscription_changed) {
+            $subscription->calculate_totals(false);
+            $subscription->save();
+
+            $logger->info('[OrgMan] Saved subscription after additional seats update', array_merge($context, [
+                'order_id' => $order_id,
+                'subscription_id' => (int) $subscription_id,
+                'seat_limit' => (int) $new_seats,
             ]));
         }
 

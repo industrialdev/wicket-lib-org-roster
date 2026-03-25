@@ -390,6 +390,7 @@ final class OrgManConfig
                 'additional_seats' => [
                     'enabled' => true,
                     'sku' => 'additional-seats',
+                    'discount_sku' => 'corporate-seat-discount',
                     'form_id' => 0,
                     'form_slug' => 'additional-seats',
                     'min_quantity' => 1,
