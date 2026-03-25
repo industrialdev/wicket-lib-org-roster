@@ -946,6 +946,16 @@ final class OrgMan
 
         if ($this->isOrgmanScreen()) {
             $classes[] = 'wicket-orgman-screen';
+            $slug = $this->getCurrentPageSlug();
+
+            if ($slug !== '') {
+                $classes[] = 'wicket-orgman-page';
+                $classes[] = 'wicket-orgman-page-' . sanitize_html_class($slug);
+            }
+
+            if ($slug === 'supplemental-members') {
+                $classes[] = 'wicket-orgman-supplemental';
+            }
         }
 
         return array_values(array_unique($classes));

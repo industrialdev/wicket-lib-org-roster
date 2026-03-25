@@ -153,7 +153,7 @@ $show_remove_policy_callout = (
 ?>
 <div
     id="<?php echo esc_attr($members_list_target); ?>"
-    class="wt_mt-6 wt_flex wt_flex-col wt_gap-1 wt_relative"
+    class="wt_mt-6 wt_mb-6 wt_flex wt_flex-col wt_gap-1 wt_relative"
     data-page="<?php echo esc_attr((string) $page); ?>"
     data-attr:aria-busy="$listLoading">
     <div class="members-loading-state wt_flex wt_flex-col wt_items-center wt_justify-center wt_gap-4 wt_rounded-card wt_border wt_border-color wt_bg-white wt_shadow-sm wt_text-center"
