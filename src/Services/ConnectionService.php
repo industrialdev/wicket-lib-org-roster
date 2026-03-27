@@ -719,11 +719,12 @@ class ConnectionService
     /**
      * End-date all active person-to-organization connections for a person and organization.
      *
-     * @param string $person_uuid
-     * @param string $org_id
+     * @param string   $person_uuid
+     * @param string   $org_id
+     * @param string[] $skip_types  Relationship type slugs to leave untouched (e.g. ['company_admin']).
      * @return array|WP_Error
      */
-    public function endActivePersonOrganizationConnections($person_uuid, $org_id)
+    public function endActivePersonOrganizationConnections($person_uuid, $org_id, array $skip_types = [])
     {
         $connections = $this->getActivePersonOrganizationConnections($person_uuid, $org_id);
         if (is_wp_error($connections)) {
@@ -735,6 +736,14 @@ class ConnectionService
             $connection_id = (string) ($connection['id'] ?? '');
             if ($connection_id === '') {
                 continue;
+            }
+
+            // Leave protected relationship types intact so they are not destroyed during repair.
+            if (!empty($skip_types)) {
+                $rel_type = (string) ($connection['attributes']['type'] ?? '');
+                if (in_array($rel_type, $skip_types, true)) {
+                    continue;
+                }
             }
 
             $result = $this->endRelationshipToday($person_uuid, $connection_id, $org_id);

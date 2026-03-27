@@ -30,6 +30,7 @@ This document mirrors the current site override. If it drifts, update the site c
 ### `member_management`
 
 - `member_management.addition.auto_assign_roles = []`
+- `member_management.addition.protected_relationship_types = ['company_admin']`
 - `member_management.forms.add_member.fields.first_name.enabled = true`
 - `member_management.forms.add_member.fields.first_name.required = true`
 - `member_management.forms.add_member.fields.last_name.enabled = true`
@@ -89,6 +90,9 @@ function wicket_child_orgman_config(array $config): array
     $config['membership']['strategy'] = 'cascade';
     $config['membership']['resolution']['prefer_current_cycle'] = true;
     $config['member_management']['addition']['auto_assign_roles'] = [];
+
+    // Protect company_admin connections during stale-relationship repair so onboarding relationships are preserved.
+    $config['member_management']['addition']['protected_relationship_types'] = ['company_admin'];
 
     // Management permissions
     $config['access']['permissions']['manage_member_roles'] = ['membership_manager', 'membership_owner'];

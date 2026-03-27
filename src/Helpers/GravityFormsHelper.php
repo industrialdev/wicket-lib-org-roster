@@ -11,8 +11,10 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-// Gravity Forms can hard-exit if its API file is loaded before the plugin bootstraps.
-// Fail closed and only use the API after Gravity Forms has initialized itself.
+// Include Gravity Forms API
+if (!class_exists('GFAPI')) {
+    require_once WP_PLUGIN_DIR . '/gravityforms/includes/api.php';
+}
 
 /**
  * Helper functions for Gravity Forms integration.
@@ -447,7 +449,7 @@ class GravityFormsHelper extends Helper
             $form_id = $configService->getLocalizedFormId($query_form_id);
         }
 
-        if (empty($form_id) || !class_exists('GFAPI') || !function_exists('gravity_form')) {
+        if (empty($form_id)) {
             return '';
         }
 

@@ -150,6 +150,7 @@ final class OrgManConfig
                     'auto_assign_roles' => [],
                     'base_member_role' => 'member',
                     'repair_stale_relationship_without_membership' => true,
+                    'protected_relationship_types' => [],
                     'auto_opt_in_communications' => [
                         'enabled' => true,
                         'email' => true,

@@ -294,7 +294,8 @@ class CascadeStrategy implements RosterManagementStrategy
                         'repair_enabled' => true,
                     ]));
 
-                    $end_result = $this->connectionService()->endActivePersonOrganizationConnections($person_uuid, $org_id);
+                    $protected_types = (array) ($config['member_management']['addition']['protected_relationship_types'] ?? []);
+                    $end_result = $this->connectionService()->endActivePersonOrganizationConnections($person_uuid, $org_id, $protected_types);
                     if (is_wp_error($end_result)) {
                         $logger->error('[OrgMan] Cascade stale relationship end-date failed', array_merge($log_context, [
                             'error' => $end_result->get_error_message(),
