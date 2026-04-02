@@ -19,11 +19,11 @@ abstract class Helper
     /**
      * Get logger instance.
      *
-     * @return \WC_Logger
+     * @return \WicketWP\Log
      */
     protected static function getLogger()
     {
-        return wc_get_logger();
+        return \Wicket()->log();
     }
 
     /**

@@ -238,7 +238,7 @@ class OrganizationService
                 $page_number++;
             } while ($page_number <= $total_pages);
         } catch (\Throwable $e) {
-            wc_get_logger()->warning('[OrgMan] Failed resolving organizations from role-only access: ' . $e->getMessage(), [
+            \Wicket()->log()->warning('[OrgMan] Failed resolving organizations from role-only access: ' . $e->getMessage(), [
                 'source' => 'wicket-orgman',
                 'person_uuid' => $person_uuid,
             ]);
@@ -275,7 +275,7 @@ class OrganizationService
             return $cached_data;
         }
 
-        $logger = wc_get_logger();
+        $logger = \Wicket()->log();
         $person = wicket_get_person_by_id($person_uuid);
 
         if (!$person) {
@@ -436,7 +436,7 @@ class OrganizationService
 
             return $membershipService->getMembershipForOrganization($organizationUuid);
         } catch (\Throwable $e) {
-            wc_get_logger()->warning(
+            \Wicket()->log()->warning(
                 '[OrgMan] Failed resolving membership uuid for organization: ' . $e->getMessage(),
                 [
                     'source'   => 'wicket-orgman',
@@ -505,7 +505,7 @@ class OrganizationService
             return $person;
 
         } catch (\Exception $e) {
-            error_log('OrganizationService::getOrganizationOwner() - Exception: ' . $e->getMessage());
+            \Wicket()->log()->error('OrganizationService::getOrganizationOwner() - Exception: ' . $e->getMessage());
 
             return new \WP_Error('get_owner_exception', $e->getMessage());
         }

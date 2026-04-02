@@ -458,7 +458,7 @@ class GroupsStrategy implements RosterManagementStrategy
     private function getLogger()
     {
         if (null === $this->logger) {
-            $this->logger = wc_get_logger();
+            $this->logger = \Wicket()->log();
         }
 
         return $this->logger;

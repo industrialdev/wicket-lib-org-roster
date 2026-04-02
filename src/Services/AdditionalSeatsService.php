@@ -186,7 +186,7 @@ class AdditionalSeatsService
      */
     private function resolvePurchasableProductBySkus(array $skus, $product_context = 'Product')
     {
-        $logger = wc_get_logger();
+        $logger = \Wicket()->log();
 
         if (empty($skus)) {
             return null;
@@ -320,7 +320,7 @@ class AdditionalSeatsService
      */
     public function updateSubscriptionSeatCount($order_id, $subscription_id, $additional_seats)
     {
-        $logger = wc_get_logger();
+        $logger = \Wicket()->log();
 
         try {
             $subscription = wcs_get_subscription($subscription_id);
@@ -367,7 +367,7 @@ class AdditionalSeatsService
 
     public function updateMdpMembershipMaxAssignments($membership_id, $new_max_assignments)
     {
-        $logger = wc_get_logger();
+        $logger = \Wicket()->log();
 
         $membership_id = is_string($membership_id) ? trim($membership_id) : '';
         $new_max_assignments = (int) $new_max_assignments;
@@ -466,7 +466,7 @@ class AdditionalSeatsService
      */
     private function updateMdpSeatLimit($subscription, $new_seat_limit)
     {
-        $logger = wc_get_logger();
+        $logger = \Wicket()->log();
 
         try {
             // Get comprehensive membership data from order meta
@@ -617,7 +617,7 @@ class AdditionalSeatsService
 
         $success = update_user_meta($current_user_id, 'orgman_additional_seats_data', $purchase_data);
 
-        $logger = wc_get_logger();
+        $logger = \Wicket()->log();
         if ($success) {
             $logger->info('[OrgMan] Purchase user meta stored', [
                 'source' => 'wicket-orgman',
@@ -684,7 +684,7 @@ class AdditionalSeatsService
      */
     public function getMembershipDataForMdp($org_uuid, $membership_id)
     {
-        $logger = wc_get_logger();
+        $logger = \Wicket()->log();
 
         try {
             // Get organization data
@@ -816,7 +816,7 @@ class AdditionalSeatsService
         // Store data in user meta for later use
         $stored = $this->storePurchaseUserMeta($org_uuid, $membership_id, $membership_data);
         if (!$stored) {
-            $logger = wc_get_logger();
+            $logger = \Wicket()->log();
             $logger->error('[OrgMan] Unable to build purchase form URL: failed to persist purchase user meta', [
                 'source' => 'wicket-orgman',
                 'org_uuid' => is_string($org_uuid) ? $org_uuid : null,
@@ -844,7 +844,7 @@ class AdditionalSeatsService
      */
     private function getMembershipDataFromApi($membership_id)
     {
-        $logger = wc_get_logger();
+        $logger = \Wicket()->log();
 
         try {
             if (!function_exists('wicket_api_client')) {

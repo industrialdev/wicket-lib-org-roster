@@ -251,14 +251,14 @@ include __DIR__ . '/members-list-unified.php';
         'description' => __('Purchase additional seats for your organization membership to accommodate more team members.', 'wicket-acc'),
         'style' => 'secondary',
         'links' => [
-                [
-                    'link' => [
-                        'title' => __('Purchase Additional Seats', 'wicket-acc'),
-                        'url' => $purchase_url,
-                        'target' => '_self',
-                    ],
-                    'link_style' => 'secondary',
+            [
+                'link' => [
+                    'title' => __('Purchase Additional Seats', 'wicket-acc'),
+                    'url' => $purchase_url,
+                    'target' => '_self',
                 ],
+                'link_style' => 'secondary',
+            ],
         ],
         'classes' => ['my-3'],
     ]);

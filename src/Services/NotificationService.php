@@ -192,7 +192,7 @@ class NotificationService
      */
     public function sendPersonToOrgAssignmentEmail($person_uuid, $org_id)
     {
-        $logger = wc_get_logger();
+        $logger = \Wicket()->log();
         $context = [
             'source' => 'wicket-orgman',
             'notification' => 'person_to_org_assignment',
@@ -484,7 +484,7 @@ class NotificationService
             return true;
 
         } catch (\Exception $e) {
-            error_log('NotificationService::email_to_person_on_group_assignment() - Exception: ' . $e->getMessage());
+            \Wicket()->log()->error('NotificationService::email_to_person_on_group_assignment() - Exception: ' . $e->getMessage());
 
             return new WP_Error('email_exception', $e->getMessage());
         }

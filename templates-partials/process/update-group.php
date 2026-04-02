@@ -15,7 +15,7 @@ if ('POST' !== strtoupper($request_method)) {
     return;
 }
 
-$logger = wc_get_logger();
+$logger = \Wicket()->log();
 $log_context = [
     'source' => 'wicket-orgman',
     'action' => 'update_group',

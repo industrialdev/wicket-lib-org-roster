@@ -104,7 +104,7 @@ class PermissionService
 
             return array_values(array_filter($roles));
         } catch (\Throwable $e) {
-            error_log('[PermissionService] Failed to get person roles: ' . $e->getMessage());
+            \Wicket()->log()->error('[PermissionService] Failed to get person roles: ' . $e->getMessage());
 
             return [];
         }
@@ -163,7 +163,7 @@ class PermissionService
 
             return true;
         } catch (\Throwable $e) {
-            error_log('[PermissionService] Failed to remove single role: ' . $e->getMessage());
+            \Wicket()->log()->error('[PermissionService] Failed to remove single role: ' . $e->getMessage());
 
             return false;
         }

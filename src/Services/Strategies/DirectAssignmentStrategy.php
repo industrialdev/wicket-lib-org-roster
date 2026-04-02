@@ -617,7 +617,7 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
             $context['strategy'] = 'direct';
             $this->touchpointService()->logMemberAdded($person_uuid, $org_id, $member_data, $context);
         } catch (\Throwable $e) {
-            error_log('[OrgMan] Failed to write touchpoint: ' . $e->getMessage());
+            \Wicket()->log()->error('[OrgMan] Failed to write touchpoint: ' . $e->getMessage());
         }
     }
 
@@ -639,7 +639,7 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
             $context['strategy'] = 'direct';
             $this->touchpointService()->logMemberRemoved($person_uuid, $org_id, $context);
         } catch (\Throwable $e) {
-            error_log('[OrgMan] Failed to write removal touchpoint: ' . $e->getMessage());
+            \Wicket()->log()->error('[OrgMan] Failed to write removal touchpoint: ' . $e->getMessage());
         }
     }
 
@@ -767,7 +767,7 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
     private function getLogger()
     {
         if (null === $this->logger) {
-            $this->logger = wc_get_logger();
+            $this->logger = \Wicket()->log();
         }
 
         return $this->logger;

@@ -22,7 +22,7 @@ if ('POST' !== strtoupper($request_method)) {
 
 $message_target = '#group-member-add-messages';
 
-$logger = wc_get_logger();
+$logger = \Wicket()->log();
 $log_context = [
     'source' => 'wicket-orgman',
     'action' => 'add_group_member',

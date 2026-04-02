@@ -825,21 +825,19 @@ class BulkMemberUploadService
     {
         $normalized_context = array_merge(['source' => 'wicket-orgman-bulk-upload'], $context);
 
-        if (function_exists('wc_get_logger')) {
-            $logger = wc_get_logger();
-            if ($logger && method_exists($logger, $level)) {
-                $logger->{$level}('[OrgMan] ' . $message, $normalized_context);
+        $logger = \Wicket()->log();
+        if (method_exists($logger, $level)) {
+            $logger->{$level}('[OrgMan] ' . $message, $normalized_context);
 
-                return;
-            }
-            if ($logger && method_exists($logger, 'info')) {
-                $logger->info('[OrgMan] ' . $message, $normalized_context);
+            return;
+        }
+        if (method_exists($logger, 'info')) {
+            $logger->info('[OrgMan] ' . $message, $normalized_context);
 
-                return;
-            }
+            return;
         }
 
-        error_log('[OrgMan] ' . $message . ' ' . wp_json_encode($normalized_context));
+        \Wicket()->log()->error('[OrgMan] ' . $message . ' ' . wp_json_encode($normalized_context));
     }
 
     /**
