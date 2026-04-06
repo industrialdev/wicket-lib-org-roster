@@ -1,6 +1,6 @@
 {
   "name": "industrialdev/wicket-lib-org-roster",
-  "version": "0.5.20",
+  "version": "0.5.21",
   "description": "Organization & Roster management library for Wicket Inc.",
   "type": "library",
   "license": "GPL-2.0-or-later",

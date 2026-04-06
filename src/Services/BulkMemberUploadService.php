@@ -530,7 +530,7 @@ class BulkMemberUploadService
                 $context['role'] = $row_role;
             }
 
-            $result = $this->memberService->addMember((string) ($job['org_uuid'] ?? ''), $member_data, $context);
+            $result = $this->member_service->addMember((string) ($job['org_uuid'] ?? ''), $member_data, $context);
             if (is_wp_error($result)) {
                 $error_code = (string) $result->get_error_code();
                 if ($error_code === 'group_member_exists') {
