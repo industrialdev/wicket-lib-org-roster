@@ -691,8 +691,21 @@ class ConnectionService
             return new WP_Error('invalid_params', 'Person UUID and organization ID are required.');
         }
 
+        $logger = \Wicket()->log();
+        $log_context = [
+            'source' => 'wicket-orgman',
+            'service' => 'connection',
+            'action' => 'get_active_person_org_connections',
+            'person_uuid' => $person_uuid,
+            'org_id' => $org_id,
+        ];
+
         $connections = $this->getPersonConnectionsById($person_uuid);
         if ($connections === false) {
+            if ($logger) {
+                $logger->warning('[OrgMan] Active connection lookup failed', $log_context);
+            }
+
             return new WP_Error('relationship_lookup_failed', 'Unable to load person connections.');
         }
 
@@ -713,6 +726,22 @@ class ConnectionService
             $matches[] = $connection;
         }
 
+        if ($logger) {
+            $logger->debug('[OrgMan] Active person-org connections resolved', $log_context + [
+                'active_connection_count' => count($matches),
+                'active_connections' => array_map(static function (array $connection): array {
+                    return [
+                        'connection_id' => (string) ($connection['id'] ?? ''),
+                        'type' => (string) ($connection['attributes']['type'] ?? ''),
+                        'connection_type' => (string) ($connection['attributes']['connection_type'] ?? ''),
+                        'active' => (bool) ($connection['attributes']['active'] ?? false),
+                        'starts_at' => $connection['attributes']['starts_at'] ?? null,
+                        'ends_at' => $connection['attributes']['ends_at'] ?? null,
+                    ];
+                }, $matches),
+            ]);
+        }
+
         return $matches;
     }
 
@@ -726,32 +755,105 @@ class ConnectionService
      */
     public function endActivePersonOrganizationConnections($person_uuid, $org_id, array $skip_types = [])
     {
+        $logger = \Wicket()->log();
+        $log_context = [
+            'source' => 'wicket-orgman',
+            'service' => 'connection',
+            'action' => 'end_active_person_org_connections',
+            'person_uuid' => $person_uuid,
+            'org_id' => $org_id,
+        ];
+
+        if ($logger) {
+            $logger->info('[OrgMan] End active connections started', $log_context + [
+                'skip_types_raw' => array_values($skip_types),
+            ]);
+        }
+
         $connections = $this->getActivePersonOrganizationConnections($person_uuid, $org_id);
         if (is_wp_error($connections)) {
+            if ($logger) {
+                $logger->error('[OrgMan] End active connections aborted: active connection lookup error', $log_context + [
+                    'error_code' => $connections->get_error_code(),
+                    'error_message' => $connections->get_error_message(),
+                ]);
+            }
+
             return $connections;
         }
 
+        $normalized_skip_types = array_values(array_unique(array_filter(array_map(static function ($type): string {
+            $normalized = strtolower(trim((string) $type));
+            $normalized = str_replace(['-', ' '], '_', $normalized);
+
+            return sanitize_key($normalized);
+        }, $skip_types))));
+
         $ended_ids = [];
+        $skipped_ids = [];
+        $evaluated = [];
         foreach ($connections as $connection) {
             $connection_id = (string) ($connection['id'] ?? '');
             if ($connection_id === '') {
                 continue;
             }
 
+            $raw_relationship_type = (string) ($connection['attributes']['type'] ?? '');
+            $normalized_relationship_type = sanitize_key(str_replace(['-', ' '], '_', strtolower(trim($raw_relationship_type))));
+
             // Leave protected relationship types intact so they are not destroyed during repair.
+            // Match by exact raw value OR normalized slug to handle API formatting variants.
             if (!empty($skip_types)) {
-                $rel_type = (string) ($connection['attributes']['type'] ?? '');
-                if (in_array($rel_type, $skip_types, true)) {
+                if (
+                    in_array($raw_relationship_type, $skip_types, true)
+                    || in_array($normalized_relationship_type, $normalized_skip_types, true)
+                ) {
+                    $skipped_ids[] = $connection_id;
+                    $evaluated[] = [
+                        'connection_id' => $connection_id,
+                        'type_raw' => $raw_relationship_type,
+                        'type_normalized' => $normalized_relationship_type,
+                        'decision' => 'skipped_protected_type',
+                    ];
                     continue;
                 }
             }
 
             $result = $this->endRelationshipToday($person_uuid, $connection_id, $org_id);
             if (is_wp_error($result)) {
+                if ($logger) {
+                    $logger->error('[OrgMan] End active connections failed while ending connection', $log_context + [
+                        'connection_id' => $connection_id,
+                        'type_raw' => $raw_relationship_type,
+                        'type_normalized' => $normalized_relationship_type,
+                        'error_code' => $result->get_error_code(),
+                        'error_message' => $result->get_error_message(),
+                    ]);
+                }
+
                 return $result;
             }
 
             $ended_ids[] = $connection_id;
+            $evaluated[] = [
+                'connection_id' => $connection_id,
+                'type_raw' => $raw_relationship_type,
+                'type_normalized' => $normalized_relationship_type,
+                'decision' => 'ended',
+            ];
+        }
+
+        if ($logger) {
+            $logger->info('[OrgMan] End active connections completed', $log_context + [
+                'skip_types_raw' => array_values($skip_types),
+                'skip_types_normalized' => $normalized_skip_types,
+                'evaluated_count' => count($evaluated),
+                'ended_count' => count($ended_ids),
+                'skipped_count' => count($skipped_ids),
+                'ended_connection_ids' => $ended_ids,
+                'skipped_connection_ids' => $skipped_ids,
+                'evaluated_connections' => $evaluated,
+            ]);
         }
 
         return [

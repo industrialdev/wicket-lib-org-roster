@@ -2,6 +2,15 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.5.20] - 2026-04-06
+
+### Fixed
+- Fixed org-scoped edit-permissions role updates to respect permissions modal allow/deny config so hidden roles are not removed.
+- Fixed cascade strategy stale-relationship repair to preserve protected relationship types during the end-date operation.
+- Fixed cascade strategy stale-relationship repair logging to include resolved relationship type and description.
+- Enhanced connection service logging with detailed diagnostic tracking for active person-org connection lookups and end-date operations.
+- Enhanced member service role management to normalize and filter manageable roles based on modal allow/deny configuration.
+
 ## [0.5.15] - 2026-03-25
 
 ### Fixed

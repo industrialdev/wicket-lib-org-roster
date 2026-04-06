@@ -1607,8 +1607,49 @@ class MemberService
             // Update roles using the correct API approach
             // Based on legacy wicket_assign_role and wicket_remove_role functions
 
-            // Define which roles we can manage (organization-specific roles only)
+            // Define which roles we can manage (organization-specific roles only).
+            // Respect edit-permissions modal allow/deny config so hidden roles are not removed.
             $manageable_roles = ['membership_manager', 'org_editor'];
+            $permissions_modal_config = is_array($this->config['member_management']['permissions_modal'] ?? null)
+                ? $this->config['member_management']['permissions_modal']
+                : [];
+            $modal_allowlist = is_array($permissions_modal_config['allowlist'] ?? null)
+                ? $permissions_modal_config['allowlist']
+                : [];
+            if ($modal_allowlist === [] && is_array($permissions_modal_config['allowed_roles'] ?? null)) {
+                $modal_allowlist = $permissions_modal_config['allowed_roles'];
+            }
+            $modal_denylist = is_array($permissions_modal_config['denylist'] ?? null)
+                ? $permissions_modal_config['denylist']
+                : [];
+            if ($modal_denylist === [] && is_array($permissions_modal_config['excluded_roles'] ?? null)) {
+                $modal_denylist = $permissions_modal_config['excluded_roles'];
+            }
+
+            $normalizeRoleList = function (array $role_list): array {
+                $normalized_roles = [];
+                foreach ($role_list as $role_name) {
+                    $role_slug = $this->normalizeRoleSlug((string) $role_name);
+                    if ($role_slug === '') {
+                        continue;
+                    }
+                    $normalized_roles[] = $role_slug;
+                }
+
+                return array_values(array_unique($normalized_roles));
+            };
+
+            $normalized_modal_allowlist = $normalizeRoleList($modal_allowlist);
+            $normalized_modal_denylist = $normalizeRoleList($modal_denylist);
+            $manageable_roles = $normalizeRoleList($manageable_roles);
+
+            if (!empty($normalized_modal_allowlist)) {
+                $manageable_roles = array_values(array_intersect($manageable_roles, $normalized_modal_allowlist));
+            }
+
+            if (!empty($normalized_modal_denylist)) {
+                $manageable_roles = array_values(array_diff($manageable_roles, $normalized_modal_denylist));
+            }
 
             // Only consider manageable roles for add/remove operations. Compare against org-scoped
             // role assignments to avoid false positives from roles held in other organizations.

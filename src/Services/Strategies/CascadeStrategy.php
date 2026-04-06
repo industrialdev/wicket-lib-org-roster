@@ -289,12 +289,19 @@ class CascadeStrategy implements RosterManagementStrategy
                 }
 
                 $repair_stale_relationship = (bool) ($config['member_management']['addition']['repair_stale_relationship_without_membership'] ?? true);
+                $protected_types = (array) ($config['member_management']['addition']['protected_relationship_types'] ?? []);
+                $logger->debug('[OrgMan] Cascade stale relationship repair decision', array_merge($log_context, [
+                    'has_membership' => false,
+                    'has_relationship' => (bool) $has_relationship,
+                    'repair_stale_relationship' => $repair_stale_relationship,
+                    'protected_relationship_types' => array_values($protected_types),
+                    'resolved_relationship_type_for_new_connection' => $relationship_type,
+                ]));
                 if ($has_relationship && $repair_stale_relationship) {
                     $logger->info('[OrgMan] Cascade stale relationship detected without membership', array_merge($log_context, [
                         'repair_enabled' => true,
                     ]));
 
-                    $protected_types = (array) ($config['member_management']['addition']['protected_relationship_types'] ?? []);
                     $end_result = $this->connectionService()->endActivePersonOrganizationConnections($person_uuid, $org_id, $protected_types);
                     if (is_wp_error($end_result)) {
                         $logger->error('[OrgMan] Cascade stale relationship end-date failed', array_merge($log_context, [
@@ -335,6 +342,7 @@ class CascadeStrategy implements RosterManagementStrategy
                     if ($repaired_stale_relationship) {
                         $logger->info('[OrgMan] Cascade stale relationship recreated', array_merge($log_context, [
                             'relationship_type' => $relationship_type,
+                            'relationship_description' => $relationship_description,
                         ]));
                     }
                 }
