@@ -181,6 +181,6 @@ status_header(200);
 OrgManagement\Helpers\DatastarSSE::renderSuccess($summary, $message_target, [
     'membersLoading' => false,
     'bulkUploadSubmitting' => false,
-], 'bulk-upload-countdown');
+], 0, 'bulk-upload-countdown');
 
 return;
