@@ -317,6 +317,12 @@ class PermissionService
     public function getOrgRolesForPerson(string $personUuid, string $orgId): array
     {
         if (empty($personUuid) || empty($orgId) || !function_exists('wicket_api_client')) {
+            \Wicket()->log()->debug('[PermissionService] getOrgRolesForPerson: missing params or api_client', [
+                'source' => 'wicket-orgman',
+                'personUuid' => $personUuid,
+                'orgId' => $orgId,
+                'has_api_client' => function_exists('wicket_api_client'),
+            ]);
             return [];
         }
 
@@ -329,6 +335,15 @@ class PermissionService
             ];
             $response = $client->get('/people/' . rawurlencode($personUuid) . '/roles', $params);
 
+            \Wicket()->log()->debug('[PermissionService] getOrgRolesForPerson: API response', [
+                'source' => 'wicket-orgman',
+                'personUuid' => $personUuid,
+                'orgId' => $orgId,
+                'has_data' => isset($response['data']),
+                'data_count' => isset($response['data']) && is_array($response['data']) ? count($response['data']) : 0,
+                'response_keys' => array_keys($response),
+            ]);
+
             $roles = [];
             if (isset($response['data']) && is_array($response['data'])) {
                 foreach ($response['data'] as $role) {
@@ -337,6 +352,20 @@ class PermissionService
                         ?? null;
                     $resource_id = is_array($resource) ? (string) ($resource['id'] ?? '') : '';
                     $resource_type = strtolower((string) ($resource['type'] ?? ''));
+
+                    $role_name = $role['attributes']['name'] ?? '';
+                    $is_global = !empty($role['attributes']['global']);
+
+                    \Wicket()->log()->debug('[PermissionService] getOrgRolesForPerson: processing role', [
+                        'source' => 'wicket-orgman',
+                        'target_orgId' => $orgId,
+                        'role_name' => $role_name,
+                        'resource_id' => $resource_id,
+                        'resource_type' => $resource_type,
+                        'is_global' => $is_global,
+                        'matches_org' => $resource_id === $orgId,
+                    ]);
+
                     if ($resource_id === '' || $resource_id !== $orgId) {
                         continue;
                     }
@@ -353,8 +382,22 @@ class PermissionService
                 }
             }
 
+            \Wicket()->log()->debug('[PermissionService] getOrgRolesForPerson: final result', [
+                'source' => 'wicket-orgman',
+                'personUuid' => $personUuid,
+                'orgId' => $orgId,
+                'filtered_roles' => $roles,
+                'filtered_count' => count($roles),
+            ]);
+
             return array_values(array_filter($roles));
         } catch (\Throwable $e) {
+            \Wicket()->log()->error('[PermissionService] getOrgRolesForPerson: exception', [
+                'source' => 'wicket-orgman',
+                'personUuid' => $personUuid,
+                'orgId' => $orgId,
+                'error' => $e->getMessage(),
+            ]);
             return [];
         }
     }

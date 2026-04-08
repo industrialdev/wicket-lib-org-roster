@@ -266,6 +266,18 @@ class PermissionHelper extends Helper
         // Normalize all check roles for comparison
         $normalized_check_roles = array_map([self::class, 'normalizeRoleName'], $check_roles);
 
+        \Wicket()->log()->debug('[PermissionHelper] role_check', [
+            'source' => 'wicket-orgman',
+            'org_id' => $org_id,
+            'user_login' => $user->user_login,
+            'required_roles' => $normalized_roles,
+            'wp_roles' => $wp_roles,
+            'org_roles' => $org_roles,
+            'check_roles' => $check_roles,
+            'normalized_check_roles' => $normalized_check_roles,
+            'all_true' => $all_true,
+        ]);
+
         // Check if user has required roles
         if ($all_true) {
             // User must have ALL specified roles
@@ -297,6 +309,11 @@ class PermissionHelper extends Helper
     public static function has_active_membership($org_id = null): bool
     {
         if (!$org_id || !is_user_logged_in()) {
+            \Wicket()->log()->debug('[PermissionHelper] has_active_membership: NO - missing org_id or not logged in', [
+                'source' => 'wicket-orgman',
+                'org_id' => $org_id,
+                'is_logged_in' => is_user_logged_in(),
+            ]);
             return false;
         }
 
@@ -304,6 +321,10 @@ class PermissionHelper extends Helper
         $person_uuid = wp_get_current_user()->user_login;
 
         if (empty($person_uuid)) {
+            \Wicket()->log()->debug('[PermissionHelper] has_active_membership: NO - empty person_uuid', [
+                'source' => 'wicket-orgman',
+                'org_id' => $org_id,
+            ]);
             return false;
         }
 
@@ -321,18 +342,73 @@ class PermissionHelper extends Helper
             $memberships = wicket_get_person_active_memberships($person_uuid);
 
             if (empty($memberships['included']) || !is_array($memberships['included'])) {
+                \Wicket()->log()->debug('[PermissionHelper] has_active_membership: NO - no memberships found', [
+                    'source' => 'wicket-orgman',
+                    'org_id' => $org_id,
+                    'person_uuid' => $person_uuid,
+                    'memberships_count' => 0,
+                ]);
                 return false;
             }
 
+            $org_membership_ids = [];
             foreach ($memberships['included'] as $included) {
                 if (
                     isset($included['type']) && $included['type'] === 'organization_memberships'
                     && isset($included['relationships']['organization']['data']['id'])
-                    && $included['relationships']['organization']['data']['id'] === $org_id
                 ) {
-                    return true;
+                    $org_membership_ids[] = $included['relationships']['organization']['data']['id'];
+
+                    if ($included['relationships']['organization']['data']['id'] === $org_id) {
+                        \Wicket()->log()->debug('[PermissionHelper] has_active_membership: YES (direct)', [
+                            'source' => 'wicket-orgman',
+                            'org_id' => $org_id,
+                            'person_uuid' => $person_uuid,
+                        ]);
+                        return true;
+                    }
                 }
             }
+
+            // No direct membership found - check if this is a parent organization
+            // with memberships inside, and user has org-level roles
+            \Wicket()->log()->debug('[PermissionHelper] has_active_membership: checking parent org access', [
+                'source' => 'wicket-orgman',
+                'org_id' => $org_id,
+                'person_uuid' => $person_uuid,
+            ]);
+
+            // Check if user has any organization-level roles (not person-specific)
+            if (class_exists('\OrgManagement\Services\PermissionService')) {
+                $permissionService = new \OrgManagement\Services\PermissionService();
+                $org_roles = $permissionService->getOrgRolesForPerson($person_uuid, $org_id);
+
+                if (!empty($org_roles)) {
+                    // User has org-level roles - check if org has any memberships
+                    if (function_exists('wicket_get_org_memberships')) {
+                        $org_memberships = wicket_get_org_memberships($org_id);
+
+                        if (!empty($org_memberships) && is_array($org_memberships)) {
+                            $membership_count = count($org_memberships);
+                            \Wicket()->log()->debug('[PermissionHelper] has_active_membership: YES (parent org with roles and memberships)', [
+                                'source' => 'wicket-orgman',
+                                'org_id' => $org_id,
+                                'person_uuid' => $person_uuid,
+                                'org_roles' => $org_roles,
+                                'org_membership_count' => $membership_count,
+                            ]);
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            \Wicket()->log()->debug('[PermissionHelper] has_active_membership: NO - no access found', [
+                'source' => 'wicket-orgman',
+                'org_id' => $org_id,
+                'person_uuid' => $person_uuid,
+                'direct_org_membership_ids' => $org_membership_ids,
+            ]);
         } catch (\Throwable $e) {
             // Log error but return false
             \Wicket()->log()->error('[PermissionHelper] Error checking active membership: ' . $e->getMessage(), [
@@ -432,15 +508,46 @@ class PermissionHelper extends Helper
             ? ConfigHelper::get_edit_organization_roles()
             : ['org_editor'];
 
-        if (self::has_active_membership($org_id) && self::role_check($edit_roles, $org_id)) {
+        \Wicket()->log()->debug('[PermissionHelper] can_edit_organization check', [
+            'source' => 'wicket-orgman',
+            'org_id' => $org_id,
+            'edit_roles' => $edit_roles,
+        ]);
+
+        $has_active = self::has_active_membership($org_id);
+        $has_roles = self::role_check($edit_roles, $org_id);
+
+        \Wicket()->log()->debug('[PermissionHelper] can_edit_organization result', [
+            'source' => 'wicket-orgman',
+            'org_id' => $org_id,
+            'has_active_membership' => $has_active,
+            'has_edit_roles' => $has_roles,
+            'combined' => $has_active && $has_roles,
+        ]);
+
+        if ($has_active && $has_roles) {
             return true;
         }
 
-        if (self::can_bypass_active_membership_requirement($org_id, $edit_roles)) {
+        $bypass = self::can_bypass_active_membership_requirement($org_id, $edit_roles);
+        \Wicket()->log()->debug('[PermissionHelper] can_edit_organization bypass check', [
+            'source' => 'wicket-orgman',
+            'org_id' => $org_id,
+            'can_bypass' => $bypass,
+        ]);
+
+        if ($bypass) {
             return true;
         }
 
-        return self::can_access_role_only_management_surface($org_id);
+        $role_only = self::can_access_role_only_management_surface($org_id);
+        \Wicket()->log()->debug('[PermissionHelper] can_edit_organization role_only check', [
+            'source' => 'wicket-orgman',
+            'org_id' => $org_id,
+            'can_access_role_only' => $role_only,
+        ]);
+
+        return $role_only;
     }
 
     /**
@@ -578,11 +685,34 @@ class PermissionHelper extends Helper
             ? ConfigHelper::get_manage_members_roles()
             : ['membership_manager'];
 
-        if (self::has_active_membership($org_id)) {
-            return self::role_check($manage_roles, $org_id, false);
+        \Wicket()->log()->debug('[PermissionHelper] is_membership_manager check', [
+            'source' => 'wicket-orgman',
+            'org_id' => $org_id,
+            'manage_roles' => $manage_roles,
+        ]);
+
+        $has_active = self::has_active_membership($org_id);
+
+        if ($has_active) {
+            $has_roles = self::role_check($manage_roles, $org_id, false);
+            \Wicket()->log()->debug('[PermissionHelper] is_membership_manager: active membership path', [
+                'source' => 'wicket-orgman',
+                'org_id' => $org_id,
+                'has_active_membership' => $has_active,
+                'has_manage_roles' => $has_roles,
+            ]);
+            return $has_roles;
         }
 
-        return self::can_bypass_active_membership_requirement($org_id, $manage_roles);
+        $bypass = self::can_bypass_active_membership_requirement($org_id, $manage_roles);
+        \Wicket()->log()->debug('[PermissionHelper] is_membership_manager: bypass path', [
+            'source' => 'wicket-orgman',
+            'org_id' => $org_id,
+            'has_active_membership' => $has_active,
+            'can_bypass' => $bypass,
+        ]);
+
+        return $bypass;
     }
 
     /**
