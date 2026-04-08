@@ -49,13 +49,6 @@ add_action('after_setup_theme', static function (): void {
 
 The package contains REST controller classes, but `OrgMan` currently looks for `register_routes` while those controllers implement `registerRoutes`. In the current code, the active runtime is template injection plus hypermedia/process handlers, not registered REST routes.
 
-## Docs
+## Documentation
 
-- `docs/INSTALLATION.md`
-- `docs/ADDITIONAL-SEATS.md`
-- `docs/ARCHITECTURE.md`
-- `docs/CONFIGURATION.md`
-- `docs/FRONTEND.md`
-- `docs/STRATEGIES.md`
-- `docs/SPECS.md`
-- `docs/TESTING.md`
+For complete documentation, see **[docs/index.md](docs/index.md)**.
