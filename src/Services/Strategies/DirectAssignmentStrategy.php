@@ -791,6 +791,28 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
 
             $config = \OrgManagement\Config\OrgManConfig::get();
             $preserve_relationship = (bool) ($config['member_management']['removal']['direct']['preserve_relationship'] ?? false);
+            $prevent_owner_removal = (bool) ($config['access']['permissions']['prevent_owner_removal'] ?? false);
+            $owner_must_have_membership_owner = (bool) ($config['access']['permissions']['owner_removal_requires_membership_owner_role'] ?? false);
+
+            if ($prevent_owner_removal && !empty($org_id)) {
+                $org_owner = $this->organizationService()->getOrganizationOwner($org_id);
+                $is_org_owner = !is_wp_error($org_owner)
+                    && $org_owner
+                    && isset($org_owner->uuid)
+                    && (string) $org_owner->uuid === (string) $person_uuid;
+
+                if ($is_org_owner) {
+                    $owner_role_match = true;
+                    if ($owner_must_have_membership_owner) {
+                        $current_roles = $this->permissionService()->getPersonCurrentRolesByOrgId($person_uuid, $org_id);
+                        $owner_role_match = is_array($current_roles) && in_array('membership_owner', $current_roles, true);
+                    }
+
+                    if ($owner_role_match) {
+                        return new WP_Error('owner_removal_forbidden', 'The organization owner (Primary Member) cannot be removed.');
+                    }
+                }
+            }
 
             if (!$preserve_relationship) {
                 $connection_ids = [];

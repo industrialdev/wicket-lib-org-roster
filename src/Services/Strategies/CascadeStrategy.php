@@ -476,10 +476,28 @@ class CascadeStrategy implements RosterManagementStrategy
                 return new \WP_Error('missing_person_membership_id', 'Person membership ID is required to remove a member.');
             }
 
-            if (!empty($org_id)) {
+            $config = \OrgManagement\Config\OrgManConfig::get();
+            $access_permissions = is_array($config['access']['permissions'] ?? null) ? $config['access']['permissions'] : [];
+            $prevent_owner_removal = (bool) ($access_permissions['prevent_owner_removal'] ?? false);
+            $owner_must_have_membership_owner = (bool) ($access_permissions['owner_removal_requires_membership_owner_role'] ?? false);
+
+            if ($prevent_owner_removal && !empty($org_id)) {
                 $org_owner = $this->organizationService()->getOrganizationOwner($org_id);
-                if (!is_wp_error($org_owner) && $org_owner && $org_owner->uuid === $person_uuid) {
-                    return new \WP_Error('owner_removal_forbidden', 'The organization owner (Primary Member) cannot be removed.');
+                $is_org_owner = !is_wp_error($org_owner)
+                    && $org_owner
+                    && isset($org_owner->uuid)
+                    && (string) $org_owner->uuid === (string) $person_uuid;
+
+                if ($is_org_owner) {
+                    $owner_role_match = true;
+                    if ($owner_must_have_membership_owner) {
+                        $current_roles = $this->permissionService()->getPersonCurrentRolesByOrgId($person_uuid, $org_id);
+                        $owner_role_match = is_array($current_roles) && in_array('membership_owner', $current_roles, true);
+                    }
+
+                    if ($owner_role_match) {
+                        return new \WP_Error('owner_removal_forbidden', 'The organization owner (Primary Member) cannot be removed.');
+                    }
                 }
             }
 

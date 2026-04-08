@@ -82,12 +82,33 @@ if ('POST' === strtoupper($request_method)) {
             return;
         }
 
-        if ($roster_mode === 'membership_cycle') {
-            $cycle_config = OrgManagement\Config\OrgManConfig::get()['membership']['cycle'] ?? [];
-            $prevent_owner_removal = (bool) ($cycle_config['prevent_owner_removal'] ?? true);
-            if ($prevent_owner_removal) {
-                $org_owner = $organizationService->getOrganizationOwner($org_uuid);
-                if (!is_wp_error($org_owner) && $org_owner && $org_owner->uuid === $person_uuid) {
+        $cycle_config = is_array($orgman_config['membership']['cycle'] ?? null)
+            ? $orgman_config['membership']['cycle']
+            : [];
+        $access_permissions = is_array($orgman_config['access']['permissions'] ?? null)
+            ? $orgman_config['access']['permissions']
+            : [];
+
+        $prevent_owner_removal = ($roster_mode === 'membership_cycle')
+            ? (bool) ($cycle_config['prevent_owner_removal'] ?? true)
+            : (bool) ($access_permissions['prevent_owner_removal'] ?? false);
+        $owner_must_have_membership_owner = (bool) ($access_permissions['owner_removal_requires_membership_owner_role'] ?? false);
+
+        if ($prevent_owner_removal) {
+            $org_owner = $organizationService->getOrganizationOwner($org_uuid);
+            $is_org_owner = !is_wp_error($org_owner)
+                && $org_owner
+                && isset($org_owner->uuid)
+                && (string) $org_owner->uuid === $person_uuid;
+
+            if ($is_org_owner) {
+                $owner_role_match = true;
+                if ($owner_must_have_membership_owner) {
+                    $current_roles = $permissionService->getPersonCurrentRolesByOrgId($person_uuid, $org_uuid);
+                    $owner_role_match = is_array($current_roles) && in_array('membership_owner', $current_roles, true);
+                }
+
+                if ($owner_role_match) {
                     status_header(200);
                     OrgManagement\Helpers\DatastarSSE::renderError(
                         __('The organization owner (Primary Member) cannot be removed.', 'wicket-acc'),

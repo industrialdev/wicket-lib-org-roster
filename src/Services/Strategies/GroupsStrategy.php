@@ -10,6 +10,7 @@ use OrgManagement\Services\ConnectionService;
 use OrgManagement\Services\GroupService;
 use OrgManagement\Services\NotificationService;
 use OrgManagement\Services\OrganizationService;
+use OrgManagement\Services\PermissionService;
 use OrgManagement\Services\PersonService;
 use OrgManagement\Services\TouchpointService;
 
@@ -47,6 +48,11 @@ class GroupsStrategy implements RosterManagementStrategy
      * @var GroupService|null
      */
     private $groupService = null;
+
+    /**
+     * @var PermissionService|null
+     */
+    private $permissionService = null;
 
     /**
      * @var \WC_Logger|null
@@ -299,16 +305,33 @@ class GroupsStrategy implements RosterManagementStrategy
             $org_identifier = (string) ($manager_access['org_identifier'] ?? '');
             $org_uuid = (string) ($manager_access['org_uuid'] ?? $org_id);
 
-            if (!empty($org_uuid)) {
-                $org_owner = $this->organizationService()->getOrganizationOwner($org_uuid);
-                if (!is_wp_error($org_owner) && $org_owner && $org_owner->uuid === $person_uuid) {
-                    $logger->warning('[OrgRoster] Groups strategy attempted to remove organization owner', $log_context);
+            $orgman_config = \OrgManagement\Config\OrgManConfig::get();
+            $access_permissions = is_array($orgman_config['access']['permissions'] ?? null) ? $orgman_config['access']['permissions'] : [];
+            $prevent_owner_removal = (bool) ($access_permissions['prevent_owner_removal'] ?? false);
+            $owner_must_have_membership_owner = (bool) ($access_permissions['owner_removal_requires_membership_owner_role'] ?? false);
 
-                    return new \WP_Error('owner_removal_forbidden', 'The organization owner (Primary Member) cannot be removed.');
+            if ($prevent_owner_removal && !empty($org_uuid)) {
+                $org_owner = $this->organizationService()->getOrganizationOwner($org_uuid);
+                $is_org_owner = !is_wp_error($org_owner)
+                    && $org_owner
+                    && isset($org_owner->uuid)
+                    && (string) $org_owner->uuid === (string) $person_uuid;
+
+                if ($is_org_owner) {
+                    $owner_role_match = true;
+                    if ($owner_must_have_membership_owner) {
+                        $current_roles = $this->permissionService()->getPersonCurrentRolesByOrgId($person_uuid, $org_uuid);
+                        $owner_role_match = is_array($current_roles) && in_array('membership_owner', $current_roles, true);
+                    }
+
+                    if ($owner_role_match) {
+                        $logger->warning('[OrgRoster] Groups strategy attempted to remove organization owner', $log_context);
+
+                        return new \WP_Error('owner_removal_forbidden', 'The organization owner (Primary Member) cannot be removed.');
+                    }
                 }
             }
 
-            $orgman_config = \OrgManagement\Config\OrgManConfig::get();
             $groups_config = is_array($orgman_config['groups'] ?? null) ? $orgman_config['groups'] : [];
             $group_roles = is_array($groups_config['roles'] ?? null) ? $groups_config['roles'] : [];
             $manage_roles = is_array($group_roles['management'] ?? null) ? $group_roles['management'] : [];
@@ -448,6 +471,20 @@ class GroupsStrategy implements RosterManagementStrategy
         }
 
         return $this->groupService;
+    }
+
+    /**
+     * Lazily instantiate PermissionService.
+     *
+     * @return PermissionService
+     */
+    private function permissionService(): PermissionService
+    {
+        if (!isset($this->permissionService)) {
+            $this->permissionService = new PermissionService();
+        }
+
+        return $this->permissionService;
     }
 
     /**

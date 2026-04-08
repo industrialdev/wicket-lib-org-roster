@@ -8,6 +8,7 @@ namespace OrgManagement\Services\Strategies;
 
 use OrgManagement\Services\MembershipService;
 use OrgManagement\Services\OrganizationService;
+use OrgManagement\Services\PermissionService;
 use OrgManagement\Services\TouchpointService;
 use WP_Error;
 
@@ -40,6 +41,11 @@ class MembershipCycleStrategy implements RosterManagementStrategy
      * @var TouchpointService|null
      */
     private $touchpointService = null;
+
+    /**
+     * @var PermissionService|null
+     */
+    private $permissionService = null;
 
     /**
      * Add member via direct assignment, but scoped to explicit membership cycle.
@@ -99,12 +105,28 @@ class MembershipCycleStrategy implements RosterManagementStrategy
             return $scope_valid;
         }
 
-        $cycle_config = \OrgManagement\Config\OrgManConfig::get()['membership']['cycle'] ?? [];
+        $config = \OrgManagement\Config\OrgManConfig::get();
+        $cycle_config = is_array($config['membership']['cycle'] ?? null) ? $config['membership']['cycle'] : [];
+        $access_permissions = is_array($config['access']['permissions'] ?? null) ? $config['access']['permissions'] : [];
         $prevent_owner_removal = (bool) ($cycle_config['prevent_owner_removal'] ?? true);
+        $owner_must_have_membership_owner = (bool) ($access_permissions['owner_removal_requires_membership_owner_role'] ?? false);
         if ($prevent_owner_removal) {
             $org_owner = $this->organizationService()->getOrganizationOwner($org_id);
-            if (!is_wp_error($org_owner) && $org_owner && $org_owner->uuid === $person_uuid) {
-                return new WP_Error('owner_removal_forbidden', 'The organization owner (Primary Member) cannot be removed.');
+            $is_org_owner = !is_wp_error($org_owner)
+                && $org_owner
+                && isset($org_owner->uuid)
+                && (string) $org_owner->uuid === (string) $person_uuid;
+
+            if ($is_org_owner) {
+                $owner_role_match = true;
+                if ($owner_must_have_membership_owner) {
+                    $current_roles = $this->permissionService()->getPersonCurrentRolesByOrgId($person_uuid, $org_id);
+                    $owner_role_match = is_array($current_roles) && in_array('membership_owner', $current_roles, true);
+                }
+
+                if ($owner_role_match) {
+                    return new WP_Error('owner_removal_forbidden', 'The organization owner (Primary Member) cannot be removed.');
+                }
             }
         }
 
@@ -221,5 +243,19 @@ class MembershipCycleStrategy implements RosterManagementStrategy
         }
 
         return $this->touchpointService;
+    }
+
+    /**
+     * Lazily instantiate permission service.
+     *
+     * @return PermissionService
+     */
+    private function permissionService(): PermissionService
+    {
+        if (!isset($this->permissionService)) {
+            $this->permissionService = new PermissionService();
+        }
+
+        return $this->permissionService;
     }
 }

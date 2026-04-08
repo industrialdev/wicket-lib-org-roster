@@ -60,6 +60,7 @@ final class OrgManConfig
                         'membership_owner',
                     ],
                     'prevent_owner_removal' => false,
+                    'owner_removal_requires_membership_owner_role' => false,
                     'prevent_owner_assignment' => true,
                     'relationship_grants' => [
                         'enabled' => false,
