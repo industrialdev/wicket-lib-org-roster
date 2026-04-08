@@ -2,6 +2,19 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.5.23] - 2026-04-08
+
+### Added
+- Added configurable organization owner removal prevention across all roster management strategies (Direct, Cascade, Groups, MembershipCycle).
+- Added `access.permissions.prevent_owner_removal` config flag (default: false) to enable blocking removal of organization owners.
+- Added `access.permissions.owner_removal_requires_membership_owner_role` config flag (default: false) to require the owner to currently hold the `membership_owner` role before blocking removal.
+- Added `CSAE.md` site configuration mirror documenting the CASAE roster implementation.
+
+### Changed
+- Unified organization owner removal logic in `remove-member.php` template to apply consistent guards across all strategies.
+- Added lazy `PermissionService` instantiation to `CascadeStrategy`, `DirectAssignmentStrategy`, `GroupsStrategy`, and `MembershipCycleStrategy` for role validation during owner removal checks.
+- Restructured documentation hierarchy: created `product/`, `engineering/`, and `guides/` directories; replaced `AGENTS.md` with standardized documentation rules; added `index.md` entry point.
+
 ## [0.5.20] - 2026-04-06
 
 ### Fixed
