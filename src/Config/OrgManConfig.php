@@ -30,6 +30,8 @@ final class OrgManConfig
                         'membership_owner' => __('Membership Owner', 'wicket-acc'),
                     ],
                     'descriptions' => [
+                        'membership_owner' => __('Primary owner role for this organization membership', 'wicket-acc'),
+                        'membership_manager' => __('Can add, remove, and edit users in the roster', 'wicket-acc'),
                         'org_editor' => __('Ability to edit Organization\'s profile', 'wicket-acc'),
                     ],
                 ],
