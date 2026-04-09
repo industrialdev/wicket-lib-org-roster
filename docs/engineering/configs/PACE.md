@@ -22,6 +22,16 @@ PACE's MDP membership has "Cascading Membership Settings" enabled with cascade t
 
 - `relationships.defaults.type = employee`
 
+### `integrations.additional_seats`
+
+- `integrations.additional_seats.enabled = true`
+- `integrations.additional_seats.sku = additional-seats`
+- `integrations.additional_seats.discount_sku = corporate-seat-discount`
+- `integrations.additional_seats.form_id = 0`
+- `integrations.additional_seats.form_slug = additional-seats`
+- `integrations.additional_seats.min_quantity = 1`
+- `integrations.additional_seats.max_quantity = 900`
+
 ## Current Config Function
 
 ```php
@@ -32,6 +42,13 @@ function wicket_orgman_config(array $config): array
     // MDP cascade membership is configured to trigger on 'employee' relationship type only.
     // The library default is 'Position' — override it here so the cascade fires correctly.
     $config['relationships']['defaults']['type'] = 'employee';
+    $config['integrations']['additional_seats']['enabled'] = true;
+    $config['integrations']['additional_seats']['sku'] = 'additional-seats';
+    $config['integrations']['additional_seats']['discount_sku'] = 'corporate-seat-discount';
+    $config['integrations']['additional_seats']['form_id'] = 0;
+    $config['integrations']['additional_seats']['form_slug'] = 'additional-seats';
+    $config['integrations']['additional_seats']['min_quantity'] = 1;
+    $config['integrations']['additional_seats']['max_quantity'] = 900;
 
     return $config;
 }

@@ -80,6 +80,16 @@ This document mirrors the current site override. If it drifts, update the site c
 - `presentation.member_card.fields.description.enabled = true`
 - `presentation.member_list.show_bulk_upload = true`
 
+### `integrations.additional_seats`
+
+- `integrations.additional_seats.enabled = true`
+- `integrations.additional_seats.sku = additional-seats`
+- `integrations.additional_seats.discount_sku = corporate-seat-discount`
+- `integrations.additional_seats.form_id = 0`
+- `integrations.additional_seats.form_slug = additional-seats`
+- `integrations.additional_seats.min_quantity = 1`
+- `integrations.additional_seats.max_quantity = 900`
+
 ## Current Config Function
 
 ```php
@@ -170,6 +180,13 @@ function njbia_orgman_config(array $config): array
 
     // Enable relationship type editing
     $config['member_management']['forms']['add_member']['allow_relationship_type_editing'] = true;
+    $config['integrations']['additional_seats']['enabled'] = true;
+    $config['integrations']['additional_seats']['sku'] = 'additional-seats';
+    $config['integrations']['additional_seats']['discount_sku'] = 'corporate-seat-discount';
+    $config['integrations']['additional_seats']['form_id'] = 0;
+    $config['integrations']['additional_seats']['form_slug'] = 'additional-seats';
+    $config['integrations']['additional_seats']['min_quantity'] = 1;
+    $config['integrations']['additional_seats']['max_quantity'] = 900;
 
     return $config;
 }

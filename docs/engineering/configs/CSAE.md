@@ -53,6 +53,16 @@ This document mirrors the current site override. If it drifts, update the site c
 - `presentation.member_list.seat_limit_message = You have reached the maximum number of assignable people under this membership.`
 - `presentation.member_card.fields.job_title.label = Title`
 
+### `integrations.additional_seats`
+
+- `integrations.additional_seats.enabled = false`
+- `integrations.additional_seats.sku = additional-seats`
+- `integrations.additional_seats.discount_sku = corporate-seat-discount`
+- `integrations.additional_seats.form_id = 0`
+- `integrations.additional_seats.form_slug = additional-seats`
+- `integrations.additional_seats.min_quantity = 1`
+- `integrations.additional_seats.max_quantity = 900`
+
 ### `removal`
 
 - `removal.end_date_anchor = action_time`
@@ -102,6 +112,15 @@ function wicket_orgman_config(array $config): array
 
     // Match "Title" wording in roster cards.
     $config['presentation']['member_card']['fields']['job_title']['label'] = __('Title', 'wicket-acc');
+
+    // CSAE does not use additional seat purchasing.
+    $config['integrations']['additional_seats']['enabled'] = false;
+    $config['integrations']['additional_seats']['sku'] = 'additional-seats';
+    $config['integrations']['additional_seats']['discount_sku'] = 'corporate-seat-discount';
+    $config['integrations']['additional_seats']['form_id'] = 0;
+    $config['integrations']['additional_seats']['form_slug'] = 'additional-seats';
+    $config['integrations']['additional_seats']['min_quantity'] = 1;
+    $config['integrations']['additional_seats']['max_quantity'] = 900;
 
     return $config;
 }

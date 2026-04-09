@@ -52,7 +52,7 @@ class ConfigurationController
             // Get config value directly to avoid recursion
             $config_data = \OrgManagement\Config\OrgManConfig::get();
 
-            return $config_data['integrations']['additional_seats']['enabled'] ?? true;
+            return $config_data['integrations']['additional_seats']['enabled'] ?? false;
         });
 
         // Set the SKU for additional seats product
@@ -242,7 +242,7 @@ class ConfigurationController
     public function getAdditionalSeatsConfig(): array
     {
         return [
-            'enabled' => apply_filters('wicket/acc/orgman/additional_seats_enabled', true),
+            'enabled' => apply_filters('wicket/acc/orgman/additional_seats_enabled', false),
             'sku' => apply_filters('wicket/acc/orgman/additional_seats_sku', 'additional-seats'),
             'discount_sku' => apply_filters('wicket/acc/orgman/additional_seats_discount_sku', 'corporate-seat-discount'),
             'form_id' => apply_filters('wicket/acc/orgman/additional_seats_form_id', 0),
@@ -258,7 +258,7 @@ class ConfigurationController
      */
     public function isAdditionalSeatsEnabled(): bool
     {
-        return (bool) apply_filters('wicket/acc/orgman/additional_seats_enabled', true);
+        return (bool) apply_filters('wicket/acc/orgman/additional_seats_enabled', false);
     }
 
     /**

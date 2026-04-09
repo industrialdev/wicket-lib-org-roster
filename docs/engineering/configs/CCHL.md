@@ -99,6 +99,7 @@ This document mirrors the current site override. If it drifts, update the site c
 
 - `integrations.additional_seats.enabled = true`
 - `integrations.additional_seats.sku = additional-seats`
+- `integrations.additional_seats.discount_sku = corporate-seat-discount`
 - `integrations.additional_seats.form_id = 0`
 - `integrations.additional_seats.form_slug = additional-seats`
 - `integrations.additional_seats.min_quantity = 1`
@@ -173,6 +174,7 @@ function wicket_orgman_config(array $config): array
 
     $config['integrations']['additional_seats']['enabled'] = true;
     $config['integrations']['additional_seats']['sku'] = 'additional-seats';
+    $config['integrations']['additional_seats']['discount_sku'] = 'corporate-seat-discount';
     $config['integrations']['additional_seats']['form_id'] = 0;
     $config['integrations']['additional_seats']['form_slug'] = 'additional-seats';
     $config['integrations']['additional_seats']['min_quantity'] = 1;

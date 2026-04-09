@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.5.25] - 2026-04-09
+
+### Changed
+- Changed additional seats to opt-in by default: `integrations.additional_seats.enabled` now defaults to `false` in `OrgManConfig`.
+- Updated additional seats enabled fallbacks to default `false` in `ConfigService` and `ConfigurationController` filter/accessor methods.
+
 ## [0.5.23] - 2026-04-08
 
 ### Added

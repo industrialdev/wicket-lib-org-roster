@@ -37,7 +37,7 @@ class ConfigService
     public function isAdditionalSeatsEnabled()
     {
         $config = \OrgManagement\Config\OrgManConfig::get();
-        $default_enabled = $config['integrations']['additional_seats']['enabled'] ?? true;
+        $default_enabled = $config['integrations']['additional_seats']['enabled'] ?? false;
 
         return apply_filters('wicket/acc/orgman/additional_seats_enabled', $default_enabled);
     }
