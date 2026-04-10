@@ -64,7 +64,7 @@ if (!empty($membership_uuid)) {
     $membership_query_fragment = '&membership_uuid=' . rawurlencode((string) $membership_uuid);
 }
 $update_permissions_local_sync_actions = "(() => { const modal = document.getElementById('editPermissionsModal'); if (!modal) return; const selected = Array.from(modal.querySelectorAll('input[name=\"roles[]\"]:checked')).map((node) => node.value); const selectedJson = JSON.stringify(selected); document.querySelectorAll('.edit-permissions-button[data-member-uuid=\"' + \$currentMemberUuid + '\"]').forEach((btn) => { btn.dataset.memberRoles = selectedJson; }); \$currentMemberRoles = selected; })();";
-$update_permissions_success_actions = "console.log('Permissions updated successfully'); $editPermissionsSubmitting = false; $editPermissionsSuccess = true; $membersLoading = false; {$update_permissions_local_sync_actions} @get('{$members_list_endpoint}{$members_list_separator}org_uuid={$encodedOrgUuid}{$membership_query_fragment}&page=1') >> select('#{$members_list_target}') | set(html);";
+$update_permissions_success_actions = "console.log('Permissions updated successfully'); $editPermissionsSubmitting = false; $editPermissionsSuccess = true; $membersLoading = false; {$update_permissions_local_sync_actions}";
 $remove_member_reset_actions = "(() => { const modal = document.getElementById('removeMemberModal'); const messages = modal ? modal.querySelector('#remove-member-messages') : document.getElementById('remove-member-messages'); if (messages) messages.innerHTML = ''; if (modal && modal.open) modal.close(); })(); \$removeMemberModalOpen = false; \$removeMemberSubmitting = false; \$removeMemberSuccess = false; \$membersLoading = false; \$autoCloseCountdown = 0; \$currentRemoveMemberUuid = ''; \$currentRemoveMemberName = ''; \$currentRemoveMemberEmail = ''; \$currentRemoveMemberConnectionId = ''; \$currentRemoveMemberPersonMembershipId = '';";
 $remove_member_success_actions = "console.log('Member removed successfully'); $removeMemberSubmitting = false; $removeMemberSuccess = true; $membersLoading = false;";
 
@@ -547,6 +547,7 @@ $no_members_message = __('No members found.', 'wicket-acc');
                 data-on:reset="$editPermissionsSubmitting = false; $membersLoading = false"
             >
                 <input type="hidden" name="org_uuid" value="<?php echo esc_attr($org_uuid); ?>">
+                <input type="hidden" name="org_dom_suffix" value="<?php echo esc_attr(sanitize_html_class($org_uuid ?: 'default')); ?>">
                 <input type="hidden" name="membership_uuid" value="<?php echo esc_attr($membership_uuid ?? ''); ?>">
                 <input type="hidden" name="person_uuid" data-attr:value="$currentMemberUuid">
                 <input type="hidden" name="person_name" data-attr:value="$currentMemberName">
@@ -678,6 +679,7 @@ $no_members_message = __('No members found.', 'wicket-acc');
                     data-on:reset="$removeMemberSubmitting = false; $membersLoading = false"
                 >
                     <input type="hidden" name="org_uuid" value="<?php echo esc_attr($org_uuid); ?>">
+                    <input type="hidden" name="org_dom_suffix" value="<?php echo esc_attr(sanitize_html_class($org_uuid ?: 'default')); ?>">
                     <input type="hidden" name="membership_uuid" value="<?php echo esc_attr($membership_uuid ?? ''); ?>">
                     <input type="hidden" name="person_uuid" data-attr:value="$currentRemoveMemberUuid">
                     <input type="hidden" name="person_name" data-attr:value="$currentRemoveMemberName">

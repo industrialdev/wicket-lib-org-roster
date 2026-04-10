@@ -27,6 +27,9 @@ if ('POST' === strtoupper($request_method)) {
     }
 
     $org_uuid = isset($_POST['org_uuid']) ? sanitize_text_field(wp_unslash($_POST['org_uuid'])) : '';
+    $org_dom_suffix = isset($_POST['org_dom_suffix'])
+        ? sanitize_html_class((string) wp_unslash($_POST['org_dom_suffix']))
+        : sanitize_html_class($org_uuid ?: 'default');
     $membership_uuid = isset($_POST['membership_uuid']) ? sanitize_text_field(wp_unslash($_POST['membership_uuid'])) : '';
     $person_uuid = isset($_POST['person_uuid']) ? sanitize_text_field(wp_unslash($_POST['person_uuid'])) : '';
     $person_name = isset($_POST['person_name']) ? sanitize_text_field(wp_unslash($_POST['person_name'])) : '';
@@ -216,12 +219,12 @@ if ('POST' === strtoupper($request_method)) {
 
         OrgManagement\Helpers\Helper::log_debug('[OrgMan Debug] Member removal roster mode', ['roster_mode' => $roster_mode, 'person_uuid' => $person_uuid]);
 
-        $build_members_list_patches = static function () use ($org_uuid, $membership_uuid): array {
+        $build_members_list_patches = static function () use ($org_uuid, $membership_uuid, $org_dom_suffix): array {
             if ($org_uuid === '') {
                 return [];
             }
 
-            $members_list_target = 'members-list-container-' . sanitize_html_class($org_uuid ?: 'default');
+            $members_list_target = 'members-list-container-' . $org_dom_suffix;
             $original_get = $_GET;
             $_GET['org_uuid'] = $org_uuid;
             $_GET['page'] = '1';

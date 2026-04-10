@@ -335,9 +335,8 @@ $remove_member_auto_close_enabled = ($mode === 'groups')
         $allow_relationship_editing = $orgman_config['member_management']['forms']['add_member']['allow_relationship_type_editing'] ?? false;
         $relationship_types = $orgman_config['relationships']['labels']['custom'] ?? [];
         $update_permissions_endpoint = OrgHelpers\template_url() . 'process/update-permissions';
-        $members_list_separator = str_contains($members_list_endpoint, '?') ? '&' : '?';
         $update_permissions_local_sync_actions = "(() => { const modal = document.getElementById('editPermissionsModal'); if (!modal) return; const selected = Array.from(modal.querySelectorAll('input[name=\"roles[]\"]:checked')).map((node) => node.value); const selectedJson = JSON.stringify(selected); document.querySelectorAll('.edit-permissions-button[data-member-uuid=\"' + \$currentMemberUuid + '\"]').forEach((btn) => { btn.dataset.memberRoles = selectedJson; }); \$currentMemberRoles = selected; })();";
-        $update_permissions_success_actions = "console.log('Permissions updated successfully'); \$editPermissionsSubmitting = false; \$editPermissionsSuccess = true; \$membersLoading = false; {$update_permissions_local_sync_actions} @get('{$members_list_endpoint}{$members_list_separator}org_uuid={$encoded_org_uuid}{$membership_query_fragment}&page=1') >> select('#{$members_list_target}') | set(html);";
+        $update_permissions_success_actions = "console.log('Permissions updated successfully'); \$editPermissionsSubmitting = false; \$editPermissionsSuccess = true; \$membersLoading = false; {$update_permissions_local_sync_actions}";
         $update_permissions_error_actions = "console.error('Failed to update permissions'); \$editPermissionsSubmitting = false; \$membersLoading = false;";
         $edit_permissions_reset_actions = "\$editPermissionsSuccess = false; \$editPermissionsSubmitting = false; \$currentMemberUuid = ''; \$currentMemberName = ''; \$currentMemberRoles = []; \$currentMemberRelationshipType = ''; \$currentMemberDescription = ''; \$updatePermissionsMessages.innerHTML = '';";
         ?>
@@ -379,6 +378,7 @@ $remove_member_auto_close_enabled = ($mode === 'groups')
                         data-on:error="<?php echo esc_attr($update_permissions_error_actions); ?>"
                         data-on:reset="$editPermissionsSubmitting = false; $membersLoading = false">
                         <input type="hidden" name="org_uuid" value="<?php echo esc_attr($org_uuid); ?>">
+                        <input type="hidden" name="org_dom_suffix" value="<?php echo esc_attr(sanitize_html_class($org_uuid ?: 'default')); ?>">
                         <input type="hidden" name="membership_uuid" value="<?php echo esc_attr($membership_uuid); ?>">
                         <input type="hidden" name="person_uuid" data-attr:value="$currentMemberUuid">
                         <input type="hidden" name="person_name" data-attr:value="$currentMemberName">
@@ -837,6 +837,7 @@ $available_roles = OrgHelpers\PermissionHelper::filter_role_choices(
                         <input type="hidden" name="nonce" value="<?php echo esc_attr(wp_create_nonce('wicket-orgman-remove-group-member')); ?>">
                     <?php else : ?>
                         <input type="hidden" name="org_uuid" value="<?php echo esc_attr($org_uuid); ?>">
+                        <input type="hidden" name="org_dom_suffix" value="<?php echo esc_attr(sanitize_html_class($org_uuid ?: 'default')); ?>">
                         <input type="hidden" name="membership_uuid" value="<?php echo esc_attr($membership_uuid); ?>">
                         <input type="hidden" name="person_uuid" data-attr:value="$currentRemoveMemberUuid">
                         <input type="hidden" name="person_name" data-attr:value="$currentRemoveMemberName">

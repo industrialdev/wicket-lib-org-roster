@@ -9,6 +9,7 @@
 use OrgManagement\Services\ConfigService;
 use OrgManagement\Services\MemberService;
 use OrgManagement\Services\MembershipService;
+use starfederation\datastar\enums\ElementPatchMode;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -27,6 +28,9 @@ if ('POST' === strtoupper($request_method)) {
     }
 
     $org_uuid = isset($_POST['org_uuid']) ? sanitize_text_field(wp_unslash($_POST['org_uuid'])) : '';
+    $org_dom_suffix = isset($_POST['org_dom_suffix'])
+        ? sanitize_html_class((string) wp_unslash($_POST['org_dom_suffix']))
+        : sanitize_html_class($org_uuid ?: 'default');
     $membership_uuid = isset($_POST['membership_uuid']) ? sanitize_text_field(wp_unslash($_POST['membership_uuid'])) : '';
     $person_uuid = isset($_POST['person_uuid']) ? sanitize_text_field(wp_unslash($_POST['person_uuid'])) : '';
     $person_name = isset($_POST['person_name']) ? sanitize_text_field(wp_unslash($_POST['person_name'])) : '';
@@ -142,6 +146,44 @@ if ('POST' === strtoupper($request_method)) {
             ]);
         }
 
+        $build_members_list_patches = static function () use ($org_uuid, $effective_membership_uuid, $org_dom_suffix): array {
+            if ($org_uuid === '') {
+                return [];
+            }
+
+            $members_list_target = 'members-list-container-' . $org_dom_suffix;
+            $original_get = $_GET;
+            $_GET['org_uuid'] = $org_uuid;
+            $_GET['page'] = '1';
+            $_GET['query'] = '';
+
+            if ($effective_membership_uuid !== '') {
+                $_GET['membership_uuid'] = $effective_membership_uuid;
+            } else {
+                unset($_GET['membership_uuid']);
+            }
+
+            $membership_uuid = $effective_membership_uuid;
+            $members = null;
+            $pagination = null;
+            $query = '';
+
+            ob_start();
+            include dirname(__DIR__) . '/members-list.php';
+            $members_list_html = (string) ob_get_clean();
+            $_GET = $original_get;
+
+            if ($members_list_html === '') {
+                return [];
+            }
+
+            return [[
+                'elements' => $members_list_html,
+                'selector' => '#' . $members_list_target,
+                'mode' => ElementPatchMode::Outer,
+            ]];
+        };
+
         // Then update roles
         $result = $member_service->updateMemberRoles($person_uuid, $org_uuid, $effective_membership_uuid, $roles);
 
@@ -181,12 +223,18 @@ if ('POST' === strtoupper($request_method)) {
                 'applied_roles' => array_values($roles),
             ]);
         }
+        if ($effective_membership_uuid !== '') {
+            $orgman_instance = OrgManagement\OrgMan::get_instance();
+            $orgman_instance->clearMembersCache($effective_membership_uuid);
+        }
+        $element_patches = $build_members_list_patches();
 
         status_header(200);
         OrgManagement\Helpers\DatastarSSE::renderSuccess($success_message, '#update-permissions-messages', [
             'editPermissionsSubmitting' => false,
             'editPermissionsSuccess' => true,
-        ]);
+            'membersLoading' => false,
+        ], 0, 'update-permissions-countdown', $element_patches);
 
         return;
 
