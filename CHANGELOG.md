@@ -2,6 +2,18 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.5.29] - 2026-04-10
+
+### Changed
+- Normalized org member-list refresh logic across add-member, remove-member, and update-permissions flows to a shared server-side patch generation path.
+- Updated add-member process success handling to build list refresh patches via the shared helper, matching the remove/edit-permissions refresh mechanism.
+- Kept edit-permissions success handling server-driven (no client-side `@get` list refetch) while preserving existing modal success state behavior.
+
+### Added
+- Added `OrgManagement\Helpers\MemberListRefresh::buildOrgMembersListPatches()` to centralize Datastar members-list patch generation for org roster mutations.
+- Added hidden `org_dom_suffix` form posting in legacy and unified member views for edit-permissions and remove-member forms to ensure refresh patches target the exact list container.
+- Added QA regression coverage in `qa/tests/Unit/Roster/Helpers/MemberListRefreshRegressionTest.php` to guard the shared helper path and server-driven edit-permissions refresh wiring.
+
 ## [0.5.28] - 2026-04-10
 
 ### Fixed

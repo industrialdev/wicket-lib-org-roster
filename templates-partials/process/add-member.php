@@ -269,15 +269,13 @@ if ('POST' === strtoupper($request_method)) {
             (string) ($member_data['email'] ?? '')
         );
 
-        $members_list_target = 'members-list-container-' . $org_dom_suffix;
-        $members_list_endpoint = OrgManagement\Helpers\template_url() . 'members-list';
-        $query = '';
-        $members = null;
-        $pagination = null;
-
-        ob_start();
-        include dirname(__DIR__) . '/members-list.php';
-        $members_list_html = (string) ob_get_clean();
+        $element_patches = OrgManagement\Helpers\MemberListRefresh::buildOrgMembersListPatches(
+            $org_uuid,
+            (string) $cache_membership_uuid,
+            $org_dom_suffix,
+            1,
+            ''
+        );
 
         status_header(200);
         $orgman_config = OrgManagement\Config\OrgManConfig::get();
@@ -294,10 +292,12 @@ if ('POST' === strtoupper($request_method)) {
             'addMemberSuccessMessage' => $success_message,
             'autoCloseCountdown' => $auto_close_on_success ? $auto_close_delay_seconds : 0,
         ]);
-        $generator->patchElements($members_list_html, [
-            'selector' => '#' . $members_list_target,
-            'mode' => ElementPatchMode::Outer,
-        ]);
+        foreach ($element_patches as $patch) {
+            $generator->patchElements((string) $patch['elements'], [
+                'selector' => (string) $patch['selector'],
+                'mode' => $patch['mode'] ?? ElementPatchMode::Outer,
+            ]);
+        }
 
         return;
 

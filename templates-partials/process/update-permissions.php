@@ -9,7 +9,6 @@
 use OrgManagement\Services\ConfigService;
 use OrgManagement\Services\MemberService;
 use OrgManagement\Services\MembershipService;
-use starfederation\datastar\enums\ElementPatchMode;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -146,44 +145,6 @@ if ('POST' === strtoupper($request_method)) {
             ]);
         }
 
-        $build_members_list_patches = static function () use ($org_uuid, $effective_membership_uuid, $org_dom_suffix): array {
-            if ($org_uuid === '') {
-                return [];
-            }
-
-            $members_list_target = 'members-list-container-' . $org_dom_suffix;
-            $original_get = $_GET;
-            $_GET['org_uuid'] = $org_uuid;
-            $_GET['page'] = '1';
-            $_GET['query'] = '';
-
-            if ($effective_membership_uuid !== '') {
-                $_GET['membership_uuid'] = $effective_membership_uuid;
-            } else {
-                unset($_GET['membership_uuid']);
-            }
-
-            $membership_uuid = $effective_membership_uuid;
-            $members = null;
-            $pagination = null;
-            $query = '';
-
-            ob_start();
-            include dirname(__DIR__) . '/members-list.php';
-            $members_list_html = (string) ob_get_clean();
-            $_GET = $original_get;
-
-            if ($members_list_html === '') {
-                return [];
-            }
-
-            return [[
-                'elements' => $members_list_html,
-                'selector' => '#' . $members_list_target,
-                'mode' => ElementPatchMode::Outer,
-            ]];
-        };
-
         // Then update roles
         $result = $member_service->updateMemberRoles($person_uuid, $org_uuid, $effective_membership_uuid, $roles);
 
@@ -227,7 +188,13 @@ if ('POST' === strtoupper($request_method)) {
             $orgman_instance = OrgManagement\OrgMan::get_instance();
             $orgman_instance->clearMembersCache($effective_membership_uuid);
         }
-        $element_patches = $build_members_list_patches();
+        $element_patches = OrgManagement\Helpers\MemberListRefresh::buildOrgMembersListPatches(
+            $org_uuid,
+            $effective_membership_uuid,
+            $org_dom_suffix,
+            1,
+            ''
+        );
 
         status_header(200);
         OrgManagement\Helpers\DatastarSSE::renderSuccess($success_message, '#update-permissions-messages', [

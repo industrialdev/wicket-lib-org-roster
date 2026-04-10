@@ -8,7 +8,6 @@
 
 use OrgManagement\Services\ConfigService;
 use OrgManagement\Services\ConnectionService;
-use starfederation\datastar\enums\ElementPatchMode;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -219,39 +218,6 @@ if ('POST' === strtoupper($request_method)) {
 
         OrgManagement\Helpers\Helper::log_debug('[OrgMan Debug] Member removal roster mode', ['roster_mode' => $roster_mode, 'person_uuid' => $person_uuid]);
 
-        $build_members_list_patches = static function () use ($org_uuid, $membership_uuid, $org_dom_suffix): array {
-            if ($org_uuid === '') {
-                return [];
-            }
-
-            $members_list_target = 'members-list-container-' . $org_dom_suffix;
-            $original_get = $_GET;
-            $_GET['org_uuid'] = $org_uuid;
-            $_GET['page'] = '1';
-            $_GET['query'] = '';
-
-            if ($membership_uuid !== '') {
-                $_GET['membership_uuid'] = $membership_uuid;
-            } else {
-                unset($_GET['membership_uuid']);
-            }
-
-            ob_start();
-            include dirname(__DIR__) . '/members-list.php';
-            $members_list_html = (string) ob_get_clean();
-            $_GET = $original_get;
-
-            if ($members_list_html === '') {
-                return [];
-            }
-
-            return [[
-                'elements' => $members_list_html,
-                'selector' => '#' . $members_list_target,
-                'mode' => ElementPatchMode::Outer,
-            ]];
-        };
-
         if ($roster_mode === 'membership_cycle') {
             if (!$removal_success) {
                 status_header(200);
@@ -273,7 +239,13 @@ if ('POST' === strtoupper($request_method)) {
                 esc_html__('Successfully removed %1$s from the organization.', 'wicket-acc'),
                 '<strong>' . esc_html($member_name) . '</strong>'
             );
-            $element_patches = $build_members_list_patches();
+            $element_patches = OrgManagement\Helpers\MemberListRefresh::buildOrgMembersListPatches(
+                $org_uuid,
+                $membership_uuid,
+                $org_dom_suffix,
+                1,
+                ''
+            );
 
             status_header(200);
             OrgManagement\Helpers\DatastarSSE::renderSuccess($success_message, '#remove-member-messages', [
@@ -389,7 +361,13 @@ if ('POST' === strtoupper($request_method)) {
             $orgman_instance = OrgManagement\OrgMan::get_instance();
             $orgman_instance->clearMembersCache($membership_uuid);
         }
-        $element_patches = $build_members_list_patches();
+        $element_patches = OrgManagement\Helpers\MemberListRefresh::buildOrgMembersListPatches(
+            $org_uuid,
+            $membership_uuid,
+            $org_dom_suffix,
+            1,
+            ''
+        );
 
         status_header(200);
         OrgManagement\Helpers\DatastarSSE::renderSuccess($success_message, '#remove-member-messages', [
