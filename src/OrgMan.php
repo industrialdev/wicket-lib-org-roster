@@ -209,8 +209,8 @@ final class OrgMan
     public function registerApiRoutes()
     {
         foreach ($this->controllers as $controller) {
-            if (method_exists($controller, 'register_routes')) {
-                $controller->register_routes();
+            if (method_exists($controller, 'registerRoutes')) {
+                $controller->registerRoutes();
             }
         }
     }

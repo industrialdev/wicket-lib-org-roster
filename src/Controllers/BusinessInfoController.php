@@ -45,12 +45,12 @@ class BusinessInfoController extends ApiController
             [
                 'methods'             => WP_REST_Server::READABLE,
                 'callback'            => [$this, 'getBusinessInfo'],
-                'permission_callback' => [$this, 'check_logged_in'],
+                'permission_callback' => [$this, 'checkLoggedIn'],
             ],
             [
                 'methods'             => WP_REST_Server::CREATABLE,
                 'callback'            => [$this, 'postBusinessInfo'],
-                'permission_callback' => [$this, 'check_logged_in'],
+                'permission_callback' => [$this, 'checkLoggedIn'],
             ],
         ]);
     }

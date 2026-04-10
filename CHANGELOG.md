@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.5.27] - 2026-04-10
+
+### Fixed
+- Fixed REST routes never registering: `OrgMan::registerApiRoutes()` was checking for `register_routes()` instead of `registerRoutes()`, so no API endpoints were ever registered.
+- Fixed REST permission callbacks silently falling back to public access: `BusinessInfoController` and `DocumentController` referenced `check_logged_in` instead of `checkLoggedIn`, bypassing authentication on all their endpoints.
+- Fixed `NotificationService::error()`, `warning()`, and `info()` throwing fatal errors by calling the non-existent `add_notification()` instead of `addNotification()`.
+
 ## [0.5.25] - 2026-04-09
 
 ### Changed

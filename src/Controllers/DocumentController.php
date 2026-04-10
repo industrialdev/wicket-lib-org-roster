@@ -46,7 +46,7 @@ class DocumentController extends ApiController
             [
                 'methods'             => WP_REST_Server::READABLE,
                 'callback'            => [$this, 'getDocumentList'],
-                'permission_callback' => [$this, 'check_logged_in'],
+                'permission_callback' => [$this, 'checkLoggedIn'],
             ],
         ]);
 
@@ -55,7 +55,7 @@ class DocumentController extends ApiController
             [
                 'methods'             => WP_REST_Server::CREATABLE,
                 'callback'            => [$this, 'uploadDocument'],
-                'permission_callback' => [$this, 'check_logged_in'],
+                'permission_callback' => [$this, 'checkLoggedIn'],
             ],
         ]);
 
@@ -64,7 +64,7 @@ class DocumentController extends ApiController
             [
                 'methods'             => WP_REST_Server::DELETABLE,
                 'callback'            => [$this, 'deleteDocument'],
-                'permission_callback' => [$this, 'check_logged_in'],
+                'permission_callback' => [$this, 'checkLoggedIn'],
             ],
         ]);
     }

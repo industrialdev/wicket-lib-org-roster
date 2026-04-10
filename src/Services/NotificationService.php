@@ -72,7 +72,7 @@ class NotificationService
      */
     public function error($message, $title = '', $options = [])
     {
-        return $this->add_notification($message, 'error', $title, $options);
+        return $this->addNotification($message, 'error', $title, $options);
     }
 
     /**
@@ -85,7 +85,7 @@ class NotificationService
      */
     public function warning($message, $title = '', $options = [])
     {
-        return $this->add_notification($message, 'warning', $title, $options);
+        return $this->addNotification($message, 'warning', $title, $options);
     }
 
     /**
@@ -98,7 +98,7 @@ class NotificationService
      */
     public function info($message, $title = '', $options = [])
     {
-        return $this->add_notification($message, 'info', $title, $options);
+        return $this->addNotification($message, 'info', $title, $options);
     }
 
     /**
