@@ -120,7 +120,15 @@ class PermissionService
      */
     private function removePersonSingleRoleFromOrg($person_uuid, $role_name, $org_id): bool
     {
-        if (empty($person_uuid) || empty($role_name) || empty($org_id) || !function_exists('wicket_api_client') || !function_exists('wicket_get_person_by_id')) {
+        if (empty($person_uuid) || empty($role_name) || empty($org_id)) {
+            return false;
+        }
+
+        if (function_exists('wicket_remove_role')) {
+            return (bool) wicket_remove_role($person_uuid, $role_name, $org_id);
+        }
+
+        if (!function_exists('wicket_api_client') || !function_exists('wicket_get_person_by_id')) {
             return false;
         }
 
@@ -135,12 +143,23 @@ class PermissionService
             $role_id = '';
 
             // Find the role ID from the person's included roles
-            if (method_exists($person, 'included')) {
-                foreach ($person->included() as $included) {
-                    if (isset($included['type']) && $included['type'] == 'roles'
-                        && isset($included['attributes']['name']) && $included['attributes']['name'] == $role_name) {
-                        $role_id = $included['id'];
+            if (is_array($person) && isset($person['included']) && is_array($person['included'])) {
+                foreach ($person['included'] as $included) {
+                    if (isset($included['type']) && $included['type'] === 'roles'
+                        && isset($included['attributes']['name']) && $included['attributes']['name'] === $role_name) {
+                        $role_id = (string) $included['id'];
                         break;
+                    }
+                }
+            } elseif (is_object($person) && method_exists($person, 'included')) {
+                $included_data = $person->included();
+                if (is_array($included_data)) {
+                    foreach ($included_data as $included) {
+                        if (isset($included['type']) && $included['type'] === 'roles'
+                            && isset($included['attributes']['name']) && $included['attributes']['name'] === $role_name) {
+                            $role_id = (string) $included['id'];
+                            break;
+                        }
                     }
                 }
             }

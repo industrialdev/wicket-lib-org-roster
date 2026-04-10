@@ -2,6 +2,16 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.5.28] - 2026-04-10
+
+### Fixed
+- Fixed `DirectAssignmentStrategy`, `CascadeStrategy`, and `MembershipCycleStrategy` incorrectly assuming `getOrganizationOwner()` returns an object; Wicket API responses can be arrays, causing owner-removal protection to silently never trigger.
+- Fixed `PermissionService::removePersonSingleRoleFromOrg()` assuming `wicket_get_person_by_id()` returns an object; role ID lookup now handles both array and object shapes. Added fast path via `wicket_remove_role()` when available.
+- Fixed `DirectAssignmentStrategy::sendAssignmentEmail()` unconditionally overwriting `$to` with a raw object property access after the fallback-email logic had already resolved it, negating the fallback entirely.
+- Fixed `TouchpointService` assuming `wicket_get_person_by_id()` returns an object; field extraction now handles both array and object responses.
+- Fixed `DirectAssignmentStrategy::removeMember()` calling `wicket_remove_role()` without a `function_exists()` guard, causing a fatal error when the Wicket base plugin is inactive.
+- Fixed `MembershipService::getMembershipForOrganization()` and `OrganizationService::getUserOrganizations()` calling `wicket_current_person_uuid()` without a `function_exists()` guard; both now return early cleanly when the function is unavailable.
+
 ## [0.5.27] - 2026-04-10
 
 ### Fixed

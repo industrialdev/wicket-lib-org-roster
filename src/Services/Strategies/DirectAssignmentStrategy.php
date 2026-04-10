@@ -682,7 +682,12 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
             $base_domain = 'localhost.com';
         }
 
-        $to = $person->primary_email_address ?? '';
+        $to = '';
+        if (is_array($person)) {
+            $to = $person['primary_email_address'] ?? ($person['attributes']['primary_email_address'] ?? '');
+        } elseif (is_object($person)) {
+            $to = $person->primary_email_address ?? '';
+        }
 
         if (empty($to) && !empty($fallback_email)) {
             $to = $fallback_email;
@@ -708,8 +713,14 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
             }
         }
 
-        $to = sanitize_email($person->primary_email_address);
-        $first_name = sanitize_text_field($person->given_name ?? '');
+        $to = sanitize_email($to);
+        $first_name = '';
+        if (is_array($person)) {
+            $first_name = $person['given_name'] ?? ($person['attributes']['given_name'] ?? '');
+        } elseif (is_object($person)) {
+            $first_name = $person->given_name ?? '';
+        }
+        $first_name = sanitize_text_field($first_name);
         $subject = sprintf('Welcome to %s', $organization_name);
 
         // Get configuration for email
@@ -796,10 +807,17 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
 
             if ($prevent_owner_removal && !empty($org_id)) {
                 $org_owner = $this->organizationService()->getOrganizationOwner($org_id);
+                $owner_uuid = '';
+                if (is_array($org_owner)) {
+                    $owner_uuid = $org_owner['id'] ?? ($org_owner['uuid'] ?? ($org_owner['data']['id'] ?? ''));
+                } elseif (is_object($org_owner)) {
+                    $owner_uuid = $org_owner->id ?? ($org_owner->uuid ?? '');
+                }
+
                 $is_org_owner = !is_wp_error($org_owner)
                     && $org_owner
-                    && isset($org_owner->uuid)
-                    && (string) $org_owner->uuid === (string) $person_uuid;
+                    && !empty($owner_uuid)
+                    && (string) $owner_uuid === (string) $person_uuid;
 
                 if ($is_org_owner) {
                     $owner_role_match = true;
@@ -849,10 +867,12 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
             }
 
             // Remove all org-scoped roles
-            $roles_to_remove = $this->permissionService()->getPersonCurrentRolesByOrgId($person_uuid, $org_id);
-            if (!empty($roles_to_remove)) {
-                foreach ($roles_to_remove as $role) {
-                    wicket_remove_role($person_uuid, $role, $org_id);
+            if (function_exists('wicket_remove_role')) {
+                $roles_to_remove = $this->permissionService()->getPersonCurrentRolesByOrgId($person_uuid, $org_id);
+                if (!empty($roles_to_remove)) {
+                    foreach ($roles_to_remove as $role) {
+                        wicket_remove_role($person_uuid, $role, $org_id);
+                    }
                 }
             }
 

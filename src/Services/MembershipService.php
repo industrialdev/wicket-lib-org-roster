@@ -264,8 +264,11 @@ class MembershipService
      */
     public function getMembershipForOrganization(string $organizationUuid): ?string
     {
-        // Check cache first - use wicket UUID for consistency
-        $current_user_uuid = wicket_current_person_uuid();
+        $current_user_uuid = function_exists('wicket_current_person_uuid') ? wicket_current_person_uuid() : '';
+        if ('' === $current_user_uuid) {
+            return null;
+        }
+
         $cache_key = 'orgman_membership_' . md5($current_user_uuid . '_' . $organizationUuid);
         $cached_data = false;
 

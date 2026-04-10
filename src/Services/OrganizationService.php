@@ -266,8 +266,11 @@ class OrganizationService
      */
     public function getUserOrganizations($person_uuid)
     {
-        // Check cache first - user specific cache
-        $user_uuid = wicket_current_person_uuid();
+        $user_uuid = function_exists('wicket_current_person_uuid') ? wicket_current_person_uuid() : '';
+        if ('' === $user_uuid) {
+            return [];
+        }
+
         $cache_key = 'orgman_user_orgs_' . md5($user_uuid . '_' . $person_uuid);
         $cached_data = $this->getCachedData($cache_key);
 
@@ -286,11 +289,14 @@ class OrganizationService
             return $error_data;
         }
 
-        // Get user's individual memberships from person membership entries endpoint
         $organizations = [];
         $membership_error = null;
         $client = wicket_api_client();
-        $user_uuid = wicket_current_person_uuid();
+        $user_uuid = function_exists('wicket_current_person_uuid') ? wicket_current_person_uuid() : '';
+        if ('' === $user_uuid) {
+            return [];
+        }
+
         $user_memberships_endpoint = "/people/{$user_uuid}/membership_entries?page[number]=1&page[size]=12&sort=-active,membership_category_weight,-ends_at&include=membership,organization_membership.organization,fusebill_subscription";
 
         try {

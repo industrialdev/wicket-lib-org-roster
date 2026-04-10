@@ -207,10 +207,24 @@ class TouchpointService
             ];
         }
 
+        $first_name = '';
+        $last_name = '';
+        $email = '';
+
+        if (is_array($person)) {
+            $first_name = $person['given_name'] ?? ($person['attributes']['given_name'] ?? '');
+            $last_name = $person['family_name'] ?? ($person['attributes']['family_name'] ?? '');
+            $email = $person['primary_email_address'] ?? ($person['attributes']['primary_email_address'] ?? '');
+        } elseif (is_object($person)) {
+            $first_name = $person->given_name ?? '';
+            $last_name = $person->family_name ?? '';
+            $email = $person->primary_email_address ?? '';
+        }
+
         return [
-            'first_name' => sanitize_text_field((string) ($person->given_name ?? '')),
-            'last_name' => sanitize_text_field((string) ($person->family_name ?? '')),
-            'email' => sanitize_email((string) ($person->primary_email_address ?? '')),
+            'first_name' => sanitize_text_field((string) $first_name),
+            'last_name' => sanitize_text_field((string) $last_name),
+            'email' => sanitize_email((string) $email),
         ];
     }
 }

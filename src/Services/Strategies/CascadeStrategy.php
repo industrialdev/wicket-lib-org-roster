@@ -483,10 +483,17 @@ class CascadeStrategy implements RosterManagementStrategy
 
             if ($prevent_owner_removal && !empty($org_id)) {
                 $org_owner = $this->organizationService()->getOrganizationOwner($org_id);
+                $owner_uuid = '';
+                if (is_array($org_owner)) {
+                    $owner_uuid = $org_owner['id'] ?? ($org_owner['uuid'] ?? ($org_owner['data']['id'] ?? ''));
+                } elseif (is_object($org_owner)) {
+                    $owner_uuid = $org_owner->id ?? ($org_owner->uuid ?? '');
+                }
+
                 $is_org_owner = !is_wp_error($org_owner)
                     && $org_owner
-                    && isset($org_owner->uuid)
-                    && (string) $org_owner->uuid === (string) $person_uuid;
+                    && !empty($owner_uuid)
+                    && (string) $owner_uuid === (string) $person_uuid;
 
                 if ($is_org_owner) {
                     $owner_role_match = true;
