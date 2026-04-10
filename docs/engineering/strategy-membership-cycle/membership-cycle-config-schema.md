@@ -4,13 +4,13 @@ Membership-cycle mode uses the `membership_cycle` namespace plus shared UI confi
 
 ## Relevant Keys
 
-- `roster.strategy = membership_cycle`
-- `membership_cycle.strategy_key`
-- `membership_cycle.permissions.add_roles`
-- `membership_cycle.permissions.remove_roles`
-- `membership_cycle.permissions.purchase_seats_roles`
-- `membership_cycle.permissions.prevent_owner_removal`
-- `membership_cycle.member_management.require_explicit_membership_uuid`
-- `ui.member_list.show_bulk_upload`
-- `ui.member_list.use_unified`
-- `ui.member_view.use_unified`
+- `membership.strategy = membership_cycle`
+- `membership.cycle.key`
+- `membership.cycle.permissions.add_member_roles`
+- `membership.cycle.permissions.remove_member_roles`
+- `membership.cycle.permissions.purchase_seat_roles`
+- `membership.cycle.prevent_owner_removal`
+- `membership.cycle.require_explicit_membership_uuid`
+- `presentation.member_list.show_bulk_upload`
+- `presentation.member_list.use_unified`
+- `presentation.member_view.use_unified`

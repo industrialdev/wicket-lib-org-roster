@@ -4,9 +4,9 @@ Cascade mode uses shared permission config.
 
 ## Relevant Keys
 
-- `permissions.manage_members`
-- `permissions.add_members`
-- `permissions.remove_members`
-- `permissions.prevent_owner_removal`
-- `permissions.relationship_based_permissions`
-- `permissions.relationship_roles_map`
+- `access.permissions.manage_member_roles`
+- `access.permissions.add_member_roles`
+- `access.permissions.remove_member_roles`
+- `access.permissions.prevent_owner_removal`
+- `access.permissions.relationship_grants.enabled`
+- `access.permissions.relationship_grants.roles_by_type`

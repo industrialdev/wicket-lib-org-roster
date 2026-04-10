@@ -2,7 +2,7 @@
 
 Bulk upload is available in membership-cycle mode when:
 
-- `ui.member_list.show_bulk_upload = true`
+- `presentation.member_list.show_bulk_upload = true`
 - actor can add members
 - a target `membership_uuid` is available
 

@@ -4,10 +4,10 @@ Membership-cycle mode has strategy-local permission keys.
 
 ## Relevant Keys
 
-- `membership_cycle.permissions.add_roles`
-- `membership_cycle.permissions.remove_roles`
-- `membership_cycle.permissions.purchase_seats_roles`
-- `membership_cycle.permissions.prevent_owner_removal`
+- `membership.cycle.permissions.add_member_roles`
+- `membership.cycle.permissions.remove_member_roles`
+- `membership.cycle.permissions.purchase_seat_roles`
+- `membership.cycle.prevent_owner_removal`
 
 ## Defaults
 

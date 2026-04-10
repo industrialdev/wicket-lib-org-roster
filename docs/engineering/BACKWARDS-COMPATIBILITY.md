@@ -4,7 +4,7 @@ Released behavior in this library is expected to stay stable unless a breaking c
 
 ## Current Compatibility Rules
 
-- keep `roster.strategy` defaulting to `direct`
+- keep `membership.strategy` defaulting to `direct`
 - keep additive config keys opt-in
 - do not silently change permission defaults
 - keep `OrgManagement\OrgMan::get_instance()` as the theme-facing alias
@@ -15,13 +15,13 @@ Released behavior in this library is expected to stay stable unless a breaking c
 
 The following areas are additive and safe by default because they ship disabled or empty:
 
-- `feature_flags.membership_resolution_prefer_current_cycle`
-- `permissions.role_only_management_access.*`
-- `ui.member_list.show_bulk_upload`
-- `ui.member_list.display_roles_allowlist`
-- `ui.member_list.display_roles_exclude`
-- `ui.member_list.remove_policy_callout.*`
-- `membership_cycle.*`
+- `membership.resolution.prefer_current_cycle`
+- `access.permissions.role_only_management_access.*`
+- `presentation.member_list.show_bulk_upload`
+- `presentation.member_list.display_roles.allowlist`
+- `presentation.member_list.display_roles.denylist`
+- `presentation.member_list.remove_policy_callout.*`
+- `membership.cycle.*`
 
 ## What Counts As Breaking
 

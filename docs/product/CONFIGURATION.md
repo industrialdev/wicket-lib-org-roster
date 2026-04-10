@@ -8,10 +8,10 @@ Use `docs/INSTALLATION.md` for setup wiring.
 
 ## Status
 
-- The runtime still reads the current legacy-shaped config array in `OrgManConfig`.
-- This document defines the target schema we should move to.
-- Breaking key renames are acceptable.
-- Every moved or renamed path below includes a migration destination so downstream site configs can be updated later.
+- The runtime now reads the canonical config array in `OrgManConfig`.
+- This document defines the active schema.
+- Breaking key renames have been implemented in the runtime.
+- Every moved or renamed path below includes a migration reference for downstream site configs.
 
 ## Canonical Top-Level Categories
 
@@ -746,8 +746,9 @@ The runtime still uses the current paths below. These are the target destination
 
 ## Notes
 
-- The current runtime still reads the legacy schema. This document is the target shape, not the active parser contract.
-- `presentation.relationships.show_type` is intentionally positive. It replaces the harder-to-read negative flag `ui.hide_relationship_type`.
+- The runtime now uses the canonical schema.
+- The migration map below serves as a reference for updating legacy site-specific configurations.
+- `presentation.relationships.show_type` is positive. It replaced the legacy negative flag `ui.hide_relationship_type`.
 - Member management is intentionally unified into one category because the current code already couples member addition, edit rules, permission filtering, and bulk upload.
 - `ConfigService` also exposes dedicated filters for some runtime-resolved values such as additional seats form settings and document limits.
 - Site-specific docs under `docs/configs/` are examples only. They are not loaded automatically.

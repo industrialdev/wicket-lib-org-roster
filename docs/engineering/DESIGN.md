@@ -26,4 +26,3 @@ The library is designed around WordPress account pages, server-rendered partials
 
 - no client-side cycle resolver exists for membership-cycle mode
 - no dedicated SPA or build step exists in this package
-- controller-based REST rendering exists in code, but `OrgMan` does not currently register those controller routes

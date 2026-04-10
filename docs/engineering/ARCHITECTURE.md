@@ -38,16 +38,10 @@ These map to files in `templates/`.
 
 ## Mutation Paths
 
-Most user-facing mutations do not go through registered REST routes today. The active write path is the template/hypermedia layer in `templates-partials/process/`.
+User-facing mutations can go through either registered REST routes or the template/hypermedia layer in `templates-partials/process/`.
 
-Important current-state detail:
-
-- controller classes exist in `src/Controllers/`
-- `OrgMan::registerApiRoutes()` looks for `register_routes`
-- controllers define `registerRoutes`
-- result: those controller routes are not currently registered by `OrgMan`
-
-Docs in this folder treat those controllers as present code, not active runtime surfaces.
+- controller classes in `src/Controllers/` are registered by `OrgMan::registerApiRoutes()`
+- process handlers in `templates-partials/process/` handle hypermedia requests
 
 ## Frontend Model
 
@@ -68,5 +62,4 @@ The library supports both legacy member templates and unified member templates. 
 ## Current Constraints
 
 - no bundled automated test suite in this package
-- REST controller classes are not wired by `OrgMan` as noted above
 - membership-cycle mode exists for mutation scoping, but the library does not currently ship a cycle resolver or cycle-tab UI layer

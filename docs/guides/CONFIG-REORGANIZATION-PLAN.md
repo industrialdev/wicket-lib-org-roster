@@ -163,8 +163,12 @@ Success criteria:
 - No site-specific config cleanup in `docs/configs/`.
 - No attempt to solve unrelated runtime issues while reorganizing configuration.
 
-## Immediate Decision
+## Status: Completed
 
-Proceed with Phase 1 now.
+The configuration reorganization has been fully implemented in the library runtime.
 
-That gives the library a canonical target schema and a migration plan before runtime changes begin.
+- **Phase 1 (Documentation):** `docs/product/CONFIGURATION.md` was rewritten around the canonical schema and includes a migration map.
+- **Phase 2 (Ownership):** Runtime consumers (services and controllers) have been updated to use the canonical paths.
+- **Phase 3 (Runtime Refactor):** `OrgManConfig` now defines the canonical default tree, and `ConfigService` / `ConfigHelper` access these paths directly.
+
+The library now uses the cleaner, feature-oriented configuration model. Site-specific overrides can be migrated using the migration map provided in the configuration documentation.

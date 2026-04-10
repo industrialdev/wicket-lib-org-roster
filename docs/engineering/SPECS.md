@@ -33,7 +33,6 @@ This file describes what the library does today.
 - no bundled automated tests in this package
 - no cycle-tab resolver UI for `membership_cycle`
 - no packaged documentation guarantee that additional-seats UI propagation is cycle-specific across every membership-cycle surface
-- controller classes for business info, documents, and subsidiaries are present, but `OrgMan::registerApiRoutes()` does not currently register them because it looks for `register_routes` while controllers define `registerRoutes`
 
 ## Bulk Upload
 

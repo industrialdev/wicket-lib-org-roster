@@ -114,12 +114,16 @@
 
 ---
 
-## Latent Bugs
+## Latent Bugs (Resolved)
 
-### 1. NotificationService — snake_case method mismatch
+### 1. NotificationService — snake_case method mismatch (Fixed)
 
-`success()`, `error()`, `warning()`, and `info()` all call `$this->add_notification()`, but the actual method is `addNotification()` (camelCase). This would cause a fatal error if any of these methods were ever invoked. Currently harmless only because the methods themselves are dead code.
+`success()`, `error()`, `warning()`, and `info()` now correctly call `$this->addNotification()`.
 
-### 2. BusinessInfoController — permission callback mismatch
+### 2. Controller — permission callback mismatch (Fixed)
 
-REST route registration uses snake_case `check_logged_in` as a permission callback, but `ApiController` defines `checkLoggedIn` (camelCase). Would fatal on the permission check unless a `__call` fallback exists.
+REST route registration now uses camelCase `checkLoggedIn` as a permission callback, matching `ApiController` definition.
+
+### 3. OrgMan — API route registration (Fixed)
+
+`OrgMan::registerApiRoutes()` now correctly looks for `registerRoutes` (camelCase).

@@ -2,7 +2,7 @@
 
 Bulk upload is available in groups mode when:
 
-- `ui.member_list.show_bulk_upload = true`
+- `presentation.member_list.show_bulk_upload = true`
 - `group_uuid` is present
 - current user can manage the group
 

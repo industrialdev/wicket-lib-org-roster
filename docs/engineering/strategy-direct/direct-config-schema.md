@@ -4,11 +4,11 @@ Direct mode uses the shared library config without a dedicated `direct` namespac
 
 ## Most Relevant Keys
 
-- `roster.strategy = direct`
-- `member_addition.*`
-- `permissions.*`
+- `membership.strategy = direct`
+- `member_management.addition.*`
+- `access.permissions.*`
 - `relationships.*`
-- `ui.member_list.*`
-- `ui.member_view.*`
-- `member_addition_form.*`
-- `bulk_upload.*`
+- `presentation.member_list.*`
+- `presentation.member_view.*`
+- `member_management.forms.add_member.*`
+- `member_management.bulk_upload.*`

@@ -21,7 +21,7 @@ When changing this library, validate:
 - PHP syntax on touched PHP files
 - account-page rendering on the supported page slugs
 - strategy-specific add/remove flows
-- bulk upload when `ui.member_list.show_bulk_upload = true`
+- bulk upload when `presentation.member_list.show_bulk_upload = true`
 - additional-seats Gravity Forms and WooCommerce handoff when that integration is in use
 
 ## Current Documentation Rule

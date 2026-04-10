@@ -2,7 +2,7 @@
 
 Bulk upload is available in direct mode when:
 
-- `ui.member_list.show_bulk_upload = true`
+- `presentation.member_list.show_bulk_upload = true`
 - the actor can add members
 - a target organization membership can be resolved
 

@@ -1,6 +1,6 @@
 # Strategies
 
-Strategy selection is driven by `roster.strategy`.
+Strategy selection is driven by `membership.strategy`.
 
 ## Registered Strategies
 

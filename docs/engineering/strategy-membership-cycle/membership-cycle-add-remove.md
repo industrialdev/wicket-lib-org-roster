@@ -13,4 +13,4 @@
   - `membership_uuid` or `membership_id`
   - `person_membership_id`
 - removal ends the selected person-membership assignment for that cycle
-- owner removal is blocked by default through `membership_cycle.permissions.prevent_owner_removal`
+- owner removal is blocked by default through `membership.cycle.prevent_owner_removal`
