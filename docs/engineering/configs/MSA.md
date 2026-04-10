@@ -80,7 +80,7 @@ This document mirrors the current site override. If it drifts, update the site c
 
 ### `integrations`
 
-- `integrations.additional_seats.enabled = true`
+- `integrations.additional_seats.enabled = false`
 - `integrations.additional_seats.sku = additional-seats`
 - `integrations.additional_seats.discount_sku = corporate-seat-discount`
 - `integrations.additional_seats.form_id = 0`
@@ -173,7 +173,7 @@ function wicket_child_orgman_config(array $config): array
 
     // Notification email content overrides (site-specific).
     $config['integrations']['notifications']['confirmation_email_from'] = 'associationmanagement@microscopy.org';
-    $config['integrations']['additional_seats']['enabled'] = true;
+    $config['integrations']['additional_seats']['enabled'] = false;
     $config['integrations']['additional_seats']['sku'] = 'additional-seats';
     $config['integrations']['additional_seats']['discount_sku'] = 'corporate-seat-discount';
     $config['integrations']['additional_seats']['form_id'] = 0;
