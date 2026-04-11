@@ -7,7 +7,7 @@
 namespace OrgManagement;
 
 // Exit if accessed directly.
-if (!defined('ABSPATH') && !defined('WICKET_ORGROSTER_DOINGTESTS')) {
+if (!defined('ABSPATH') && !defined('WICKET_DOING_TESTS')) {
     exit;
 }
 

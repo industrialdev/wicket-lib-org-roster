@@ -9,7 +9,7 @@ namespace OrgManagement\Helpers;
 use starfederation\datastar\enums\ElementPatchMode;
 use starfederation\datastar\ServerSentEventGenerator;
 
-if (!defined('ABSPATH') && !defined('WICKET_ORGROSTER_DOINGTESTS')) {
+if (!defined('ABSPATH') && !defined('WICKET_DOING_TESTS')) {
     exit;
 }
 
