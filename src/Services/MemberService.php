@@ -1687,7 +1687,11 @@ class MemberService
                     ]);
                 }
 
-                if (!function_exists('wicket_remove_role') || !wicket_remove_role($personUuid, $role_name)) {
+                $remove_role_result = function_exists('wicket_remove_role')
+                    ? wicket_remove_role($personUuid, $role_name, $orgUuid)
+                    : false;
+
+                if (!$remove_role_result) {
                     if ($logger) {
                         $logger->error('[OrgMan] update_member_roles failed removing role', $log_context + [
                             'org_uuid' => $orgUuid,
@@ -1700,6 +1704,25 @@ class MemberService
                     return new \WP_Error(
                         'role_remove_failed',
                         sprintf("Failed to remove role '%s'.", $role_name)
+                    );
+                }
+
+                $org_roles_after_remove = $this->getPersonCurrentRolesByOrgId($personUuid, $orgUuid);
+                $role_still_present = in_array($role_name, $org_roles_after_remove, true);
+                if ($role_still_present) {
+                    if ($logger) {
+                        $logger->error('[OrgMan] update_member_roles remove reported success but role remains', $log_context + [
+                            'org_uuid' => $orgUuid,
+                            'membership_uuid' => $membershipUuid,
+                            'person_uuid' => $personUuid,
+                            'role' => $role_name,
+                            'org_roles_after_remove' => array_values($org_roles_after_remove),
+                        ]);
+                    }
+
+                    return new \WP_Error(
+                        'role_remove_verify_failed',
+                        sprintf("Failed to verify removal of role '%s'.", $role_name)
                     );
                 }
             }

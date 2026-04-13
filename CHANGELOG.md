@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.5.30] - 2026-04-13
+
+### Fixed
+- Fixed `MemberService::update_member_roles()` calling `wicket_remove_role()` without passing `$orgUuid`, causing role removal to be unscoped; now passes the org UUID as the third argument.
+- Added post-removal verification in `MemberService::update_member_roles()`: after `wicket_remove_role()` reports success, re-fetches the person's current roles and returns a `WP_Error` (`role_remove_verify_failed`) if the role is still present, preventing silent partial failures.
+
 ## [0.5.29] - 2026-04-10
 
 ### Changed
