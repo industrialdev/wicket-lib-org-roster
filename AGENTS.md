@@ -1,36 +1,35 @@
-# Repository Guidelines
-
-## Project Overview
+# Project Overview
 `wicket-lib-org-roster` is a PHP library for managing organization rosters in Wicket WordPress environments. It supports multiple roster management strategies, integrates with WooCommerce for seat purchases, and uses Datastar for a reactive frontend experience.
 
 ## Project Structure & Module Organization
 - `src/`: Core PHP library code (Namespace: `OrgManagement\`).
     - `OrgMan.php`: Singleton orchestrator; handles initialization, hooks, and asset loading.
-    - `controllers/`: REST API controllers (e.g., `ApiController`, `BusinessInfoController`).
-    - `services/`: Business logic services (e.g., `OrganizationService`, `MemberService`).
-    - `services/strategies/`: Implementations of `RosterManagementStrategy` (Cascade, Direct, Groups).
-    - `helpers/`: Utility classes (e.g., `DatastarSSE`, `TemplateHelper`, `ConfigHelper`).
-    - `config/`: Configuration definitions.
+    - `Controllers/`: REST API and config controllers (e.g., `ApiController`, `ConfigurationController`).
+    - `Services/`: Business logic services (e.g., `OrganizationService`, `MemberService`, `AdditionalSeatsService`).
+    - `Services/Strategies/`: Implementations of `RosterManagementStrategy` (`DirectAssignmentStrategy`, `CascadeStrategy`, `GroupsStrategy`, `MembershipCycleStrategy`).
+    - `Helpers/`: Utility classes (e.g., `DatastarSSE`, `TemplateHelper`, `ConfigHelper`, `PermissionHelper`).
+    - `Config/`: Configuration definitions (`OrgManConfig`).
 - `templates/`: Main page templates injected into WordPress content.
 - `templates-partials/`: Reusable template parts and process handlers (e.g., `process/add-member.php`).
 - `public/`: Frontend assets.
     - `css/`: Static vanilla CSS assets (`modern-orgman-static.css` is the runtime stylesheet).
     - `js/`: Datastar error handlers and shared scripts.
-- `tests/`: Pest-based test suite.
-    - `Unit/`: Service and helper unit tests.
-    - `helpers/`: WordPress shims for testing environment.
-- `docs/`: Specification and reference documentation.
+- `docs/`: Product, engineering, and end-user docs (`docs/product/`, `docs/engineering/`, `docs/guides/`, plus strategy notes).
 
 ## Key Architectural Patterns
 - **Orchestrator Pattern**: `OrgMan` is the central entry point.
-- **Service Layer**: Business logic is encapsulated in services, which are lazily instantiated when possible.
-- **Strategy Pattern**: `RosterManagementStrategy` allows for different roster behaviors (e.g., membership-based vs. group-based management).
+- **Service Layer**: Business logic is encapsulated in services initialized by `OrgMan`.
+- **Strategy Pattern**: `RosterManagementStrategy` supports `direct`, `cascade`, `groups`, and `membership_cycle` modes.
 - **Reactive UI**: Uses [Datastar](https://data-star.dev/) for real-time DOM updates via Server-Sent Events (SSE) and signals, reducing full-page reloads.
 - **Caching**: Extensive use of WordPress transients for API response caching, managed via `ConfigHelper`.
 
 ## Build, Test, and Development Commands
 - `composer install`: Installs PHP dependencies and sets up autoloading.
-- `composer test`: Runs the Pest test suite.
+- `composer check`: Runs configured static/style checks (`cs:lint`).
+- `composer cs:lint`: PHP CS Fixer dry run.
+- `composer cs:format`: Applies PHP CS Fixer formatting.
+- `composer check:case-collisions`: Validates case-sensitive path collisions under `src/`.
+- `composer setup-hooks`: Installs local git pre-push hook.
 - No npm build pipeline is required for frontend CSS in this library.
 
 ## Coding Style & Naming Conventions
@@ -44,18 +43,18 @@
 - **Utility classes (`wt_` prefixed)**: Do not assume Tailwind-like utilities exist. Any new `wt_` utility class added in templates must be declared in `public/css/modern-orgman-static.css` in the utility section (or reuse an existing declared utility).
 
 ## Testing Guidelines
-- Framework: **Pest** with **Brain Monkey** and **Mockery**.
-- Mocking: Use anonymous class stubs or closure binding for testing classes with private/protected members.
-- Location: `tests/Unit/` with `*Test.php` naming.
-- Ensure `composer test` passes before any submission.
+- This package currently does **not** ship a `tests/` directory or a `composer test` script.
+- Validate touched files with syntax/style checks (`composer check`, `php -l <file>` as needed).
+- Stack-level automated tests for this library live in `qa/` (for example, `composer test:unit:org-roster` from `qa/`).
+- Do not claim Pest/Brain Monkey coverage for this package unless tests are added to this repository.
 
 ## Integrations
 - **Wicket API**: Primarily accessed via `wicket_api_client()` and related helper functions.
-- **WooCommerce**: Handles "Additional Seats" purchases; integrated via `AdditionalSeatsService` and order processing hooks in `OrgMan`.
+- **WooCommerce + Gravity Forms**: Additional-seats flow is implemented via `AdditionalSeatsService`, `GravityFormsHelper`, and order-processing hooks in `OrgMan`.
 - **Datastar**: Frontend reactivity; uses `DatastarSSE` helper for standard success/error responses.
 
 ## Security & Configuration
 - Use `PermissionService` for all capability and role checks.
-- Sensitive data should not be logged; use `wc_get_logger` for standard logging.
+- Sensitive data should not be logged; follow existing logging patterns and keep PII out of logs.
 - Configuration is filterable via `wicket/acc/orgman/config`.
 - Base paths/URLs are filterable via `wicket/acc/orgman/base_path` and `wicket/acc/orgman/base_url`.
