@@ -51,7 +51,7 @@ $status = isset($_REQUEST['status']) ? sanitize_text_field(wp_unslash($_REQUEST[
 
 ?>
 <div id="org-management-members-app" class="org-management-app wicket-orgman wt_w-full wt_mt-6 wt_mb-6">
-    <h2 class="wt_text-2xl wt_font-bold wt_mb-4"><?php echo esc_html($management_title); ?></h2>
+    <h2 class="wp-block-heading has-heading-sm-font-size wt_text-2xl wt_font-bold wt_mb-4"><?php echo esc_html($management_title); ?></h2>
 
     <?php if ($status === 'success') : ?>
         <div class="alert alert-success wt_my-3 wt_p-3" role="alert">

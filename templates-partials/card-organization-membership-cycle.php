@@ -4,7 +4,7 @@
     $can_open_org = $can_edit_org || $is_membership_manager;
     $title_url = OrgManagement\Helpers\Helper::getMyAccountPageUrl('organization-management', '/my-account/organization-management/') . '?org_uuid=' . urlencode($org_id);
     ?>
-    <h2 class="wt_text-2xl wt_mb-3">
+    <h2 class="wp-block-heading has-heading-sm-font-size wt_text-2xl wt_mb-3">
         <?php if ($can_open_org): ?>
             <a href="<?php echo esc_url($title_url); ?>"
                 class="wt_text-content wt_hover_text-primary-600 wt_focus_outline-hidden wt_focus_ring-2 wt_focus_ring-primary-500 wt_focus_ring-offset-2 wt_decoration-none">

@@ -182,7 +182,7 @@ if ($roster_mode !== 'groups') {
 <div id="organization-details-container" class="org-details wt_flex wt_flex-col wt_gap-3">
     <div class="org-details__summary-card wt_rounded-card-accent wt_p-4 wt_bg-summary-card">
         <?php if ($roster_mode === 'groups' && $group_name): ?>
-            <h2 class="org-details__title wt_text-lg wt_mb-2 wt_text-heading-color wt_font-bold"><?php echo esc_html($group_name); ?></h2>
+            <h2 class="wp-block-heading has-heading-sm-font-size org-details__title wt_text-lg wt_mb-2 wt_text-heading-color wt_font-bold"><?php echo esc_html($group_name); ?></h2>
             <?php if ($org_name): ?>
                 <p class="org-details__summary-item wt_leading-normal wt_text-content mb-1">
                     <?php esc_html_e('Organization:', 'wicket-acc'); ?>
@@ -195,7 +195,7 @@ if ($roster_mode !== 'groups') {
                 </p>
             <?php endif; ?>
         <?php else: ?>
-            <h2 class="org-details__title wt_text-lg wt_mb-2 wt_text-heading-color wt_font-bold"><?php echo esc_html($org_name); ?></h2>
+            <h2 class="wp-block-heading has-heading-sm-font-size org-details__title wt_text-lg wt_mb-2 wt_text-heading-color wt_font-bold"><?php echo esc_html($org_name); ?></h2>
             <div class="org-details__summary-list wt_flex wt_flex-col wt_gap-0">
                 <p class="org-details__summary-heading wt_font-bold wt_mb-1"><?php esc_html_e('Summary', 'wicket-acc'); ?></p>
                 <?php if ($membership_name): ?>

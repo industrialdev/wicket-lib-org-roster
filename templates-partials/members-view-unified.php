@@ -360,7 +360,7 @@ $remove_member_auto_close_enabled = ($mode === 'groups')
                         ×
                     </button>
 
-                    <h2 class="wt_text-2xl wt_font-semibold wt_mb-4">
+                    <h2 class="wp-block-heading has-heading-sm-font-size wt_text-2xl wt_font-semibold wt_mb-4">
                         <span
                             data-text="$currentMemberName ? '<?php echo esc_js(__('Edit Permissions for', 'wicket-acc')); ?> ' + $currentMemberName : '<?php echo esc_js(__('Edit Permissions', 'wicket-acc')); ?>'">
                             <?php echo esc_html__('Edit Permissions', 'wicket-acc'); ?>
@@ -503,7 +503,7 @@ $remove_member_auto_close_enabled = ($mode === 'groups')
                 ×
             </button>
 
-            <h2 class="wt_text-2xl wt_font-semibold wt_mb-4">
+            <h2 class="wp-block-heading has-heading-sm-font-size wt_text-2xl wt_font-semibold wt_mb-4">
                 <?php esc_html_e('Add Member', 'wicket-acc'); ?>
             </h2>
 
@@ -799,7 +799,7 @@ $available_roles = OrgHelpers\PermissionHelper::filter_role_choices(
                 data-on:click="<?php echo esc_attr($remove_member_request_close_actions); ?>" data-show="!$removeMemberSuccess"
                 data-class="{ 'wt_pointer-events-none': $removeMemberSubmitting, 'wt_opacity-50': $removeMemberSubmitting }"
                 data-attr:aria-disabled="$removeMemberSubmitting ? 'true' : 'false'">×</button>
-            <h2 class="wt_text-2xl wt_font-semibold wt_mb-4"><?php esc_html_e('Remove Member', 'wicket-acc'); ?></h2>
+            <h2 class="wp-block-heading has-heading-sm-font-size wt_text-2xl wt_font-semibold wt_mb-4"><?php esc_html_e('Remove Member', 'wicket-acc'); ?></h2>
             <div id="remove-member-messages"></div>
 
             <div data-show="!$removeMemberSuccess">

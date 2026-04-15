@@ -13,7 +13,7 @@
     $title_url = !empty($title_params) ? add_query_arg($title_params, $title_url_base) : $title_url_base;
     $can_open_org = $can_edit_org || $is_membership_manager;
     ?>
-    <h2 class="wt_text-2xl wt_mb-3">
+    <h2 class="wp-block-heading has-heading-sm-font-size wt_text-2xl wt_mb-3">
         <?php if ($can_open_org): ?>
             <a href="<?php echo esc_url($title_url); ?>"
                 class="wt_text-content wt_hover_text-primary-600 wt_focus_outline-hidden wt_focus_ring-2 wt_focus_ring-primary-500 wt_focus_ring-offset-2 wt_decoration-none">

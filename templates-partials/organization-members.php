@@ -363,7 +363,7 @@ if ($can_purchase_seats && !empty($purchase_url)):
 					×
 				</button>
 
-				<h2 class="wt_text-2xl wt_font-semibold wt_mb-4">
+				<h2 class="wp-block-heading has-heading-sm-font-size wt_text-2xl wt_font-semibold wt_mb-4">
 					<?php esc_html_e('Add Member', 'wicket-acc'); ?>
 				</h2>
 

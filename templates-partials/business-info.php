@@ -35,7 +35,7 @@ $notice ??= null;
 
 	<?php if (!empty($header['name'])) : ?>
 		<section class="business-info__header">
-			<h2 class="wt_text-xl wt_font-bold wt_mb-2"><?php echo esc_html($header['name']); ?></h2>
+			<h2 class="wp-block-heading has-heading-sm-font-size wt_text-xl wt_font-bold wt_mb-2"><?php echo esc_html($header['name']); ?></h2>
 			<?php if (!empty($header['address'])) : ?>
 				<p class="wt_text-sm wt_text-gray-600"><?php echo esc_html($header['address']); ?></p>
 			<?php endif; ?>

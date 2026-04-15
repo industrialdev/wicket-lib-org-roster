@@ -42,7 +42,7 @@ if (empty($org_uuid) && !empty($org_id_fallback)) {
 ?>
 
 <div id="org-management-index-app" class="org-management-app wicket-orgman wt_w-full wt_mt-6 wt_mb-6">
-    <h2 class="wt_text-2xl wt_font-bold wt_mb-4"><?php echo esc_html($management_title); ?></h2>
+    <h2 class="wp-block-heading has-heading-sm-font-size wt_text-2xl wt_font-bold wt_mb-4"><?php echo esc_html($management_title); ?></h2>
 
     <?php
     if ($roster_mode === 'groups') {

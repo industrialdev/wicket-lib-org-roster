@@ -268,7 +268,7 @@ $observer_role = $group_roles['observer'] ?? ($groups_config['observer_role'] ??
                 ×
             </button>
 
-            <h2 class="wt_text-2xl wt_font-semibold wt_mb-4">
+            <h2 class="wp-block-heading has-heading-sm-font-size wt_text-2xl wt_font-semibold wt_mb-4">
                 <?php esc_html_e('Add Member', 'wicket-acc'); ?>
             </h2>
 
@@ -373,7 +373,7 @@ $observer_role = $group_roles['observer'] ?? ($groups_config['observer_role'] ??
                 data-attr:aria-disabled="$removeMemberSubmitting ? 'true' : 'false'">
                 ×
             </button>
-            <h2 class="wt_text-2xl wt_font-semibold wt_mb-4"><?php esc_html_e('Remove Member', 'wicket-acc'); ?></h2>
+            <h2 class="wp-block-heading has-heading-sm-font-size wt_text-2xl wt_font-semibold wt_mb-4"><?php esc_html_e('Remove Member', 'wicket-acc'); ?></h2>
             <div id="remove-member-messages"></div>
 
             <div data-show="!$removeMemberSuccess">

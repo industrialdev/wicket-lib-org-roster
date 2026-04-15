@@ -526,7 +526,7 @@ $no_members_message = __('No members found.', 'wicket-acc');
                 ×
             </button>
 
-            <h2 class="wt_text-2xl wt_font-semibold wt_mb-4">
+            <h2 class="wp-block-heading has-heading-sm-font-size wt_text-2xl wt_font-semibold wt_mb-4">
                 <span
                     data-text="$currentMemberName ? '<?php echo esc_js(__('Edit Permissions for', 'wicket-acc')); ?> ' + $currentMemberName : '<?php echo esc_js(__('Edit Permissions', 'wicket-acc')); ?>'">
                     <?php echo esc_html__('Edit Permissions', 'wicket-acc'); ?>
@@ -652,7 +652,7 @@ $no_members_message = __('No members found.', 'wicket-acc');
                 data-attr:aria-disabled="$removeMemberSubmitting ? 'true' : 'false'">
                 ×
             </button>
-            <h2 class="wt_text-2xl wt_font-semibold wt_mb-4"><?php esc_html_e('Remove Member', 'wicket-acc'); ?></h2>
+            <h2 class="wp-block-heading has-heading-sm-font-size wt_text-2xl wt_font-semibold wt_mb-4"><?php esc_html_e('Remove Member', 'wicket-acc'); ?></h2>
             <div id="remove-member-messages" data-ref="removeMemberMessages">
                 <!-- Messages will be inserted here by Datastar -->
             </div>
