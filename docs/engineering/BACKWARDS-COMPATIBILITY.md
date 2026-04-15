@@ -1,3 +1,10 @@
+---
+title: "Backwards Compatibility"
+audience: [developer]
+php_class: OrgManagement\OrgMan
+source_files: ["src/OrgMan.php", "src/Config/OrgManConfig.php"]
+---
+
 # Backwards Compatibility
 
 Released behavior in this library is expected to stay stable unless a breaking change is explicitly approved.

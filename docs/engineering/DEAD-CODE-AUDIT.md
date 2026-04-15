@@ -1,3 +1,9 @@
+---
+title: "Dead Code Audit"
+audience: [developer]
+source_files: ["src/OrgMan.php", "src/Controllers/", "src/Services/", "src/Helpers/"]
+---
+
 # Dead Code Audit
 
 **Date:** 2026-03-19

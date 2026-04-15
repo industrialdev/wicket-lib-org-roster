@@ -1,3 +1,10 @@
+---
+title: "Architecture"
+audience: [developer]
+php_class: OrgManagement\OrgMan
+source_files: ["src/OrgMan.php", "src/Config/OrgManConfig.php", "src/Services/", "src/Helpers/TemplateHelper.php"]
+---
+
 # Architecture
 
 `wicket-lib-org-roster` is a WordPress library that injects roster-management UI into account pages and routes mutations through service classes and Datastar-oriented template endpoints.

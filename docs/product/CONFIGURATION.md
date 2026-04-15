@@ -1,3 +1,11 @@
+---
+title: "Configuration"
+audience: [implementer, support, developer]
+php_class: OrgManagement\Config\OrgManConfig
+config_path: ""
+source_files: ["src/Config/OrgManConfig.php"]
+---
+
 # Configuration
 
 Current runtime source of truth: `src/Config/OrgManConfig.php`

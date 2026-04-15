@@ -1,3 +1,10 @@
+---
+title: "Strategies"
+audience: [developer, implementer]
+php_class: OrgManagement\Services\MemberService
+source_files: ["src/Services/Strategies/", "src/Services/MemberService.php"]
+---
+
 # Strategies
 
 Strategy selection is driven by `membership.strategy`.

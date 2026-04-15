@@ -45,10 +45,6 @@ add_action('after_setup_theme', static function (): void {
 - bulk upload is disabled by default
 - the library resolves `base_path` and `base_url` automatically, with filters available for overrides
 
-## Important Current-State Note
-
-The package contains REST controller classes, but `OrgMan` currently looks for `register_routes` while those controllers implement `registerRoutes`. In the current code, the active runtime is template injection plus hypermedia/process handlers, not registered REST routes.
-
 ## Documentation
 
 For complete documentation, see **[docs/index.md](docs/index.md)**.

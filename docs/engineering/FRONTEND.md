@@ -1,3 +1,9 @@
+---
+title: "Frontend"
+audience: [developer]
+source_files: ["src/Helpers/TemplateHelper.php", "templates/", "templates-partials/", "public/"]
+---
+
 # Frontend
 
 ## Runtime Surfaces

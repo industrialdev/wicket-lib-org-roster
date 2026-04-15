@@ -1,3 +1,9 @@
+---
+title: "Current Library Spec"
+audience: [developer, implementer]
+source_files: ["src/OrgMan.php", "src/Services/Strategies/"]
+---
+
 # Current Library Spec
 
 This file describes what the library does today.

@@ -1,3 +1,9 @@
+---
+title: "Testing"
+audience: [implementer, developer]
+source_files: ["src/OrgMan.php"]
+---
+
 # Testing
 
 This package does not currently ship a `tests/` directory or a `composer test` script.

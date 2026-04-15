@@ -1,3 +1,9 @@
+---
+title: "Design"
+audience: [developer]
+source_files: ["src/OrgMan.php", "src/Helpers/TemplateHelper.php", "templates/", "templates-partials/"]
+---
+
 # Design
 
 The library is designed around WordPress account pages, server-rendered partials, and low-JS progressive enhancement.

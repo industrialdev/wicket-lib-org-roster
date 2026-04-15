@@ -1,3 +1,10 @@
+---
+title: "Installation"
+audience: [implementer, support]
+php_class: OrgManagement\OrgMan
+source_files: ["src/OrgMan.php"]
+---
+
 # Installation
 
 This guide shows the supported way to load `industrialdev/wicket-lib-org-roster` in WordPress sites.
@@ -8,7 +15,7 @@ Supported install modes:
 
 ## Requirements
 
-- PHP 8.3+
+- PHP 8.2+
 - WordPress
 - Composer autoload available before `OrgMan.php` runs
 
@@ -18,7 +25,7 @@ Optional integrations:
 - Gravity Forms for the additional seats purchase form
 - Wicket/MDP helper functions supplied by the host application
 
-For product setup and operational behavior of the additional seats flow, see `docs/ADDITIONAL-SEATS.md`.
+For product setup and operational behavior of the additional seats flow, see [ADDITIONAL-SEATS.md](ADDITIONAL-SEATS.md).
 
 ## Why `after_setup_theme`
 

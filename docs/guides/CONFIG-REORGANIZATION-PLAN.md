@@ -1,3 +1,9 @@
+---
+title: "Configuration Reorganization Plan"
+audience: [developer]
+source_files: ["src/Config/OrgManConfig.php"]
+---
+
 # Configuration Reorganization Plan
 
 ## Goal
