@@ -314,6 +314,7 @@ class PermissionHelper extends Helper
                 'org_id' => $org_id,
                 'is_logged_in' => is_user_logged_in(),
             ]);
+
             return false;
         }
 
@@ -325,6 +326,7 @@ class PermissionHelper extends Helper
                 'source' => 'wicket-orgman',
                 'org_id' => $org_id,
             ]);
+
             return false;
         }
 
@@ -348,6 +350,7 @@ class PermissionHelper extends Helper
                     'person_uuid' => $person_uuid,
                     'memberships_count' => 0,
                 ]);
+
                 return false;
             }
 
@@ -365,6 +368,7 @@ class PermissionHelper extends Helper
                             'org_id' => $org_id,
                             'person_uuid' => $person_uuid,
                         ]);
+
                         return true;
                     }
                 }
@@ -397,6 +401,7 @@ class PermissionHelper extends Helper
                                 'org_roles' => $org_roles,
                                 'org_membership_count' => $membership_count,
                             ]);
+
                             return true;
                         }
                     }
@@ -701,6 +706,7 @@ class PermissionHelper extends Helper
                 'has_active_membership' => $has_active,
                 'has_manage_roles' => $has_roles,
             ]);
+
             return $has_roles;
         }
 

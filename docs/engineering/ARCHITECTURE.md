@@ -22,7 +22,7 @@ source_files: ["src/OrgMan.php", "src/Config/OrgManConfig.php", "src/Services/",
   - defines the full default config tree
   - all site overrides are expected through `wicket/acc/orgman/config`
 - `src/Services/*`
-  - business logic for organizations, members, memberships, groups, documents, subsidiaries, permissions, bulk upload, and additional seats
+  - business logic for organizations, members, memberships, groups, documents, subsidiaries, permissions, bulk upload, additional seats, member exports, and engagement data
 - `src/Services/Strategies/*`
   - roster mutation behavior for `direct`, `cascade`, `groups`, and `membership_cycle`
 - `src/Helpers/TemplateHelper.php`

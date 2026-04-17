@@ -2,6 +2,23 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.6.0] - 2026-04-17
+
+### Added
+- MemberExportService: Async, batch-processed CSV export of all org members with WP-Cron scheduling, secure download tokens, and expiration controls.
+- EngagementService: MDP engagement/donation data display with configurable sections, badge parsing from person tags, and per-field formatting (currency, date, yesno, string).
+- New REST endpoints: `/org-management/v1/exports/initiate`, `/org-management/v1/exports/status`, `/org-management/v1/engagement/person`.
+- New templates: `export-members-modal.php`, `export-members-status.php`, `process/initiate-member-export.php`, `engagement-summary.php`.
+- Config section `exports`: Master switch, batch size, token expiration days, max downloads, upload dir slug, and configurable CSV columns.
+- Config section `engagement`: Master switch, member org UUIDs for active membership checks, person/org data field keys, and configurable section definitions with fields and badge patterns.
+- Full QA test coverage: 16 tests for MemberExportService, 18 tests for EngagementService in `qa/tests/Unit/Roster/Services/`.
+
+### Changed
+- OrgManConfig: Added `exports` and `engagement` top-level config sections (both `enabled => false` by default).
+- OrgMan: Conditional service/controller initialization for exports and engagement based on config flags.
+- OrgMan: Added cron hooks for export processing and cleanup, plus download query var registration.
+- WP shims: Added namespace-scoped WordPress function shims in `OrgManagement\Services\` for isolated unit testing.
+
 ## [0.5.30] - 2026-04-13
 
 ### Fixed

@@ -342,6 +342,7 @@ class PermissionService
                 'orgId' => $orgId,
                 'has_api_client' => function_exists('wicket_api_client'),
             ]);
+
             return [];
         }
 
@@ -417,6 +418,7 @@ class PermissionService
                 'orgId' => $orgId,
                 'error' => $e->getMessage(),
             ]);
+
             return [];
         }
     }

@@ -531,6 +531,79 @@ Use `docs/INSTALLATION.md` for setup wiring.
 - `integrations.business_info.seat_limit_info`
   - Default: `null`
 
+### `exports`
+
+Async CSV member export with secure download tokens and WP-Cron batch processing. Disabled by default.
+
+- `exports.enabled`
+  - Default: `false`
+  - Master switch for the export feature. When enabled, adds export controls to member list views.
+- `exports.batch_size`
+  - Default: `50`
+  - Number of member records processed per cron batch. Higher values process faster but use more memory.
+- `exports.token_expiration_days`
+  - Default: `30`
+  - Number of days before download links expire.
+- `exports.max_downloads`
+  - Default: `10`
+  - Maximum number of times a download link can be used before it expires.
+- `exports.upload_dir_slug`
+  - Default: `wicket-exports`
+  - Directory slug (under WordPress uploads) where generated CSV files are stored.
+- `exports.columns`
+  - Default: See `OrgManConfig` for full column map
+  - CSV column configuration. Each key maps to a person attribute from the MDP API response.
+  - Available columns: `first_name`, `last_name`, `email`, `job_title`, `permission_role`, `primary_role`
+
+| | |
+|---|---|
+| Config path | `exports` |
+| PHP access | `ConfigService::get('exports')` |
+| Template | `templates-partials/export-members-modal.php` |
+| Service | `OrgManagement\Services\MemberExportService` |
+| Controller | `OrgManagement\Controllers\MemberExportController` |
+
+### `engagement`
+
+MDP engagement/donation data display with configurable sections and badge parsing. Disabled by default.
+
+- `engagement.enabled`
+  - Default: `false`
+  - Master switch for engagement data display. When enabled, shows engagement summary on member cards.
+- `engagement.member_org_uuids`
+  - Default: `[]`
+  - Array of organization UUIDs to check for active membership. Used to conditionally show sections like PAC that require active membership.
+- `engagement.person_data_fields_key`
+  - Default: `'data_fields'`
+  - Key in person API response that contains engagement data.
+- `engagement.org_data_fields_key`
+  - Default: `'data_fields'`
+  - Key in organization API response that contains engagement data.
+- `engagement.sections`
+  - Default: Foundation and PAC sections (see `OrgManConfig` for full structure)
+  - Configurable sections with fields, labels, badge patterns, and formatting rules.
+  - Each section has:
+    - `enabled`: Master switch for this section
+    - `label`: Display label
+    - `requires_active_membership`: Only show when person is an active member
+    - `fields`: Map of field keys to configuration (mdp_key, label, format)
+    - `badge_pattern`: Regex pattern for parsing tags into badges
+    - `badge_label_template`: Template for badge labels (uses `{year}` placeholder)
+
+Available formats for field values:
+- `currency`: Formats as `$1,234.56`
+- `date`: Formats using WordPress date format
+- `yesno`: Converts `yes`/`1`/`true` to "Yes", everything else to "No"
+- `string`: Passes through `sanitize_text_field()`
+
+| | |
+|---|---|
+| Config path | `engagement` |
+| PHP access | `ConfigService::get('engagement')` |
+| Template | `templates-partials/engagement-summary.php` |
+| Service | `OrgManagement\Services\EngagementService` |
+| Controller | `OrgManagement\Controllers\EngagementController` |
+
 ### `platform`
 
 #### `platform.cache`

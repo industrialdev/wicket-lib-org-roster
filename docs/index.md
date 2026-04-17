@@ -2,7 +2,7 @@
 
 ## Product Docs (Operators & Support)
 - [Additional Seats](product/ADDITIONAL-SEATS.md) — Additional-seats purchase flow: requirements, config, setup checklist, and troubleshooting
-- [Configuration](product/CONFIGURATION.md) — Full canonical config schema with all paths, defaults, and migration map
+- [Configuration](product/CONFIGURATION.md) — Full canonical config schema with all paths, defaults, and migration map (includes `exports` for async CSV export and `engagement` for MDP data display)
 - [Installation](product/INSTALLATION.md) — How to install and bootstrap the library in WordPress or Bedrock
 - [Testing](product/TESTING.md) — Available verification commands and practical validation steps
 
@@ -28,7 +28,7 @@ Each strategy has a dedicated subdirectory covering its specification, logic, ro
 
 Per-client bootstrap overrides for sites currently using this library. Manually maintained — update when a site override changes.
 
-- [`engineering/configs/`](engineering/configs/) — CCHL, CSAE, ESCRS, IAA, MSA, NJBIA, PACE
+- [`engineering/configs/`](engineering/configs/) — CCHL, CSAE, ESCRS, IAA, MSA, NJBIA, PACE, Exports & Engagement Example
 
 ## Planning (Archive)
 - [Active Sites Index](guides/ACTIVE-SITES.md) — Index of active site config snapshot files and their strategy mappings

@@ -119,6 +119,14 @@ final class OrgMan
         $this->services['additional_seats'] = new Services\AdditionalSeatsService($this->services['config']);
         $this->services['membership'] = new Services\MembershipService();
         $this->services['bulk_upload'] = new Services\BulkMemberUploadService($this->services['config']);
+
+        if (!empty($this->config['exports']['enabled'])) {
+            $this->services['member_export'] = new Services\MemberExportService($this->services['config']);
+        }
+
+        if (!empty($this->config['engagement']['enabled'])) {
+            $this->services['engagement'] = new Services\EngagementService($this->services['config']);
+        }
     }
 
     /**
@@ -130,6 +138,14 @@ final class OrgMan
         $this->controllers['document'] = new Controllers\DocumentController($this->services['document']);
         $this->controllers['subsidiary'] = new Controllers\SubsidiaryController($this->services['subsidiary']);
         $this->controllers['configuration'] = new Controllers\ConfigurationController();
+
+        if (isset($this->services['member_export'])) {
+            $this->controllers['member_export'] = new Controllers\MemberExportController($this->services['member_export']);
+        }
+
+        if (isset($this->services['engagement'])) {
+            $this->controllers['engagement'] = new Controllers\EngagementController($this->services['engagement']);
+        }
     }
 
     private function addHooks()
@@ -155,6 +171,17 @@ final class OrgMan
 
         add_filter('woocommerce_get_return_url', [$this, 'filterWoocommerceReturnUrl'], 10, 2);
         add_action(Services\BulkMemberUploadService::CRON_HOOK, [$this, 'processBulkUploadJob'], 10, 1);
+
+        if (isset($this->services['member_export'])) {
+            add_action(Services\MemberExportService::CRON_HOOK, [$this, 'processMemberExportJob'], 10, 1);
+            add_action(Services\MemberExportService::CLEANUP_HOOK, [$this, 'cleanupMemberExport'], 10, 1);
+            add_action('init', [$this->services['member_export'], 'handleDownload'], 1);
+            add_filter('query_vars', static function (array $vars): array {
+                $vars[] = Services\MemberExportService::QUERY_VAR;
+
+                return $vars;
+            });
+        }
 
         // Add hooks to transfer user meta to order items
         add_action('woocommerce_checkout_create_order_line_item', [$this, 'addAdditionalSeatsDataToOrderItem'], 10, 4);
@@ -201,6 +228,48 @@ final class OrgMan
         }
 
         $bulk_upload_service->processScheduledJob($job_id);
+    }
+
+    /**
+     * Process one scheduled member export batch.
+     *
+     * @param string $job_id
+     * @return void
+     */
+    public function processMemberExportJob($job_id)
+    {
+        $job_id = sanitize_key((string) $job_id);
+        if ($job_id === '') {
+            return;
+        }
+
+        $export_service = $this->services['member_export'] ?? null;
+        if (!$export_service instanceof Services\MemberExportService) {
+            $export_service = new Services\MemberExportService($this->services['config']);
+        }
+
+        $export_service->processScheduledJob($job_id);
+    }
+
+    /**
+     * Clean up an expired member export.
+     *
+     * @param string $job_id
+     * @return void
+     */
+    public function cleanupMemberExport($job_id)
+    {
+        $job_id = sanitize_key((string) $job_id);
+        if ($job_id === '') {
+            return;
+        }
+
+        $export_service = $this->services['member_export'] ?? null;
+        if (!$export_service instanceof Services\MemberExportService) {
+            $export_service = new Services\MemberExportService($this->services['config']);
+        }
+
+        $export_service->cleanupExpiredExport($job_id);
     }
 
     /**

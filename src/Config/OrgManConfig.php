@@ -422,6 +422,57 @@ final class OrgManConfig
             'removal' => [
                 'end_date_anchor' => 'action_time',
             ],
+            'exports' => [
+                'enabled'               => false,
+                'batch_size'            => 50,
+                'token_expiration_days' => 30,
+                'max_downloads'         => 10,
+                'upload_dir_slug'       => 'wicket-exports',
+                'columns'               => [
+                    'first_name'      => true,
+                    'last_name'       => true,
+                    'email'           => true,
+                    'job_title'       => true,
+                    'permission_role' => true,
+                    'primary_role'    => true,
+                ],
+            ],
+            'engagement' => [
+                'enabled'                => false,
+                'member_org_uuids'       => [],
+                'person_data_fields_key' => 'data_fields',
+                'org_data_fields_key'    => 'data_fields',
+                'sections'               => [
+                    'foundation' => [
+                        'enabled'                    => true,
+                        'label'                      => __('Foundation', 'wicket-acc'),
+                        'requires_active_membership' => false,
+                        'fields'                     => [
+                            'current_fy'     => ['mdp_key' => 'fdn_current_fy',     'label' => __('Current FY', 'wicket-acc'), 'format' => 'currency'],
+                            'last_fy'        => ['mdp_key' => 'fdn_last_fy',        'label' => __('Last FY', 'wicket-acc'), 'format' => 'currency'],
+                            'last_giving_dt' => ['mdp_key' => 'fdn_last_giving_dt', 'label' => __('Last Gift', 'wicket-acc'), 'format' => 'date'],
+                            'lifetime_level' => ['mdp_key' => 'fdn_lifetime_level', 'label' => __('Lifetime Level', 'wicket-acc'), 'format' => 'string'],
+                            'last_fy_level'  => ['mdp_key' => 'fdn_last_fy_level',  'label' => __('Last FY Level', 'wicket-acc'), 'format' => 'string'],
+                            'leadership_soc' => ['mdp_key' => 'fdn_leadership_soc', 'label' => __('Leadership Soc.', 'wicket-acc'), 'format' => 'yesno'],
+                            'legacy_soc'     => ['mdp_key' => 'fdn_legacy_soc',     'label' => __('Legacy Soc.', 'wicket-acc'), 'format' => 'yesno'],
+                        ],
+                        'badge_pattern'        => '/^fdn_Donor_FY(\d{2})$/',
+                        'badge_label_template' => 'Foundation Donor FY{year}',
+                    ],
+                    'pac' => [
+                        'enabled'                    => true,
+                        'label'                      => __('PAC', 'wicket-acc'),
+                        'requires_active_membership' => true,
+                        'fields'                     => [
+                            'current_fy'     => ['mdp_key' => 'pac_current_fy',     'label' => __('Current FY', 'wicket-acc'), 'format' => 'currency'],
+                            'last_fy'        => ['mdp_key' => 'pac_last_fy',        'label' => __('Last FY', 'wicket-acc'), 'format' => 'currency'],
+                            'last_giving_dt' => ['mdp_key' => 'pac_last_giving_dt', 'label' => __('Last Gift', 'wicket-acc'), 'format' => 'date'],
+                        ],
+                        'badge_pattern'        => '/^DonorPAC_FY(\d{2})$/',
+                        'badge_label_template' => 'PAC Donor FY{year}',
+                    ],
+                ],
+            ],
         ];
 
         return apply_filters('wicket/acc/orgman/config', $orgmanConfig);
