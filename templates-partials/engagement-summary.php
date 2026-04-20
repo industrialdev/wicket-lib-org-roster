@@ -27,13 +27,19 @@ $notice = isset($notice) && is_array($notice) ? $notice : null;
     <?php if ($notice !== null) : ?>
         <?php $notice_type = (string) ($notice['type'] ?? 'error'); ?>
         <?php if ($notice_type === 'error') : ?>
-            <div class="wt_bg-red-100 wt_border wt_border-red-400 wt_text-red-700 wt_px-4 wt_py-3 wt_rounded-sm wt_mb-4">
-                <?php echo esc_html((string) ($notice['message'] ?? '')); ?>
-            </div>
+            <?php
+            get_component('alert', [
+                'classes' => ['wt_bg-red-100', 'wt_border', 'wt_border-red-400', 'wt_text-red-700', 'wt_px-4', 'wt_py-3', 'wt_rounded-sm', 'wt_mb-4'],
+                'content' => esc_html((string) ($notice['message'] ?? '')),
+            ]);
+            ?>
         <?php else : ?>
-            <div class="wt_bg-green-100 wt_border wt_border-green-400 wt_text-green-700 wt_px-4 wt_py-3 wt_rounded-sm wt_mb-4">
-                <?php echo esc_html((string) ($notice['message'] ?? '')); ?>
-            </div>
+            <?php
+            get_component('alert', [
+                'classes' => ['wt_bg-green-100', 'wt_border', 'wt_border-green-400', 'wt_text-green-700', 'wt_px-4', 'wt_py-3', 'wt_rounded-sm', 'wt_mb-4'],
+                'content' => esc_html((string) ($notice['message'] ?? '')),
+            ]);
+            ?>
         <?php endif; ?>
     <?php endif; ?>
 

@@ -178,21 +178,22 @@ $show_remove_policy_callout = (
     <?php endif; ?>
 
     <?php if ($show_remove_policy_callout && $remove_policy_callout_placement === 'above_members') : ?>
-        <div class="wt_mt-1 wt_mb-3 wt_p-4 wt_border wt_border-yellow-200 wt_bg-yellow-50 wt_rounded-md wt_text-sm wt_text-yellow-900">
-            <?php if (!empty($remove_policy_callout['title'])) : ?>
-                <p class="wt_font-semibold wt_mb-1"><?php echo esc_html((string) $remove_policy_callout['title']); ?></p>
-            <?php endif; ?>
-            <p class="wt_mb-0">
-                <?php echo esc_html((string) $remove_policy_callout['message']); ?>
-                <?php if (!empty($remove_policy_callout['email'])) : ?>
-                    <br>
-                    <a class="wt_text-interactive underline wt_hover_decoration_none" href="mailto:<?php echo esc_attr((string) $remove_policy_callout['email']); ?>">
-                        <?php echo esc_html((string) $remove_policy_callout['email']); ?>
-                    </a>
-                <?php endif; ?>
-            </p>
-        </div>
-    <?php endif; ?>
+        <?php
+        $callout_content = '';
+        if (!empty($remove_policy_callout['title'])) {
+            $callout_content .= '<p class="wt_font-semibold wt_mb-1">' . esc_html((string) $remove_policy_callout['title']) . '</p>';
+        }
+        $callout_content .= '<p class="wt_mb-0">' . esc_html((string) $remove_policy_callout['message']);
+        if (!empty($remove_policy_callout['email'])) {
+            $callout_content .= '<br><a class="wt_text-interactive underline wt_hover_decoration-none" href="mailto:' . esc_attr((string) $remove_policy_callout['email']) . '">' . esc_html((string) $remove_policy_callout['email']) . '</a>';
+        }
+        $callout_content .= '</p>';
+
+        get_component('alert', [
+            'classes' => ['wt_mt-1', 'wt_mb-3', 'wt_p-4', 'wt_border', 'wt_border-yellow-200', 'wt_bg-yellow-50', 'wt_rounded-md', 'wt_text-sm', 'wt_text-yellow-900'],
+            'content' => $callout_content,
+        ]);
+        ?>    <?php endif; ?>
 
     <?php if (empty($members)) : ?>
         <p class="wt_text-gray-500 wt_p-4"><?php esc_html_e('No members found.', 'wicket-acc'); ?></p>
@@ -375,37 +376,58 @@ $show_remove_policy_callout = (
             <div class="members-pagination__controls wt_w-full wt_flex wt_items-center wt_gap-2 wt_justify-end wt_self-end">
                 <?php $show_prev = $page > 1; ?>
                 <?php if ($show_prev) : ?>
-                    <button type="button"
-                        class="members-pagination__btn members-pagination__btn--prev button button--secondary wt_px-3 wt_py-2 wt_text-sm component-button"
-                        data-on:click="<?php echo esc_attr($build_action($page - 1)); ?>"
-                        data-on:success="<?php echo esc_attr('$listLoading = false; ' . wp_sprintf("select('#%s') | set(html)", $members_list_target)); ?>"
-                        data-indicator:members-loading>
-                        <?php esc_html_e('Previous', 'wicket-acc'); ?>
-                    </button>
+                    <?php
+                    get_component('button', [
+                        'variant' => 'secondary',
+                        'label' => __('Previous', 'wicket-acc'),
+                        'type' => 'button',
+                        'classes' => ['members-pagination__btn', 'members-pagination__btn--prev', 'wt_px-3', 'wt_py-2', 'wt_text-sm'],
+                        'atts' => [
+                            'data-on:click' => $build_action($page - 1),
+                            'data-on:success' => '$listLoading = false; ' . wp_sprintf("select('#%s') | set(html)", $members_list_target),
+                            'data-indicator:members-loading' => true,
+                        ],
+                    ]);
+                    ?>
                 <?php endif; ?>
                 <div class="members-pagination__pages wt_flex wt_items-center wt_gap-1">
                     <?php for ($i = 1; $i <= $total_pages; $i++) :
                         $is_current = ($i === $page);
-                        ?>
-                        <button type="button"
-                            class="members-pagination__btn members-pagination__btn--page button wt_px-3 wt_py-2 wt_text-sm <?php echo $is_current ? 'button--primary' : 'button--secondary'; ?> component-button"
-                            <?php if ($is_current) : ?>disabled<?php endif; ?>
-                            <?php if (!$is_current) : ?>data-on:click="<?php echo esc_attr($build_action($i)); ?>" <?php endif; ?>
-                            data-on:success="<?php echo esc_attr('$listLoading = false; ' . wp_sprintf("select('#%s') | set(html)", $members_list_target)); ?>"
-                            data-indicator:members-loading>
-                            <?php echo esc_html((string) $i); ?>
-                        </button>
+                        $page_button_atts = [
+                            'data-on:success' => '$listLoading = false; ' . wp_sprintf("select('#%s') | set(html)", $members_list_target),
+                            'data-indicator:members-loading' => true,
+                        ];
+
+                        if (!$is_current) {
+                            $page_button_atts['data-on:click'] = $build_action($i);
+                        }
+
+                        get_component('button', [
+                            'variant' => $is_current ? 'primary' : 'secondary',
+                            'label' => (string) $i,
+                            'type' => 'button',
+                            'classes' => ['members-pagination__btn', 'members-pagination__btn--page', 'wt_px-3', 'wt_py-2', 'wt_text-sm'],
+                            'disabled' => $is_current,
+                            'atts' => $page_button_atts,
+                        ]);
+                    ?>
                     <?php endfor; ?>
                 </div>
                 <?php $show_next = $page < $total_pages; ?>
                 <?php if ($show_next) : ?>
-                    <button type="button"
-                        class="members-pagination__btn members-pagination__btn--next button button--secondary wt_px-3 wt_py-2 wt_text-sm component-button"
-                        data-on:click="<?php echo esc_attr($build_action($page + 1)); ?>"
-                        data-on:success="<?php echo esc_attr('$listLoading = false; ' . wp_sprintf("select('#%s') | set(html)", $members_list_target)); ?>"
-                        data-indicator:members-loading>
-                        <?php esc_html_e('Next', 'wicket-acc'); ?>
-                    </button>
+                    <?php
+                    get_component('button', [
+                        'variant' => 'secondary',
+                        'label' => __('Next', 'wicket-acc'),
+                        'type' => 'button',
+                        'classes' => ['members-pagination__btn', 'members-pagination__btn--next', 'wt_px-3', 'wt_py_2', 'wt_text-sm'],
+                        'atts' => [
+                            'data-on:click' => $build_action($page + 1),
+                            'data-on:success' => '$listLoading = false; ' . wp_sprintf("select('#%s') | set(html)", $members_list_target),
+                            'data-indicator:members-loading' => true,
+                        ],
+                    ]);
+                    ?>
                 <?php endif; ?>
             </div>
         <?php endif; ?>
@@ -414,46 +436,58 @@ $show_remove_policy_callout = (
     <?php if ($show_add_member_button) : ?>
         <div class="wt_mt-6">
             <?php if ($has_seats_available) : ?>
-                <button type="button"
-                    class="button button--primary add-member-button wt_w-full wt_py-2 component-button"
-                    data-on:click="$addMemberSuccess = false; $addMemberSubmitting = false; $addMemberSuccessMessage = ''; (() => { const modal = document.getElementById('membersAddModal'); if (!modal) return; const form = modal.querySelector('form'); if (form) form.reset(); const messages = modal.querySelector(`[id^='add-member-messages-']`); if (messages) messages.innerHTML = ''; const groupMessages = modal.querySelector('#group-member-add-messages'); if (groupMessages) groupMessages.innerHTML = ''; })(); $addMemberModalOpen = true"><?php esc_html_e('Add Member', 'wicket-acc'); ?></button>
+                <?php
+                get_component('button', [
+                    'variant' => 'primary',
+                    'label' => __('Add Member', 'wicket-acc'),
+                    'type' => 'button',
+                    'classes' => ['add-member-button', 'wt_w-full', 'wt_py-2'],
+                    'atts' => [
+                        'data-on:click' => '$addMemberSuccess = false; $addMemberSubmitting = false; $addMemberSuccessMessage = \'\'; (() => { const modal = document.getElementById(\'membersAddModal\'); if (!modal) return; const form = modal.querySelector(\'form\'); if (form) form.reset(); const messages = modal.querySelector(`[id^=\'add-member-messages-\']`); if (messages) messages.innerHTML = \'\'; const groupMessages = modal.querySelector(\'#group-member-add-messages\'); if (groupMessages) groupMessages.innerHTML = \'\'; })(); $addMemberModalOpen = true',
+                    ],
+                ]);
+                ?>
                 <?php if ($mode !== 'groups' && $show_bulk_upload) : ?>
                     <div class="wt_mt-3">
-                        <button type="button"
-                            class="button button--primary add-member-button wt_w-full wt_py-2 component-button"
-                            data-on:click="$bulkUploadModalOpen = true"><?php esc_html_e('Bulk Upload Members', 'wicket-acc'); ?></button>
+                        <?php
+                        get_component('button', [
+                            'variant' => 'primary',
+                            'label' => __('Bulk Upload Members', 'wicket-acc'),
+                            'type' => 'button',
+                            'classes' => ['add-member-button', 'wt_w-full', 'wt_py-2'],
+                            'atts' => [
+                                'data-on:click' => '$bulkUploadModalOpen = true',
+                            ],
+                        ]);
+                        ?>
                     </div>
                 <?php endif; ?>
             <?php endif; ?>
 
             <?php if (!$has_seats_available) : ?>
-                <div class="wt_mt-2 wt_p-3 wt_bg-yellow-50 wt_border wt_border-yellow-200 wt_rounded-md wt_text-yellow-800 wt_text-sm">
-                    <div class="wt_flex wt_items-center wt_gap-2">
-                        <svg class="wt_w-5 wt_h-5 wt_text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
-                        </svg>
-                        <span><?php echo esc_html($seat_limit_message); ?></span>
-                    </div>
-                </div>
-            <?php endif; ?>
+            <?php
+            get_component('alert', [
+                'classes' => ['wt_mt-2', 'wt_p-3', 'wt_bg-yellow-50', 'wt_border', 'wt_border-yellow-200', 'wt_rounded-md', 'wt_text-yellow-800', 'wt_text-sm'],
+                'content' => '<div class="wt_flex wt_items-center wt_gap-2"><svg class="wt_w-5 wt_h-5 wt_text-yellow-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" /></svg><span>' . esc_html($seat_limit_message) . '</span></div>',
+            ]);
+            ?>            <?php endif; ?>
         </div>
     <?php endif; ?>
 
-    <?php if ($show_remove_policy_callout && $remove_policy_callout_placement === 'below_members') : ?>
-        <div class="wt_mt-2 wt_mb-0 wt_p-4 wt_border wt_border-yellow-200 wt_bg-yellow-50 wt_rounded-md wt_text-sm wt_text-yellow-900">
-            <?php if (!empty($remove_policy_callout['title'])) : ?>
-                <p class="wt_font-semibold wt_mb-1"><?php echo esc_html((string) $remove_policy_callout['title']); ?></p>
-            <?php endif; ?>
-            <p class="wt_mb-0">
-                <?php echo esc_html((string) $remove_policy_callout['message']); ?>
-                <?php if (!empty($remove_policy_callout['email'])) : ?>
-                    <br>
-                    <a class="wt_text-interactive underline wt_hover_decoration_none" href="mailto:<?php echo esc_attr((string) $remove_policy_callout['email']); ?>">
-                        <?php echo esc_html((string) $remove_policy_callout['email']); ?>
-                    </a>
-                <?php endif; ?>
-            </p>
-        </div>
-    <?php endif; ?>
-    </div>
+    <?php
+    $callout_content = '';
+    if (!empty($remove_policy_callout['title'])) {
+        $callout_content .= '<p class="wt_font-semibold wt_mb-1">' . esc_html((string) $remove_policy_callout['title']) . '</p>';
+    }
+    $callout_content .= '<p class="wt_mb-0">' . esc_html((string) $remove_policy_callout['message']);
+    if (!empty($remove_policy_callout['email'])) {
+        $callout_content .= '<br><a class="wt_text-interactive underline wt_hover_decoration-none" href="mailto:' . esc_attr((string) $remove_policy_callout['email']) . '">' . esc_html((string) $remove_policy_callout['email']) . '</a>';
+    }
+    $callout_content .= '</p>';
+
+    get_component('alert', [
+        'classes' => ['wt_mt-2', 'wt_mb-0', 'wt_p-4', 'wt_border', 'wt_border-yellow-200', 'wt_bg-yellow-50', 'wt_rounded-md', 'wt_text-sm', 'wt_text-yellow-900'],
+        'content' => $callout_content,
+    ]);
+    ?>    </div>
 </div>

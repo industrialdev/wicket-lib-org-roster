@@ -36,27 +36,20 @@ if (!isset($organizations)) {
 if (isset($error) && is_array($error)) {
     ?>
 
-    <div id="organization-list-container" class="wt_bg-red-50 wt_border wt_border-red-200 wt_rounded-md wt_shadow-sm wt_p-6">
-        <div class="wt_flex wt_items-center">
-            <svg class="wt_w-5 wt_h-5 wt_text-red-500 wt_mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-            </svg>
-            <h3 class="wt_text-lg wt_font-medium wt_text-red-800"><?php esc_html_e('Connection Error', 'wicket-acc'); ?></h3>
-        </div>
-        <p class="wt_mt-2 wt_text-red-700">
-            <?php
-                if (isset($error['message'])) {
-                    echo esc_html($error['message']);
-                } else {
-                    esc_html_e('Unable to connect to the organization service. Please try again later.', 'wicket-acc');
-                }
-    ?>
-        </p>
-        <button
-            onclick="location.reload()"
-            class="wt_mt-4 wt_px-4 wt_py-2 wt_bg-red-600 wt_text-white wt_rounded-md wt_hover_bg-red-700 wt_focus_outline-hidden wt_focus_ring-2 wt_focus_ring-red-500"><?php esc_html_e('Try Again', 'wicket-acc'); ?></button>
-    </div>
-<?php
+
+    <?php
+    $error_content = '';
+    if (isset($error['message'])) {
+        $error_content = esc_html($error['message']);
+    } else {
+        $error_content = esc_html__('Unable to connect to the organization service. Please try again later.', 'wicket-acc');
+    }
+
+    get_component('alert', [
+        'classes' => ['wt_bg-red-50', 'wt_border', 'wt_border-red-200', 'wt_rounded-md', 'wt_shadow-sm', 'wt_p-6'],
+        'content' => '<div class="wt_flex wt_items-center"><svg class="wt_w-5 wt_h-5 wt_text-red-500 wt_mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg><h3 class="wt_text-lg wt_font-medium wt_text-red-800">' . esc_html__('Connection Error', 'wicket-acc') . '</h3></div><p class="wt_mt-2 wt_text-red-700">' . $error_content . '</p><button onclick="location.reload()" class="wt_mt-4 wt_px-4 wt_py-2 wt_bg-red-600 wt_text-white wt_rounded-md wt_hover_bg-red-700 wt_focus_outline-hidden wt_focus_ring-2 wt_focus_ring-red-500">' . esc_html__('Try Again', 'wicket-acc') . '</button>',
+    ]);
+    ?><?php
     return;
 }
 
