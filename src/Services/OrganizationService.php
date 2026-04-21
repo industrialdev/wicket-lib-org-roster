@@ -259,6 +259,143 @@ class OrganizationService
     }
 
     /**
+     * Resolve organization rows where the user is the owner of organization memberships.
+     *
+     * This discovers organizations where the user owns the membership itself (via the
+     * owner relationship on organization_memberships), even if they have no personal
+     * membership entry or org-scoped roles.
+     *
+     * @param string $person_uuid Person UUID.
+     * @return array
+     */
+    private function getUserOrganizationsFromOwnership(string $person_uuid): array
+    {
+        if (empty($person_uuid) || !function_exists('wicket_api_client')) {
+            return [];
+        }
+
+        $client = wicket_api_client();
+        $organizations = [];
+
+        try {
+            // Fetch all organization memberships where user is the owner
+            // Use filter on owner relationship via the people endpoint
+            $page_number = 1;
+            $total_pages = 1;
+
+            do {
+                // Query organization_memberships filtered by owner
+                $response = $client->get('/organization_memberships', [
+                    'query' => [
+                        'page' => ['number' => $page_number, 'size' => 100],
+                        'filter' => [
+                            'owner_uuid_eq' => $person_uuid,
+                        ],
+                    ],
+                    'include' => 'organization,owner',
+                ]);
+
+                $response_data = is_array($response['data'] ?? null) ? $response['data'] : [];
+                $included_data = is_array($response['included'] ?? null) ? $response['included'] : [];
+
+                \Wicket()->log()->debug('[OrgMan] getUserOrganizationsFromOwnership: page fetched', [
+                    'source' => 'wicket-orgman',
+                    'person_uuid' => $person_uuid,
+                    'page' => $page_number,
+                    'memberships_count' => count($response_data),
+                    'included_count' => count($included_data),
+                    'first_membership_id' => !empty($response_data) ? ($response_data[0]['id'] ?? 'no-id') : 'no-data',
+                    'has_owner_relationship' => !empty($response_data) && isset($response_data[0]['relationships']['owner']['data']['id']),
+                ]);
+
+                // Build org name lookup from included data
+                $org_name_by_id = [];
+                foreach ($included_data as $included) {
+                    if (($included['type'] ?? '') !== 'organizations') {
+                        continue;
+                    }
+                    $org_id = (string) ($included['id'] ?? '');
+                    if ($org_id === '') {
+                        continue;
+                    }
+                    $org_attrs = (array) ($included['attributes'] ?? []);
+                    $org_name_by_id[$org_id] = $this->resolveOrgNameFromAttributes($org_attrs);
+                }
+
+                // Process organization_memberships where user is the owner
+                $sample_owners = [];
+                foreach ($response_data as $membership) {
+                    // Verify the owner relationship matches
+                    $owner_id = $membership['relationships']['owner']['data']['id'] ?? '';
+
+                    // Collect sample owner IDs for debugging (first 3)
+                    if (count($sample_owners) < 3 && $owner_id !== '') {
+                        $sample_owners[] = $owner_id;
+                    }
+
+                    if ($owner_id !== $person_uuid) {
+                        continue;
+                    }
+
+                    // Get the organization ID
+                    $org_id = $membership['relationships']['organization']['data']['id'] ?? '';
+                    if ($org_id === '') {
+                        continue;
+                    }
+
+                    if (!isset($organizations[$org_id])) {
+                        $organizations[$org_id] = [
+                            'id' => $org_id,
+                            'org_name' => $org_name_by_id[$org_id] ?? 'Unknown Organization',
+                            'user_role' => 'Membership Owner',
+                            'roles' => [],
+                        ];
+
+                        \Wicket()->log()->debug('[OrgMan] getUserOrganizationsFromOwnership: found owned organization', [
+                            'source' => 'wicket-orgman',
+                            'person_uuid' => $person_uuid,
+                            'org_id' => $org_id,
+                            'org_name' => $organizations[$org_id]['org_name'],
+                            'membership_id' => $membership['id'] ?? '',
+                        ]);
+                    }
+                }
+
+                $page_meta = $response['meta']['page'] ?? [];
+                $total_pages = max(1, (int) ($page_meta['total_pages'] ?? 1));
+
+                // Log sample owner IDs from this page for debugging
+                if (!empty($sample_owners) && $page_number === 1) {
+                    \Wicket()->log()->debug('[OrgMan] getUserOrganizationsFromOwnership: sample owner IDs', [
+                        'source' => 'wicket-orgman',
+                        'person_uuid' => $person_uuid,
+                        'sample_owners' => $sample_owners,
+                        'looking_for' => $person_uuid,
+                    ]);
+                }
+
+                $page_number++;
+            } while ($page_number <= $total_pages);
+
+            \Wicket()->log()->debug('[OrgMan] getUserOrganizationsFromOwnership: complete', [
+                'source' => 'wicket-orgman',
+                'person_uuid' => $person_uuid,
+                'found_count' => count($organizations),
+                'org_ids' => array_keys($organizations),
+            ]);
+        } catch (\Throwable $e) {
+            \Wicket()->log()->warning('[OrgMan] Failed resolving organizations from ownership: ' . $e->getMessage(), [
+                'source' => 'wicket-orgman',
+                'person_uuid' => $person_uuid,
+            ]);
+
+            return [];
+        }
+
+        return array_values($organizations);
+    }
+
+    /**
      * Get all organizations a user is associated with.
      *
      * @param string $person_uuid The UUID of the person.
@@ -344,6 +481,12 @@ class OrganizationService
         } catch (\Throwable $e) {
             $logger->error('[OrgMan] Error fetching membership entries: ' . $e->getMessage(), ['source' => 'wicket-orgman']);
             $membership_error = ['error' => 'api_error', 'message' => 'Unable to fetch memberships. Please try again later.'];
+        }
+
+        // Get organizations where the user is the owner of the organization membership
+        $ownership_organizations = $this->getUserOrganizationsFromOwnership((string) $person_uuid);
+        if (!empty($ownership_organizations)) {
+            $organizations = array_merge($organizations, $ownership_organizations);
         }
 
         $role_organizations = $this->getUserOrganizationsFromRoles((string) $person_uuid);

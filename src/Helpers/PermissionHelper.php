@@ -343,46 +343,70 @@ class PermissionHelper extends Helper
         try {
             $memberships = wicket_get_person_active_memberships($person_uuid);
 
+            $org_membership_ids = [];
             if (empty($memberships['included']) || !is_array($memberships['included'])) {
-                \Wicket()->log()->debug('[PermissionHelper] has_active_membership: NO - no memberships found', [
+                \Wicket()->log()->debug('[PermissionHelper] has_active_membership: no direct memberships, checking ownership and roles', [
                     'source' => 'wicket-orgman',
                     'org_id' => $org_id,
                     'person_uuid' => $person_uuid,
                     'memberships_count' => 0,
                 ]);
 
-                return false;
-            }
+                // Don't return yet - check ownership and org-level roles below
+            } else {
+                foreach ($memberships['included'] as $included) {
+                    if (
+                        isset($included['type']) && $included['type'] === 'organization_memberships'
+                        && isset($included['relationships']['organization']['data']['id'])
+                    ) {
+                        $org_membership_ids[] = $included['relationships']['organization']['data']['id'];
 
-            $org_membership_ids = [];
-            foreach ($memberships['included'] as $included) {
-                if (
-                    isset($included['type']) && $included['type'] === 'organization_memberships'
-                    && isset($included['relationships']['organization']['data']['id'])
-                ) {
-                    $org_membership_ids[] = $included['relationships']['organization']['data']['id'];
+                        if ($included['relationships']['organization']['data']['id'] === $org_id) {
+                            \Wicket()->log()->debug('[PermissionHelper] has_active_membership: YES (direct)', [
+                                'source' => 'wicket-orgman',
+                                'org_id' => $org_id,
+                                'person_uuid' => $person_uuid,
+                            ]);
 
-                    if ($included['relationships']['organization']['data']['id'] === $org_id) {
-                        \Wicket()->log()->debug('[PermissionHelper] has_active_membership: YES (direct)', [
-                            'source' => 'wicket-orgman',
-                            'org_id' => $org_id,
-                            'person_uuid' => $person_uuid,
-                        ]);
-
-                        return true;
+                            return true;
+                        }
                     }
                 }
             }
 
             // No direct membership found - check if this is a parent organization
-            // with memberships inside, and user has org-level roles
+            // with memberships inside, and user has org-level roles OR owns the membership
             \Wicket()->log()->debug('[PermissionHelper] has_active_membership: checking parent org access', [
                 'source' => 'wicket-orgman',
                 'org_id' => $org_id,
                 'person_uuid' => $person_uuid,
             ]);
 
-            // Check if user has any organization-level roles (not person-specific)
+            // First check: user owns the organization membership
+            if (class_exists('\OrgManagement\Services\MembershipService')) {
+                $membershipService = new \OrgManagement\Services\MembershipService();
+                $membership_uuid = $membershipService->getMembershipForOrganization($org_id);
+
+                if (!empty($membership_uuid)) {
+                    $membership_data = $membershipService->getOrgMembershipData($membership_uuid);
+
+                    if (is_array($membership_data) && isset($membership_data['data']['relationships']['owner']['data']['id'])) {
+                        $owner_id = $membership_data['data']['relationships']['owner']['data']['id'];
+
+                        if ($owner_id === $person_uuid) {
+                            \Wicket()->log()->debug('[PermissionHelper] has_active_membership: YES (membership owner)', [
+                                'source' => 'wicket-orgman',
+                                'org_id' => $org_id,
+                                'person_uuid' => $person_uuid,
+                            ]);
+
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            // Second check: user has any organization-level roles (not person-specific)
             if (class_exists('\OrgManagement\Services\PermissionService')) {
                 $permissionService = new \OrgManagement\Services\PermissionService();
                 $org_roles = $permissionService->getOrgRolesForPerson($person_uuid, $org_id);

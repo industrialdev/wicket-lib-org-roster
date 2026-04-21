@@ -414,7 +414,7 @@ $no_members_message = __('No members found.', 'wicket-acc');
                 $last = min($total_items, $page * $page_size);
                 echo esc_html(sprintf(__('Showing %1$d–%2$d of %3$d', 'wicket-acc'), $first, $last, $total_items));
             } else {
-                esc_html_e('No members to display.', 'wicket-acc');
+                // Pagination hidden when no members - esc_html_e('No members to display.', 'wicket-acc');
             }
 ?>
         </div>

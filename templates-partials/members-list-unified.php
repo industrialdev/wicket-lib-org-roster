@@ -360,34 +360,31 @@ $show_remove_policy_callout = (
         <?php endforeach; ?>
     <?php endif; ?>
 
+    <?php if ($total_items > 0) : ?>
     <nav class="members-pagination wt_mt-6 wt_flex wt_flex-col wt_gap-4" aria-label="<?php esc_attr_e('Members pagination', 'wicket-acc'); ?>">
         <div class="members-pagination__info wt_w-full wt_text-left wt_text-sm wt_text-content">
             <?php
-                if ($total_items > 0) {
-                    $first = (($page - 1) * $page_size) + 1;
-                    $last = min($total_items, $page * $page_size);
-                    echo esc_html(sprintf(__('Showing %1$d–%2$d of %3$d', 'wicket-acc'), $first, $last, $total_items));
-                } else {
-                    esc_html_e('No members to display.', 'wicket-acc');
-                }
-?>
+                $first = (($page - 1) * $page_size) + 1;
+        $last = min($total_items, $page * $page_size);
+        echo esc_html(sprintf(__('Showing %1$d–%2$d of %3$d', 'wicket-acc'), $first, $last, $total_items));
+        ?>
         </div>
         <?php if ($total_pages > 1) : ?>
             <div class="members-pagination__controls wt_w-full wt_flex wt_items-center wt_gap-2 wt_justify-end wt_self-end">
                 <?php $show_prev = $page > 1; ?>
                 <?php if ($show_prev) : ?>
                     <?php
-                    get_component('button', [
-                        'variant' => 'secondary',
-                        'label' => __('Previous', 'wicket-acc'),
-                        'type' => 'button',
-                        'classes' => ['members-pagination__btn', 'members-pagination__btn--prev', 'wt_px-3', 'wt_py-2', 'wt_text-sm'],
-                        'atts' => [
-                            'data-on:click' => $build_action($page - 1),
-                            'data-on:success' => '$listLoading = false; ' . wp_sprintf("select('#%s') | set(html)", $members_list_target),
-                            'data-indicator:members-loading' => true,
-                        ],
-                    ]);
+                get_component('button', [
+                    'variant' => 'secondary',
+                    'label' => __('Previous', 'wicket-acc'),
+                    'type' => 'button',
+                    'classes' => ['members-pagination__btn', 'members-pagination__btn--prev', 'wt_px-3', 'wt_py-2', 'wt_text-sm'],
+                    'atts' => [
+                        'data-on:click' => $build_action($page - 1),
+                        'data-on:success' => '$listLoading = false; ' . wp_sprintf("select('#%s') | set(html)", $members_list_target),
+                        'data-indicator:members-loading' => true,
+                    ],
+                ]);
                     ?>
                 <?php endif; ?>
                 <div class="members-pagination__pages wt_flex wt_items-center wt_gap-1">
@@ -410,28 +407,29 @@ $show_remove_policy_callout = (
                             'disabled' => $is_current,
                             'atts' => $page_button_atts,
                         ]);
-                    ?>
+                        ?>
                     <?php endfor; ?>
                 </div>
                 <?php $show_next = $page < $total_pages; ?>
                 <?php if ($show_next) : ?>
                     <?php
-                    get_component('button', [
-                        'variant' => 'secondary',
-                        'label' => __('Next', 'wicket-acc'),
-                        'type' => 'button',
-                        'classes' => ['members-pagination__btn', 'members-pagination__btn--next', 'wt_px-3', 'wt_py_2', 'wt_text-sm'],
-                        'atts' => [
-                            'data-on:click' => $build_action($page + 1),
-                            'data-on:success' => '$listLoading = false; ' . wp_sprintf("select('#%s') | set(html)", $members_list_target),
-                            'data-indicator:members-loading' => true,
-                        ],
-                    ]);
+                        get_component('button', [
+                            'variant' => 'secondary',
+                            'label' => __('Next', 'wicket-acc'),
+                            'type' => 'button',
+                            'classes' => ['members-pagination__btn', 'members-pagination__btn--next', 'wt_px-3', 'wt_py_2', 'wt_text-sm'],
+                            'atts' => [
+                                'data-on:click' => $build_action($page + 1),
+                                'data-on:success' => '$listLoading = false; ' . wp_sprintf("select('#%s') | set(html)", $members_list_target),
+                                'data-indicator:members-loading' => true,
+                            ],
+                        ]);
                     ?>
                 <?php endif; ?>
             </div>
         <?php endif; ?>
     </nav>
+    <?php endif; ?>
 
     <?php if ($show_add_member_button) : ?>
         <div class="wt_mt-6">
@@ -441,7 +439,7 @@ $show_remove_policy_callout = (
                     'variant' => 'primary',
                     'label' => __('Add Member', 'wicket-acc'),
                     'type' => 'button',
-                    'classes' => ['add-member-button', 'wt_w-full', 'wt_py-2'],
+                    'classes' => ['add-member-button', 'wt_w-full', 'wt_py_2', 'wt_justify-center'],
                     'atts' => [
                         'data-on:click' => '$addMemberSuccess = false; $addMemberSubmitting = false; $addMemberSuccessMessage = \'\'; (() => { const modal = document.getElementById(\'membersAddModal\'); if (!modal) return; const form = modal.querySelector(\'form\'); if (form) form.reset(); const messages = modal.querySelector(`[id^=\'add-member-messages-\']`); if (messages) messages.innerHTML = \'\'; const groupMessages = modal.querySelector(\'#group-member-add-messages\'); if (groupMessages) groupMessages.innerHTML = \'\'; })(); $addMemberModalOpen = true',
                     ],
@@ -454,12 +452,12 @@ $show_remove_policy_callout = (
                             'variant' => 'primary',
                             'label' => __('Bulk Upload Members', 'wicket-acc'),
                             'type' => 'button',
-                            'classes' => ['add-member-button', 'wt_w-full', 'wt_py-2'],
+                            'classes' => ['add-member-button', 'wt_w-full', 'wt_py_2', 'wt_justify-center'],
                             'atts' => [
                                 'data-on:click' => '$bulkUploadModalOpen = true',
                             ],
                         ]);
-                        ?>
+                    ?>
                     </div>
                 <?php endif; ?>
             <?php endif; ?>
@@ -470,7 +468,7 @@ $show_remove_policy_callout = (
                 'classes' => ['wt_mt-2', 'wt_p-3', 'wt_bg-yellow-50', 'wt_border', 'wt_border-yellow-200', 'wt_rounded-md', 'wt_text-yellow-800', 'wt_text-sm'],
                 'content' => '<div class="wt_flex wt_items-center wt_gap-2"><svg class="wt_w-5 wt_h-5 wt_text-yellow-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" /></svg><span>' . esc_html($seat_limit_message) . '</span></div>',
             ]);
-            ?>            <?php endif; ?>
+                ?>            <?php endif; ?>
         </div>
     <?php endif; ?>
 

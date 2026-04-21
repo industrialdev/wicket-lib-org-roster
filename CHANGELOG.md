@@ -2,6 +2,16 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.6.2] - 2026-04-21
+
+### Added
+- Membership ownership detection: users who own organization memberships (via the owner relationship on organization_memberships) are now recognized and granted access, even without direct membership entries or org-scoped roles. New `OrganizationService::getUserOrganizationsFromOwnership()` method with pagination support for discovering owned organizations.
+- Enhanced `PermissionHelper::has_active_membership()` to check membership ownership before returning false when no direct memberships are found.
+
+### Changed
+- Member list pagination controls now only render when total items exceed zero, removing empty pagination markup from no-results states.
+- Fixed button utility class naming in `members-list-unified.php` (hyphenated `wt_py-2` → underscored `wt_py_2`) and added `wt_justify-center` for consistent button alignment.
+
 ## [0.6.1] - 2026-04-21
 
 ### Changed
