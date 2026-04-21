@@ -474,20 +474,23 @@ $show_remove_policy_callout = (
         </div>
     <?php endif; ?>
 
-    <?php
-    $callout_content = '';
-    if (!empty($remove_policy_callout['title'])) {
-        $callout_content .= '<p class="wt_font-semibold wt_mb-1">' . esc_html((string) $remove_policy_callout['title']) . '</p>';
-    }
-    $callout_content .= '<p class="wt_mb-0">' . esc_html((string) $remove_policy_callout['message']);
-    if (!empty($remove_policy_callout['email'])) {
-        $callout_content .= '<br><a class="wt_text-interactive underline wt_hover_decoration-none" href="mailto:' . esc_attr((string) $remove_policy_callout['email']) . '">' . esc_html((string) $remove_policy_callout['email']) . '</a>';
-    }
-    $callout_content .= '</p>';
+    <?php if ($show_remove_policy_callout && $remove_policy_callout_placement === 'below_members') : ?>
+        <?php
+        $callout_content = '';
+        if (!empty($remove_policy_callout['title'])) {
+            $callout_content .= '<p class="wt_font-semibold wt_mb-1">' . esc_html((string) $remove_policy_callout['title']) . '</p>';
+        }
+        $callout_content .= '<p class="wt_mb-0">' . esc_html((string) $remove_policy_callout['message']);
+        if (!empty($remove_policy_callout['email'])) {
+            $callout_content .= '<br><a class="wt_text-interactive underline wt_hover_decoration-none" href="mailto:' . esc_attr((string) $remove_policy_callout['email']) . '">' . esc_html((string) $remove_policy_callout['email']) . '</a>';
+        }
+        $callout_content .= '</p>';
 
-    get_component('alert', [
-        'classes' => ['wt_mt-2', 'wt_mb-0', 'wt_p-4', 'wt_border', 'wt_border-yellow-200', 'wt_bg-yellow-50', 'wt_rounded-md', 'wt_text-sm', 'wt_text-yellow-900'],
-        'content' => $callout_content,
-    ]);
-    ?>    </div>
+        get_component('alert', [
+            'classes' => ['wt_mt-2', 'wt_mb-0', 'wt_p-4', 'wt_border', 'wt_border-yellow-200', 'wt_bg-yellow-50', 'wt_rounded-md', 'wt_text-sm', 'wt_text-yellow-900'],
+            'content' => $callout_content,
+        ]);
+        ?>
+    <?php endif; ?>
+    </div>
 </div>

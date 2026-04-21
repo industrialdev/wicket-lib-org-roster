@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.6.1] - 2026-04-21
+
+### Changed
+- Templates now use `get_component('alert')` and `get_component('button')` from the base plugin instead of custom markup, standardizing UI components across `engagement-summary.php`, `export-members-status.php`, `members-list-unified.php`, and `organization-list.php`. Visual classes and Datastar attributes are forwarded via the `atts` parameter so reactive behavior is preserved.
+
+### Fixed
+- Remove-policy callout in `members-list-unified.php` was rendered unconditionally; it now only outputs when `$show_remove_policy_callout` is true **and** `$remove_policy_callout_placement === 'below_members'`, preventing it from appearing in unintended locations.
+
 ## [0.6.0] - 2026-04-17
 
 ### Added
