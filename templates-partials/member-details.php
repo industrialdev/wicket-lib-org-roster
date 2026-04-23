@@ -22,9 +22,9 @@ if (!defined('ABSPATH')) {
  * Lazy loading endpoint for member card cosmetic details.
  * Returns Datastar SSE fragments.
  */
-$person_uuid = isset($_GET['person_uuid']) ? sanitize_text_field($_GET['person_uuid']) : '';
-$org_uuid = isset($_GET['org_uuid']) ? sanitize_text_field($_GET['org_uuid']) : '';
-$membership_uuid = isset($_GET['membership_uuid']) ? sanitize_text_field($_GET['membership_uuid']) : '';
+$person_uuid = isset($_REQUEST['person_uuid']) ? sanitize_text_field($_REQUEST['person_uuid']) : '';
+$org_uuid = isset($_REQUEST['org_uuid']) ? sanitize_text_field($_REQUEST['org_uuid']) : '';
+$membership_uuid = isset($_REQUEST['membership_uuid']) ? sanitize_text_field($_REQUEST['membership_uuid']) : '';
 
 \OrgManagement\Helpers\Helper::log_debug('[OrgMan] member-details endpoint hit', [
     'person_uuid'     => $person_uuid,

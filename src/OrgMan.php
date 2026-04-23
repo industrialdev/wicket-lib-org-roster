@@ -162,6 +162,9 @@ final class OrgMan
         add_filter('body_class', [$this, 'addOrgmanBodyClass']);
         add_action('wp_enqueue_scripts', [$this, 'enqueueAssets']);
 
+        add_filter('query_vars', [Helpers\TemplateHelper::class, 'add_hypermedia_query_vars']);
+        add_action('parse_request', [Helpers\TemplateHelper::class, 'maybe_handle_hypermedia_request']);
+
         // Initialize helpers
         add_action('init', [Helpers\GravityFormsHelper::class, 'init']);
         add_action('init', [Helpers\TemplateHelper::class, 'init']);
@@ -1002,8 +1005,8 @@ final class OrgMan
         wp_enqueue_script('orgman-content-behaviors', $base_uri . 'public/js/orgman-content-behaviors.js', [], $content_behaviors_js_version, true);
 
         // Load Datastar from CDN as module script
-        $datastar_version = '1.0.0-RC.7';
-        $datastar_src = 'https://cdn.jsdelivr.net/gh/starfederation/datastar@' . $datastar_version . '/bundles/datastar.js';
+        $datastar_version = '1.0.1';
+        $datastar_src = 'https://cdn.jsdelivr.net/gh/starfederation/datastar@v' . $datastar_version . '/bundles/datastar.js';
         wp_enqueue_script_module('wicket-datastar', $datastar_src, [], $datastar_version);
     }
 

@@ -341,15 +341,14 @@ $no_members_message = __('No members found.', 'wicket-acc');
                             <?php if (empty($member['lazy_loaded'])) : ?>
                                 <?php
                                     $lazy_details_url = add_query_arg([
-                                        'action'          => 'hypermedia',
                                         'template'        => 'member-details',
                                         'person_uuid'     => (string) $member_uuid,
                                         'org_uuid'        => (string) $org_uuid,
                                         'membership_uuid' => (string) ($membership_uuid ?? ''),
-                                    ], home_url('/'));
+                                    ], OrgHelpers\template_url());
                                 ?>
                                 <div class="wt_animate-pulse wt_p-2 wt_bg-gray-50 wt_rounded"
-                                    data-on-load="@get('<?php echo esc_js($lazy_details_url); ?>')">
+                                    data-effect="if (!$listLoading && !$lazy_<?php echo esc_attr($person_uuid_no_dashes); ?>) { $lazy_<?php echo esc_attr($person_uuid_no_dashes); ?> = true; @get('<?php echo esc_js($lazy_details_url); ?>') }">
                                     <div class="wt_h-4 wt_bg-gray-200 wt_rounded wt_w-1/2"></div>
                                 </div>
                             <?php else : ?>

@@ -214,8 +214,8 @@ class TemplateHelper extends Helper
      */
     public static function maybe_handle_hypermedia_request($wp)
     {
-        $action = $wp->query_vars['action'] ?? '';
-        $template = $wp->query_vars['template'] ?? '';
+        $action = $wp->query_vars['action'] ?? $_REQUEST['action'] ?? '';
+        $template = $wp->query_vars['template'] ?? $_REQUEST['template'] ?? '';
 
         if (!empty($action) || !empty($template)) {
             \Wicket()->log()->info('[OrgMan] Hypermedia request detected', [

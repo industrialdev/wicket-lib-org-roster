@@ -261,12 +261,13 @@ class MemberService
         $page = max(1, (int) ($args['page'] ?? 1));
         $size = max(1, (int) ($args['size'] ?? $defaultPageSize));
         $searchTerm = isset($args['query']) ? sanitize_text_field((string) $args['query']) : '';
+        $isLazy = (bool) ($args['lazy'] ?? false);
 
         $logger = \Wicket()->log();
 
         // Cache initial load only (no search term)
         if (empty($searchTerm)) {
-            $cache_key = 'orgman_members_' . md5($membershipUuid . $page . $size);
+            $cache_key = 'orgman_members_' . md5($membershipUuid . $page . $size . (int) $isLazy);
             $cached_data = $this->getCachedData($cache_key);
 
             if (false !== $cached_data) {
@@ -365,7 +366,8 @@ class MemberService
                 if (null !== $normalized) {
                     // Cache initial load only (no search term)
                     if (empty($searchTerm)) {
-                        $cache_key = 'orgman_members_' . md5($membershipUuid . $page . $size);
+                        $isLazy = (bool) ($args['lazy'] ?? false);
+                        $cache_key = 'orgman_members_' . md5($membershipUuid . $page . $size . (int) $isLazy);
                         $this->setCachedData($cache_key, $normalized);
                     }
 
@@ -431,7 +433,8 @@ class MemberService
 
         // Cache initial load only (no search term)
         if (empty($searchTerm) && null !== $final_response) {
-            $cache_key = 'orgman_members_' . md5($membershipUuid . $page . $size);
+            $isLazy = (bool) ($args['lazy'] ?? false);
+            $cache_key = 'orgman_members_' . md5($membershipUuid . $page . $size . (int) $isLazy);
             $this->setCachedData($cache_key, $final_response);
         }
 
@@ -814,6 +817,7 @@ class MemberService
                 'page'  => $page,
                 'size'  => $size,
                 'query' => $query ?: null,
+                'lazy'  => $lazy,
             ]
         );
 
