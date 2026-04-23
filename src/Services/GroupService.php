@@ -305,7 +305,7 @@ class GroupService
      */
     public function getGroupListPageSize(): int
     {
-        $size = (int) ($this->getGroupsConfig()['list']['page_size'] ?? 20);
+        $size = (int) ($this->getGroupsConfig()['list']['page_size'] ?? 15);
 
         return max(1, $size);
     }

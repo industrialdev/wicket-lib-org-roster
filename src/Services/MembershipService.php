@@ -580,7 +580,7 @@ class MembershipService
         try {
             // Defaults
             $page = absint($args['page'] ?? 1);
-            $size = absint($args['size'] ?? 50);
+            $size = absint($args['size'] ?? 15);
             $query = isset($args['query']) ? sanitize_text_field($args['query']) : '';
 
             if (empty($query)) {
@@ -637,7 +637,7 @@ class MembershipService
         try {
             // Defaults
             $page = absint($args['page'] ?? 1);
-            $size = absint($args['size'] ?? 20);
+            $size = absint($args['size'] ?? 15);
 
             $client = wicket_api_client();
             $response = $client->get('/organization_memberships/' . rawurlencode($membership_uuid) . '/person_memberships?page[number]=' . $page . '&page[size]=' . $size . '&filter[active_at]=now');

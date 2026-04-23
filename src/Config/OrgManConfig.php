@@ -291,7 +291,7 @@ final class OrgManConfig
                     'seat_limited' => ['member'],
                 ],
                 'list' => [
-                    'page_size' => 20,
+                    'page_size' => 15,
                     'member_page_size' => 15,
                 ],
                 'additional_info' => [
@@ -320,7 +320,7 @@ final class OrgManConfig
             ],
             'presentation' => [
                 'organization_list' => [
-                    'page_size' => 5,
+                    'page_size' => 15,
                     'use_custom_title' => false,
                     'custom_title' => '',
                 ],
@@ -330,6 +330,7 @@ final class OrgManConfig
                 ],
                 'member_list' => [
                     'use_unified' => true,
+                    'page_size' => 15,
                     'show_edit_permissions' => true,
                     'show_remove_button' => true,
                     'show_bulk_upload' => false,
@@ -415,8 +416,10 @@ final class OrgManConfig
             ],
             'platform' => [
                 'cache' => [
-                    'enabled' => false,
+                    'enabled' => true,
                     'duration' => 5 * 60,
+                    'search_clear_cache_duration' => 1 * 60 * 60,
+                    'cache_salt' => '202604231700',
                 ],
             ],
             'removal' => [

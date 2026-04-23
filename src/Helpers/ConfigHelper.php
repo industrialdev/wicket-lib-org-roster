@@ -39,6 +39,30 @@ class ConfigHelper extends Helper
     }
 
     /**
+     * Get search clear cache duration from config.
+     *
+     * @return int Duration in seconds (defaults to 1 hour)
+     */
+    public static function get_search_cache_duration(): int
+    {
+        $config = self::get_config();
+
+        return $config['platform']['cache']['search_clear_cache_duration'] ?? (1 * HOUR_IN_SECONDS);
+    }
+
+    /**
+     * Get cache version/salt from config.
+     *
+     * @return string Salt string
+     */
+    public static function get_cache_salt(): string
+    {
+        $config = self::get_config();
+
+        return (string) ($config['platform']['cache']['cache_salt'] ?? '202604231700');
+    }
+
+    /**
      * Get roles configuration.
      *
      * @return array Roles configuration

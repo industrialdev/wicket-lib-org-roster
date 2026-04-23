@@ -116,7 +116,8 @@ if ((!isset($members) || !is_array($members)) && !empty($org_uuid)) {
                 'page' => $page,
                 'size' => max(1, $page_size_param),
                 'query' => $query,
-            ]
+            ],
+            true // Enable lazy loading
         );
 
         $members = $result['members'] ?? [];
@@ -201,6 +202,7 @@ $show_remove_policy_callout = (
 
 // Get current user UUID for owner comparison
 $current_user_uuid = function_exists('wicket_current_person_uuid') ? wicket_current_person_uuid() : null;
+$encodedOrgUuid = rawurlencode((string) $org_uuid);
 
 $base_query_args = [
     'org_uuid' => $org_uuid,
@@ -300,28 +302,26 @@ $no_members_message = __('No members found.', 'wicket-acc');
                                 <h3 class="wt_text-xl wt_font-medium wt_text-content wt_mb-0">
                                     <?php echo esc_html($member['full_name'] ?? ''); ?>
                                 </h3>
-                                <?php
-                            // Check confirmation status using helper method
-                            $configService = new OrgManagement\Services\ConfigService();
-            $member_service = new OrgManagement\Services\MemberService($configService);
-            $is_confirmed = $member_service->isUserConfirmed($member_uuid);
-            ?>
-                            <?php if ($show_account_status) : ?>
-                                <?php if ($is_confirmed) : ?>
-                                    <span class="wt_text-content" title="<?php echo esc_attr($confirmed_tooltip); ?>">
-                                        <span class="wt_inline-block wt_w-2 wt_h-2 wt_rounded-full wt_bg-green-500" aria-hidden="true"></span>
-                                    </span>
-                                <?php else : ?>
-                                    <span class="wt_text-content" title="<?php echo esc_attr($unconfirmed_tooltip); ?>">
-                                        <span class="wt_inline-block wt_w-2 wt_h-2 wt_rounded-full wt_bg-gray-400" aria-hidden="true"></span>
-                                    </span>
-                                    <?php if ($show_unconfirmed_label && $unconfirmed_label !== '') : ?>
-                                        <span class="wt_text-warning wt_whitespace-nowrap wt_ml-1 wt_text-2xs" title="<?php echo esc_attr($unconfirmed_tooltip); ?>">
-                                            <?php echo esc_html($unconfirmed_label); ?>
-                                        </span>
+                                <div id="member-status-<?php echo esc_attr($person_uuid_no_dashes); ?>" class="wt_inline-flex wt_items-center">
+                                    <?php if (!empty($member['lazy_loaded'])) : ?>
+                                        <?php if ($show_account_status) : ?>
+                                            <?php if (!empty($member['is_confirmed'])) : ?>
+                                                <span class="wt_text-content" title="<?php echo esc_attr($confirmed_tooltip); ?>">
+                                                    <span class="wt_inline-block wt_w-2 wt_h-2 wt_rounded-full wt_bg-green-500" aria-hidden="true"></span>
+                                                </span>
+                                            <?php else : ?>
+                                                <span class="wt_text-content" title="<?php echo esc_attr($unconfirmed_tooltip); ?>">
+                                                    <span class="wt_inline-block wt_w-2 wt_h-2 wt_rounded-full wt_bg-gray-400" aria-hidden="true"></span>
+                                                </span>
+                                                <?php if ($show_unconfirmed_label && $unconfirmed_label !== '') : ?>
+                                                    <span class="wt_text-warning wt_whitespace-nowrap wt_ml-1 wt_text-2xs" title="<?php echo esc_attr($unconfirmed_tooltip); ?>">
+                                                        <?php echo esc_html($unconfirmed_label); ?>
+                                                    </span>
+                                                <?php endif; ?>
+                                            <?php endif; ?>
+                                        <?php endif; ?>
                                     <?php endif; ?>
-                                <?php endif; ?>
-                            <?php endif; ?>
+                                </div>
                             </div>
                         </div>
                         <?php if (!empty($member['is_owner'])) : ?>
@@ -334,27 +334,41 @@ $no_members_message = __('No members found.', 'wicket-acc');
                                 <?php echo esc_html($member['title']); ?>
                             </p>
                         <?php endif; ?>
-                        <?php
-                        // Check if relationship type should be hidden
-                        if (!empty($member['relationship_names']) && !OrgHelpers\Helper::should_hide_relationship_type()) :
-                            ?>
-                            <div class="wt_flex wt_items-center wt_gap-2">
-                                <span class="wt_text-content"><?php echo esc_html($member['relationship_names']); ?></span>
-                            </div>
-                        <?php endif; ?>
-                        <?php if (!empty($member_email)) : ?>
-                            <div class="wt_flex wt_items-center wt_gap-2">
-                                <a href="mailto:<?php echo esc_attr($member_email); ?>" class="wt_text-sm wt_text-interactive wt_hover_underline">
-                                    <?php echo esc_html($member_email); ?>
-                                </a>
-                            </div>
-                        <?php endif; ?>
-                        <?php if (OrgHelpers\Helper::should_show_member_roles()) : ?>
-                            <div class="wt_flex wt_items-baseline wt_gap-2 wt_text-sm">
-                                <strong><?php esc_html_e('Roles:', 'wicket-acc'); ?></strong>
-                                <span class="wt_text-content"><?php echo esc_html($roles_text); ?></span>
-                            </div>
-                        <?php endif; ?>
+
+                        <div id="member-details-<?php echo esc_attr($person_uuid_no_dashes); ?>" class="wt_flex wt_flex-col wt_gap-2">
+                            <?php if (empty($member['lazy_loaded'])) : ?>
+                                <?php
+                                    $lazy_details_url = OrgHelpers\template_url() . 'member-details&person_uuid=' . rawurlencode((string) $member_uuid) . '&org_uuid=' . $encodedOrgUuid . '&membership_uuid=' . rawurlencode((string) ($membership_uuid ?? ''));
+                                ?>
+                                <div class="wt_animate-pulse wt_flex wt_flex-col wt_gap-2"
+                                    data-on:intersect="@get('<?php echo esc_js($lazy_details_url); ?>')">
+                                    <div class="wt_h-4 wt_bg-gray-200 wt_rounded wt_w-1/4"></div>
+                                    <div class="wt_h-4 wt_bg-gray-200 wt_rounded wt_w-1/2"></div>
+                                </div>
+                            <?php else : ?>
+                                <?php
+                                // Check if relationship type should be hidden
+                                if (!empty($member['relationship_names']) && !OrgHelpers\Helper::should_hide_relationship_type()) :
+                                    ?>
+                                    <div class="wt_flex wt_items-center wt_gap-2">
+                                        <span class="wt_text-content"><?php echo esc_html($member['relationship_names']); ?></span>
+                                    </div>
+                                <?php endif; ?>
+                                <?php if (!empty($member_email)) : ?>
+                                    <div class="wt_flex wt_items-center wt_gap-2">
+                                        <a href="mailto:<?php echo esc_attr($member_email); ?>" class="wt_text-sm wt_text-interactive wt_hover_underline">
+                                            <?php echo esc_html($member_email); ?>
+                                        </a>
+                                    </div>
+                                <?php endif; ?>
+                                <?php if (OrgHelpers\Helper::should_show_member_roles()) : ?>
+                                    <div class="wt_flex wt_items-baseline wt_gap-2 wt_text-sm">
+                                        <strong><?php esc_html_e('Roles:', 'wicket-acc'); ?></strong>
+                                        <span class="wt_text-content"><?php echo esc_html($roles_text); ?></span>
+                                    </div>
+                                <?php endif; ?>
+                            <?php endif; ?>
+                        </div>
                     </div>
                     <div class="wt_flex wt_flex-col sm_wt_flex-row wt_items-stretch sm_wt_items-start wt_gap-2 wt_justify-between md_wt_auto wt_shrink-0">
                             <button type="button" class="acc-edit-button edit-permissions-button button button--primary wt_inline-flex wt_items-center wt_justify-between wt_gap-2 wt_px-4 wt_py-2 wt_text-sm wt_border wt_border-bg-interactive wt_transition-colors wt_whitespace-nowrap component-button"

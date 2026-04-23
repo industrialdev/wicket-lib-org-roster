@@ -66,11 +66,7 @@ class MemberService
      */
     private function getCachedData($cache_key)
     {
-        if (!\OrgManagement\Helpers\ConfigHelper::is_cache_enabled()) {
-            return false;
-        }
-
-        return get_transient($cache_key);
+        return (new CacheService())->get($cache_key);
     }
 
     /**
@@ -82,10 +78,7 @@ class MemberService
      */
     private function setCachedData($cache_key, $data)
     {
-        if (\OrgManagement\Helpers\ConfigHelper::is_cache_enabled()) {
-            $cache_duration = \OrgManagement\Helpers\ConfigHelper::get_cache_duration();
-            set_transient($cache_key, $data, $cache_duration);
-        }
+        (new CacheService())->set($cache_key, $data);
     }
 
     /**
@@ -263,7 +256,7 @@ class MemberService
             return null;
         }
 
-        $defaultPageSize = 10;
+        $defaultPageSize = 15;
 
         $page = max(1, (int) ($args['page'] ?? 1));
         $size = max(1, (int) ($args['size'] ?? $defaultPageSize));
@@ -273,7 +266,7 @@ class MemberService
 
         // Cache initial load only (no search term)
         if (empty($searchTerm)) {
-            $cache_key = 'orgman_members_initial_' . md5($membershipUuid . '_' . $page . '_' . $size);
+            $cache_key = 'orgman_members_' . md5($membershipUuid . $page . $size);
             $cached_data = $this->getCachedData($cache_key);
 
             if (false !== $cached_data) {
@@ -354,6 +347,7 @@ class MemberService
         $queryParams = [
             'page[number]' => $page,
             'page[size]'   => $size,
+            'include'      => 'person,membership',
             'filter[active_at]' => 'now',
         ];
 
@@ -371,7 +365,7 @@ class MemberService
                 if (null !== $normalized) {
                     // Cache initial load only (no search term)
                     if (empty($searchTerm)) {
-                        $cache_key = 'orgman_members_initial_' . md5($membershipUuid . '_' . $page . '_' . $size);
+                        $cache_key = 'orgman_members_' . md5($membershipUuid . $page . $size);
                         $this->setCachedData($cache_key, $normalized);
                     }
 
@@ -437,7 +431,7 @@ class MemberService
 
         // Cache initial load only (no search term)
         if (empty($searchTerm) && null !== $final_response) {
-            $cache_key = 'orgman_members_initial_' . md5($membershipUuid . '_' . $page . '_' . $size);
+            $cache_key = 'orgman_members_' . md5($membershipUuid . $page . $size);
             $this->setCachedData($cache_key, $final_response);
         }
 
@@ -792,17 +786,7 @@ class MemberService
      */
     public function clearMembersCache(string $membershipUuid): void
     {
-        if (empty($membershipUuid)) {
-            return;
-        }
-        // Clear first 5 pages of cache for typical sizes
-        $sizes = [10, 15, 20, 50, 100];
-        for ($p = 1; $p <= 5; $p++) {
-            foreach ($sizes as $s) {
-                $cache_key = 'orgman_members_initial_' . md5($membershipUuid . '_' . $p . '_' . $s);
-                delete_transient($cache_key);
-            }
-        }
+        (new CacheService())->invalidateMemberCache($membershipUuid);
     }
 
     /**
@@ -818,7 +802,7 @@ class MemberService
      *     query: string
      * }
      */
-    public function getMembers(string $membershipUuid, string $orgUuid, array $args = []): array
+    public function getMembers(string $membershipUuid, string $orgUuid, array $args = [], bool $lazy = false): array
     {
         $page = max(1, (int) ($args['page'] ?? 1));
         $size = max(1, (int) ($args['size'] ?? 15));
@@ -841,6 +825,7 @@ class MemberService
                 'page'            => $page,
                 'size'            => $size,
                 'query'           => $query,
+                'lazy'            => $lazy,
             ]
         );
     }
@@ -902,6 +887,7 @@ class MemberService
         $query = isset($context['query']) ? (string) $context['query'] : '';
         $orgUuid = (string) ($context['org_uuid'] ?? '');
         $membershipUuid = $context['membership_uuid'] ?? null;
+        $isLazy = (bool) ($context['lazy'] ?? false);
 
         $rawMembers = [];
         if (is_array($membersResponse)) {
@@ -963,6 +949,79 @@ class MemberService
         $membersByPerson = [];
         $membersWithoutPerson = [];
 
+        // Pre-fetch connections and roles for all unique people to avoid N+1 calls inside the loop.
+        $connectionsByPerson = [];
+        $rolesByPerson = [];
+        if (!$isLazy && !empty($rawMembers) && !empty($orgUuid) && function_exists('wicket_api_client')) {
+            $uniquePersonIds = [];
+            foreach ($rawMembers as $member) {
+                $personId = $member['relationships']['person']['data']['id']
+                    ?? $member['person']['id']
+                    ?? null;
+                if ($personId && !in_array($personId, $uniquePersonIds, true)) {
+                    $uniquePersonIds[] = $personId;
+                }
+            }
+
+            if (!empty($uniquePersonIds)) {
+                $client = wicket_api_client();
+                foreach ($uniquePersonIds as $personId) {
+                    // Fetch connections
+                    try {
+                        $endpoint = 'people/' . rawurlencode((string) $personId) . '/connections';
+                        $params = [
+                            'filter[connection_type_eq]' => 'all',
+                            'sort' => '-created_at',
+                        ];
+                        $response = $client->get($endpoint, $params);
+
+                        if (is_array($response) && isset($response['data']) && is_array($response['data'])) {
+                            // Filter connections to this organization only
+                            $orgConnections = array_filter($response['data'], static function ($conn) use ($orgUuid) {
+                                $connOrgId = $conn['relationships']['organization']['data']['id'] ?? '';
+
+                                return (string) $connOrgId === (string) $orgUuid;
+                            });
+
+                            if (!empty($orgConnections)) {
+                                $connectionsByPerson[$personId] = array_values($orgConnections);
+                            } else {
+                                $connectionsByPerson[$personId] = [];
+                            }
+                        }
+                    } catch (\Throwable $e) {
+                        $logger->warning('[OrgMan] Failed to pre-fetch connections', ['person_id' => $personId, 'error' => $e->getMessage()]);
+                    }
+
+                    // Fetch roles for MDP permission roles merging
+                    try {
+                        $roleParams = [
+                            'page' => ['number' => 1, 'size' => 100],
+                            'include' => 'resource',
+                            'sort' => '-global,name',
+                        ];
+                        $roleResponse = $client->get('/people/' . rawurlencode((string) $personId) . '/roles', $roleParams);
+
+                        if (is_array($roleResponse) && isset($roleResponse['data']) && is_array($roleResponse['data'])) {
+                            $orgRoles = [];
+                            foreach ($roleResponse['data'] as $role) {
+                                $resourceId = $role['relationships']['resource']['data']['id'] ?? '';
+                                if ((string) $resourceId === (string) $orgUuid) {
+                                    $roleSlug = $role['attributes']['slug'] ?? '';
+                                    if ($roleSlug !== '') {
+                                        $orgRoles[] = $roleSlug;
+                                    }
+                                }
+                            }
+                            $rolesByPerson[$personId] = $orgRoles;
+                        }
+                    } catch (\Throwable $e) {
+                        $logger->warning('[OrgMan] Failed to pre-fetch roles', ['person_id' => $personId, 'error' => $e->getMessage()]);
+                    }
+                }
+            }
+        }
+
         foreach ($rawMembers as $member) {
             // Convert stdClass objects to arrays
             if (is_object($member) && !is_array($member)) {
@@ -1002,15 +1061,22 @@ class MemberService
             }
 
             $currentRolesList = [];
-            if ($personUuid) {
+            if ($personUuid && !$isLazy) {
                 try {
-                    $rolesList = $this->getPersonCurrentRolesByOrgId($personUuid, $orgUuid);
+                    // Use pre-fetched roles if available, fallback for safety
+                    if (isset($rolesByPerson[$personUuid])) {
+                        $rawRoles = $rolesByPerson[$personUuid];
+                        $rolesList = $this->normalizeRoleList($rawRoles);
+                    } else {
+                        $rolesList = $this->getPersonCurrentRolesByOrgId($personUuid, $orgUuid);
+                    }
+
                     if (is_array($rolesList)) {
                         $currentRolesList = array_values(array_filter(array_map('strval', $rolesList)));
                     }
                 } catch (\Throwable $e) {
                     $logger->warning(
-                        '[OrgMan] Failed to fetch person current roles',
+                        '[OrgMan] Failed to process person current roles',
                         [
                             'source'    => 'wicket-orgman',
                             'person_id' => $personUuid,
@@ -1057,12 +1123,19 @@ class MemberService
             $relationshipNamesBySlug = [];
             $relationshipDescription = null;
             $personConnectionIds = []; // Store all connection IDs for this organization
-            if ($personUuid) {
+            if ($personUuid && !$isLazy) {
                 try {
-                    $connections = $this->connectionService()->getPersonConnectionsById($personUuid);
+                    // Use pre-fetched data if available, fallback for safety
+                    if (isset($connectionsByPerson[$personUuid])) {
+                        $connectionsData = $connectionsByPerson[$personUuid];
+                    } else {
+                        $connections = $this->connectionService()->getPersonConnectionsById($personUuid);
+                        $connectionsData = $connections['data'] ?? [];
+                    }
+
                     $activeOnlyConnections = (bool) ($this->config['relationships']['display']['member_card_active_only'] ?? false);
-                    if (is_array($connections) && !empty($connections['data'])) {
-                        foreach ($connections['data'] as $conn) {
+                    if (is_array($connectionsData) && !empty($connectionsData)) {
+                        foreach ($connectionsData as $conn) {
                             $orgId = $conn['relationships']['organization']['data']['id'] ?? null;
                             if ($orgId !== $orgUuid) {
                                 continue;
@@ -1107,7 +1180,7 @@ class MemberService
                     }
                 } catch (\Throwable $e) {
                     $logger->warning(
-                        '[OrgMan] Failed to fetch person connections',
+                        '[OrgMan] Failed to process person connections',
                         [
                             'source'    => 'wicket-orgman',
                             'person_id' => $personUuid,

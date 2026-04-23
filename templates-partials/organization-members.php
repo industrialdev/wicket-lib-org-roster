@@ -65,8 +65,9 @@ if (!empty($membershipUuid)) {
             $org_uuid,
             [
                 'page' => 1,
-                'size' => 10,
-            ]
+                'size' => 15, // Standardized page size
+            ],
+            true // Enable lazy loading
         );
     } catch (\Throwable $e) {
         \OrgManagement\Helpers\Helper::log_error('[OrgMan] Failed to load members list: ' . $e->getMessage(), [
