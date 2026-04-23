@@ -294,7 +294,9 @@ $no_members_message = __('No members found.', 'wicket-acc');
                 // Create person UUID without dashes for unique IDs
                 $person_uuid_no_dashes = $member_uuid ? str_replace('-', '', $member_uuid) : uniqid('member', true);
             ?>
-            <div class="member-card wt_bg-light-neutral wt_rounded-card wt_p-6 wt_transition-opacity wt_duration-300" id="member-<?php echo esc_attr($person_uuid_no_dashes); ?>">
+            <div class="member-card wt_bg-light-neutral wt_rounded-card wt_p-6 wt_transition-opacity wt_duration-300" 
+                id="member-card-<?php echo esc_attr($person_uuid_no_dashes); ?>"
+                data-signals="{ lazy_<?php echo esc_attr($person_uuid_no_dashes); ?>: false }">
                 <div class="wt_flex wt_w-full md_wt_flex-row wt_items-start wt_justify-between wt_gap-4">
                     <div class="wt_flex wt_flex-col wt_gap-2 wt_w-full md_wt_w-4-5">
                         <div class="wt_flex wt_flex-col sm_wt_flex-row wt_items-start sm_wt_items-center wt_gap-2">
@@ -338,11 +340,16 @@ $no_members_message = __('No members found.', 'wicket-acc');
                         <div id="member-details-<?php echo esc_attr($person_uuid_no_dashes); ?>" class="wt_flex wt_flex-col wt_gap-2">
                             <?php if (empty($member['lazy_loaded'])) : ?>
                                 <?php
-                                    $lazy_details_url = OrgHelpers\template_url() . 'member-details&person_uuid=' . rawurlencode((string) $member_uuid) . '&org_uuid=' . $encodedOrgUuid . '&membership_uuid=' . rawurlencode((string) ($membership_uuid ?? ''));
+                                    $lazy_details_url = add_query_arg([
+                                        'action'          => 'hypermedia',
+                                        'template'        => 'member-details',
+                                        'person_uuid'     => (string) $member_uuid,
+                                        'org_uuid'        => (string) $org_uuid,
+                                        'membership_uuid' => (string) ($membership_uuid ?? ''),
+                                    ], home_url('/'));
                                 ?>
-                                <div class="wt_animate-pulse wt_flex wt_flex-col wt_gap-2"
-                                    data-on:intersect="@get('<?php echo esc_js($lazy_details_url); ?>')">
-                                    <div class="wt_h-4 wt_bg-gray-200 wt_rounded wt_w-1/4"></div>
+                                <div class="wt_animate-pulse wt_p-2 wt_bg-gray-50 wt_rounded"
+                                    data-on-load="@get('<?php echo esc_js($lazy_details_url); ?>')">
                                     <div class="wt_h-4 wt_bg-gray-200 wt_rounded wt_w-1/2"></div>
                                 </div>
                             <?php else : ?>

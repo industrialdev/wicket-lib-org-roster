@@ -4,9 +4,13 @@ declare(strict_types=1);
 
 namespace OrgManagement\Templates;
 
-use OrgManagement\Services\MemberService;
+\Wicket()->log()->info('[OrgMan] member-details.php script execution started', [
+    'get' => $_GET,
+    'uri' => $_SERVER['REQUEST_URI'] ?? 'unknown',
+]);
+
 use OrgManagement\Services\ConfigService;
-use OrgManagement\Helpers\DatastarSSE;
+use OrgManagement\Services\MemberService;
 use starfederation\datastar\ServerSentEventGenerator;
 
 // Ensure this file is not accessed directly.
@@ -18,10 +22,15 @@ if (!defined('ABSPATH')) {
  * Lazy loading endpoint for member card cosmetic details.
  * Returns Datastar SSE fragments.
  */
-
 $person_uuid = isset($_GET['person_uuid']) ? sanitize_text_field($_GET['person_uuid']) : '';
 $org_uuid = isset($_GET['org_uuid']) ? sanitize_text_field($_GET['org_uuid']) : '';
 $membership_uuid = isset($_GET['membership_uuid']) ? sanitize_text_field($_GET['membership_uuid']) : '';
+
+\OrgManagement\Helpers\Helper::log_debug('[OrgMan] member-details endpoint hit', [
+    'person_uuid'     => $person_uuid,
+    'org_uuid'        => $org_uuid,
+    'membership_uuid' => $membership_uuid,
+]);
 
 if (empty($person_uuid) || empty($org_uuid)) {
     exit;
@@ -63,7 +72,14 @@ if (false === $member) {
     }
 }
 
+// Initialize Datastar SSE Generator
+$generator = new ServerSentEventGenerator();
+$person_uuid_no_dashes = str_replace('-', '', $person_uuid);
+
+// If the member was filtered out by the full load (e.g. relationship filters), remove the card
 if (!$member) {
+    // Delete the entire card container
+    $generator->deleteFragments('#member-card-' . $person_uuid_no_dashes);
     exit;
 }
 
@@ -78,10 +94,6 @@ $unconfirmed_label = (string) ($member_list_config['unconfirmed_label'] ?? __('U
 $confirmed_tooltip = __('Confirmed Wicket Account', 'wicket-acc');
 $unconfirmed_tooltip = __('Unconfirmed Wicket Account', 'wicket-acc');
 $member_email = $member['email'] ?? '';
-$person_uuid_no_dashes = str_replace('-', '', $person_uuid);
-
-// Initialize Datastar SSE Generator
-$generator = new ServerSentEventGenerator();
 
 // Fragment 1: Update Status Indicator
 ob_start();
@@ -115,6 +127,7 @@ $formatted_roles = array_map(static function ($role) use ($role_display_map) {
     if (isset($role_display_map[$role])) {
         return $role_display_map[$role];
     }
+
     return ucwords(str_replace('_', ' ', (string) $role));
 }, is_array($current_roles) ? $current_roles : []);
 $roles_text = !empty($formatted_roles) ? implode(', ', $formatted_roles) : '—';

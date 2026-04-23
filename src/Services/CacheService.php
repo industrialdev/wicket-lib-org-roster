@@ -29,6 +29,7 @@ class CacheService
         }
 
         $versionedKey = $this->getVersionedKey($key);
+
         return get_transient($versionedKey);
     }
 
@@ -48,7 +49,7 @@ class CacheService
 
         $cacheDuration = $duration ?? ConfigHelper::get_cache_duration();
         $versionedKey = $this->getVersionedKey($key);
-        
+
         return set_transient($versionedKey, $data, $cacheDuration);
     }
 
@@ -65,6 +66,7 @@ class CacheService
         }
 
         $versionedKey = $this->getVersionedKey($key);
+
         return delete_transient($versionedKey);
     }
 
@@ -77,6 +79,7 @@ class CacheService
     private function getVersionedKey(string $key): string
     {
         $salt = ConfigHelper::get_cache_salt();
+
         return 'orgman_' . $salt . '_' . md5($key);
     }
 
@@ -111,7 +114,7 @@ class CacheService
         for ($p = 1; $p <= 5; $p++) {
             foreach ($commonPageSizes as $size) {
                 $this->delete('orgman_members_' . md5($membershipUuid . $p . $size));
-                
+
                 // Legacy "initial" key formats used in wicket-wp-stack
                 delete_transient('orgman_members_initial_' . md5($membershipUuid . '_' . $p . '_' . $size));
             }

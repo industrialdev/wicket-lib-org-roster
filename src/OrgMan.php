@@ -89,6 +89,12 @@ final class OrgMan
      */
     public function init()
     {
+        // Explicitly include new services that might not be in the autoloader yet in all environments
+        $base_path = dirname(__DIR__);
+        if (file_exists($base_path . '/src/Services/CacheService.php')) {
+            require_once $base_path . '/src/Services/CacheService.php';
+        }
+
         $this->loadConfig();
         $this->initServices();
         $this->initControllers();

@@ -112,6 +112,7 @@ class TemplateHelper extends Helper
         $template_dir = dirname(dirname(__DIR__)); // Go up to org-management root
 
         $template_map = [
+            'member-details' => $template_dir . '/templates-partials/member-details.php',
             'group-members-list' => $template_dir . '/templates-partials/group-members-list-endpoint.php',
             'process/add-group-member' => $template_dir . '/templates-partials/process/add-group-member.php',
             'process/remove-group-member' => $template_dir . '/templates-partials/process/remove-group-member.php',
@@ -120,18 +121,29 @@ class TemplateHelper extends Helper
 
         $template_path = $template_map[$template] ?? ($template_dir . '/templates-partials/' . $relative_path);
 
+        \Wicket()->log()->info('[OrgMan] Resolving template', [
+            'template' => $template,
+            'is_mapped' => isset($template_map[$template]),
+            'resolved_path' => $template_path
+        ]);
+
         // Security: Ensure the template file exists within our plugin directory
         $real_template_path = realpath($template_path);
         $real_plugin_dir = realpath($template_dir);
 
         if (!$real_template_path || !$real_plugin_dir
              || strpos($real_template_path, $real_plugin_dir) !== 0) {
-            self::log_error('Template not found: ' . $template_path);
+            \Wicket()->log()->error('[OrgMan] Template security check failed or file missing', [
+                'path' => $template_path,
+                'real_path' => $real_template_path ?: 'false',
+                'plugin_dir' => $real_plugin_dir
+            ]);
             wp_die('Template not found.');
             exit;
         }
 
         if (file_exists($real_template_path)) {
+            \Wicket()->log()->info('[OrgMan] Loading template', ['file' => $real_template_path]);
             // Load services that templates might need
             if (!isset($args['organizations']) && $template === 'organization-list') {
                 // Initialize the organization service
@@ -204,6 +216,14 @@ class TemplateHelper extends Helper
     {
         $action = $wp->query_vars['action'] ?? '';
         $template = $wp->query_vars['template'] ?? '';
+
+        if (!empty($action) || !empty($template)) {
+            \Wicket()->log()->info('[OrgMan] Hypermedia request detected', [
+                'action' => $action,
+                'template' => $template,
+                'query_vars' => $wp->query_vars
+            ]);
+        }
 
         if ($action === 'hypermedia' && !empty($template)) {
             // Normalize org_id=>org_uuid for hypermedia endpoint too

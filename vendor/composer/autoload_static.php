@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitce6ec697dc6968bc76c761566fcb716b
+class ComposerStaticInita58837f1a0b2aa6517e606198733014a
 {
     public static $prefixLengthsPsr4 = array (
         's' =>
@@ -50,6 +50,7 @@ class ComposerStaticInitce6ec697dc6968bc76c761566fcb716b
         'OrgManagement\\Services\\AdditionalSeatsService' => __DIR__ . '/../..' . '/src/Services/AdditionalSeatsService.php',
         'OrgManagement\\Services\\BulkMemberUploadService' => __DIR__ . '/../..' . '/src/Services/BulkMemberUploadService.php',
         'OrgManagement\\Services\\BusinessInfoService' => __DIR__ . '/../..' . '/src/Services/BusinessInfoService.php',
+        'OrgManagement\\Services\\CacheService' => __DIR__ . '/../..' . '/src/Services/CacheService.php',
         'OrgManagement\\Services\\ConfigService' => __DIR__ . '/../..' . '/src/Services/ConfigService.php',
         'OrgManagement\\Services\\ConnectionService' => __DIR__ . '/../..' . '/src/Services/ConnectionService.php',
         'OrgManagement\\Services\\DocumentService' => __DIR__ . '/../..' . '/src/Services/DocumentService.php',
@@ -88,9 +89,9 @@ class ComposerStaticInitce6ec697dc6968bc76c761566fcb716b
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitce6ec697dc6968bc76c761566fcb716b::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitce6ec697dc6968bc76c761566fcb716b::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInitce6ec697dc6968bc76c761566fcb716b::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInita58837f1a0b2aa6517e606198733014a::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInita58837f1a0b2aa6517e606198733014a::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInita58837f1a0b2aa6517e606198733014a::$classMap;
 
         }, null, ClassLoader::class);
     }

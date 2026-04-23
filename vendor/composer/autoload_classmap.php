@@ -27,6 +27,7 @@ return array(
     'OrgManagement\\Services\\AdditionalSeatsService' => $baseDir . '/src/Services/AdditionalSeatsService.php',
     'OrgManagement\\Services\\BulkMemberUploadService' => $baseDir . '/src/Services/BulkMemberUploadService.php',
     'OrgManagement\\Services\\BusinessInfoService' => $baseDir . '/src/Services/BusinessInfoService.php',
+    'OrgManagement\\Services\\CacheService' => $baseDir . '/src/Services/CacheService.php',
     'OrgManagement\\Services\\ConfigService' => $baseDir . '/src/Services/ConfigService.php',
     'OrgManagement\\Services\\ConnectionService' => $baseDir . '/src/Services/ConnectionService.php',
     'OrgManagement\\Services\\DocumentService' => $baseDir . '/src/Services/DocumentService.php',

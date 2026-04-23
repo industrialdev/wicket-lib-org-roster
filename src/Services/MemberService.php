@@ -980,7 +980,7 @@ class MemberService
                             $orgConnections = array_filter($response['data'], static function ($conn) use ($orgUuid) {
                                 $connOrgId = $conn['relationships']['organization']['data']['id'] ?? '';
 
-                                return (string) $connOrgId === (string) $orgUuid;
+                                return trim((string) $connOrgId) === trim((string) $orgUuid);
                             });
 
                             if (!empty($orgConnections)) {
@@ -1137,7 +1137,7 @@ class MemberService
                     if (is_array($connectionsData) && !empty($connectionsData)) {
                         foreach ($connectionsData as $conn) {
                             $orgId = $conn['relationships']['organization']['data']['id'] ?? null;
-                            if ($orgId !== $orgUuid) {
+                            if (trim((string) $orgId) !== trim((string) $orgUuid)) {
                                 continue;
                             }
 
@@ -1202,7 +1202,7 @@ class MemberService
                 }));
             }
 
-            if ((!empty($allowedTypes) || !empty($excludedTypes)) && empty($relationshipSlugs)) {
+            if (!$isLazy && (!empty($allowedTypes) || !empty($excludedTypes)) && empty($relationshipSlugs)) {
                 continue;
             }
 
@@ -1237,6 +1237,7 @@ class MemberService
                 'is_owner'              => (!empty($ownerId) && $personUuid && $personUuid === $ownerId),
                 'person_connection_ids_list' => array_values(array_unique(array_filter(array_map('strval', $personConnectionIds)))),
                 'person_membership_id'  => $member['id'] ?? null,
+                'lazy_loaded'           => !$isLazy,
             ];
 
             $personKey = is_string($personUuid) ? trim($personUuid) : '';
