@@ -98,7 +98,12 @@ class PermissionService
                 }
 
                 if ($resource_id === $org_id) {
-                    $roles[] = $role['attributes']['name'] ?? '';
+                    $role_slug = $role['attributes']['slug'] ?? '';
+                    // Strip UUID suffix if present (e.g., "membership_manager-11cf43f7..." -> "membership_manager")
+                    if (str_contains($role_slug, '-')) {
+                        $role_slug = explode('-', $role_slug)[0];
+                    }
+                    $roles[] = $role_slug;
                 }
             }
 

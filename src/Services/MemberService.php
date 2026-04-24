@@ -840,10 +840,11 @@ class MemberService
         // Covers both regular and search loads so SSE calls on subsequent renders hit cache.
         if (!$lazy && !empty($result['members'])) {
             $cacheService = new CacheService();
+            $gen = $cacheService->getMembershipGeneration($membershipUuid);
             foreach ($result['members'] as $member) {
                 $personUuid = $member['person_uuid'] ?? '';
                 if ($personUuid !== '') {
-                    $lazyCacheKey = 'orgman_lazy_details_' . md5($personUuid . $orgUuid . $membershipUuid);
+                    $lazyCacheKey = 'orgman_lazy_details_' . md5($personUuid . $orgUuid . $membershipUuid . $gen);
                     $cacheService->set($lazyCacheKey, $member);
                 }
             }
@@ -911,26 +912,8 @@ class MemberService
         $members = $response['data'] ?? [];
         $matched_member = null;
 
-        \Wicket()->log()->debug('getMemberByPersonUuid: Filtering results', [
-            'source'          => 'wicket-orgman',
-            'person_uuid'     => $personUuid,
-            'membership_uuid' => $membershipUuid,
-            'org_uuid'        => $orgUuid,
-            'results_count'   => count($members),
-        ]);
-
-        foreach ($members as $idx => $member) {
+        foreach ($members as $member) {
             $person_id = $member['relationships']['person']['data']['id'] ?? null;
-
-            \Wicket()->log()->debug('getMemberByPersonUuid: Checking member', [
-                'source'            => 'wicket-orgman',
-                'person_uuid'       => $personUuid,
-                'index'             => $idx,
-                'person_id'         => $person_id,
-                'target_person_uuid'=> $personUuid,
-                'match'             => $person_id === $personUuid ? 'YES' : 'NO',
-            ]);
-
             if ($person_id === $personUuid) {
                 $matched_member = $member;
                 break;
@@ -1042,16 +1025,6 @@ class MemberService
                 $rawMembers = $membersResponse;
             }
         }
-
-        $logger->debug('prepareMembersResult input', [
-            'source' => 'wicket-orgman',
-            'raw_members_count' => count($rawMembers),
-            'page' => $page,
-            'size' => $size,
-            'isLazy' => $isLazy,
-            'response_has_data' => isset($membersResponse['data']),
-            'response_has_included' => isset($membersResponse['included']),
-        ]);
 
         // Convert any stdClass objects in rawMembers to arrays
         $rawMembers = array_map(static function ($member) {
@@ -1170,6 +1143,10 @@ class MemberService
                                 $resourceId = $role['relationships']['resource']['data']['id'] ?? '';
                                 if ((string) $resourceId === (string) $orgUuid) {
                                     $roleSlug = $role['attributes']['slug'] ?? '';
+                                    // Strip UUID suffix if present (e.g., "membership_manager-11cf43f7..." -> "membership_manager")
+                                    if ($roleSlug !== '' && str_contains($roleSlug, '-')) {
+                                        $roleSlug = explode('-', $roleSlug)[0];
+                                    }
                                     if ($roleSlug !== '') {
                                         $orgRoles[] = $roleSlug;
                                     }
@@ -1231,10 +1208,10 @@ class MemberService
             }
 
             $currentRolesList = [];
-            if ($personUuid && !$isLazy) {
+            if ($personUuid) {
                 try {
-                    // Use pre-fetched roles if available, fallback for safety
-                    if (isset($rolesByPerson[$personUuid])) {
+                    // Use pre-fetched roles if available (non-lazy only), fallback for safety
+                    if (!$isLazy && isset($rolesByPerson[$personUuid])) {
                         $rawRoles = $rolesByPerson[$personUuid];
                         $rolesList = $this->normalizeRoleList($rawRoles);
                     } else {
@@ -1423,45 +1400,17 @@ class MemberService
             if ($personKey !== '') {
                 // Add all person_membership records (no deduplication by person)
                 $members[] = $this->finalizePreparedMemberRow($memberRow);
-                $logger->debug('Added member record (allowing duplicates)', [
-                    'source' => 'wicket-orgman',
-                    'person_uuid' => $personUuid,
-                    'person_membership_id' => $member['id'] ?? null,
-                    'members_count' => count($members),
-                ]);
                 $loopSuccess++;
             } else {
                 $membersWithoutPerson[] = $memberRow;
-                $logger->debug('Added member to membersWithoutPerson', [
-                    'source' => 'wicket-orgman',
-                    'person_uuid' => $personUuid,
-                    'members_without_person_count' => count($membersWithoutPerson),
-                ]);
                 $loopSuccess++;
             }
         }
-
-        $logger->debug('Loop processing complete', [
-            'source' => 'wicket-orgman',
-            'raw_members_count' => count($rawMembers),
-            'loop_iterations' => $loopCounter,
-            'loop_continues' => $loopContinue,
-            'loop_success' => $loopSuccess,
-            'final_members_count' => count($members),
-            'final_members_without_person' => count($membersWithoutPerson),
-        ]);
 
         // Add members without person data (if any)
         foreach ($membersWithoutPerson as $memberRow) {
             $members[] = $this->finalizePreparedMemberRow($memberRow);
         }
-
-        $logger->debug('prepareMembersResult output', [
-            'source' => 'wicket-orgman',
-            'final_members_count' => count($members),
-            'members_without_person_count' => count($membersWithoutPerson),
-            'total_items_from_meta' => $totalItems ?? 'not_set',
-        ]);
 
         $totalItems = 0;
         if (is_array($membersResponse)) {
@@ -1592,7 +1541,14 @@ class MemberService
                     isset($role['relationships']['resource']['data']['id'])
                     && $role['relationships']['resource']['data']['id'] === $orgUuid
                 ) {
-                    $roles[] = $role['attributes']['name'];
+                    $role_slug = $role['attributes']['slug'] ?? '';
+                    // Strip UUID suffix if present (e.g., "membership_manager-11cf43f7..." -> "membership_manager")
+                    if ($role_slug !== '' && str_contains($role_slug, '-')) {
+                        $role_slug = explode('-', $role_slug)[0];
+                    }
+                    if ($role_slug !== '') {
+                        $roles[] = $role_slug;
+                    }
                 }
             }
 

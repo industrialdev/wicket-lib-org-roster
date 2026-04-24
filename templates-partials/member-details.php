@@ -46,7 +46,8 @@ $member_service = new MemberService($config_service);
 // Fetch the member with full details (lazy = false)
 // Uses CacheService so the versioned cache_salt key invalidates this alongside the member list.
 $cache_service = new CacheService();
-$cache_key = 'orgman_lazy_details_' . md5($person_uuid . $org_uuid . $membership_uuid);
+$gen = $cache_service->getMembershipGeneration($membership_uuid);
+$cache_key = 'orgman_lazy_details_' . md5($person_uuid . $org_uuid . $membership_uuid . $gen);
 $member = $cache_service->get($cache_key);
 
 if (false === $member) {
@@ -81,6 +82,14 @@ if (!$member) {
 $member['lazy_loaded'] = true;
 // Derive is_confirmed from confirmed_at (the service never populates is_confirmed directly).
 $member['is_confirmed'] = !empty($member['confirmed_at']);
+
+\Wicket()->log()->debug('member-details: Member data fetched', [
+    'source' => 'wicket-orgman',
+    'person_uuid' => $person_uuid,
+    'roles' => $member['roles'] ?? [],
+    'current_roles' => $member['current_roles'] ?? [],
+    'lazy_loaded' => $member['lazy_loaded'] ?? false,
+]);
 
 // Shared variables for the partials
 $config = \OrgManagement\Config\OrgManConfig::get();
