@@ -55,7 +55,7 @@ $person_uuid_no_dashes = str_replace('-', '', $person_uuid);
 
 // If the member was filtered out by the full load (e.g. relationship filters), remove the card
 if (!$member) {
-    \Wicket()->log()->warning('member-details: Member not found, removing card', [
+    \Wicket()->log()->info('member-details: Member not found, removing card', [
         'source' => 'wicket-orgman',
         'person_uuid'     => $person_uuid,
         'org_uuid'        => $org_uuid,

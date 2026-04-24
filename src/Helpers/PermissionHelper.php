@@ -309,7 +309,7 @@ class PermissionHelper extends Helper
 
         // Use wicket_get_person_active_memberships to support impersonation
         if (!function_exists('wicket_get_person_active_memberships')) {
-            \Wicket()->log()->warning('wicket_get_person_active_memberships function not available', [
+            \Wicket()->log()->info('wicket_get_person_active_memberships function not available', [
                 'source' => 'wicket-orgman',
                 'org_id' => $org_id,
             ]);
@@ -575,7 +575,7 @@ class PermissionHelper extends Helper
         try {
             // Get the organization membership to find the owner
             if (!class_exists('\OrgManagement\Services\MembershipService')) {
-                \Wicket()->log()->warning('MembershipService class not available', [
+                \Wicket()->log()->info('MembershipService class not available', [
                     'source' => 'wicket-orgman',
                     'org_id' => $org_id,
                 ]);

@@ -238,7 +238,7 @@ class OrganizationService
                 $page_number++;
             } while ($page_number <= $total_pages);
         } catch (\Throwable $e) {
-            \Wicket()->log()->warning('Failed resolving organizations from role-only access: ' . $e->getMessage(), [
+            \Wicket()->log()->info('Failed resolving organizations from role-only access: ' . $e->getMessage(), [
                 'source' => 'wicket-orgman',
                 'person_uuid' => $person_uuid,
             ]);
@@ -349,7 +349,7 @@ class OrganizationService
                 $page_number++;
             } while ($page_number <= $total_pages);
         } catch (\Throwable $e) {
-            \Wicket()->log()->warning('Failed resolving organizations from ownership: ' . $e->getMessage(), [
+            \Wicket()->log()->info('Failed resolving organizations from ownership: ' . $e->getMessage(), [
                 'source' => 'wicket-orgman',
                 'person_uuid' => $person_uuid,
             ]);
@@ -550,7 +550,7 @@ class OrganizationService
 
             return $membershipService->getMembershipForOrganization($organizationUuid);
         } catch (\Throwable $e) {
-            \Wicket()->log()->warning(
+            \Wicket()->log()->info(
                 'Failed resolving membership uuid for organization: ' . $e->getMessage(),
                 [
                     'source'   => 'wicket-orgman',

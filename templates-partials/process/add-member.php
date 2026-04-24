@@ -226,14 +226,14 @@ if ('POST' === strtoupper($request_method)) {
                     ]);
 
                     if (!$opt_in_result) {
-                        \Wicket()->log()->warning('Auto-opt-in failed', [
+                        \Wicket()->log()->info('Auto-opt-in failed', [
                             'source' => 'wicket-orgman',
                             'person_uuid' => $result['person_uuid'],
                         ]);
                     }
                 }
             } else {
-                \Wicket()->log()->warning('Auto-opt-in skipped: helper function missing', [
+                \Wicket()->log()->info('Auto-opt-in skipped: helper function missing', [
                     'source' => 'wicket-orgman',
                 ]);
             }

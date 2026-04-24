@@ -898,7 +898,7 @@ class MemberService
         }
 
         if (!is_array($response) || empty($response['data'])) {
-            \Wicket()->log()->warning('getMemberByPersonUuid: No data returned from API', [
+            \Wicket()->log()->info('getMemberByPersonUuid: No data returned from API', [
                 'source'          => 'wicket-orgman',
                 'person_uuid'     => $personUuid,
                 'membership_uuid' => $membershipUuid,
@@ -921,7 +921,7 @@ class MemberService
         }
 
         if (!$matched_member) {
-            \Wicket()->log()->warning('getMemberByPersonUuid: No matching person found', [
+            \Wicket()->log()->info('getMemberByPersonUuid: No matching person found', [
                 'source'          => 'wicket-orgman',
                 'person_uuid'     => $personUuid,
                 'membership_uuid' => $membershipUuid,
@@ -935,7 +935,7 @@ class MemberService
         $filtered_response = $response;
         $filtered_response['data'] = [$matched_member];
 
-        \Wicket()->log()->warning('getMemberByPersonUuid: Response structure', [
+        \Wicket()->log()->info('getMemberByPersonUuid: Response structure', [
             'source' => 'wicket-orgman',
             'person_uuid' => $personUuid,
             'has_included' => isset($response['included']),
@@ -1466,7 +1466,7 @@ class MemberService
 
         $decoded = json_decode($body, true);
         if (json_last_error() !== JSON_ERROR_NONE) {
-            \Wicket()->log()->warning(
+            \Wicket()->log()->info(
                 'Unable to decode membership response JSON',
                 [
                     'source' => 'wicket-orgman',
