@@ -46,6 +46,13 @@ $membershipUuid = $requested_membership_uuid !== ''
     ? $requested_membership_uuid
     : $membershipService->getMembershipForOrganization($org_uuid);
 
+$presentation_config = is_array($orgman_config['presentation'] ?? null)
+    ? $orgman_config['presentation']
+    : [];
+$member_list_config = is_array($presentation_config['member_list'] ?? null)
+    ? $presentation_config['member_list']
+    : [];
+
 $membersResult = [
     'members'    => [],
     'pagination' => [
@@ -60,12 +67,13 @@ $membersResult = [
 
 if (!empty($membershipUuid)) {
     try {
+        $requested_page_size = (int) ($member_list_config['page_size'] ?? 15);
         $membersResult = $member_service->getMembers(
             $membershipUuid,
             $org_uuid,
             [
                 'page' => 1,
-                'size' => 15, // Standardized page size
+                'size' => $requested_page_size,
             ],
             true // Enable lazy loading
         );
@@ -89,12 +97,6 @@ $members = $membersResult['members'] ?? [];
 $pagination = $membersResult['pagination'];
 $query = $membersResult['query'] ?? '';
 $totalMemberCount = (int) ($pagination['totalItems'] ?? count($members));
-$presentation_config = is_array($orgman_config['presentation'] ?? null)
-    ? $orgman_config['presentation']
-    : [];
-$member_list_config = is_array($presentation_config['member_list'] ?? null)
-    ? $presentation_config['member_list']
-    : [];
 $show_bulk_upload = (bool) ($member_list_config['show_bulk_upload'] ?? false);
 
 \OrgManagement\Helpers\Helper::log_debug('[OrgMan] Members render summary', [

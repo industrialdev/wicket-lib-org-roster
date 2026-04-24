@@ -348,7 +348,7 @@ class MemberService
         $queryParams = [
             'page[number]' => $page,
             'page[size]'   => $size,
-            'include'      => 'person,membership',
+            'include'      => 'person,membership,user',
             'filter[active_at]' => 'now',
         ];
 
@@ -1017,6 +1017,16 @@ class MemberService
             }
         }
 
+        $logger->debug('[OrgMan] prepareMembersResult input', [
+            'source' => 'wicket-orgman',
+            'raw_members_count' => count($rawMembers),
+            'page' => $page,
+            'size' => $size,
+            'isLazy' => $isLazy,
+            'response_has_data' => isset($membersResponse['data']),
+            'response_has_included' => isset($membersResponse['included']),
+        ]);
+
         // Convert any stdClass objects in rawMembers to arrays
         $rawMembers = array_map(static function ($member) {
             if (is_object($member) && !is_array($member)) {
@@ -1046,6 +1056,7 @@ class MemberService
         }
 
         $peopleIndex = [];
+        $userIndex = [];
         if (is_array($membersResponse) && isset($membersResponse['included']) && is_array($membersResponse['included'])) {
             foreach ($membersResponse['included'] as $included) {
                 // Convert stdClass objects to arrays
@@ -1053,11 +1064,24 @@ class MemberService
                     $included = json_decode(json_encode($included), true);
                 }
 
-                if (($included['type'] ?? '') === 'people' && isset($included['id'])) {
-                    $peopleIndex[$included['id']] = $included;
+                $type = $included['type'] ?? '';
+                $id = $included['id'] ?? '';
+
+                if ($type === 'people' && $id !== '') {
+                    $peopleIndex[$id] = $included;
+                }
+
+                // Build user index by person_id (user has relationship to person)
+                if ($type === 'users' && $id !== '') {
+                    $personId = $included['relationships']['person']['data']['id'] ?? '';
+                    if ($personId !== '') {
+                        $userIndex[$personId] = $included;
+                    }
                 }
             }
         }
+
+        $logger->debug('[OrgMan] userIndex built', ['count' => count($userIndex)]);
 
         $allowedTypes = $this->normalizeRelationshipTypeList((array) ($this->config['relationships']['filters']['allowlist'] ?? []));
         $excludedTypes = $this->normalizeRelationshipTypeList((array) ($this->config['relationships']['filters']['denylist'] ?? []));
@@ -1065,8 +1089,12 @@ class MemberService
         $displayRoleExcludes = $this->normalizeRoleList((array) ($this->config['presentation']['member_list']['display_roles']['denylist'] ?? []));
         $relationshipTypeLabels = (array) ($this->config['relationships']['labels']['custom'] ?? []);
 
-        $membersByPerson = [];
+        $members = [];
         $membersWithoutPerson = [];
+
+        $loopCounter = 0;
+        $loopContinue = 0;
+        $loopSuccess = 0;
 
         // Pre-fetch connections and roles for all unique people to avoid N+1 calls inside the loop.
         $connectionsByPerson = [];
@@ -1141,13 +1169,21 @@ class MemberService
             }
         }
 
-        foreach ($rawMembers as $member) {
+        foreach ($rawMembers as $idx => $member) {
+            $loopCounter++;
+
             // Convert stdClass objects to arrays
             if (is_object($member) && !is_array($member)) {
                 $member = json_decode(json_encode($member), true);
             }
 
             if (!is_array($member)) {
+                $logger->debug('[OrgMan] Skipping member: not an array', [
+                    'source' => 'wicket-orgman',
+                    'index' => $idx,
+                    'member_type' => gettype($member),
+                ]);
+                $loopContinue++;
                 continue;
             }
 
@@ -1322,6 +1358,14 @@ class MemberService
             }
 
             if (!$isLazy && (!empty($allowedTypes) || !empty($excludedTypes)) && empty($relationshipSlugs)) {
+                $logger->debug('[OrgMan] Skipping member due to relationship filter', [
+                    'source' => 'wicket-orgman',
+                    'person_uuid' => $personUuid,
+                    'isLazy' => $isLazy,
+                    'allowedTypes' => $allowedTypes,
+                    'excludedTypes' => $excludedTypes,
+                    'relationshipSlugs' => $relationshipSlugs,
+                ]);
                 continue;
             }
 
@@ -1333,10 +1377,30 @@ class MemberService
                 }
             }
 
-            $confirmedAt = $personData['data']['attributes']['user']['confirmed_at']
-                ?? ($personData['user']['confirmed_at']
-                    ?? ($personAttributes['confirmed_at']
-                        ?? ($memberAttributes['confirmed_at'] ?? null)));
+            $confirmedAt = null;
+            if ($personUuid && isset($userIndex[$personUuid])) {
+                $userData = $userIndex[$personUuid];
+                $confirmedAt = $userData['attributes']['confirmed_at']
+                    ?? ($userData['data']['attributes']['confirmed_at'] ?? null);
+                $logger->debug('[OrgMan] Found confirmed_at from userIndex', [
+                    'person_uuid' => $personUuid,
+                    'confirmed_at' => $confirmedAt,
+                ]);
+            } else {
+                $logger->debug('[OrgMan] No userIndex entry', [
+                    'person_uuid' => $personUuid,
+                    'personUuid_empty' => $personUuid === '',
+                    'userIndex_keys' => array_keys($userIndex),
+                ]);
+            }
+
+            if (empty($confirmedAt)) {
+                $confirmedAt = $personAttributes['confirmed_at'] ?? $memberAttributes['confirmed_at'] ?? null;
+                $logger->debug('[OrgMan] Fallback confirmed_at', [
+                    'person_uuid' => $personUuid,
+                    'confirmed_at' => $confirmedAt,
+                ]);
+            }
 
             $memberRow = [
                 'person_uuid'           => $personUuid,
@@ -1361,23 +1425,47 @@ class MemberService
 
             $personKey = is_string($personUuid) ? trim($personUuid) : '';
             if ($personKey !== '') {
-                if (isset($membersByPerson[$personKey])) {
-                    $membersByPerson[$personKey] = $this->mergePreparedMemberRows($membersByPerson[$personKey], $memberRow);
-                } else {
-                    $membersByPerson[$personKey] = $memberRow;
-                }
+                // Add all person_membership records (no deduplication by person)
+                $members[] = $this->finalizePreparedMemberRow($memberRow);
+                $logger->debug('[OrgMan] Added member record (allowing duplicates)', [
+                    'source' => 'wicket-orgman',
+                    'person_uuid' => $personUuid,
+                    'person_membership_id' => $member['id'] ?? null,
+                    'members_count' => count($members),
+                ]);
+                $loopSuccess++;
             } else {
                 $membersWithoutPerson[] = $memberRow;
+                $logger->debug('[OrgMan] Added member to membersWithoutPerson', [
+                    'source' => 'wicket-orgman',
+                    'person_uuid' => $personUuid,
+                    'members_without_person_count' => count($membersWithoutPerson),
+                ]);
+                $loopSuccess++;
             }
         }
 
-        $members = [];
-        foreach ($membersByPerson as $memberRow) {
-            $members[] = $this->finalizePreparedMemberRow($memberRow);
-        }
+        $logger->debug('[OrgMan] Loop processing complete', [
+            'source' => 'wicket-orgman',
+            'raw_members_count' => count($rawMembers),
+            'loop_iterations' => $loopCounter,
+            'loop_continues' => $loopContinue,
+            'loop_success' => $loopSuccess,
+            'final_members_count' => count($members),
+            'final_members_without_person' => count($membersWithoutPerson),
+        ]);
+
+        // Add members without person data (if any)
         foreach ($membersWithoutPerson as $memberRow) {
             $members[] = $this->finalizePreparedMemberRow($memberRow);
         }
+
+        $logger->debug('[OrgMan] prepareMembersResult output', [
+            'source' => 'wicket-orgman',
+            'final_members_count' => count($members),
+            'members_without_person_count' => count($membersWithoutPerson),
+            'total_items_from_meta' => $totalItems ?? 'not_set',
+        ]);
 
         $totalItems = 0;
         if (is_array($membersResponse)) {
