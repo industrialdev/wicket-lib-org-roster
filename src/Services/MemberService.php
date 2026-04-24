@@ -835,6 +835,121 @@ class MemberService
     }
 
     /**
+     * Fetch a single member's full data by person UUID via direct API query.
+     * Used by the lazy-load SSE endpoint to avoid text-search limitations.
+     *
+     * @param string $personUuid     Person UUID to look up.
+     * @param string $membershipUuid Organization membership UUID.
+     * @param string $orgUuid        Organization UUID.
+     * @return array|null Normalized member array, or null if not found.
+     */
+    public function getMemberByPersonUuid(string $personUuid, string $membershipUuid, string $orgUuid): ?array
+    {
+        if (!function_exists('wicket_api_client')) {
+            return null;
+        }
+
+        try {
+            $client = wicket_api_client();
+
+            // Use the same nested endpoint pattern as getMembershipMembers()
+            // GET /organization_memberships/{membershipUuid}/person_memberships
+            $endpoint = '/organization_memberships/' . rawurlencode($membershipUuid) . '/person_memberships';
+            $queryParams = [
+                'page[number]' => 1,
+                'page[size]'   => 100,
+                'filter[active_at]' => 'now',
+                'include'      => 'person,membership',
+            ];
+
+            $response = $client->get($endpoint . '?' . http_build_query($queryParams));
+        } catch (\Throwable $e) {
+            \Wicket()->log()->error(
+                '[OrgMan] getMemberByPersonUuid API call failed',
+                [
+                    'source'          => 'wicket-orgman',
+                    'person_uuid'     => $personUuid,
+                    'membership_uuid' => $membershipUuid,
+                    'org_uuid'        => $orgUuid,
+                    'error'           => $e->getMessage(),
+                ]
+            );
+
+            return null;
+        }
+
+        if (!is_array($response) || empty($response['data'])) {
+            \Wicket()->log()->warning('[OrgMan] getMemberByPersonUuid: No data returned from API', [
+                'source'          => 'wicket-orgman',
+                'person_uuid'     => $personUuid,
+                'membership_uuid' => $membershipUuid,
+                'org_uuid'        => $orgUuid,
+                'response_keys'   => is_array($response) ? array_keys($response) : 'not_array',
+            ]);
+            return null;
+        }
+
+        // Filter results to find the matching person by person_id
+        $members = $response['data'] ?? [];
+        $matched_member = null;
+
+        \Wicket()->log()->debug('[OrgMan] getMemberByPersonUuid: Filtering results', [
+            'source'          => 'wicket-orgman',
+            'person_uuid'     => $personUuid,
+            'membership_uuid' => $membershipUuid,
+            'org_uuid'        => $orgUuid,
+            'results_count'   => count($members),
+        ]);
+
+        foreach ($members as $idx => $member) {
+            $person_id = $member['relationships']['person']['data']['id'] ?? null;
+
+            \Wicket()->log()->debug('[OrgMan] getMemberByPersonUuid: Checking member', [
+                'source'            => 'wicket-orgman',
+                'person_uuid'       => $personUuid,
+                'index'             => $idx,
+                'person_id'         => $person_id,
+                'target_person_uuid'=> $personUuid,
+                'match'             => $person_id === $personUuid ? 'YES' : 'NO',
+            ]);
+
+            if ($person_id === $personUuid) {
+                $matched_member = $member;
+                break;
+            }
+        }
+
+        if (!$matched_member) {
+            \Wicket()->log()->warning('[OrgMan] getMemberByPersonUuid: No matching person found', [
+                'source'          => 'wicket-orgman',
+                'person_uuid'     => $personUuid,
+                'membership_uuid' => $membershipUuid,
+                'org_uuid'        => $orgUuid,
+                'total_results'   => count($members),
+            ]);
+            return null;
+        }
+
+        // Reconstruct response with just the matched member
+        $filtered_response = $response;
+        $filtered_response['data'] = [$matched_member];
+
+        $result = $this->prepareMembersResult(
+            $filtered_response,
+            [
+                'org_uuid'        => $orgUuid,
+                'membership_uuid' => $membershipUuid,
+                'page'            => 1,
+                'size'            => 1,
+                'query'           => '',
+                'lazy'            => false,
+            ]
+        );
+
+        return $result['members'][0] ?? null;
+    }
+
+    /**
      * Retrieve group roster members for groups strategy.
      *
      * @param string $group_uuid Group identifier.

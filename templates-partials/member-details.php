@@ -6,11 +6,12 @@ namespace OrgManagement\Templates;
 
 \Wicket()->log()->info('[OrgMan] member-details.php script execution started', [
     'get' => $_GET,
-    'uri' => $_SERVER['REQUEST_URI'] ?? 'unknown',
+    'uri' => $_SERVER['REQUEST_URI'] ?? 'unknown'
 ]);
 
-use OrgManagement\Services\ConfigService;
 use OrgManagement\Services\MemberService;
+use OrgManagement\Services\ConfigService;
+use OrgManagement\Helpers\DatastarSSE;
 use starfederation\datastar\ServerSentEventGenerator;
 
 // Ensure this file is not accessed directly.
@@ -22,6 +23,7 @@ if (!defined('ABSPATH')) {
  * Lazy loading endpoint for member card cosmetic details.
  * Returns Datastar SSE fragments.
  */
+
 $person_uuid = isset($_REQUEST['person_uuid']) ? sanitize_text_field($_REQUEST['person_uuid']) : '';
 $org_uuid = isset($_REQUEST['org_uuid']) ? sanitize_text_field($_REQUEST['org_uuid']) : '';
 $membership_uuid = isset($_REQUEST['membership_uuid']) ? sanitize_text_field($_REQUEST['membership_uuid']) : '';
@@ -45,60 +47,51 @@ $cache_key = 'orgman_lazy_details_' . md5($person_uuid . $org_uuid . $membership
 $member = get_transient($cache_key);
 
 if (false === $member) {
-    $result = $member_service->getMembers(
-        $membership_uuid,
-        $org_uuid,
-        [
-            'page' => 1,
-            'size' => 1,
-            'query' => $person_uuid, // Service supports querying by UUID
-        ],
-        false // Full load
-    );
-
-    // Find our specific member in the result
-    $member = null;
-    if (!empty($result['members'])) {
-        foreach ($result['members'] as $m) {
-            if (($m['person_uuid'] ?? '') === $person_uuid) {
-                $member = $m;
-                break;
-            }
-        }
-    }
+    $member = $member_service->getMemberByPersonUuid($person_uuid, $membership_uuid, $org_uuid);
 
     if ($member) {
         set_transient($cache_key, $member, 1 * HOUR_IN_SECONDS);
     }
 }
 
-// Initialize Datastar SSE Generator
+// Initialize Datastar SSE Generator. sendHeaders() sets Content-Type: text/event-stream
+// (and keep-alive on HTTP/1.1); must be called before any output so Datastar's client-side
+// fetch can parse the stream instead of treating it as raw HTML.
 $generator = new ServerSentEventGenerator();
+$generator->sendHeaders();
 $person_uuid_no_dashes = str_replace('-', '', $person_uuid);
 
 // If the member was filtered out by the full load (e.g. relationship filters), remove the card
 if (!$member) {
+    \Wicket()->log()->warning('[OrgMan] member-details: Member not found, removing card', [
+        'person_uuid'     => $person_uuid,
+        'org_uuid'        => $org_uuid,
+        'membership_uuid' => $membershipUuid,
+    ]);
     // Delete the entire card container
-    $generator->deleteFragments('#member-card-' . $person_uuid_no_dashes);
+    $generator->removeElements('#member-' . $person_uuid_no_dashes);
     exit;
 }
 
 // Mark as lazy loaded for the template logic
 $member['lazy_loaded'] = true;
+// Derive is_confirmed from confirmed_at (the service never populates is_confirmed directly).
+$member['is_confirmed'] = !empty($member['confirmed_at']);
 
 // Shared variables for the partials
-$member_list_config = $config_service->getMemberListConfig();
-$show_account_status = (bool) ($member_list_config['show_account_status'] ?? true);
-$show_unconfirmed_label = (bool) ($member_list_config['show_unconfirmed_label'] ?? true);
-$unconfirmed_label = (string) ($member_list_config['unconfirmed_label'] ?? __('Unconfirmed', 'wicket-acc'));
-$confirmed_tooltip = __('Confirmed Wicket Account', 'wicket-acc');
-$unconfirmed_tooltip = __('Unconfirmed Wicket Account', 'wicket-acc');
+$config = \OrgManagement\Config\OrgManConfig::get();
+$member_list_config = $config['presentation']['member_list'] ?? [];
+$show_account_status = (bool) ($member_list_config['account_status']['enabled'] ?? true);
+$show_unconfirmed_label = (bool) ($member_list_config['account_status']['show_unconfirmed_label'] ?? true);
+$unconfirmed_label = (string) ($member_list_config['account_status']['unconfirmed_label'] ?? __('Account not confirmed', 'wicket-acc'));
+$confirmed_tooltip = (string) ($member_list_config['account_status']['confirmed_tooltip'] ?? __('Account confirmed', 'wicket-acc'));
+$unconfirmed_tooltip = (string) ($member_list_config['account_status']['unconfirmed_tooltip'] ?? __('Account not confirmed', 'wicket-acc'));
 $member_email = $member['email'] ?? '';
 
 // Fragment 1: Update Status Indicator
 ob_start();
 ?>
-<div id="member-status-<?php echo esc_attr($person_uuid_no_dashes); ?>" class="wt_inline-flex wt_items-center" data-merge="morph">
+<div id="member-status-<?php echo esc_attr($person_uuid_no_dashes); ?>" class="wt_inline-flex wt_items-center">
     <?php if ($show_account_status) : ?>
         <?php if (!empty($member['is_confirmed'])) : ?>
             <span class="wt_text-content" title="<?php echo esc_attr($confirmed_tooltip); ?>">
@@ -118,7 +111,7 @@ ob_start();
 </div>
 <?php
 $status_html = ob_get_clean();
-$generator->mergeFragments($status_html);
+$generator->patchElements($status_html);
 
 // Fragment 2: Update Details Block (Roles, Relationships, Email)
 $role_display_map = (array) ($member_list_config['display_roles']['labels'] ?? []);
@@ -127,18 +120,19 @@ $formatted_roles = array_map(static function ($role) use ($role_display_map) {
     if (isset($role_display_map[$role])) {
         return $role_display_map[$role];
     }
-
     return ucwords(str_replace('_', ' ', (string) $role));
 }, is_array($current_roles) ? $current_roles : []);
 $roles_text = !empty($formatted_roles) ? implode(', ', $formatted_roles) : '—';
 
 ob_start();
 ?>
-<div id="member-details-<?php echo esc_attr($person_uuid_no_dashes); ?>" class="wt_flex wt_flex-col wt_gap-2" data-merge="morph">
-    <?php
-    // Check if relationship type should be hidden
-    if (!empty($member['relationship_names']) && !\OrgManagement\Helpers\Helper::should_hide_relationship_type()) :
-        ?>
+<div id="member-details-<?php echo esc_attr($person_uuid_no_dashes); ?>" class="wt_flex wt_flex-col wt_gap-2">
+    <?php if (!empty($member['relationship_description']) && \OrgManagement\Helpers\Helper::should_show_member_description()) : ?>
+        <p class="member-description wt_text-sm wt_text-content wt_mb-0">
+            <?php echo esc_html($member['relationship_description']); ?>
+        </p>
+    <?php endif; ?>
+    <?php if (!empty($member['relationship_names']) && !\OrgManagement\Helpers\Helper::should_hide_relationship_type()) : ?>
         <div class="wt_flex wt_items-center wt_gap-2">
             <span class="wt_text-content"><?php echo esc_html($member['relationship_names']); ?></span>
         </div>
@@ -152,11 +146,11 @@ ob_start();
     <?php endif; ?>
     <?php if (\OrgManagement\Helpers\Helper::should_show_member_roles()) : ?>
         <div class="wt_flex wt_items-baseline wt_gap-2 wt_text-sm">
-            <strong><?php esc_html_e('Roles:', 'wicket-acc'); ?></strong>
+            <strong><?php esc_html_e('Role(s):', 'wicket-acc'); ?></strong>
             <span class="wt_text-content"><?php echo esc_html($roles_text); ?></span>
         </div>
     <?php endif; ?>
 </div>
 <?php
 $details_html = ob_get_clean();
-$generator->mergeFragments($details_html);
+$generator->patchElements($details_html);

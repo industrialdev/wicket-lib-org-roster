@@ -245,13 +245,15 @@ class TemplateHelper extends Helper
                 ob_end_clean();
             }
 
-            // Set headers for template-only response
-            header('Content-Type: text/html; charset=' . get_option('blog_charset'));
+            // No-cache is safe for both text/html and text/event-stream responses.
             header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
             header('Cache-Control: post-check=0, pre-check=0', false);
             header('Pragma: no-cache');
 
-            // Load the template using our helper function
+            // Content-Type is intentionally NOT set here. SSE templates (e.g. member-details)
+            // call ServerSentEventGenerator::sendHeaders() themselves to set text/event-stream;
+            // plain HTML templates fall back to PHP's default text/html. Setting text/html up
+            // front breaks Datastar SSE parsing for streaming templates.
             self::wicket_orgman_get_template($template, []);
 
             // Exit to prevent any further WordPress processing

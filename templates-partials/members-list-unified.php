@@ -137,10 +137,15 @@ if ($membership_uuid !== '') {
     }
 }
 
-$member_service = null;
-if ($show_account_status) {
-    $member_service = new OrgManagement\Services\MemberService(new OrgManagement\Services\ConfigService());
-}
+// Lazy-detail endpoint: each card initially renders with only the data that's cheap to
+// compute server-side (name, email, owner, confirmed_at). Org-scoped roles, relationship
+// names, and description require per-person API calls and are deferred to this endpoint,
+// which patches fragments back via SSE into #member-status-<uuid> and #member-details-<uuid>.
+$lazy_details_base_args = [
+    'template'        => 'member-details',
+    'org_uuid'        => (string) $org_uuid,
+    'membership_uuid' => (string) $membership_uuid,
+];
 
 $role_label = __('Role(s):', 'wicket-acc');
 $show_remove_policy_callout = (
@@ -225,14 +230,19 @@ $show_remove_policy_callout = (
             $roles_text = !empty($formatted_roles) ? implode(', ', $formatted_roles) : '—';
 
             $person_uuid_no_dashes = $member_uuid ? str_replace('-', '', $member_uuid) : uniqid('member', true);
-            $is_confirmed = $show_account_status && $member_service ? $member_service->isUserConfirmed($member_uuid) : null;
+            $lazy_loaded = !empty($member['lazy_loaded']);
+            $is_confirmed = $show_account_status ? !empty($member['confirmed_at']) : null;
             $relationship_names = $member['relationship_names'] ?? '';
             $is_owner = !empty($member['is_owner']);
             $is_current_user_owner = $is_owner && $current_user_uuid && $member_uuid === $current_user_uuid;
+            $lazy_details_url = add_query_arg(
+                array_merge($lazy_details_base_args, ['person_uuid' => (string) $member_uuid]),
+                OrgHelpers\template_url()
+            );
             ?>
             <div class="member-card wt_bg-light-neutral wt_rounded-card wt_p-6 wt_transition-opacity wt_duration-300"
                 id="member-<?php echo esc_attr($person_uuid_no_dashes); ?>"
-                data-class_wt_hidden="$listLoading">
+                data-show="!$listLoading">
                 <div class="wt_flex wt_w-full md_wt_flex-row wt_items-start wt_justify-between wt_gap-4">
                     <div class="wt_flex wt_flex-col wt_gap-2 wt_w-full md_wt_w-4-5">
                         <div class="wt_flex wt_flex-col sm_wt_flex-row wt_items-start sm_wt_items-center wt_gap-2">
@@ -240,22 +250,24 @@ $show_remove_policy_callout = (
                                 <h3 class="wt_text-xl wt_font-medium wt_text-content wt_mb-0">
                                     <?php echo esc_html($member_name); ?>
                                 </h3>
-                                <?php if ($show_account_status && $is_confirmed !== null) : ?>
-                                    <?php if ($is_confirmed) : ?>
-                                        <span class="wt_text-content" title="<?php echo esc_attr($confirmed_tooltip); ?>">
-                                            <span class="wt_inline-block wt_w-2 wt_h-2 wt_rounded-full wt_bg-green-500" aria-hidden="true"></span>
-                                        </span>
-                                    <?php else : ?>
-                                        <span class="wt_text-content" title="<?php echo esc_attr($unconfirmed_tooltip); ?>">
-                                            <span class="wt_inline-block wt_w-2 wt_h-2 wt_rounded-full wt_bg-gray-400" aria-hidden="true"></span>
-                                        </span>
-                                        <?php if ($show_unconfirmed_label && $unconfirmed_label !== '') : ?>
-                                            <span class="wt_text-warning wt_whitespace-nowrap wt_ml-1 wt_text-2xs" title="<?php echo esc_attr($unconfirmed_tooltip); ?>">
-                                                <?php echo esc_html($unconfirmed_label); ?>
+                                <div id="member-status-<?php echo esc_attr($person_uuid_no_dashes); ?>" class="wt_inline-flex wt_items-center">
+                                    <?php if ($show_account_status && $is_confirmed !== null) : ?>
+                                        <?php if ($is_confirmed) : ?>
+                                            <span class="wt_text-content" title="<?php echo esc_attr($confirmed_tooltip); ?>">
+                                                <span class="wt_inline-block wt_w-2 wt_h-2 wt_rounded-full wt_bg-green-500" aria-hidden="true"></span>
                                             </span>
+                                        <?php else : ?>
+                                            <span class="wt_text-content" title="<?php echo esc_attr($unconfirmed_tooltip); ?>">
+                                                <span class="wt_inline-block wt_w-2 wt_h-2 wt_rounded-full wt_bg-gray-400" aria-hidden="true"></span>
+                                            </span>
+                                            <?php if ($show_unconfirmed_label && $unconfirmed_label !== '') : ?>
+                                                <span class="wt_text-warning wt_whitespace-nowrap wt_ml-1 wt_text-2xs" title="<?php echo esc_attr($unconfirmed_tooltip); ?>">
+                                                    <?php echo esc_html($unconfirmed_label); ?>
+                                                </span>
+                                            <?php endif; ?>
                                         <?php endif; ?>
                                     <?php endif; ?>
-                                <?php endif; ?>
+                                </div>
                             </div>
                         </div>
 
@@ -271,32 +283,41 @@ $show_remove_policy_callout = (
                             </p>
                         <?php endif; ?>
 
-                        <?php if (!empty($member['relationship_description']) && OrgHelpers\Helper::should_show_member_description()) : ?>
-                            <p class="member-description wt_text-sm wt_text-content wt_mb-0">
-                                <?php echo esc_html($member['relationship_description']); ?>
-                            </p>
-                        <?php endif; ?>
+                        <div id="member-details-<?php echo esc_attr($person_uuid_no_dashes); ?>" class="wt_flex wt_flex-col wt_gap-2">
+                            <?php if (!$lazy_loaded) : ?>
+                                <div class="wt_animate-pulse wt_p-2 wt_bg-gray-50 wt_rounded"
+                                    data-init="@get('<?php echo esc_js($lazy_details_url); ?>')">
+                                    <div class="wt_h-4 wt_bg-gray-200 wt_rounded wt_w-1/2"></div>
+                                </div>
+                            <?php else : ?>
+                                <?php if (!empty($member['relationship_description']) && OrgHelpers\Helper::should_show_member_description()) : ?>
+                                    <p class="member-description wt_text-sm wt_text-content wt_mb-0">
+                                        <?php echo esc_html($member['relationship_description']); ?>
+                                    </p>
+                                <?php endif; ?>
 
-                        <?php if ($relationship_names !== '' && !OrgHelpers\Helper::should_hide_relationship_type()) : ?>
-                            <div class="wt_flex wt_items-center wt_gap-2">
-                                <span class="wt_text-content"><?php echo esc_html($relationship_names); ?></span>
-                            </div>
-                        <?php endif; ?>
+                                <?php if ($relationship_names !== '' && !OrgHelpers\Helper::should_hide_relationship_type()) : ?>
+                                    <div class="wt_flex wt_items-center wt_gap-2">
+                                        <span class="wt_text-content"><?php echo esc_html($relationship_names); ?></span>
+                                    </div>
+                                <?php endif; ?>
 
-                        <?php if ($member_email !== '') : ?>
-                            <div class="wt_flex wt_items-center wt_gap-2">
-                                <a href="mailto:<?php echo esc_attr($member_email); ?>" class="wt_text-sm wt_text-interactive wt_hover_underline">
-                                    <?php echo esc_html($member_email); ?>
-                                </a>
-                            </div>
-                        <?php endif; ?>
+                                <?php if ($member_email !== '') : ?>
+                                    <div class="wt_flex wt_items-center wt_gap-2">
+                                        <a href="mailto:<?php echo esc_attr($member_email); ?>" class="wt_text-sm wt_text-interactive wt_hover_underline">
+                                            <?php echo esc_html($member_email); ?>
+                                        </a>
+                                    </div>
+                                <?php endif; ?>
 
-                        <?php if (OrgHelpers\Helper::should_show_member_roles()) : ?>
-                            <div class="wt_flex wt_items-baseline wt_gap-2 wt_text-sm">
-                                <strong><?php echo esc_html($role_label); ?></strong>
-                                <span class="wt_text-content"><?php echo esc_html($roles_text); ?></span>
-                            </div>
-                        <?php endif; ?>
+                                <?php if (OrgHelpers\Helper::should_show_member_roles()) : ?>
+                                    <div class="wt_flex wt_items-baseline wt_gap-2 wt_text-sm">
+                                        <strong><?php echo esc_html($role_label); ?></strong>
+                                        <span class="wt_text-content"><?php echo esc_html($roles_text); ?></span>
+                                    </div>
+                                <?php endif; ?>
+                            <?php endif; ?>
+                        </div>
                     </div>
 
                     <div class="wt_flex wt_flex-col sm_wt_flex-row wt_items-stretch sm_wt_items-start wt_gap-2 wt_justify-between md_wt_auto wt_shrink-0">

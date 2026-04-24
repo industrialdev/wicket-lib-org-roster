@@ -294,9 +294,8 @@ $no_members_message = __('No members found.', 'wicket-acc');
                 // Create person UUID without dashes for unique IDs
                 $person_uuid_no_dashes = $member_uuid ? str_replace('-', '', $member_uuid) : uniqid('member', true);
             ?>
-            <div class="member-card wt_bg-light-neutral wt_rounded-card wt_p-6 wt_transition-opacity wt_duration-300" 
-                id="member-card-<?php echo esc_attr($person_uuid_no_dashes); ?>"
-                data-signals="{ lazy_<?php echo esc_attr($person_uuid_no_dashes); ?>: false }">
+            <div class="member-card wt_bg-light-neutral wt_rounded-card wt_p-6 wt_transition-opacity wt_duration-300"
+                id="member-card-<?php echo esc_attr($person_uuid_no_dashes); ?>">
                 <div class="wt_flex wt_w-full md_wt_flex-row wt_items-start wt_justify-between wt_gap-4">
                     <div class="wt_flex wt_flex-col wt_gap-2 wt_w-full md_wt_w-4-5">
                         <div class="wt_flex wt_flex-col sm_wt_flex-row wt_items-start sm_wt_items-center wt_gap-2">
@@ -348,7 +347,7 @@ $no_members_message = __('No members found.', 'wicket-acc');
                                     ], OrgHelpers\template_url());
                                 ?>
                                 <div class="wt_animate-pulse wt_p-2 wt_bg-gray-50 wt_rounded"
-                                    data-effect="if (!$listLoading && !$lazy_<?php echo esc_attr($person_uuid_no_dashes); ?>) { $lazy_<?php echo esc_attr($person_uuid_no_dashes); ?> = true; @get('<?php echo esc_js($lazy_details_url); ?>') }">
+                                    data-init="@get('<?php echo esc_js($lazy_details_url); ?>')">
                                     <div class="wt_h-4 wt_bg-gray-200 wt_rounded wt_w-1/2"></div>
                                 </div>
                             <?php else : ?>
