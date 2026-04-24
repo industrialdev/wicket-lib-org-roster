@@ -267,7 +267,8 @@ class MemberService
 
         // Cache initial load only (no search term)
         if (empty($searchTerm)) {
-            $cache_key = 'orgman_members_' . md5($membershipUuid . $page . $size . (int) $isLazy);
+            $gen = (new CacheService())->getMembershipGeneration($membershipUuid);
+            $cache_key = 'orgman_members_' . md5($membershipUuid . $page . $size . (int) $isLazy . $gen);
             $cached_data = $this->getCachedData($cache_key);
 
             if (false !== $cached_data) {
@@ -367,7 +368,8 @@ class MemberService
                     // Cache initial load only (no search term)
                     if (empty($searchTerm)) {
                         $isLazy = (bool) ($args['lazy'] ?? false);
-                        $cache_key = 'orgman_members_' . md5($membershipUuid . $page . $size . (int) $isLazy);
+                        $gen = (new CacheService())->getMembershipGeneration($membershipUuid);
+                        $cache_key = 'orgman_members_' . md5($membershipUuid . $page . $size . (int) $isLazy . $gen);
                         $this->setCachedData($cache_key, $normalized);
                     }
 
@@ -434,7 +436,8 @@ class MemberService
         // Cache initial load only (no search term)
         if (empty($searchTerm) && null !== $final_response) {
             $isLazy = (bool) ($args['lazy'] ?? false);
-            $cache_key = 'orgman_members_' . md5($membershipUuid . $page . $size . (int) $isLazy);
+            $gen = (new CacheService())->getMembershipGeneration($membershipUuid);
+            $cache_key = 'orgman_members_' . md5($membershipUuid . $page . $size . (int) $isLazy . $gen);
             $this->setCachedData($cache_key, $final_response);
         }
 

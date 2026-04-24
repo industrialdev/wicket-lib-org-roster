@@ -1513,6 +1513,13 @@ input:where([type="button"], [type="reset"], [type="submit"]) {
   padding: 0.375rem 0.75rem;
   font-size: 0.875rem;
 }
+.wicket-orgman .button.button--primary.button--disabled {
+  background-color: var(--wicket-orgman-bg-interactive) !important;
+  color: #ffffff !important;
+  opacity: 1 !important;
+  cursor: not-allowed;
+  pointer-events: none;
+}
 .wicket-orgman .org-details__actions {
   display: flex !important;
   width: 100% !important;

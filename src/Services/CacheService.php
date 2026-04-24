@@ -84,8 +84,30 @@ class CacheService
     }
 
     /**
+     * Get the current per-membership generation counter.
+     * Raw (non-versioned) transient so it survives global salt bumps.
+     */
+    public function getMembershipGeneration(string $membershipUuid): int
+    {
+        $val = get_transient('orgman_mgen_' . md5($membershipUuid));
+        return $val !== false ? (int) $val : 1;
+    }
+
+    /**
+     * Bump the per-membership generation counter, instantly staling
+     * all paged member list cache entries for this membership in O(1).
+     */
+    public function bumpMembershipGeneration(string $membershipUuid): void
+    {
+        $key = 'orgman_mgen_' . md5($membershipUuid);
+        $current = get_transient($key);
+        $next = $current !== false ? (int) $current + 1 : 2;
+        set_transient($key, $next, 7 * DAY_IN_SECONDS);
+    }
+
+    /**
      * Standardized method to clear member-related caches for an organization.
-     * Clears both versioned and legacy "ghost" caches.
+     * Bumps per-membership generation so all pages are instantly stale in O(1).
      */
     public function invalidateMemberCache(string $membershipUuid, ?string $orgUuid = null, ?string $personUuid = null): void
     {
@@ -94,7 +116,8 @@ class CacheService
         }
 
         $logger = \Wicket()->log();
-        $logger->debug('[OrgMan] CacheService: Invalidating member cache', [
+        $logger->debug('CacheService: Invalidating member cache', [
+            'source'          => 'wicket-orgman',
             'membership_uuid' => $membershipUuid,
             'org_uuid'        => $orgUuid,
             'person_uuid'     => $personUuid,
@@ -102,20 +125,19 @@ class CacheService
 
         if ($personUuid && $orgUuid) {
             $this->delete('orgman_person_roles_' . md5($personUuid . $orgUuid));
-            // Legacy key format
             delete_transient('orgman_person_roles_' . md5($personUuid . $orgUuid));
         }
 
         $this->delete('orgman_membership_data_' . md5($membershipUuid));
         delete_transient('orgman_membership_data_' . md5($membershipUuid));
 
-        // Invalidate common page/size combinations (first 5 pages)
+        // Bump generation — all pages for this membership miss on next read.
+        $this->bumpMembershipGeneration($membershipUuid);
+
+        // Legacy "initial" key formats (first 5 pages only, kept for transition).
         $commonPageSizes = [10, 15, 20, 25, 50, 100];
         for ($p = 1; $p <= 5; $p++) {
             foreach ($commonPageSizes as $size) {
-                $this->delete('orgman_members_' . md5($membershipUuid . $p . $size));
-
-                // Legacy "initial" key formats used in wicket-wp-stack
                 delete_transient('orgman_members_initial_' . md5($membershipUuid . '_' . $p . '_' . $size));
             }
         }
