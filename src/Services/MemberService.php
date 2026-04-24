@@ -821,7 +821,7 @@ class MemberService
             ]
         );
 
-        return $this->prepareMembersResult(
+        $result = $this->prepareMembersResult(
             $membersResponse,
             [
                 'org_uuid'        => $orgUuid,
@@ -832,6 +832,21 @@ class MemberService
                 'lazy'            => $lazy,
             ]
         );
+
+        // Pre-warm lazy-details cache for each member when full data is available.
+        // Covers both regular and search loads so SSE calls on subsequent renders hit cache.
+        if (!$lazy && !empty($result['members'])) {
+            $cacheService = new CacheService();
+            foreach ($result['members'] as $member) {
+                $personUuid = $member['person_uuid'] ?? '';
+                if ($personUuid !== '') {
+                    $lazyCacheKey = 'orgman_lazy_details_' . md5($personUuid . $orgUuid . $membershipUuid);
+                    $cacheService->set($lazyCacheKey, $member);
+                }
+            }
+        }
+
+        return $result;
     }
 
     /**

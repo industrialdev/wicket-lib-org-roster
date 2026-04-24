@@ -53,7 +53,7 @@ if (false === $member) {
     $member = $member_service->getMemberByPersonUuid($person_uuid, $membership_uuid, $org_uuid);
 
     if ($member) {
-        $cache_service->set($cache_key, $member, 1 * HOUR_IN_SECONDS);
+        $cache_service->set($cache_key, $member);
     }
 }
 
