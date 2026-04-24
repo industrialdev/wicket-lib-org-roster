@@ -154,11 +154,6 @@ if ('POST' === strtoupper($request_method)) {
 
         // 1. End all person memberships for this person/email in this organization membership
         if (!empty($membership_uuid) && !empty($person_uuid)) {
-            OrgManagement\Helpers\Helper::log_info('[OrgMan Debug] Searching for person memberships by ID', [
-                'membership_uuid' => $membership_uuid,
-                'person_uuid' => $person_uuid,
-            ]);
-
             try {
                 $client = wicket_api_client();
                 $filter_data = [
@@ -171,22 +166,17 @@ if ('POST' === strtoupper($request_method)) {
                 $response = $client->post('/person_memberships/query', ['json' => $filter_data]);
 
                 if (!is_wp_error($response) && !empty($response['data'])) {
-                    OrgManagement\Helpers\Helper::log_info('[OrgMan Debug] Found memberships count by ID: ' . count($response['data']));
                     foreach ($response['data'] as $p_membership) {
                         $p_membership_id = $p_membership['id'] ?? null;
                         $p_membership_active = $p_membership['attributes']['active'] ?? false;
-
-                        OrgManagement\Helpers\Helper::log_info('[OrgMan Debug] Processing extra p_membership', ['id' => $p_membership_id, 'active' => $p_membership_active]);
 
                         if ($p_membership_id && $p_membership_active) {
                             $result = $membershipService->endPersonMembershipToday($p_membership_id);
                             if (!is_wp_error($result)) {
                                 $removal_success = true;
-                                OrgManagement\Helpers\Helper::log_info('[OrgMan] Successfully end-dated extra person membership by ID', [
-                                    'person_membership_id' => $p_membership_id,
-                                ]);
                             } else {
-                                OrgManagement\Helpers\Helper::log_error('[OrgMan] Failed to end extra membership', [
+                                \Wicket()->log()->error('Failed to end extra membership', [
+                                    'source' => 'wicket-orgman',
                                     'id' => $p_membership_id,
                                     'error' => $result->get_error_message(),
                                 ]);
@@ -195,7 +185,10 @@ if ('POST' === strtoupper($request_method)) {
                     }
                 }
             } catch (Throwable $e) {
-                OrgManagement\Helpers\Helper::log_error('[OrgMan Debug] Membership query exception', ['error' => $e->getMessage()]);
+                \Wicket()->log()->error('Membership query exception', [
+                    'source' => 'wicket-orgman',
+                    'error' => $e->getMessage(),
+                ]);
             }
         }
 
@@ -204,19 +197,15 @@ if ('POST' === strtoupper($request_method)) {
             $result = $membershipService->endPersonMembershipToday($person_membership_id);
 
             if (is_wp_error($result)) {
-                OrgManagement\Helpers\Helper::log_error('[OrgMan] Failed to end-date primary person membership', [
+                \Wicket()->log()->error('Failed to end-date primary person membership', [
+                    'source' => 'wicket-orgman',
                     'person_membership_id' => $person_membership_id,
                     'error' => $result->get_error_message(),
                 ]);
             } else {
                 $removal_success = true;
-                OrgManagement\Helpers\Helper::log_info('[OrgMan] Successfully end-dated primary person membership', [
-                    'person_membership_id' => $person_membership_id,
-                ]);
             }
         }
-
-        OrgManagement\Helpers\Helper::log_debug('[OrgMan Debug] Member removal roster mode', ['roster_mode' => $roster_mode, 'person_uuid' => $person_uuid]);
 
         if ($roster_mode === 'membership_cycle') {
             if (!$removal_success) {
@@ -263,16 +252,12 @@ if ('POST' === strtoupper($request_method)) {
 
         // 3. End ALL connections for this person to this organization
         if (!empty($person_uuid) && $should_end_relationships) {
-            OrgManagement\Helpers\Helper::log_info('[OrgMan Debug] Searching for person connections', ['person_uuid' => $person_uuid, 'org_uuid' => $org_uuid]);
             $connections = $connection_service->getPersonConnectionsById($person_uuid);
             if (!empty($connections['data'])) {
-                OrgManagement\Helpers\Helper::log_info('[OrgMan Debug] Found connections count: ' . count($connections['data']));
                 foreach ($connections['data'] as $conn) {
                     $conn_org_id = $conn['relationships']['organization']['data']['id'] ?? null;
                     $conn_id = $conn['id'] ?? null;
                     $conn_active = $conn['attributes']['active'] ?? false;
-
-                    OrgManagement\Helpers\Helper::log_info('[OrgMan Debug] Processing extra connection', ['id' => $conn_id, 'org_id' => $conn_org_id, 'active' => $conn_active]);
 
                     if ($conn_org_id === $org_uuid && $conn_id && $conn_active) {
                         $result = $use_direct_action_time_relationship_end
@@ -280,13 +265,12 @@ if ('POST' === strtoupper($request_method)) {
                             : $connection_service->endRelationshipToday($person_uuid, $conn_id, $org_uuid);
                         if (!is_wp_error($result)) {
                             $removal_success = true;
-                            OrgManagement\Helpers\Helper::log_info('[OrgMan] Successfully ended extra relationship', [
-                                'person_uuid' => $person_uuid,
-                                'connection_id' => $conn_id,
-                                'org_uuid' => $org_uuid,
-                            ]);
                         } else {
-                            OrgManagement\Helpers\Helper::log_error('[OrgMan] Failed to end extra connection', ['id' => $conn_id, 'error' => $result->get_error_message()]);
+                            \Wicket()->log()->error('Failed to end extra connection', [
+                                'source' => 'wicket-orgman',
+                                'id' => $conn_id,
+                                'error' => $result->get_error_message(),
+                            ]);
                         }
                     }
                 }
@@ -304,7 +288,8 @@ if ('POST' === strtoupper($request_method)) {
                     : $connection_service->endRelationshipToday($person_uuid, $connection_id, $org_uuid);
 
                 if (is_wp_error($result)) {
-                    OrgManagement\Helpers\Helper::log_error('[OrgMan] Failed to end primary relationship', [
+                    \Wicket()->log()->error('Failed to end primary relationship', [
+                        'source' => 'wicket-orgman',
                         'person_uuid' => $person_uuid,
                         'connection_id' => $connection_id,
                         'org_uuid' => $org_uuid,
@@ -312,11 +297,6 @@ if ('POST' === strtoupper($request_method)) {
                     ]);
                 } else {
                     $removal_success = true;
-                    OrgManagement\Helpers\Helper::log_info('[OrgMan] Successfully ended primary relationship', [
-                        'person_uuid' => $person_uuid,
-                        'connection_id' => $connection_id,
-                        'org_uuid' => $org_uuid,
-                    ]);
                 }
             }
         }
@@ -327,17 +307,12 @@ if ('POST' === strtoupper($request_method)) {
             $role_removal_result = $permissionService->removePersonRolesFromOrg($person_uuid, $roles_to_remove, $org_uuid);
 
             if (is_wp_error($role_removal_result)) {
-                OrgManagement\Helpers\Helper::log_error('[OrgMan] Failed to remove roles', [
+                \Wicket()->log()->error('Failed to remove roles', [
+                    'source' => 'wicket-orgman',
                     'person_uuid' => $person_uuid,
                     'org_uuid' => $org_uuid,
                     'roles' => $roles_to_remove,
                     'error' => $role_removal_result->get_error_message(),
-                ]);
-            } else {
-                OrgManagement\Helpers\Helper::log_info('[OrgMan] Successfully removed roles', [
-                    'person_uuid' => $person_uuid,
-                    'org_uuid' => $org_uuid,
-                    'roles' => $roles_to_remove,
                 ]);
             }
         }
@@ -381,7 +356,7 @@ if ('POST' === strtoupper($request_method)) {
 
     } catch (Throwable $e) {
         status_header(200);
-        OrgManagement\Helpers\Helper::log_error('[OrgMan] remove-member modal failed: ' . $e->getMessage(), ['org_uuid' => $org_uuid, 'person_uuid' => $person_uuid, 'connection_ids' => $person_connection_ids]);
+        \Wicket()->log()->error('remove-member modal failed: ' . $e->getMessage(), ['source' => 'wicket-orgman', 'org_uuid' => $org_uuid, 'person_uuid' => $person_uuid, 'connection_ids' => $person_connection_ids]);
         OrgManagement\Helpers\DatastarSSE::renderError(__('An unexpected error occurred. Please try again.', 'wicket-acc'), '#remove-member-messages', ['removeMemberSubmitting' => false, 'membersLoading' => false]);
 
         return;

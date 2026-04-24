@@ -103,7 +103,8 @@ if ('POST' === strtoupper($request_method)) {
 
             $response = $client->post('/person_memberships/query', ['json' => $filter_data]);
             if (is_wp_error($response) || !empty($response['errors'])) {
-                OrgManagement\Helpers\Helper::log_error('[OrgMan Debug] Duplicate check returned an API error', [
+                \Wicket()->log()->error('Duplicate check returned an API error', [
+                    'source' => 'wicket-orgman',
                     'membership_uuid' => $membership_uuid,
                     'member_email' => $member_data['email'],
                 ]);
@@ -135,7 +136,10 @@ if ('POST' === strtoupper($request_method)) {
                 }
             }
         } catch (Throwable $e) {
-            OrgManagement\Helpers\Helper::log_error('[OrgMan Debug] Duplicate check failed', ['error' => $e->getMessage()]);
+            \Wicket()->log()->error('Duplicate check failed', [
+                'source' => 'wicket-orgman',
+                'error' => $e->getMessage(),
+            ]);
             status_header(200);
             OrgManagement\Helpers\DatastarSSE::renderError(
                 __('Could not verify whether this person already exists. Please try again.', 'wicket-acc'),
@@ -177,12 +181,6 @@ if ('POST' === strtoupper($request_method)) {
         $configService = new ConfigService();
         $member_service = new MemberService($configService);
 
-        OrgManagement\Helpers\Helper::log_info('[OrgMan] Member addition attempt', [
-            'org_uuid' => $org_uuid,
-            'member_email' => $member_data['email'],
-            'roles' => $roles,
-        ]);
-
         $context = [
             'roles'            => $roles,
             'org_name'         => '',
@@ -192,12 +190,6 @@ if ('POST' === strtoupper($request_method)) {
         ];
 
         $result = $member_service->addMember($org_uuid, $member_data, $context);
-
-        OrgManagement\Helpers\Helper::log_info('[OrgMan] Member addition completed', [
-            'org_uuid' => $org_uuid,
-            'success' => !is_wp_error($result),
-            'error' => is_wp_error($result) ? $result->get_error_message() : null,
-        ]);
 
         if (is_wp_error($result)) {
             status_header(200);
@@ -233,19 +225,17 @@ if ('POST' === strtoupper($request_method)) {
                         'person_uuid' => $result['person_uuid'],
                     ]);
 
-                    if ($opt_in_result) {
-                        OrgManagement\Helpers\Helper::log_info('[OrgMan] Auto-opt-in successful', [
-                            'person_uuid' => $result['person_uuid'],
-                            'preferences' => $preferences,
-                        ]);
-                    } else {
-                        OrgManagement\Helpers\Helper::log_error('[OrgMan] Auto-opt-in failed', [
+                    if (!$opt_in_result) {
+                        \Wicket()->log()->warning('Auto-opt-in failed', [
+                            'source' => 'wicket-orgman',
                             'person_uuid' => $result['person_uuid'],
                         ]);
                     }
                 }
             } else {
-                OrgManagement\Helpers\Helper::log_warning('[OrgMan] Auto-opt-in skipped: helper function missing');
+                \Wicket()->log()->warning('Auto-opt-in skipped: helper function missing', [
+                    'source' => 'wicket-orgman',
+                ]);
             }
         }
 
@@ -303,7 +293,8 @@ if ('POST' === strtoupper($request_method)) {
 
     } catch (Throwable $e) {
         status_header(200);
-        OrgManagement\Helpers\Helper::log_error('[OrgMan] Member addition failed: ' . $e->getMessage(), [
+        \Wicket()->log()->error('Member addition failed: ' . $e->getMessage(), [
+            'source' => 'wicket-orgman',
             'org_uuid' => $org_uuid,
             'error_file' => $e->getFile(),
             'error_line' => $e->getLine(),

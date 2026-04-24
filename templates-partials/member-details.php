@@ -24,12 +24,6 @@ $person_uuid = isset($_REQUEST['person_uuid']) ? sanitize_text_field($_REQUEST['
 $org_uuid = isset($_REQUEST['org_uuid']) ? sanitize_text_field($_REQUEST['org_uuid']) : '';
 $membership_uuid = isset($_REQUEST['membership_uuid']) ? sanitize_text_field($_REQUEST['membership_uuid']) : '';
 
-\OrgManagement\Helpers\Helper::log_debug('member-details endpoint hit', [
-    'person_uuid'     => $person_uuid,
-    'org_uuid'        => $org_uuid,
-    'membership_uuid' => $membership_uuid,
-]);
-
 if (empty($person_uuid) || empty($org_uuid)) {
     exit;
 }

@@ -1066,7 +1066,8 @@ class BulkMemberUploadService
                 }
             }
         } catch (\Throwable $e) {
-            \OrgManagement\Helpers\Helper::log_error('Bulk upload duplicate check failed: ' . $e->getMessage(), [
+            \Wicket()->log()->error('Bulk upload duplicate check failed: ' . $e->getMessage(), [
+                'source' => 'wicket-orgman',
                 'membership_uuid' => $membership_uuid,
                 'email' => $email,
             ]);
@@ -1096,7 +1097,8 @@ class BulkMemberUploadService
 
             return $has_membership === true;
         } catch (\Throwable $e) {
-            \OrgManagement\Helpers\Helper::log_error('Bulk upload person duplicate check failed: ' . $e->getMessage(), [
+            \Wicket()->log()->error('Bulk upload person duplicate check failed: ' . $e->getMessage(), [
+                'source' => 'wicket-orgman',
                 'membership_uuid' => $membership_uuid,
                 'email' => $email,
             ]);
@@ -1193,7 +1195,8 @@ class BulkMemberUploadService
                 return (string) ($person->id ?? '');
             }
         } catch (\Throwable $e) {
-            \OrgManagement\Helpers\Helper::log_error('Bulk upload person lookup failed: ' . $e->getMessage(), [
+            \Wicket()->log()->error('Bulk upload person lookup failed: ' . $e->getMessage(), [
+                'source' => 'wicket-orgman',
                 'email' => $email,
             ]);
         }

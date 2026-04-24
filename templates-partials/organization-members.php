@@ -26,10 +26,6 @@ if (isset($args['org_uuid'])) {
 $org_uuid_dom_suffix = sanitize_html_class($org_uuid ?? 'default');
 $lang = wicket_get_current_language();
 
-\OrgManagement\Helpers\Helper::log_debug('[OrgMan] Rendering organization-members partial', [
-    'org_uuid' => $org_uuid,
-]);
-
 // Fetch organization members if the Wicket function exists.
 $membershipService = new \OrgManagement\Services\MembershipService();
 $configService = new \OrgManagement\Services\ConfigService();
@@ -78,7 +74,8 @@ if (!empty($membershipUuid)) {
             true // Enable lazy loading
         );
     } catch (\Throwable $e) {
-        \OrgManagement\Helpers\Helper::log_error('[OrgMan] Failed to load members list: ' . $e->getMessage(), [
+        \Wicket()->log()->error('Failed to load members list: ' . $e->getMessage(), [
+            'source' => 'wicket-orgman',
             'membership_uuid' => $membershipUuid,
         ]);
     }
@@ -98,13 +95,6 @@ $pagination = $membersResult['pagination'];
 $query = $membersResult['query'] ?? '';
 $totalMemberCount = (int) ($pagination['totalItems'] ?? count($members));
 $show_bulk_upload = (bool) ($member_list_config['show_bulk_upload'] ?? false);
-
-\OrgManagement\Helpers\Helper::log_debug('[OrgMan] Members render summary', [
-    'render_count'      => count($members),
-    'total_member_count' => $totalMemberCount,
-    'current_page'      => $pagination['currentPage'] ?? 1,
-    'page_size'         => $pagination['pageSize'] ?? 10,
-]);
 
 $available_roles = $permissionService->getAvailableRoles();
 $role_descriptions = $orgman_config['access']['roles']['descriptions'] ?? [];
@@ -318,18 +308,6 @@ $members_list_endpoint = $membersListEndpoint;
             $can_purchase_seats = $additional_seats_service->canPurchaseAdditionalSeats($org_uuid);
 $purchase_url = $can_purchase_seats ? $additional_seats_service->getPurchaseFormUrl($org_uuid, $membershipUuid) : '';
 
-// Debug logging for administrators
-if ($is_admin) {
-    \OrgManagement\Helpers\Helper::log_debug('[OrgMan Debug] CTA visibility check', [
-        'org_uuid' => $org_uuid,
-        'membershipUuid' => $membershipUuid,
-        'can_purchase_seats' => $can_purchase_seats,
-        'purchase_url' => $purchase_url,
-        'additional_seats_enabled' => $additional_seats_enabled,
-        'current_user_roles' => wp_get_current_user()->roles,
-        'current_user_login' => wp_get_current_user()->user_login,
-    ]);
-}
 
 if ($can_purchase_seats && !empty($purchase_url)):
     ?>

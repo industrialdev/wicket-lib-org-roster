@@ -207,7 +207,7 @@ if ('POST' === strtoupper($request_method)) {
 
     } catch (Throwable $e) {
         status_header(200);
-        OrgManagement\Helpers\Helper::log_error('[OrgMan] update-permissions modal failed: ' . $e->getMessage(), ['org_uuid' => $org_uuid, 'membership_uuid' => $membership_uuid, 'person_uuid' => $person_uuid]);
+        \Wicket()->log()->error('update-permissions modal failed: ' . $e->getMessage(), ['source' => 'wicket-orgman', 'org_uuid' => $org_uuid, 'membership_uuid' => $membership_uuid, 'person_uuid' => $person_uuid]);
         OrgManagement\Helpers\DatastarSSE::renderError(__('An unexpected error occurred. Please try again.', 'wicket-acc'), '#update-permissions-messages', ['editPermissionsSubmitting' => false]);
 
         return;
