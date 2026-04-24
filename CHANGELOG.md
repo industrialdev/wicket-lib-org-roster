@@ -2,6 +2,34 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.7.0] - 2026-04-24
+
+### Added
+- `CacheService`: new versioned cache layer with salt-based global invalidation and automatic cleanup of legacy transient keys, replacing ad-hoc transient management across `MemberService`, `GroupService`, and `MembershipService`.
+- Lazy-loading of member detail cards via Server-Sent Events (SSE): member cards now render immediately as skeleton placeholders and hydrate via a dedicated `member-details` SSE endpoint. New `MemberService::getMemberByPersonUuid()` fetches and normalizes a single member by person UUID for per-card detail delivery.
+- Per-membership cache generation (`CacheService::getMembershipGeneration()` / `bumpMembershipGeneration()`): O(1) member-list cache invalidation by bumping a generation counter instead of deleting individual page/size transients. `invalidateMemberCache` now calls `bumpMembershipGeneration` and retains legacy deletion for transition.
+- Pre-warming of per-member lazy-details cache during full member list loads, improving cache-hit rate on subsequent SSE requests.
+- Skeleton loader CSS (`.wt_skeleton` and helpers) for member cards in `modern-orgman-static.css`.
+- Disabled-state styles for primary buttons (`.wicket-orgman .button.button--primary.button--disabled`).
+- `presentation.member_list.page_size` config flag: page size is now driven from config instead of a hard-coded value; preloads additional `presentation.member_list` flags in the organization-members template.
+- `confirmed_at` now sourced from included `users` resources: `MemberService` builds a `userIndex` (keyed by `person_id`) from the API `included` payload so user-level timestamps are available when the person record alone does not carry them.
+- Engineering documentation: `docs/engineering/performance-migration-plan.md` covering the migration from legacy transient caching to `CacheService`.
+
+### Changed
+- Role display now uses `attributes['name']` instead of `attributes['slug']`; ad-hoc UUID-suffix stripping logic removed from `MemberService` and `PermissionService`.
+- Membership generation appended to lazy member cache keys so cached lazy-detail fragments expire correctly when the roster changes.
+- Default page size standardized to 15 across `OrgManConfig`, `GroupService`, `MemberService`, and `MembershipService`.
+- Datastar updated to v1.0.1 (CDN URL now uses the `@v` tag).
+- `TemplateHelper` no longer forces a `Content-Type` header, allowing SSE templates to set `text/event-stream` themselves.
+- `members-list.php` and `members-list-unified.php` updated to emit SSE-compatible output, use consistent `member-card-<id>` element IDs, and trigger lazy detail fetches via `data-effect` intersection guards instead of `data-on-load`.
+- Logging standardized to the Wicket logger (`\Wicket()->log()`) with a `source: wicket-orgman` context key across all member-related services and templates; verbose debug/info statements removed to reduce log noise.
+- Non-critical log conditions (missing optional functions/classes, empty API responses, JSON decode failures, skipped auto-opt-ins, filtered member cards) demoted from `warning` to `info` level.
+- `members-list-unified.php` and `members-list.php` now build lazy-details URLs via `add_query_arg` / `home_url` and register required `query_vars` and `parse_request` handlers in `TemplateHelper` so hypermedia requests are handled earlier in the WP request lifecycle.
+
+### Fixed
+- Organization ID comparison now uses `trim()` to avoid false-negative mismatches caused by stray whitespace in API-returned IDs.
+- Orphaned member cards (members filtered out during a full SSE load) are now explicitly removed from the DOM via `deleteFragments` instead of being left as empty placeholders.
+
 ## [0.6.2] - 2026-04-21
 
 ### Added
