@@ -859,7 +859,7 @@ class MemberService
                 'page[number]' => 1,
                 'page[size]'   => 100,
                 'filter[active_at]' => 'now',
-                'include'      => 'person,membership',
+                'include'      => 'person,membership,user',
             ];
 
             $response = $client->get($endpoint . '?' . http_build_query($queryParams));
@@ -933,6 +933,14 @@ class MemberService
         // Reconstruct response with just the matched member
         $filtered_response = $response;
         $filtered_response['data'] = [$matched_member];
+
+        \Wicket()->log()->warning('[OrgMan] getMemberByPersonUuid: Response structure', [
+            'source' => 'wicket-orgman',
+            'person_uuid' => $personUuid,
+            'has_included' => isset($response['included']),
+            'included_count' => isset($response['included']) ? count($response['included']) : 0,
+            'included_types' => isset($response['included']) ? array_map(fn($item) => $item['type'] ?? 'unknown', $response['included']) : [],
+        ]);
 
         $result = $this->prepareMembersResult(
             $filtered_response,
@@ -1081,7 +1089,10 @@ class MemberService
             }
         }
 
-        $logger->debug('[OrgMan] userIndex built', ['count' => count($userIndex)]);
+        \Wicket()->log()->warning('[OrgMan] userIndex built in prepareMembersResult', [
+            'userIndex_count' => count($userIndex),
+            'userIndex_keys' => array_keys($userIndex),
+        ]);
 
         $allowedTypes = $this->normalizeRelationshipTypeList((array) ($this->config['relationships']['filters']['allowlist'] ?? []));
         $excludedTypes = $this->normalizeRelationshipTypeList((array) ($this->config['relationships']['filters']['denylist'] ?? []));
@@ -1382,21 +1393,16 @@ class MemberService
                 $userData = $userIndex[$personUuid];
                 $confirmedAt = $userData['attributes']['confirmed_at']
                     ?? ($userData['data']['attributes']['confirmed_at'] ?? null);
-                $logger->debug('[OrgMan] Found confirmed_at from userIndex', [
+                \Wicket()->log()->warning('[OrgMan] Found confirmed_at from userIndex', [
                     'person_uuid' => $personUuid,
                     'confirmed_at' => $confirmedAt,
-                ]);
-            } else {
-                $logger->debug('[OrgMan] No userIndex entry', [
-                    'person_uuid' => $personUuid,
-                    'personUuid_empty' => $personUuid === '',
-                    'userIndex_keys' => array_keys($userIndex),
+                    'user_data_keys' => array_keys($userData),
                 ]);
             }
 
             if (empty($confirmedAt)) {
                 $confirmedAt = $personAttributes['confirmed_at'] ?? $memberAttributes['confirmed_at'] ?? null;
-                $logger->debug('[OrgMan] Fallback confirmed_at', [
+                \Wicket()->log()->warning('[OrgMan] Fallback confirmed_at', [
                     'person_uuid' => $personUuid,
                     'confirmed_at' => $confirmedAt,
                 ]);
