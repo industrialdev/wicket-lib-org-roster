@@ -298,16 +298,6 @@ class OrganizationService
                 $response_data = is_array($response['data'] ?? null) ? $response['data'] : [];
                 $included_data = is_array($response['included'] ?? null) ? $response['included'] : [];
 
-                \Wicket()->log()->debug('getUserOrganizationsFromOwnership: page fetched', [
-                    'source' => 'wicket-orgman',
-                    'person_uuid' => $person_uuid,
-                    'page' => $page_number,
-                    'memberships_count' => count($response_data),
-                    'included_count' => count($included_data),
-                    'first_membership_id' => !empty($response_data) ? ($response_data[0]['id'] ?? 'no-id') : 'no-data',
-                    'has_owner_relationship' => !empty($response_data) && isset($response_data[0]['relationships']['owner']['data']['id']),
-                ]);
-
                 // Build org name lookup from included data
                 $org_name_by_id = [];
                 foreach ($included_data as $included) {
@@ -350,39 +340,14 @@ class OrganizationService
                             'user_role' => 'Membership Owner',
                             'roles' => [],
                         ];
-
-                        \Wicket()->log()->debug('getUserOrganizationsFromOwnership: found owned organization', [
-                            'source' => 'wicket-orgman',
-                            'person_uuid' => $person_uuid,
-                            'org_id' => $org_id,
-                            'org_name' => $organizations[$org_id]['org_name'],
-                            'membership_id' => $membership['id'] ?? '',
-                        ]);
                     }
                 }
 
                 $page_meta = $response['meta']['page'] ?? [];
                 $total_pages = max(1, (int) ($page_meta['total_pages'] ?? 1));
 
-                // Log sample owner IDs from this page for debugging
-                if (!empty($sample_owners) && $page_number === 1) {
-                    \Wicket()->log()->debug('getUserOrganizationsFromOwnership: sample owner IDs', [
-                        'source' => 'wicket-orgman',
-                        'person_uuid' => $person_uuid,
-                        'sample_owners' => $sample_owners,
-                        'looking_for' => $person_uuid,
-                    ]);
-                }
-
                 $page_number++;
             } while ($page_number <= $total_pages);
-
-            \Wicket()->log()->debug('getUserOrganizationsFromOwnership: complete', [
-                'source' => 'wicket-orgman',
-                'person_uuid' => $person_uuid,
-                'found_count' => count($organizations),
-                'org_ids' => array_keys($organizations),
-            ]);
         } catch (\Throwable $e) {
             \Wicket()->log()->warning('Failed resolving organizations from ownership: ' . $e->getMessage(), [
                 'source' => 'wicket-orgman',

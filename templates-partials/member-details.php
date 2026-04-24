@@ -4,12 +4,6 @@ declare(strict_types=1);
 
 namespace OrgManagement\Templates;
 
-\Wicket()->log()->info('member-details.php script execution started', [
-    'source' => 'wicket-orgman',
-    'get' => $_GET,
-    'uri' => $_SERVER['REQUEST_URI'] ?? 'unknown'
-]);
-
 use OrgManagement\Services\MemberService;
 use OrgManagement\Services\ConfigService;
 use OrgManagement\Services\CacheService;
@@ -82,14 +76,6 @@ if (!$member) {
 $member['lazy_loaded'] = true;
 // Derive is_confirmed from confirmed_at (the service never populates is_confirmed directly).
 $member['is_confirmed'] = !empty($member['confirmed_at']);
-
-\Wicket()->log()->debug('member-details: Member data fetched', [
-    'source' => 'wicket-orgman',
-    'person_uuid' => $person_uuid,
-    'roles' => $member['roles'] ?? [],
-    'current_roles' => $member['current_roles'] ?? [],
-    'lazy_loaded' => $member['lazy_loaded'] ?? false,
-]);
 
 // Shared variables for the partials
 $config = \OrgManagement\Config\OrgManConfig::get();

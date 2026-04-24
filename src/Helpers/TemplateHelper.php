@@ -121,13 +121,6 @@ class TemplateHelper extends Helper
 
         $template_path = $template_map[$template] ?? ($template_dir . '/templates-partials/' . $relative_path);
 
-        \Wicket()->log()->info('Resolving template', [
-            'source' => 'wicket-orgman',
-            'template' => $template,
-            'is_mapped' => isset($template_map[$template]),
-            'resolved_path' => $template_path
-        ]);
-
         // Security: Ensure the template file exists within our plugin directory
         $real_template_path = realpath($template_path);
         $real_plugin_dir = realpath($template_dir);
@@ -145,7 +138,6 @@ class TemplateHelper extends Helper
         }
 
         if (file_exists($real_template_path)) {
-            \Wicket()->log()->info('Loading template', ['source' => 'wicket-orgman', 'file' => $real_template_path]);
             // Load services that templates might need
             if (!isset($args['organizations']) && $template === 'organization-list') {
                 // Initialize the organization service
@@ -218,15 +210,6 @@ class TemplateHelper extends Helper
     {
         $action = $wp->query_vars['action'] ?? $_REQUEST['action'] ?? '';
         $template = $wp->query_vars['template'] ?? $_REQUEST['template'] ?? '';
-
-        if (!empty($action) || !empty($template)) {
-            \Wicket()->log()->info('Hypermedia request detected', [
-                'source' => 'wicket-orgman',
-                'action' => $action,
-                'template' => $template,
-                'query_vars' => $wp->query_vars
-            ]);
-        }
 
         if ($action === 'hypermedia' && !empty($template)) {
             // Normalize org_id=>org_uuid for hypermedia endpoint too

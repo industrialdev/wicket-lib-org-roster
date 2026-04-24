@@ -1461,14 +1461,6 @@ class MemberService
         }
 
         if (null === $body) {
-            \Wicket()->log()->debug(
-                'Membership response had no body to decode',
-                [
-                    'source'   => 'wicket-orgman',
-                    'respType' => is_object($response) ? get_class($response) : gettype($response),
-                ]
-            );
-
             return null;
         }
 
