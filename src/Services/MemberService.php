@@ -1142,13 +1142,9 @@ class MemberService
                             foreach ($roleResponse['data'] as $role) {
                                 $resourceId = $role['relationships']['resource']['data']['id'] ?? '';
                                 if ((string) $resourceId === (string) $orgUuid) {
-                                    $roleSlug = $role['attributes']['slug'] ?? '';
-                                    // Strip UUID suffix if present (e.g., "membership_manager-11cf43f7..." -> "membership_manager")
-                                    if ($roleSlug !== '' && str_contains($roleSlug, '-')) {
-                                        $roleSlug = explode('-', $roleSlug)[0];
-                                    }
-                                    if ($roleSlug !== '') {
-                                        $orgRoles[] = $roleSlug;
+                                    $roleName = $role['attributes']['name'] ?? '';
+                                    if ($roleName !== '') {
+                                        $orgRoles[] = $roleName;
                                     }
                                 }
                             }
@@ -1541,13 +1537,9 @@ class MemberService
                     isset($role['relationships']['resource']['data']['id'])
                     && $role['relationships']['resource']['data']['id'] === $orgUuid
                 ) {
-                    $role_slug = $role['attributes']['slug'] ?? '';
-                    // Strip UUID suffix if present (e.g., "membership_manager-11cf43f7..." -> "membership_manager")
-                    if ($role_slug !== '' && str_contains($role_slug, '-')) {
-                        $role_slug = explode('-', $role_slug)[0];
-                    }
-                    if ($role_slug !== '') {
-                        $roles[] = $role_slug;
+                    $role_name = $role['attributes']['name'] ?? '';
+                    if ($role_name !== '') {
+                        $roles[] = $role_name;
                     }
                 }
             }

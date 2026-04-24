@@ -419,7 +419,7 @@ final class OrgManConfig
                     'enabled' => true,
                     'duration' => 5 * 60,
                     'search_clear_cache_duration' => 1 * 60 * 60,
-                    'cache_salt' => '202604243000',
+                    'cache_salt' => '202604243100',
                 ],
             ],
             'removal' => [
