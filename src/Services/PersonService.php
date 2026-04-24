@@ -90,7 +90,7 @@ class PersonService
                 return $response['data'][0];
             }
         } catch (\Throwable $e) {
-            \Wicket()->log()->error('[OrgMan] Fallback person lookup by email failed: ' . $e->getMessage());
+            \Wicket()->log()->error('Fallback person lookup by email failed: ' . $e->getMessage(), ['source' => 'wicket-orgman']);
         }
 
         return false;
@@ -114,7 +114,7 @@ class PersonService
             ]);
 
             if (is_array($update) && ($update['success'] ?? false) !== true) {
-                \Wicket()->log()->error('[OrgMan] Failed to update person job title for ' . $personUuid);
+                \Wicket()->log()->error('Failed to update person job title for ' . $personUuid, ['source' => 'wicket-orgman']);
             }
         }
 
@@ -130,7 +130,7 @@ class PersonService
                     ],
                 ]);
             } catch (\Throwable $e) {
-                \Wicket()->log()->error('[OrgMan] Failed to attach phone to person ' . $personUuid . ' : ' . $e->getMessage());
+                \Wicket()->log()->error('Failed to attach phone to person ' . $personUuid . ' : ' . $e->getMessage(), ['source' => 'wicket-orgman']);
             }
         }
     }

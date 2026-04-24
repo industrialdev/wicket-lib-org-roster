@@ -76,18 +76,18 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
         ];
 
         try {
-            $logger->info('[OrgMan] Direct strategy add_member invoked', $log_context);
+            $logger->info('Direct strategy add_member invoked', $log_context);
 
             $person_uuid = $this->personService()->createOrUpdatePerson($member_data);
             if (is_wp_error($person_uuid)) {
-                $logger->error('[OrgMan] Failed to create/update person for member addition', array_merge($log_context, [
+                $logger->error('Failed to create/update person for member addition', array_merge($log_context, [
                     'error' => $person_uuid->get_error_message(),
                 ]));
 
                 return $person_uuid;
             }
             $log_context['person_uuid'] = $person_uuid;
-            $logger->debug('[OrgMan] Person record ready for membership assignment', $log_context);
+            $logger->debug('Person record ready for membership assignment', $log_context);
 
             // Get configuration for member addition settings
             $config = \OrgManagement\Config\OrgManConfig::get();
@@ -110,7 +110,7 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
 
             $membership_uuid = $this->resolveMembershipUuid($org_id, $context);
             if (is_wp_error($membership_uuid)) {
-                $logger->error('[OrgMan] Unable to resolve membership UUID for organization', array_merge($log_context, [
+                $logger->error('Unable to resolve membership UUID for organization', array_merge($log_context, [
                     'error' => $membership_uuid->get_error_message(),
                 ]));
 
@@ -153,37 +153,37 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
 
             $membership_assignment_result = $this->assignPersonToMembershipSeat($person_uuid, $membership_uuid);
             if (is_wp_error($membership_assignment_result)) {
-                $logger->error('[OrgMan] Membership assignment failed', array_merge($log_context, [
+                $logger->error('Membership assignment failed', array_merge($log_context, [
                     'error' => $membership_assignment_result->get_error_message(),
                 ]));
 
                 return $membership_assignment_result;
             }
-            $logger->info('[OrgMan] Assigned person to membership seat', $log_context);
+            $logger->info('Assigned person to membership seat', $log_context);
 
             // Assign base member role from config
             $role_result = $this->assignRole($person_uuid, $base_member_role, $org_id);
             if (is_wp_error($role_result)) {
-                $logger->error('[OrgMan] Base member role assignment failed', array_merge($log_context, [
+                $logger->error('Base member role assignment failed', array_merge($log_context, [
                     'role' => $base_member_role,
                     'error' => $role_result->get_error_message(),
                 ]));
 
                 return $role_result;
             }
-            $logger->debug('[OrgMan] Base member role assigned', array_merge($log_context, [
+            $logger->debug('Base member role assigned', array_merge($log_context, [
                 'role' => $base_member_role,
             ]));
 
             // Assign site-specific auto-roles from config
             if (!empty($auto_assign_roles)) {
-                $logger->debug('[OrgMan] Assigning configured auto roles', array_merge($log_context, [
+                $logger->debug('Assigning configured auto roles', array_merge($log_context, [
                     'auto_roles' => $auto_assign_roles,
                 ]));
 
                 $auto_roles_result = $this->assignAdditionalRoles($person_uuid, $org_id, $auto_assign_roles);
                 if (is_wp_error($auto_roles_result)) {
-                    $logger->error('[OrgMan] Auto-role assignment failed', array_merge($log_context, [
+                    $logger->error('Auto-role assignment failed', array_merge($log_context, [
                         'roles' => $auto_assign_roles,
                         'error' => $auto_roles_result->get_error_message(),
                     ]));
@@ -196,7 +196,7 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
             $additional_roles = $context['roles'] ?? $member_data['roles'] ?? [];
             $additional_result = $this->assignAdditionalRoles($person_uuid, $org_id, $additional_roles);
             if (is_wp_error($additional_result)) {
-                $logger->error('[OrgMan] Additional role assignment failed', array_merge($log_context, [
+                $logger->error('Additional role assignment failed', array_merge($log_context, [
                     'roles' => $additional_roles,
                     'error' => $additional_result->get_error_message(),
                 ]));
@@ -204,27 +204,27 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
                 return $additional_result;
             }
             if (!empty($additional_roles)) {
-                $logger->debug('[OrgMan] Additional roles assigned', array_merge($log_context, [
+                $logger->debug('Additional roles assigned', array_merge($log_context, [
                     'roles' => $additional_roles,
                 ]));
             }
 
             $this->logTouchpoint($person_uuid, $org_id, $member_data, $context);
-            $logger->debug('[OrgMan] Touchpoint logged for member addition', $log_context);
+            $logger->debug('Touchpoint logged for member addition', $log_context);
 
             $email_result = $this->sendAssignmentEmail($person_uuid, $org_id, [
                 'fallback_email' => $member_data['email'] ?? null,
             ]);
             if (is_wp_error($email_result)) {
                 // Do not block success on email failures; log for observability.
-                $logger->error('[OrgMan] Failed to send assignment email', array_merge($log_context, [
+                $logger->error('Failed to send assignment email', array_merge($log_context, [
                     'error' => $email_result->get_error_message(),
                 ]));
             } else {
-                $logger->info('[OrgMan] Assignment email dispatched', $log_context);
+                $logger->info('Assignment email dispatched', $log_context);
             }
 
-            $logger->info('[OrgMan] Member added successfully via direct strategy', $log_context);
+            $logger->info('Member added successfully via direct strategy', $log_context);
 
             return [
                 'status'      => 'success',
@@ -233,7 +233,7 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
             ];
 
         } catch (\Exception $e) {
-            $logger->error('[OrgMan] Direct strategy add_member threw exception', array_merge($log_context, [
+            $logger->error('Direct strategy add_member threw exception', array_merge($log_context, [
                 'exception' => $e->getMessage(),
             ]));
 
@@ -360,7 +360,7 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
         foreach ($roles as $role) {
             $result = $this->assignRole($person_uuid, $role, $org_id);
             if (is_wp_error($result)) {
-                $this->getLogger()->error('[OrgMan] Additional role assignment failed', [
+                $this->getLogger()->error('Additional role assignment failed', [
                     'source' => 'wicket-orgman',
                     'strategy' => 'direct',
                     'person_uuid' => $person_uuid,
@@ -421,7 +421,7 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
         ];
 
         if (!function_exists('wicket_assign_person_to_org_membership')) {
-            $logger->error('[OrgMan] Membership assignment helper missing', $context);
+            $logger->error('Membership assignment helper missing', $context);
 
             return new WP_Error('missing_dependency', 'Membership assignment helper is unavailable.');
         }
@@ -430,7 +430,7 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
             // Get organization membership data to pass to the assignment function
             $membership_data = $this->membershipService()->getOrgMembershipData($membership_uuid);
             if (is_wp_error($membership_data)) {
-                $logger->error('[OrgMan] Membership data lookup returned WP_Error', array_merge($context, [
+                $logger->error('Membership data lookup returned WP_Error', array_merge($context, [
                     'error' => $membership_data->get_error_message(),
                 ]));
 
@@ -438,7 +438,7 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
             }
 
             if (empty($membership_data) || empty($membership_data['data'])) {
-                $logger->error('[OrgMan] Membership data missing payload', $context);
+                $logger->error('Membership data missing payload', $context);
 
                 return new WP_Error('membership_data_missing', 'Membership details unavailable.');
             }
@@ -460,7 +460,7 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
             }
 
             if (empty($membership_type_id)) {
-                $logger->error('[OrgMan] Membership type ID missing in membership data', $context);
+                $logger->error('Membership type ID missing in membership data', $context);
 
                 return new WP_Error('membership_type_missing', 'Could not find membership type ID.');
             }
@@ -476,20 +476,20 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
             // Check if the API call was successful
             if (empty($result) || isset($result['errors'])) {
                 $error_message = $result['errors'][0]['detail'] ?? 'Failed to assign person to membership seat.';
-                $logger->warning('[OrgMan] Membership assignment API returned error, verifying existing membership', array_merge($context, [
+                $logger->warning('Membership assignment API returned error, verifying existing membership', array_merge($context, [
                     'membership_type_id' => $membership_type_id,
                     'api_error' => $error_message,
                 ]));
 
                 $post_check = $this->connectionService()->personHasMembership($person_uuid, $membership_uuid);
                 if (true === $post_check) {
-                    $logger->info('[OrgMan] Membership assignment already present after API error', $context);
+                    $logger->info('Membership assignment already present after API error', $context);
 
                     return true;
                 }
 
                 if (is_wp_error($post_check)) {
-                    $logger->error('[OrgMan] Membership verification after API error failed', array_merge($context, [
+                    $logger->error('Membership verification after API error failed', array_merge($context, [
                         'verification_error' => $post_check->get_error_message(),
                     ]));
                 }
@@ -497,14 +497,14 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
                 return new WP_Error('membership_assignment_failed', $error_message);
             }
 
-            $logger->info('[OrgMan] Membership assignment API succeeded', array_merge($context, [
+            $logger->info('Membership assignment API succeeded', array_merge($context, [
                 'membership_type_id' => $membership_type_id,
             ]));
 
             return true;
 
         } catch (\Throwable $e) {
-            $logger->error('[OrgMan] Membership assignment threw exception', array_merge($context, [
+            $logger->error('Membership assignment threw exception', array_merge($context, [
                 'exception' => $e->getMessage(),
             ]));
 
@@ -617,7 +617,7 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
             $context['strategy'] = 'direct';
             $this->touchpointService()->logMemberAdded($person_uuid, $org_id, $member_data, $context);
         } catch (\Throwable $e) {
-            \Wicket()->log()->error('[OrgMan] Failed to write touchpoint: ' . $e->getMessage());
+            \Wicket()->log()->error('Failed to write touchpoint: ' . $e->getMessage(), ['source' => 'wicket-orgman']);
         }
     }
 
@@ -639,7 +639,7 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
             $context['strategy'] = 'direct';
             $this->touchpointService()->logMemberRemoved($person_uuid, $org_id, $context);
         } catch (\Throwable $e) {
-            \Wicket()->log()->error('[OrgMan] Failed to write removal touchpoint: ' . $e->getMessage());
+            \Wicket()->log()->error('Failed to write removal touchpoint: ' . $e->getMessage(), ['source' => 'wicket-orgman']);
         }
     }
 
@@ -665,12 +665,12 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
         $fallback_email = isset($options['fallback_email']) ? sanitize_email((string) $options['fallback_email']) : '';
 
         if (!function_exists('wicket_get_organization') || !function_exists('wicket_get_person_by_id')) {
-            $logger->error('[OrgMan] Email notification dependencies missing', $context);
+            $logger->error('Email notification dependencies missing', $context);
 
             return new WP_Error('missing_dependency', 'Email notification dependencies are unavailable.');
         }
 
-        $logger->debug('[OrgMan] Preparing assignment email payload', $context);
+        $logger->debug('Preparing assignment email payload', $context);
         $org = wicket_get_organization($org_id);
         $person = wicket_get_person_by_id($person_uuid);
         $home_url = home_url();
@@ -691,13 +691,13 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
 
         if (empty($to) && !empty($fallback_email)) {
             $to = $fallback_email;
-            $logger->warning('[OrgMan] Assignment email falling back to provided email', array_merge($context, [
+            $logger->warning('Assignment email falling back to provided email', array_merge($context, [
                 'fallback_email' => $fallback_email,
             ]));
         }
 
         if (empty($to)) {
-            $logger->error('[OrgMan] Assignment email aborted: missing person email', $context);
+            $logger->error('Assignment email aborted: missing person email', $context);
 
             return new WP_Error('person_email_missing', 'Unable to determine person email address.');
         }
@@ -748,7 +748,7 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
             $headers[] = sprintf('From: %s <no-reply@%s>', $organization_name, $base_domain);
         }
 
-        $logger->debug('[OrgMan] Dispatching assignment email', array_merge($context, [
+        $logger->debug('Dispatching assignment email', array_merge($context, [
             'recipient' => $to,
             'subject' => $subject,
         ]));
@@ -756,14 +756,14 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
         $sent = wp_mail($to, $subject, $body, $headers);
 
         if (!$sent) {
-            $logger->error('[OrgMan] Assignment email send failed', array_merge($context, [
+            $logger->error('Assignment email send failed', array_merge($context, [
                 'recipient' => $to,
             ]));
 
             return new WP_Error('email_failed', 'Failed to send assignment email.');
         }
 
-        $logger->info('[OrgMan] Assignment email sent', array_merge($context, [
+        $logger->info('Assignment email sent', array_merge($context, [
             'recipient' => $to,
         ]));
 

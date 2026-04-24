@@ -266,7 +266,7 @@ class PermissionHelper extends Helper
         // Normalize all check roles for comparison
         $normalized_check_roles = array_map([self::class, 'normalizeRoleName'], $check_roles);
 
-        \Wicket()->log()->debug('[PermissionHelper] role_check', [
+        \Wicket()->log()->debug('role_check', [
             'source' => 'wicket-orgman',
             'org_id' => $org_id,
             'user_login' => $user->user_login,
@@ -309,7 +309,7 @@ class PermissionHelper extends Helper
     public static function has_active_membership($org_id = null): bool
     {
         if (!$org_id || !is_user_logged_in()) {
-            \Wicket()->log()->debug('[PermissionHelper] has_active_membership: NO - missing org_id or not logged in', [
+            \Wicket()->log()->debug('has_active_membership: NO - missing org_id or not logged in', [
                 'source' => 'wicket-orgman',
                 'org_id' => $org_id,
                 'is_logged_in' => is_user_logged_in(),
@@ -322,7 +322,7 @@ class PermissionHelper extends Helper
         $person_uuid = wp_get_current_user()->user_login;
 
         if (empty($person_uuid)) {
-            \Wicket()->log()->debug('[PermissionHelper] has_active_membership: NO - empty person_uuid', [
+            \Wicket()->log()->debug('has_active_membership: NO - empty person_uuid', [
                 'source' => 'wicket-orgman',
                 'org_id' => $org_id,
             ]);
@@ -332,7 +332,7 @@ class PermissionHelper extends Helper
 
         // Use wicket_get_person_active_memberships to support impersonation
         if (!function_exists('wicket_get_person_active_memberships')) {
-            \Wicket()->log()->warning('[PermissionHelper] wicket_get_person_active_memberships function not available', [
+            \Wicket()->log()->warning('wicket_get_person_active_memberships function not available', [
                 'source' => 'wicket-orgman',
                 'org_id' => $org_id,
             ]);
@@ -345,7 +345,7 @@ class PermissionHelper extends Helper
 
             $org_membership_ids = [];
             if (empty($memberships['included']) || !is_array($memberships['included'])) {
-                \Wicket()->log()->debug('[PermissionHelper] has_active_membership: no direct memberships, checking ownership and roles', [
+                \Wicket()->log()->debug('has_active_membership: no direct memberships, checking ownership and roles', [
                     'source' => 'wicket-orgman',
                     'org_id' => $org_id,
                     'person_uuid' => $person_uuid,
@@ -362,7 +362,7 @@ class PermissionHelper extends Helper
                         $org_membership_ids[] = $included['relationships']['organization']['data']['id'];
 
                         if ($included['relationships']['organization']['data']['id'] === $org_id) {
-                            \Wicket()->log()->debug('[PermissionHelper] has_active_membership: YES (direct)', [
+                            \Wicket()->log()->debug('has_active_membership: YES (direct)', [
                                 'source' => 'wicket-orgman',
                                 'org_id' => $org_id,
                                 'person_uuid' => $person_uuid,
@@ -376,7 +376,7 @@ class PermissionHelper extends Helper
 
             // No direct membership found - check if this is a parent organization
             // with memberships inside, and user has org-level roles OR owns the membership
-            \Wicket()->log()->debug('[PermissionHelper] has_active_membership: checking parent org access', [
+            \Wicket()->log()->debug('has_active_membership: checking parent org access', [
                 'source' => 'wicket-orgman',
                 'org_id' => $org_id,
                 'person_uuid' => $person_uuid,
@@ -394,7 +394,7 @@ class PermissionHelper extends Helper
                         $owner_id = $membership_data['data']['relationships']['owner']['data']['id'];
 
                         if ($owner_id === $person_uuid) {
-                            \Wicket()->log()->debug('[PermissionHelper] has_active_membership: YES (membership owner)', [
+                            \Wicket()->log()->debug('has_active_membership: YES (membership owner)', [
                                 'source' => 'wicket-orgman',
                                 'org_id' => $org_id,
                                 'person_uuid' => $person_uuid,
@@ -418,7 +418,7 @@ class PermissionHelper extends Helper
 
                         if (!empty($org_memberships) && is_array($org_memberships)) {
                             $membership_count = count($org_memberships);
-                            \Wicket()->log()->debug('[PermissionHelper] has_active_membership: YES (parent org with roles and memberships)', [
+                            \Wicket()->log()->debug('has_active_membership: YES (parent org with roles and memberships)', [
                                 'source' => 'wicket-orgman',
                                 'org_id' => $org_id,
                                 'person_uuid' => $person_uuid,
@@ -432,7 +432,7 @@ class PermissionHelper extends Helper
                 }
             }
 
-            \Wicket()->log()->debug('[PermissionHelper] has_active_membership: NO - no access found', [
+            \Wicket()->log()->debug('has_active_membership: NO - no access found', [
                 'source' => 'wicket-orgman',
                 'org_id' => $org_id,
                 'person_uuid' => $person_uuid,
@@ -440,7 +440,7 @@ class PermissionHelper extends Helper
             ]);
         } catch (\Throwable $e) {
             // Log error but return false
-            \Wicket()->log()->error('[PermissionHelper] Error checking active membership: ' . $e->getMessage(), [
+            \Wicket()->log()->error('Error checking active membership: ' . $e->getMessage(), [
                 'source' => 'wicket-orgman',
                 'org_id' => $org_id,
                 'person_uuid' => $person_uuid ?? 'unknown',
@@ -537,7 +537,7 @@ class PermissionHelper extends Helper
             ? ConfigHelper::get_edit_organization_roles()
             : ['org_editor'];
 
-        \Wicket()->log()->debug('[PermissionHelper] can_edit_organization check', [
+        \Wicket()->log()->debug('can_edit_organization check', [
             'source' => 'wicket-orgman',
             'org_id' => $org_id,
             'edit_roles' => $edit_roles,
@@ -546,7 +546,7 @@ class PermissionHelper extends Helper
         $has_active = self::has_active_membership($org_id);
         $has_roles = self::role_check($edit_roles, $org_id);
 
-        \Wicket()->log()->debug('[PermissionHelper] can_edit_organization result', [
+        \Wicket()->log()->debug('can_edit_organization result', [
             'source' => 'wicket-orgman',
             'org_id' => $org_id,
             'has_active_membership' => $has_active,
@@ -559,7 +559,7 @@ class PermissionHelper extends Helper
         }
 
         $bypass = self::can_bypass_active_membership_requirement($org_id, $edit_roles);
-        \Wicket()->log()->debug('[PermissionHelper] can_edit_organization bypass check', [
+        \Wicket()->log()->debug('can_edit_organization bypass check', [
             'source' => 'wicket-orgman',
             'org_id' => $org_id,
             'can_bypass' => $bypass,
@@ -570,7 +570,7 @@ class PermissionHelper extends Helper
         }
 
         $role_only = self::can_access_role_only_management_surface($org_id);
-        \Wicket()->log()->debug('[PermissionHelper] can_edit_organization role_only check', [
+        \Wicket()->log()->debug('can_edit_organization role_only check', [
             'source' => 'wicket-orgman',
             'org_id' => $org_id,
             'can_access_role_only' => $role_only,
@@ -664,7 +664,7 @@ class PermissionHelper extends Helper
         try {
             // Get the organization membership to find the owner
             if (!class_exists('\OrgManagement\Services\MembershipService')) {
-                \Wicket()->log()->warning('[PermissionHelper] MembershipService class not available', [
+                \Wicket()->log()->warning('MembershipService class not available', [
                     'source' => 'wicket-orgman',
                     'org_id' => $org_id,
                 ]);
@@ -691,7 +691,7 @@ class PermissionHelper extends Helper
             return $person_uuid === $owner_id;
 
         } catch (\Throwable $e) {
-            \Wicket()->log()->error('[PermissionHelper] Error checking membership owner: ' . $e->getMessage(), [
+            \Wicket()->log()->error('Error checking membership owner: ' . $e->getMessage(), [
                 'source' => 'wicket-orgman',
                 'org_id' => $org_id,
                 'person_uuid' => $person_uuid ?? 'unknown',
@@ -714,7 +714,7 @@ class PermissionHelper extends Helper
             ? ConfigHelper::get_manage_members_roles()
             : ['membership_manager'];
 
-        \Wicket()->log()->debug('[PermissionHelper] is_membership_manager check', [
+        \Wicket()->log()->debug('is_membership_manager check', [
             'source' => 'wicket-orgman',
             'org_id' => $org_id,
             'manage_roles' => $manage_roles,
@@ -724,7 +724,7 @@ class PermissionHelper extends Helper
 
         if ($has_active) {
             $has_roles = self::role_check($manage_roles, $org_id, false);
-            \Wicket()->log()->debug('[PermissionHelper] is_membership_manager: active membership path', [
+            \Wicket()->log()->debug('is_membership_manager: active membership path', [
                 'source' => 'wicket-orgman',
                 'org_id' => $org_id,
                 'has_active_membership' => $has_active,
@@ -735,7 +735,7 @@ class PermissionHelper extends Helper
         }
 
         $bypass = self::can_bypass_active_membership_requirement($org_id, $manage_roles);
-        \Wicket()->log()->debug('[PermissionHelper] is_membership_manager: bypass path', [
+        \Wicket()->log()->debug('is_membership_manager: bypass path', [
             'source' => 'wicket-orgman',
             'org_id' => $org_id,
             'has_active_membership' => $has_active,

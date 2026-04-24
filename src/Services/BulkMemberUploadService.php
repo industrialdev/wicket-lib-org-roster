@@ -827,17 +827,17 @@ class BulkMemberUploadService
 
         $logger = \Wicket()->log();
         if (method_exists($logger, $level)) {
-            $logger->{$level}('[OrgMan] ' . $message, $normalized_context);
+            $logger->{$level}( $message, $normalized_context);
 
             return;
         }
         if (method_exists($logger, 'info')) {
-            $logger->info('[OrgMan] ' . $message, $normalized_context);
+            $logger->info( $message, $normalized_context);
 
             return;
         }
 
-        \Wicket()->log()->error('[OrgMan] ' . $message . ' ' . wp_json_encode($normalized_context));
+        \Wicket()->log()->error( $message . ' ' . wp_json_encode($normalized_context), ['source' => 'wicket-orgman']);
     }
 
     /**
@@ -1066,7 +1066,7 @@ class BulkMemberUploadService
                 }
             }
         } catch (\Throwable $e) {
-            \OrgManagement\Helpers\Helper::log_error('[OrgMan] Bulk upload duplicate check failed: ' . $e->getMessage(), [
+            \OrgManagement\Helpers\Helper::log_error('Bulk upload duplicate check failed: ' . $e->getMessage(), [
                 'membership_uuid' => $membership_uuid,
                 'email' => $email,
             ]);
@@ -1096,7 +1096,7 @@ class BulkMemberUploadService
 
             return $has_membership === true;
         } catch (\Throwable $e) {
-            \OrgManagement\Helpers\Helper::log_error('[OrgMan] Bulk upload person duplicate check failed: ' . $e->getMessage(), [
+            \OrgManagement\Helpers\Helper::log_error('Bulk upload person duplicate check failed: ' . $e->getMessage(), [
                 'membership_uuid' => $membership_uuid,
                 'email' => $email,
             ]);
@@ -1193,7 +1193,7 @@ class BulkMemberUploadService
                 return (string) ($person->id ?? '');
             }
         } catch (\Throwable $e) {
-            \OrgManagement\Helpers\Helper::log_error('[OrgMan] Bulk upload person lookup failed: ' . $e->getMessage(), [
+            \OrgManagement\Helpers\Helper::log_error('Bulk upload person lookup failed: ' . $e->getMessage(), [
                 'email' => $email,
             ]);
         }

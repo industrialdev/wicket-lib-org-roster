@@ -484,7 +484,7 @@ class NotificationService
             return true;
 
         } catch (\Exception $e) {
-            \Wicket()->log()->error('NotificationService::email_to_person_on_group_assignment() - Exception: ' . $e->getMessage());
+            \Wicket()->log()->error('NotificationService::email_to_person_on_group_assignment() - Exception: ' . $e->getMessage(), ['source' => 'wicket-orgman']);
 
             return new WP_Error('email_exception', $e->getMessage());
         }

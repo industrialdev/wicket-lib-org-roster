@@ -238,7 +238,7 @@ class OrganizationService
                 $page_number++;
             } while ($page_number <= $total_pages);
         } catch (\Throwable $e) {
-            \Wicket()->log()->warning('[OrgMan] Failed resolving organizations from role-only access: ' . $e->getMessage(), [
+            \Wicket()->log()->warning('Failed resolving organizations from role-only access: ' . $e->getMessage(), [
                 'source' => 'wicket-orgman',
                 'person_uuid' => $person_uuid,
             ]);
@@ -298,7 +298,7 @@ class OrganizationService
                 $response_data = is_array($response['data'] ?? null) ? $response['data'] : [];
                 $included_data = is_array($response['included'] ?? null) ? $response['included'] : [];
 
-                \Wicket()->log()->debug('[OrgMan] getUserOrganizationsFromOwnership: page fetched', [
+                \Wicket()->log()->debug('getUserOrganizationsFromOwnership: page fetched', [
                     'source' => 'wicket-orgman',
                     'person_uuid' => $person_uuid,
                     'page' => $page_number,
@@ -351,7 +351,7 @@ class OrganizationService
                             'roles' => [],
                         ];
 
-                        \Wicket()->log()->debug('[OrgMan] getUserOrganizationsFromOwnership: found owned organization', [
+                        \Wicket()->log()->debug('getUserOrganizationsFromOwnership: found owned organization', [
                             'source' => 'wicket-orgman',
                             'person_uuid' => $person_uuid,
                             'org_id' => $org_id,
@@ -366,7 +366,7 @@ class OrganizationService
 
                 // Log sample owner IDs from this page for debugging
                 if (!empty($sample_owners) && $page_number === 1) {
-                    \Wicket()->log()->debug('[OrgMan] getUserOrganizationsFromOwnership: sample owner IDs', [
+                    \Wicket()->log()->debug('getUserOrganizationsFromOwnership: sample owner IDs', [
                         'source' => 'wicket-orgman',
                         'person_uuid' => $person_uuid,
                         'sample_owners' => $sample_owners,
@@ -377,14 +377,14 @@ class OrganizationService
                 $page_number++;
             } while ($page_number <= $total_pages);
 
-            \Wicket()->log()->debug('[OrgMan] getUserOrganizationsFromOwnership: complete', [
+            \Wicket()->log()->debug('getUserOrganizationsFromOwnership: complete', [
                 'source' => 'wicket-orgman',
                 'person_uuid' => $person_uuid,
                 'found_count' => count($organizations),
                 'org_ids' => array_keys($organizations),
             ]);
         } catch (\Throwable $e) {
-            \Wicket()->log()->warning('[OrgMan] Failed resolving organizations from ownership: ' . $e->getMessage(), [
+            \Wicket()->log()->warning('Failed resolving organizations from ownership: ' . $e->getMessage(), [
                 'source' => 'wicket-orgman',
                 'person_uuid' => $person_uuid,
             ]);
@@ -419,7 +419,7 @@ class OrganizationService
         $person = wicket_get_person_by_id($person_uuid);
 
         if (!$person) {
-            $logger->error('[OrgMan] Person not found for UUID: ' . $person_uuid, ['source' => 'wicket-orgman']);
+            $logger->error('Person not found for UUID: ' . $person_uuid, ['source' => 'wicket-orgman']);
             $error_data = ['error' => 'person_not_found'];
             $this->setCachedData($cache_key, $error_data);
 
@@ -479,7 +479,7 @@ class OrganizationService
                 }
             }
         } catch (\Throwable $e) {
-            $logger->error('[OrgMan] Error fetching membership entries: ' . $e->getMessage(), ['source' => 'wicket-orgman']);
+            $logger->error('Error fetching membership entries: ' . $e->getMessage(), ['source' => 'wicket-orgman']);
             $membership_error = ['error' => 'api_error', 'message' => 'Unable to fetch memberships. Please try again later.'];
         }
 
@@ -586,7 +586,7 @@ class OrganizationService
             return $membershipService->getMembershipForOrganization($organizationUuid);
         } catch (\Throwable $e) {
             \Wicket()->log()->warning(
-                '[OrgMan] Failed resolving membership uuid for organization: ' . $e->getMessage(),
+                'Failed resolving membership uuid for organization: ' . $e->getMessage(),
                 [
                     'source'   => 'wicket-orgman',
                     'org_uuid' => $organizationUuid,
@@ -654,7 +654,7 @@ class OrganizationService
             return $person;
 
         } catch (\Exception $e) {
-            \Wicket()->log()->error('OrganizationService::getOrganizationOwner() - Exception: ' . $e->getMessage());
+            \Wicket()->log()->error('OrganizationService::getOrganizationOwner() - Exception: ' . $e->getMessage(), ['source' => 'wicket-orgman']);
 
             return new \WP_Error('get_owner_exception', $e->getMessage());
         }

@@ -121,7 +121,8 @@ class TemplateHelper extends Helper
 
         $template_path = $template_map[$template] ?? ($template_dir . '/templates-partials/' . $relative_path);
 
-        \Wicket()->log()->info('[OrgMan] Resolving template', [
+        \Wicket()->log()->info('Resolving template', [
+            'source' => 'wicket-orgman',
             'template' => $template,
             'is_mapped' => isset($template_map[$template]),
             'resolved_path' => $template_path
@@ -133,7 +134,8 @@ class TemplateHelper extends Helper
 
         if (!$real_template_path || !$real_plugin_dir
              || strpos($real_template_path, $real_plugin_dir) !== 0) {
-            \Wicket()->log()->error('[OrgMan] Template security check failed or file missing', [
+            \Wicket()->log()->error('Template security check failed or file missing', [
+                'source' => 'wicket-orgman',
                 'path' => $template_path,
                 'real_path' => $real_template_path ?: 'false',
                 'plugin_dir' => $real_plugin_dir
@@ -143,7 +145,7 @@ class TemplateHelper extends Helper
         }
 
         if (file_exists($real_template_path)) {
-            \Wicket()->log()->info('[OrgMan] Loading template', ['file' => $real_template_path]);
+            \Wicket()->log()->info('Loading template', ['source' => 'wicket-orgman', 'file' => $real_template_path]);
             // Load services that templates might need
             if (!isset($args['organizations']) && $template === 'organization-list') {
                 // Initialize the organization service
@@ -218,7 +220,8 @@ class TemplateHelper extends Helper
         $template = $wp->query_vars['template'] ?? $_REQUEST['template'] ?? '';
 
         if (!empty($action) || !empty($template)) {
-            \Wicket()->log()->info('[OrgMan] Hypermedia request detected', [
+            \Wicket()->log()->info('Hypermedia request detected', [
+                'source' => 'wicket-orgman',
                 'action' => $action,
                 'template' => $template,
                 'query_vars' => $wp->query_vars

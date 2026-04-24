@@ -104,7 +104,7 @@ class PermissionService
 
             return array_values(array_filter($roles));
         } catch (\Throwable $e) {
-            \Wicket()->log()->error('[PermissionService] Failed to get person roles: ' . $e->getMessage());
+            \Wicket()->log()->error('Failed to get person roles: ' . $e->getMessage(), ['source' => 'wicket-orgman']);
 
             return [];
         }
@@ -182,7 +182,7 @@ class PermissionService
 
             return true;
         } catch (\Throwable $e) {
-            \Wicket()->log()->error('[PermissionService] Failed to remove single role: ' . $e->getMessage());
+            \Wicket()->log()->error('Failed to remove single role: ' . $e->getMessage(), ['source' => 'wicket-orgman']);
 
             return false;
         }
@@ -336,7 +336,7 @@ class PermissionService
     public function getOrgRolesForPerson(string $personUuid, string $orgId): array
     {
         if (empty($personUuid) || empty($orgId) || !function_exists('wicket_api_client')) {
-            \Wicket()->log()->debug('[PermissionService] getOrgRolesForPerson: missing params or api_client', [
+            \Wicket()->log()->debug('getOrgRolesForPerson: missing params or api_client', [
                 'source' => 'wicket-orgman',
                 'personUuid' => $personUuid,
                 'orgId' => $orgId,
@@ -355,7 +355,7 @@ class PermissionService
             ];
             $response = $client->get('/people/' . rawurlencode($personUuid) . '/roles', $params);
 
-            \Wicket()->log()->debug('[PermissionService] getOrgRolesForPerson: API response', [
+            \Wicket()->log()->debug('getOrgRolesForPerson: API response', [
                 'source' => 'wicket-orgman',
                 'personUuid' => $personUuid,
                 'orgId' => $orgId,
@@ -376,7 +376,7 @@ class PermissionService
                     $role_name = $role['attributes']['name'] ?? '';
                     $is_global = !empty($role['attributes']['global']);
 
-                    \Wicket()->log()->debug('[PermissionService] getOrgRolesForPerson: processing role', [
+                    \Wicket()->log()->debug('getOrgRolesForPerson: processing role', [
                         'source' => 'wicket-orgman',
                         'target_orgId' => $orgId,
                         'role_name' => $role_name,
@@ -402,7 +402,7 @@ class PermissionService
                 }
             }
 
-            \Wicket()->log()->debug('[PermissionService] getOrgRolesForPerson: final result', [
+            \Wicket()->log()->debug('getOrgRolesForPerson: final result', [
                 'source' => 'wicket-orgman',
                 'personUuid' => $personUuid,
                 'orgId' => $orgId,
@@ -412,7 +412,7 @@ class PermissionService
 
             return array_values(array_filter($roles));
         } catch (\Throwable $e) {
-            \Wicket()->log()->error('[PermissionService] getOrgRolesForPerson: exception', [
+            \Wicket()->log()->error('getOrgRolesForPerson: exception', [
                 'source' => 'wicket-orgman',
                 'personUuid' => $personUuid,
                 'orgId' => $orgId,

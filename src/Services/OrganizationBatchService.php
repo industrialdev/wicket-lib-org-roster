@@ -44,7 +44,7 @@ class OrganizationBatchService
         // Get the same API client that wicket_get_organization uses
         $client = wicket_api_client();
         if (!$client) {
-            $logger->error('[OrgMan Batch] Failed to get Wicket API client', ['source' => 'wicket-orgman']);
+            $logger->error('Failed to get Wicket API client', ['source' => 'wicket-orgman']);
 
             return [];
         }
@@ -60,7 +60,7 @@ class OrganizationBatchService
             $response = $client->post('organizations/query', ['json' => $json_args]);
 
             if (!$response || !isset($response['data'])) {
-                $logger->warning('[OrgMan Batch] Batch call returned no data or invalid response', ['source' => 'wicket-orgman']);
+                $logger->warning('Batch call returned no data or invalid response', ['source' => 'wicket-orgman']);
 
                 return [];
             }
@@ -82,7 +82,7 @@ class OrganizationBatchService
             return $organizations;
 
         } catch (\Exception $e) {
-            $logger->error('[OrgMan Batch] Batch API call failed: ' . $e->getMessage(), ['source' => 'wicket-orgman']);
+            $logger->error('Batch API call failed: ' . $e->getMessage(), ['source' => 'wicket-orgman']);
 
             return [];
         }
@@ -105,7 +105,7 @@ class OrganizationBatchService
             return wicket_get_organization($uuid);
         } catch (\Exception $e) {
             $logger = \Wicket()->log();
-            $logger->error('[OrgMan Batch] Individual call failed for ' . $uuid . ': ' . $e->getMessage(), ['source' => 'wicket-orgman']);
+            $logger->error('Individual call failed for ' . $uuid . ': ' . $e->getMessage(), ['source' => 'wicket-orgman']);
 
             return false;
         }

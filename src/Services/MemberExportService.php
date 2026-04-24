@@ -736,15 +736,15 @@ class MemberExportService
         $normalized_context = array_merge(['source' => 'wicket-orgman-member-export'], $context);
         $logger = \Wicket()->log();
         if (method_exists($logger, $level)) {
-            $logger->{$level}('[OrgMan] ' . $message, $normalized_context);
+            $logger->{$level}( $message, $normalized_context);
 
             return;
         }
         if (method_exists($logger, 'info')) {
-            $logger->info('[OrgMan] ' . $message, $normalized_context);
+            $logger->info( $message, $normalized_context);
 
             return;
         }
-        \Wicket()->log()->error('[OrgMan] ' . $message . ' ' . wp_json_encode($normalized_context));
+        \Wicket()->log()->error( $message . ' ' . wp_json_encode($normalized_context), ['source' => 'wicket-orgman']);
     }
 }

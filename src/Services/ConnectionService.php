@@ -196,7 +196,7 @@ class ConnectionService
 
             return $response;
         } catch (\Throwable $e) {
-            \Wicket()->log()->error('[ConnectionService] Failed to get person connections: ' . $e->getMessage());
+            \Wicket()->log()->error('Failed to get person connections: ' . $e->getMessage(), ['source' => 'wicket-orgman']);
 
             return false;
         }
@@ -279,7 +279,7 @@ class ConnectionService
             $response = $client->patch("connections/{$relationship_id}", ['json' => $update_payload]);
 
             if (!empty($response['errors'])) {
-                \Wicket()->log()->error('ConnectionService::end_relationship_today() - API error: ' . wp_json_encode($response['errors']));
+                \Wicket()->log()->error('ConnectionService::end_relationship_today() - API error: ' . wp_json_encode($response['errors']), ['source' => 'wicket-orgman']);
 
                 return new WP_Error('api_error', 'Failed to end relationship: ' . ($response['errors'][0]['detail'] ?? 'Unknown error'));
             }
@@ -287,7 +287,7 @@ class ConnectionService
             return $response;
 
         } catch (\Exception $e) {
-            \Wicket()->log()->error('ConnectionService::end_relationship_today() - Exception: ' . $e->getMessage());
+            \Wicket()->log()->error('ConnectionService::end_relationship_today() - Exception: ' . $e->getMessage(), ['source' => 'wicket-orgman']);
 
             return new WP_Error('end_relationship_exception', $e->getMessage());
         }
@@ -432,7 +432,7 @@ class ConnectionService
             return $payload;
 
         } catch (\Exception $e) {
-            \Wicket()->log()->error('ConnectionService::buildConnectionPayload() - Exception: ' . $e->getMessage());
+            \Wicket()->log()->error('ConnectionService::buildConnectionPayload() - Exception: ' . $e->getMessage(), ['source' => 'wicket-orgman']);
 
             return new WP_Error('build_payload_exception', $e->getMessage());
         }
@@ -569,7 +569,7 @@ class ConnectionService
                 $response = $client->patch("connections/{$connection_id}", ['json' => $update_payload]);
 
                 if (!empty($response['errors'])) {
-                    \Wicket()->log()->error('ConnectionService::updateConnectionDescription() - API error: ' . json_encode($response['errors']));
+                    \Wicket()->log()->error('ConnectionService::updateConnectionDescription() - API error: ' . json_encode($response['errors']), ['source' => 'wicket-orgman']);
 
                     return new WP_Error('api_error', 'Failed to update connection description: ' . ($response['errors'][0]['detail'] ?? 'Unknown error'));
                 }
@@ -578,7 +578,7 @@ class ConnectionService
             return true;
 
         } catch (\Exception $e) {
-            \Wicket()->log()->error('ConnectionService::updateConnectionDescription() - Exception: ' . $e->getMessage());
+            \Wicket()->log()->error('ConnectionService::updateConnectionDescription() - Exception: ' . $e->getMessage(), ['source' => 'wicket-orgman']);
 
             return new WP_Error('update_connection_exception', $e->getMessage());
         }
@@ -621,11 +621,11 @@ class ConnectionService
                     }
                 } catch (\Exception $json_error) {
                     // If we can't parse the JSON, just use the original error message
-                    \Wicket()->log()->error('ConnectionService::createConnection() - JSON parse error: ' . $json_error->getMessage());
+                    \Wicket()->log()->error('ConnectionService::createConnection() - JSON parse error: ' . $json_error->getMessage(), ['source' => 'wicket-orgman']);
                 }
             }
 
-            \Wicket()->log()->error('ConnectionService::createConnection() - Exception: ' . $error_message);
+            \Wicket()->log()->error('ConnectionService::createConnection() - Exception: ' . $error_message, ['source' => 'wicket-orgman']);
 
             return new WP_Error('connection_creation_failed', $error_message);
         }
@@ -672,7 +672,7 @@ class ConnectionService
             return false;
 
         } catch (\Exception $e) {
-            \Wicket()->log()->error('ConnectionService::personHasRelationship() - Exception: ' . $e->getMessage());
+            \Wicket()->log()->error('ConnectionService::personHasRelationship() - Exception: ' . $e->getMessage(), ['source' => 'wicket-orgman']);
 
             return new WP_Error('relationship_check_failed', $e->getMessage());
         }
@@ -1001,7 +1001,7 @@ class ConnectionService
                 $response = $client->patch("connections/{$connection_id}", ['json' => $update_payload]);
 
                 if (!empty($response['errors'])) {
-                    \Wicket()->log()->error('ConnectionService::updateConnectionType() - API error: ' . json_encode($response['errors']));
+                    \Wicket()->log()->error('ConnectionService::updateConnectionType() - API error: ' . json_encode($response['errors']), ['source' => 'wicket-orgman']);
 
                     return new WP_Error('api_error', 'Failed to update connection type: ' . ($response['errors'][0]['detail'] ?? 'Unknown error'));
                 }
@@ -1010,7 +1010,7 @@ class ConnectionService
             return true;
 
         } catch (\Exception $e) {
-            \Wicket()->log()->error('ConnectionService::updateConnectionType() - Exception: ' . $e->getMessage());
+            \Wicket()->log()->error('ConnectionService::updateConnectionType() - Exception: ' . $e->getMessage(), ['source' => 'wicket-orgman']);
 
             return new WP_Error('update_connection_exception', $e->getMessage());
         }

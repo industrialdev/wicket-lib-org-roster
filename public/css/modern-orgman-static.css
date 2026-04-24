@@ -2894,3 +2894,57 @@ body.wicket-orgman-screen
     box-shadow: 0 0 0 2px var(--wicket-orgman-bg-interactive);
   }
 }
+
+/* Skeleton loader for member cards */
+.wt_skeleton {
+  background: #e0e0e0;
+  background: linear-gradient(90deg, #e0e0e0 25%, #f0f0f0 50%, #e0e0e0 75%);
+  background-size: 200% 100%;
+  animation: wt-skeleton-shimmer 1.5s infinite;
+}
+
+@keyframes wt-skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.wt_skeleton-text {
+  height: 1em;
+  border-radius: 0.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.wt_skeleton-text--short {
+  width: 60%;
+}
+
+.wt_skeleton-text--medium {
+  width: 75%;
+}
+
+.wt_skeleton-text--long {
+  width: 90%;
+}
+
+.wt_skeleton-avatar {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+}
+
+.wt_skeleton-badge {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.wt_skeleton-button {
+  height: 2.5rem;
+  border-radius: 0.375rem;
+  width: 100%;
+}

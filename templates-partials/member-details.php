@@ -4,13 +4,15 @@ declare(strict_types=1);
 
 namespace OrgManagement\Templates;
 
-\Wicket()->log()->info('[OrgMan] member-details.php script execution started', [
+\Wicket()->log()->info('member-details.php script execution started', [
+    'source' => 'wicket-orgman',
     'get' => $_GET,
     'uri' => $_SERVER['REQUEST_URI'] ?? 'unknown'
 ]);
 
 use OrgManagement\Services\MemberService;
 use OrgManagement\Services\ConfigService;
+use OrgManagement\Services\CacheService;
 use OrgManagement\Helpers\DatastarSSE;
 use starfederation\datastar\ServerSentEventGenerator;
 
@@ -28,7 +30,7 @@ $person_uuid = isset($_REQUEST['person_uuid']) ? sanitize_text_field($_REQUEST['
 $org_uuid = isset($_REQUEST['org_uuid']) ? sanitize_text_field($_REQUEST['org_uuid']) : '';
 $membership_uuid = isset($_REQUEST['membership_uuid']) ? sanitize_text_field($_REQUEST['membership_uuid']) : '';
 
-\OrgManagement\Helpers\Helper::log_debug('[OrgMan] member-details endpoint hit', [
+\OrgManagement\Helpers\Helper::log_debug('member-details endpoint hit', [
     'person_uuid'     => $person_uuid,
     'org_uuid'        => $org_uuid,
     'membership_uuid' => $membership_uuid,
@@ -42,15 +44,16 @@ $config_service = new ConfigService();
 $member_service = new MemberService($config_service);
 
 // Fetch the member with full details (lazy = false)
-// We use a small cache for this request since multiple cards might intersect at once
+// Uses CacheService so the versioned cache_salt key invalidates this alongside the member list.
+$cache_service = new CacheService();
 $cache_key = 'orgman_lazy_details_' . md5($person_uuid . $org_uuid . $membership_uuid);
-$member = get_transient($cache_key);
+$member = $cache_service->get($cache_key);
 
 if (false === $member) {
     $member = $member_service->getMemberByPersonUuid($person_uuid, $membership_uuid, $org_uuid);
 
     if ($member) {
-        set_transient($cache_key, $member, 1 * HOUR_IN_SECONDS);
+        $cache_service->set($cache_key, $member, 1 * HOUR_IN_SECONDS);
     }
 }
 
@@ -63,10 +66,11 @@ $person_uuid_no_dashes = str_replace('-', '', $person_uuid);
 
 // If the member was filtered out by the full load (e.g. relationship filters), remove the card
 if (!$member) {
-    \Wicket()->log()->warning('[OrgMan] member-details: Member not found, removing card', [
+    \Wicket()->log()->warning('member-details: Member not found, removing card', [
+        'source' => 'wicket-orgman',
         'person_uuid'     => $person_uuid,
         'org_uuid'        => $org_uuid,
-        'membership_uuid' => $membershipUuid,
+        'membership_uuid' => $membership_uuid,
     ]);
     // Delete the entire card container
     $generator->removeElements('#member-' . $person_uuid_no_dashes);
@@ -88,10 +92,10 @@ $confirmed_tooltip = (string) ($member_list_config['account_status']['confirmed_
 $unconfirmed_tooltip = (string) ($member_list_config['account_status']['unconfirmed_tooltip'] ?? __('Account not confirmed', 'wicket-acc'));
 $member_email = $member['email'] ?? '';
 
-// Fragment 1: Update Status Indicator
+// Fragment 1: Update Status Indicator for ALL instances of this member
 ob_start();
 ?>
-<div id="member-status-<?php echo esc_attr($person_uuid_no_dashes); ?>" class="wt_inline-flex wt_items-center">
+<div id="member-status-<?php echo esc_attr($person_uuid_no_dashes); ?>" class="wt_inline-flex wt_items-center" data-member-status="<?php echo esc_attr($person_uuid_no_dashes); ?>">
     <?php if ($show_account_status) : ?>
         <?php if (!empty($member['is_confirmed'])) : ?>
             <span class="wt_text-content" title="<?php echo esc_attr($confirmed_tooltip); ?>">
@@ -111,7 +115,8 @@ ob_start();
 </div>
 <?php
 $status_html = ob_get_clean();
-$generator->patchElements($status_html);
+// Patch ALL elements with this data-member-status attribute
+$generator->patchElements($status_html, ['selector' => '[data-member-status="' . $person_uuid_no_dashes . '"]']);
 
 // Fragment 2: Update Details Block (Roles, Relationships, Email)
 $role_display_map = (array) ($member_list_config['display_roles']['labels'] ?? []);
@@ -126,31 +131,48 @@ $roles_text = !empty($formatted_roles) ? implode(', ', $formatted_roles) : '—'
 
 ob_start();
 ?>
-<div id="member-details-<?php echo esc_attr($person_uuid_no_dashes); ?>" class="wt_flex wt_flex-col wt_gap-2">
-    <?php if (!empty($member['relationship_description']) && \OrgManagement\Helpers\Helper::should_show_member_description()) : ?>
+<div id="member-details-<?php echo esc_attr($person_uuid_no_dashes); ?>" class="wt_flex wt_flex-col wt_gap-2" data-member-details="<?php echo esc_attr($person_uuid_no_dashes); ?>">
+    <?php
+    $has_details = false;
+    if (!empty($member['relationship_description']) && \OrgManagement\Helpers\Helper::should_show_member_description()) :
+        $has_details = true;
+    ?>
         <p class="member-description wt_text-sm wt_text-content wt_mb-0">
             <?php echo esc_html($member['relationship_description']); ?>
         </p>
     <?php endif; ?>
-    <?php if (!empty($member['relationship_names']) && !\OrgManagement\Helpers\Helper::should_hide_relationship_type()) : ?>
+    <?php if (!empty($member['relationship_names']) && !\OrgManagement\Helpers\Helper::should_hide_relationship_type()) :
+        $has_details = true;
+    ?>
         <div class="wt_flex wt_items-center wt_gap-2">
             <span class="wt_text-content"><?php echo esc_html($member['relationship_names']); ?></span>
         </div>
     <?php endif; ?>
-    <?php if (!empty($member_email)) : ?>
+    <?php if (!empty($member_email)) :
+        $has_details = true;
+    ?>
         <div class="wt_flex wt_items-center wt_gap-2">
             <a href="mailto:<?php echo esc_attr($member_email); ?>" class="wt_text-sm wt_text-interactive wt_hover_underline">
                 <?php echo esc_html($member_email); ?>
             </a>
         </div>
     <?php endif; ?>
-    <?php if (\OrgManagement\Helpers\Helper::should_show_member_roles()) : ?>
+    <?php if (\OrgManagement\Helpers\Helper::should_show_member_roles()) :
+        $has_details = true;
+    ?>
         <div class="wt_flex wt_items-baseline wt_gap-2 wt_text-sm">
             <strong><?php esc_html_e('Role(s):', 'wicket-acc'); ?></strong>
             <span class="wt_text-content"><?php echo esc_html($roles_text); ?></span>
         </div>
     <?php endif; ?>
+
+    <?php if (!$has_details) : ?>
+        <div class="wt_text-content wt_text-secondary wt_text-sm wt_italic" data-empty-details="true">
+            <?php esc_html_e('No additional details available', 'wicket-acc'); ?>
+        </div>
+    <?php endif; ?>
 </div>
 <?php
 $details_html = ob_get_clean();
-$generator->patchElements($details_html);
+// Patch ALL elements with this data-member-details attribute
+$generator->patchElements($details_html, ['selector' => '[data-member-details="' . $person_uuid_no_dashes . '"]']);

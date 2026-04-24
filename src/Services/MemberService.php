@@ -297,7 +297,7 @@ class MemberService
                 }
             } catch (\Throwable $searchException) {
                 $logger->error(
-                    '[OrgMan] MembershipService member search threw exception: ' . $searchException->getMessage(),
+                    'MembershipService member search threw exception: ' . $searchException->getMessage(),
                     [
                         'source'          => 'wicket-orgman',
                         'membership_uuid' => $membershipUuid,
@@ -335,7 +335,7 @@ class MemberService
                 }
             } catch (\Throwable $searchException) {
                 $logger->error(
-                    '[OrgMan] person_memberships query search failed: ' . $searchException->getMessage(),
+                    'person_memberships query search failed: ' . $searchException->getMessage(),
                     [
                         'source'          => 'wicket-orgman',
                         'membership_uuid' => $membershipUuid,
@@ -348,7 +348,7 @@ class MemberService
         $queryParams = [
             'page[number]' => $page,
             'page[size]'   => $size,
-            'include'      => 'person,membership,user',
+            'include'      => 'person,membership',
             'filter[active_at]' => 'now',
         ];
 
@@ -376,7 +376,7 @@ class MemberService
 
             } catch (\Throwable $e) {
                 $logger->error(
-                    '[OrgMan] Error fetching organization membership members: ' . $e->getMessage(),
+                    'Error fetching organization membership members: ' . $e->getMessage(),
                     [
                         'source'          => 'wicket-orgman',
                         'membership_uuid' => $membershipUuid,
@@ -404,7 +404,7 @@ class MemberService
                 }
             } catch (\Throwable $localFallbackException) {
                 $logger->error(
-                    '[OrgMan] Local search fallback failed: ' . $localFallbackException->getMessage(),
+                    'Local search fallback failed: ' . $localFallbackException->getMessage(),
                     [
                         'source' => 'wicket-orgman',
                         'membership_uuid' => $membershipUuid,
@@ -419,7 +419,7 @@ class MemberService
             /** @var \WP_Error $response */
             $error_message = $response->get_error_message();
             \Wicket()->log()->error(
-                '[OrgMan] MembershipService::getOrgMembershipMembers() returned error',
+                'MembershipService::getOrgMembershipMembers() returned error',
                 [
                     'source'          => 'wicket-orgman',
                     'membership_uuid' => $membershipUuid,
@@ -859,13 +859,13 @@ class MemberService
                 'page[number]' => 1,
                 'page[size]'   => 100,
                 'filter[active_at]' => 'now',
-                'include'      => 'person,membership,user',
+                'include'      => 'person,membership',
             ];
 
             $response = $client->get($endpoint . '?' . http_build_query($queryParams));
         } catch (\Throwable $e) {
             \Wicket()->log()->error(
-                '[OrgMan] getMemberByPersonUuid API call failed',
+                'getMemberByPersonUuid API call failed',
                 [
                     'source'          => 'wicket-orgman',
                     'person_uuid'     => $personUuid,
@@ -879,7 +879,7 @@ class MemberService
         }
 
         if (!is_array($response) || empty($response['data'])) {
-            \Wicket()->log()->warning('[OrgMan] getMemberByPersonUuid: No data returned from API', [
+            \Wicket()->log()->warning('getMemberByPersonUuid: No data returned from API', [
                 'source'          => 'wicket-orgman',
                 'person_uuid'     => $personUuid,
                 'membership_uuid' => $membershipUuid,
@@ -893,7 +893,7 @@ class MemberService
         $members = $response['data'] ?? [];
         $matched_member = null;
 
-        \Wicket()->log()->debug('[OrgMan] getMemberByPersonUuid: Filtering results', [
+        \Wicket()->log()->debug('getMemberByPersonUuid: Filtering results', [
             'source'          => 'wicket-orgman',
             'person_uuid'     => $personUuid,
             'membership_uuid' => $membershipUuid,
@@ -904,7 +904,7 @@ class MemberService
         foreach ($members as $idx => $member) {
             $person_id = $member['relationships']['person']['data']['id'] ?? null;
 
-            \Wicket()->log()->debug('[OrgMan] getMemberByPersonUuid: Checking member', [
+            \Wicket()->log()->debug('getMemberByPersonUuid: Checking member', [
                 'source'            => 'wicket-orgman',
                 'person_uuid'       => $personUuid,
                 'index'             => $idx,
@@ -920,7 +920,7 @@ class MemberService
         }
 
         if (!$matched_member) {
-            \Wicket()->log()->warning('[OrgMan] getMemberByPersonUuid: No matching person found', [
+            \Wicket()->log()->warning('getMemberByPersonUuid: No matching person found', [
                 'source'          => 'wicket-orgman',
                 'person_uuid'     => $personUuid,
                 'membership_uuid' => $membershipUuid,
@@ -934,7 +934,7 @@ class MemberService
         $filtered_response = $response;
         $filtered_response['data'] = [$matched_member];
 
-        \Wicket()->log()->warning('[OrgMan] getMemberByPersonUuid: Response structure', [
+        \Wicket()->log()->warning('getMemberByPersonUuid: Response structure', [
             'source' => 'wicket-orgman',
             'person_uuid' => $personUuid,
             'has_included' => isset($response['included']),
@@ -1025,7 +1025,7 @@ class MemberService
             }
         }
 
-        $logger->debug('[OrgMan] prepareMembersResult input', [
+        $logger->debug('prepareMembersResult input', [
             'source' => 'wicket-orgman',
             'raw_members_count' => count($rawMembers),
             'page' => $page,
@@ -1054,7 +1054,7 @@ class MemberService
                 }
             } catch (\Throwable $e) {
                 $logger->warning(
-                    '[OrgMan] Failed to resolve membership owner: ' . $e->getMessage(),
+                    'Failed to resolve membership owner: ' . $e->getMessage(),
                     [
                         'source'          => 'wicket-orgman',
                         'membership_uuid' => $membershipUuid,
@@ -1064,7 +1064,6 @@ class MemberService
         }
 
         $peopleIndex = [];
-        $userIndex = [];
         if (is_array($membersResponse) && isset($membersResponse['included']) && is_array($membersResponse['included'])) {
             foreach ($membersResponse['included'] as $included) {
                 // Convert stdClass objects to arrays
@@ -1078,21 +1077,8 @@ class MemberService
                 if ($type === 'people' && $id !== '') {
                     $peopleIndex[$id] = $included;
                 }
-
-                // Build user index by person_id (user has relationship to person)
-                if ($type === 'users' && $id !== '') {
-                    $personId = $included['relationships']['person']['data']['id'] ?? '';
-                    if ($personId !== '') {
-                        $userIndex[$personId] = $included;
-                    }
-                }
             }
         }
-
-        \Wicket()->log()->warning('[OrgMan] userIndex built in prepareMembersResult', [
-            'userIndex_count' => count($userIndex),
-            'userIndex_keys' => array_keys($userIndex),
-        ]);
 
         $allowedTypes = $this->normalizeRelationshipTypeList((array) ($this->config['relationships']['filters']['allowlist'] ?? []));
         $excludedTypes = $this->normalizeRelationshipTypeList((array) ($this->config['relationships']['filters']['denylist'] ?? []));
@@ -1148,7 +1134,7 @@ class MemberService
                             }
                         }
                     } catch (\Throwable $e) {
-                        $logger->warning('[OrgMan] Failed to pre-fetch connections', ['person_id' => $personId, 'error' => $e->getMessage()]);
+                        $logger->warning('Failed to pre-fetch connections', ['person_id' => $personId, 'error' => $e->getMessage()]);
                     }
 
                     // Fetch roles for MDP permission roles merging
@@ -1174,7 +1160,7 @@ class MemberService
                             $rolesByPerson[$personId] = $orgRoles;
                         }
                     } catch (\Throwable $e) {
-                        $logger->warning('[OrgMan] Failed to pre-fetch roles', ['person_id' => $personId, 'error' => $e->getMessage()]);
+                        $logger->warning('Failed to pre-fetch roles', ['person_id' => $personId, 'error' => $e->getMessage()]);
                     }
                 }
             }
@@ -1189,7 +1175,7 @@ class MemberService
             }
 
             if (!is_array($member)) {
-                $logger->debug('[OrgMan] Skipping member: not an array', [
+                $logger->debug('Skipping member: not an array', [
                     'source' => 'wicket-orgman',
                     'index' => $idx,
                     'member_type' => gettype($member),
@@ -1216,7 +1202,7 @@ class MemberService
                     }
                 } catch (\Throwable $e) {
                     $logger->warning(
-                        '[OrgMan] Failed to fetch person by id',
+                        'Failed to fetch person by id',
                         [
                             'source'    => 'wicket-orgman',
                             'person_id' => $personUuid,
@@ -1242,7 +1228,7 @@ class MemberService
                     }
                 } catch (\Throwable $e) {
                     $logger->warning(
-                        '[OrgMan] Failed to process person current roles',
+                        'Failed to process person current roles',
                         [
                             'source'    => 'wicket-orgman',
                             'person_id' => $personUuid,
@@ -1346,7 +1332,7 @@ class MemberService
                     }
                 } catch (\Throwable $e) {
                     $logger->warning(
-                        '[OrgMan] Failed to process person connections',
+                        'Failed to process person connections',
                         [
                             'source'    => 'wicket-orgman',
                             'person_id' => $personUuid,
@@ -1369,7 +1355,7 @@ class MemberService
             }
 
             if (!$isLazy && (!empty($allowedTypes) || !empty($excludedTypes)) && empty($relationshipSlugs)) {
-                $logger->debug('[OrgMan] Skipping member due to relationship filter', [
+                $logger->debug('Skipping member due to relationship filter', [
                     'source' => 'wicket-orgman',
                     'person_uuid' => $personUuid,
                     'isLazy' => $isLazy,
@@ -1388,25 +1374,11 @@ class MemberService
                 }
             }
 
-            $confirmedAt = null;
-            if ($personUuid && isset($userIndex[$personUuid])) {
-                $userData = $userIndex[$personUuid];
-                $confirmedAt = $userData['attributes']['confirmed_at']
-                    ?? ($userData['data']['attributes']['confirmed_at'] ?? null);
-                \Wicket()->log()->warning('[OrgMan] Found confirmed_at from userIndex', [
-                    'person_uuid' => $personUuid,
-                    'confirmed_at' => $confirmedAt,
-                    'user_data_keys' => array_keys($userData),
-                ]);
-            }
-
-            if (empty($confirmedAt)) {
-                $confirmedAt = $personAttributes['confirmed_at'] ?? $memberAttributes['confirmed_at'] ?? null;
-                \Wicket()->log()->warning('[OrgMan] Fallback confirmed_at', [
-                    'person_uuid' => $personUuid,
-                    'confirmed_at' => $confirmedAt,
-                ]);
-            }
+            // confirmed_at is embedded in person attributes as user.confirmed_at (not a separate users resource).
+            $confirmedAt = $personAttributes['user']['confirmed_at']
+                ?? $personAttributes['confirmed_at']
+                ?? $memberAttributes['confirmed_at']
+                ?? null;
 
             $memberRow = [
                 'person_uuid'           => $personUuid,
@@ -1433,7 +1405,7 @@ class MemberService
             if ($personKey !== '') {
                 // Add all person_membership records (no deduplication by person)
                 $members[] = $this->finalizePreparedMemberRow($memberRow);
-                $logger->debug('[OrgMan] Added member record (allowing duplicates)', [
+                $logger->debug('Added member record (allowing duplicates)', [
                     'source' => 'wicket-orgman',
                     'person_uuid' => $personUuid,
                     'person_membership_id' => $member['id'] ?? null,
@@ -1442,7 +1414,7 @@ class MemberService
                 $loopSuccess++;
             } else {
                 $membersWithoutPerson[] = $memberRow;
-                $logger->debug('[OrgMan] Added member to membersWithoutPerson', [
+                $logger->debug('Added member to membersWithoutPerson', [
                     'source' => 'wicket-orgman',
                     'person_uuid' => $personUuid,
                     'members_without_person_count' => count($membersWithoutPerson),
@@ -1451,7 +1423,7 @@ class MemberService
             }
         }
 
-        $logger->debug('[OrgMan] Loop processing complete', [
+        $logger->debug('Loop processing complete', [
             'source' => 'wicket-orgman',
             'raw_members_count' => count($rawMembers),
             'loop_iterations' => $loopCounter,
@@ -1466,7 +1438,7 @@ class MemberService
             $members[] = $this->finalizePreparedMemberRow($memberRow);
         }
 
-        $logger->debug('[OrgMan] prepareMembersResult output', [
+        $logger->debug('prepareMembersResult output', [
             'source' => 'wicket-orgman',
             'final_members_count' => count($members),
             'members_without_person_count' => count($membersWithoutPerson),
@@ -1527,7 +1499,7 @@ class MemberService
 
         if (null === $body) {
             \Wicket()->log()->debug(
-                '[OrgMan] Membership response had no body to decode',
+                'Membership response had no body to decode',
                 [
                     'source'   => 'wicket-orgman',
                     'respType' => is_object($response) ? get_class($response) : gettype($response),
@@ -1540,7 +1512,7 @@ class MemberService
         $decoded = json_decode($body, true);
         if (json_last_error() !== JSON_ERROR_NONE) {
             \Wicket()->log()->warning(
-                '[OrgMan] Unable to decode membership response JSON',
+                'Unable to decode membership response JSON',
                 [
                     'source' => 'wicket-orgman',
                     'error'  => json_last_error_msg(),
@@ -1667,7 +1639,7 @@ class MemberService
             // Log error for debugging but return false for safety
             $logger = \Wicket()->log();
             $logger->warning(
-                '[OrgMan] Failed to check user confirmation status',
+                'Failed to check user confirmation status',
                 [
                     'source'    => 'wicket-orgman',
                     'person_id' => $personUuid,
@@ -1779,7 +1751,7 @@ class MemberService
             }
 
             if ($logger) {
-                $logger->debug('[OrgMan] update_member_roles candidate person_memberships', $log_context + [
+                $logger->debug('update_member_roles candidate person_memberships', $log_context + [
                     'org_uuid' => $orgUuid,
                     'membership_uuid' => $membershipUuid,
                     'person_uuid' => $personUuid,
@@ -1851,7 +1823,7 @@ class MemberService
                         $is_active_membership = !empty($query_rows);
                     } catch (\Throwable $active_lookup_exception) {
                         if ($logger) {
-                            $logger->warning('[OrgMan] update_member_roles active_at fallback query failed', $log_context + [
+                            $logger->warning('update_member_roles active_at fallback query failed', $log_context + [
                                 'org_uuid' => $orgUuid,
                                 'membership_uuid' => $membershipUuid,
                                 'person_uuid' => $personUuid,
@@ -1862,7 +1834,7 @@ class MemberService
                 }
 
                 if ($logger) {
-                    $logger->debug('[OrgMan] update_member_roles active-membership guard result', $log_context + [
+                    $logger->debug('update_member_roles active-membership guard result', $log_context + [
                         'org_uuid' => $orgUuid,
                         'membership_uuid' => $membershipUuid,
                         'person_uuid' => $personUuid,
@@ -1950,7 +1922,7 @@ class MemberService
             $roles_to_add = array_diff($desired_manageable_roles, $current_manageable_roles);
             $roles_to_remove = array_diff($current_manageable_roles, $desired_manageable_roles);
             if ($logger) {
-                $logger->debug('[OrgMan] update_member_roles role diff', $log_context + [
+                $logger->debug('update_member_roles role diff', $log_context + [
                     'org_uuid' => $orgUuid,
                     'membership_uuid' => $membershipUuid,
                     'person_uuid' => $personUuid,
@@ -1966,7 +1938,7 @@ class MemberService
             // Remove roles that are no longer needed
             foreach ($roles_to_remove as $role_name) {
                 if ($logger) {
-                    $logger->debug('[OrgMan] update_member_roles removing role', $log_context + [
+                    $logger->debug('update_member_roles removing role', $log_context + [
                         'org_uuid' => $orgUuid,
                         'membership_uuid' => $membershipUuid,
                         'person_uuid' => $personUuid,
@@ -1980,7 +1952,7 @@ class MemberService
 
                 if (!$remove_role_result) {
                     if ($logger) {
-                        $logger->error('[OrgMan] update_member_roles failed removing role', $log_context + [
+                        $logger->error('update_member_roles failed removing role', $log_context + [
                             'org_uuid' => $orgUuid,
                             'membership_uuid' => $membershipUuid,
                             'person_uuid' => $personUuid,
@@ -1998,7 +1970,7 @@ class MemberService
                 $role_still_present = in_array($role_name, $org_roles_after_remove, true);
                 if ($role_still_present) {
                     if ($logger) {
-                        $logger->error('[OrgMan] update_member_roles remove reported success but role remains', $log_context + [
+                        $logger->error('update_member_roles remove reported success but role remains', $log_context + [
                             'org_uuid' => $orgUuid,
                             'membership_uuid' => $membershipUuid,
                             'person_uuid' => $personUuid,
@@ -2017,7 +1989,7 @@ class MemberService
             // Add new roles
             foreach ($roles_to_add as $role_name) {
                 if ($logger) {
-                    $logger->debug('[OrgMan] update_member_roles adding role', $log_context + [
+                    $logger->debug('update_member_roles adding role', $log_context + [
                         'org_uuid' => $orgUuid,
                         'membership_uuid' => $membershipUuid,
                         'person_uuid' => $personUuid,
@@ -2027,7 +1999,7 @@ class MemberService
 
                 if (!function_exists('wicket_assign_role') || !wicket_assign_role($personUuid, $role_name, $orgUuid)) {
                     if ($logger) {
-                        $logger->error('[OrgMan] update_member_roles failed adding role', $log_context + [
+                        $logger->error('update_member_roles failed adding role', $log_context + [
                             'org_uuid' => $orgUuid,
                             'membership_uuid' => $membershipUuid,
                             'person_uuid' => $personUuid,
@@ -2054,7 +2026,7 @@ class MemberService
 
         } catch (\Exception $e) {
             if (isset($logger) && $logger) {
-                $logger->error('[OrgMan] update_member_roles exception', $log_context + [
+                $logger->error('update_member_roles exception', $log_context + [
                     'org_uuid' => $orgUuid,
                     'membership_uuid' => $membershipUuid,
                     'person_uuid' => $personUuid,

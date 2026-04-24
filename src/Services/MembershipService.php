@@ -87,7 +87,7 @@ class MembershipService
             $memberships = wicket_get_org_memberships($organizationUuid);
         } catch (\Throwable $e) {
             \Wicket()->log()->error(
-                '[OrgMan] Failed fetching organization memberships: ' . $e->getMessage(),
+                'Failed fetching organization memberships: ' . $e->getMessage(),
                 ['source' => 'wicket-orgman', 'org_uuid' => $organizationUuid]
             );
 
@@ -551,7 +551,7 @@ class MembershipService
             return $membership_uuid;
 
         } catch (\Exception $e) {
-            \Wicket()->log()->error('MembershipService::get_current_person_memberships_by_organization() - Exception: ' . $e->getMessage());
+            \Wicket()->log()->error('MembershipService::get_current_person_memberships_by_organization() - Exception: ' . $e->getMessage(), ['source' => 'wicket-orgman']);
 
             return new \WP_Error('get_membership_exception', $e->getMessage());
         }
@@ -608,7 +608,7 @@ class MembershipService
             return isset($response['data']) ? $response : new \WP_Error('no_results', 'No search results found.');
 
         } catch (\Exception $e) {
-            \Wicket()->log()->error('MembershipService::membership_search_members() - Exception: ' . $e->getMessage());
+            \Wicket()->log()->error('MembershipService::membership_search_members() - Exception: ' . $e->getMessage(), ['source' => 'wicket-orgman']);
 
             return new \WP_Error('search_failed', $e->getMessage());
         }
@@ -645,7 +645,7 @@ class MembershipService
             return isset($response['data']) ? $response : new \WP_Error('no_results', 'No membership members found.');
 
         } catch (\Exception $e) {
-            \Wicket()->log()->error('MembershipService::get_org_membership_members() - Exception: ' . $e->getMessage());
+            \Wicket()->log()->error('MembershipService::get_org_membership_members() - Exception: ' . $e->getMessage(), ['source' => 'wicket-orgman']);
 
             return new \WP_Error('get_members_failed', $e->getMessage());
         }
@@ -698,7 +698,7 @@ class MembershipService
             $response = $client->patch("person_memberships/{$person_membership_id}", ['json' => $update_payload]);
 
             if (!empty($response['errors'])) {
-                \Wicket()->log()->error('MembershipService::endPersonMembershipToday() - API error: ' . json_encode($response['errors']));
+                \Wicket()->log()->error('MembershipService::endPersonMembershipToday() - API error: ' . json_encode($response['errors']), ['source' => 'wicket-orgman']);
 
                 return new \WP_Error('api_error', 'Failed to end-date person membership: ' . ($response['errors'][0]['detail'] ?? 'Unknown error'));
             }
@@ -706,7 +706,7 @@ class MembershipService
             return $response;
 
         } catch (\Exception $e) {
-            \Wicket()->log()->error('MembershipService::endPersonMembershipToday() - Exception: ' . $e->getMessage());
+            \Wicket()->log()->error('MembershipService::endPersonMembershipToday() - Exception: ' . $e->getMessage(), ['source' => 'wicket-orgman']);
 
             return new \WP_Error('end_person_membership_exception', $e->getMessage());
         }

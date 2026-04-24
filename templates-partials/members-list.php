@@ -306,7 +306,7 @@ $no_members_message = __('No members found.', 'wicket-acc');
                                 <div id="member-status-<?php echo esc_attr($person_uuid_no_dashes); ?>" class="wt_inline-flex wt_items-center">
                                     <?php if (!empty($member['lazy_loaded'])) : ?>
                                         <?php if ($show_account_status) : ?>
-                                            <?php if (!empty($member['is_confirmed'])) : ?>
+                                            <?php if (!empty($member['confirmed_at'])) : ?>
                                                 <span class="wt_text-content" title="<?php echo esc_attr($confirmed_tooltip); ?>">
                                                     <span class="wt_inline-block wt_w-2 wt_h-2 wt_rounded-full wt_bg-green-500" aria-hidden="true"></span>
                                                 </span>
@@ -346,30 +346,46 @@ $no_members_message = __('No members found.', 'wicket-acc');
                                         'membership_uuid' => (string) ($membership_uuid ?? ''),
                                     ], OrgHelpers\template_url());
                                 ?>
-                                <div class="wt_animate-pulse wt_p-2 wt_bg-gray-50 wt_rounded"
+                                <div class="wt_p-2 wt_bg-gray-50 wt_rounded"
                                     data-init="@get('<?php echo esc_js($lazy_details_url); ?>')">
-                                    <div class="wt_h-4 wt_bg-gray-200 wt_rounded wt_w-1/2"></div>
+                                    <div class="wt_flex wt_flex-col wt_gap-2">
+                                        <div class="wt_skeleton wt_skeleton-text wt_skeleton-text--medium"></div>
+                                        <div class="wt_skeleton wt_skeleton-text wt_skeleton-text--long"></div>
+                                        <div class="wt_skeleton wt_skeleton-text wt_skeleton-text--short"></div>
+                                    </div>
                                 </div>
                             <?php else : ?>
                                 <?php
+                                $has_details = false;
                                 // Check if relationship type should be hidden
                                 if (!empty($member['relationship_names']) && !OrgHelpers\Helper::should_hide_relationship_type()) :
-                                    ?>
+                                    $has_details = true;
+                                ?>
                                     <div class="wt_flex wt_items-center wt_gap-2">
                                         <span class="wt_text-content"><?php echo esc_html($member['relationship_names']); ?></span>
                                     </div>
                                 <?php endif; ?>
-                                <?php if (!empty($member_email)) : ?>
+                                <?php if (!empty($member_email)) :
+                                    $has_details = true;
+                                ?>
                                     <div class="wt_flex wt_items-center wt_gap-2">
                                         <a href="mailto:<?php echo esc_attr($member_email); ?>" class="wt_text-sm wt_text-interactive wt_hover_underline">
                                             <?php echo esc_html($member_email); ?>
                                         </a>
                                     </div>
                                 <?php endif; ?>
-                                <?php if (OrgHelpers\Helper::should_show_member_roles()) : ?>
+                                <?php if (OrgHelpers\Helper\should_show_member_roles()) :
+                                    $has_details = true;
+                                ?>
                                     <div class="wt_flex wt_items-baseline wt_gap-2 wt_text-sm">
                                         <strong><?php esc_html_e('Roles:', 'wicket-acc'); ?></strong>
                                         <span class="wt_text-content"><?php echo esc_html($roles_text); ?></span>
+                                    </div>
+                                <?php endif; ?>
+
+                                <?php if (!$has_details) : ?>
+                                    <div class="wt_text-content wt_text-secondary wt_text-sm wt_italic" data-empty-details="true">
+                                        <?php esc_html_e('No additional details available', 'wicket-acc'); ?>
                                     </div>
                                 <?php endif; ?>
                             <?php endif; ?>

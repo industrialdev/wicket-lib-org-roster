@@ -212,7 +212,7 @@ final class OrgMan
                 'order_id' => (int) $order_id,
             ];
 
-            $logger->info('[OrgMan] WooCommerce hook fired for additional seats order processing', $context);
+            $logger->info('WooCommerce hook fired for additional seats order processing', $context);
 
             $this->handleAdditionalSeatsOrderProcessing($order_id);
         }, 10, 1);
@@ -305,19 +305,19 @@ final class OrgMan
         $logger = \Wicket()->log();
         $context = ['source' => 'wicket-orgman'];
 
-        $logger->info('[OrgMan] Additional seats handler invoked', array_merge($context, [
+        $logger->info('Additional seats handler invoked', array_merge($context, [
             'order_id' => $order_id,
         ]));
 
         if (!$order) {
-            $logger->error('[OrgMan] Order not found', array_merge($context, [
+            $logger->error('Order not found', array_merge($context, [
                 'order_id' => $order_id,
             ]));
 
             return;
         }
 
-        $logger->debug('[OrgMan] Order loaded', array_merge($context, [
+        $logger->debug('Order loaded', array_merge($context, [
             'order_id' => $order_id,
             'order_status' => $order->get_status(),
             'customer_id' => $order->get_customer_id(),
@@ -326,7 +326,7 @@ final class OrgMan
         ]));
 
         if ($order->get_meta('additional_seats_processed', true)) {
-            $logger->info('[OrgMan] Skipping: already processed', array_merge($context, [
+            $logger->info('Skipping: already processed', array_merge($context, [
                 'order_id' => $order_id,
             ]));
 
@@ -338,14 +338,14 @@ final class OrgMan
         $additional_seats_product_id = $additional_seats_service->getAdditionalSeatsProduct();
 
         if (!$additional_seats_product_id) {
-            $logger->error('[OrgMan] Additional seats product not found by SKU', array_merge($context, [
+            $logger->error('Additional seats product not found by SKU', array_merge($context, [
                 'order_id' => $order_id,
             ]));
 
             return;
         }
 
-        $logger->debug('[OrgMan] Additional seats product resolved', array_merge($context, [
+        $logger->debug('Additional seats product resolved', array_merge($context, [
             'order_id' => $order_id,
             'additional_seats_product_id' => (int) $additional_seats_product_id,
         ]));
@@ -365,7 +365,7 @@ final class OrgMan
             $membership_id = $user_meta_data['membership_id'];
             $membership_data = $user_meta_data['membership_data'];
 
-            $logger->debug('[OrgMan] Loaded additional seats data from user meta', array_merge($context, [
+            $logger->debug('Loaded additional seats data from user meta', array_merge($context, [
                 'order_id' => $order_id,
                 'customer_id' => $user_id,
                 'org_uuid_present' => $org_uuid !== '',
@@ -382,7 +382,7 @@ final class OrgMan
                 $has_additional_seats = true;
                 $total_additional_seats += $item->get_quantity();
 
-                $logger->debug('[OrgMan] Found additional seats order item', array_merge($context, [
+                $logger->debug('Found additional seats order item', array_merge($context, [
                     'order_id' => $order_id,
                     'order_item_id' => $item->get_id(),
                     'product_id' => (int) $product->get_id(),
@@ -404,7 +404,7 @@ final class OrgMan
                     }
                 }
 
-                $logger->debug('[OrgMan] Extracted additional seats item meta', array_merge($context, [
+                $logger->debug('Extracted additional seats item meta', array_merge($context, [
                     'order_id' => $order_id,
                     'order_item_id' => $item->get_id(),
                     'org_uuid_present' => $org_uuid !== '',
@@ -414,7 +414,7 @@ final class OrgMan
             }
         }
 
-        $logger->debug('[OrgMan] Additional seats item scan complete', array_merge($context, [
+        $logger->debug('Additional seats item scan complete', array_merge($context, [
             'order_id' => $order_id,
             'has_additional_seats' => $has_additional_seats,
             'total_additional_seats' => (int) $total_additional_seats,
@@ -430,13 +430,13 @@ final class OrgMan
             }
         }
 
-        $logger->debug('[OrgMan] Membership post id after order meta fallback', array_merge($context, [
+        $logger->debug('Membership post id after order meta fallback', array_merge($context, [
             'order_id' => $order_id,
             'membership_post_id' => (int) $membership_post_id,
         ]));
 
         if (!$has_additional_seats || empty($org_uuid) || (empty($membership_id) && empty($membership_post_id))) {
-            $logger->error('[OrgMan] Invalid additional seats order data', [
+            $logger->error('Invalid additional seats order data', [
                 'source' => 'wicket-orgman',
                 'order_id' => $order_id,
                 'has_additional_seats' => $has_additional_seats,
@@ -450,7 +450,7 @@ final class OrgMan
         }
 
         if (!$membership_post_id && !empty($membership_id)) {
-            $logger->debug('[OrgMan] Searching membership post by membership_wicket_uuid', array_merge($context, [
+            $logger->debug('Searching membership post by membership_wicket_uuid', array_merge($context, [
                 'order_id' => $order_id,
                 'membership_id' => $membership_id,
             ]));
@@ -472,7 +472,7 @@ final class OrgMan
                 $membership_post_id = (int) $query->posts[0];
             }
 
-            $logger->debug('[OrgMan] Membership post query result', array_merge($context, [
+            $logger->debug('Membership post query result', array_merge($context, [
                 'order_id' => $order_id,
                 'membership_post_id' => (int) $membership_post_id,
                 'found' => (bool) $membership_post_id,
@@ -480,7 +480,7 @@ final class OrgMan
         }
 
         if (!$membership_post_id) {
-            $logger->error('[OrgMan] Unable to locate membership post for additional seats order', [
+            $logger->error('Unable to locate membership post for additional seats order', [
                 'source' => 'wicket-orgman',
                 'order_id' => $order_id,
                 'membership_id' => $membership_id,
@@ -492,7 +492,7 @@ final class OrgMan
 
         $subscription_id = (int) get_post_meta($membership_post_id, 'membership_subscription_id', true);
         if (!$subscription_id) {
-            $logger->error('[OrgMan] Membership post missing membership_subscription_id', [
+            $logger->error('Membership post missing membership_subscription_id', [
                 'source' => 'wicket-orgman',
                 'order_id' => $order_id,
                 'membership_post_id' => $membership_post_id,
@@ -501,7 +501,7 @@ final class OrgMan
             return;
         }
 
-        $logger->debug('[OrgMan] Subscription linkage resolved', array_merge($context, [
+        $logger->debug('Subscription linkage resolved', array_merge($context, [
             'order_id' => $order_id,
             'membership_post_id' => (int) $membership_post_id,
             'subscription_id' => (int) $subscription_id,
@@ -510,7 +510,7 @@ final class OrgMan
         $current_seats = (int) get_post_meta($membership_post_id, 'org_seats', true);
         $new_seats = $current_seats + (int) $total_additional_seats;
 
-        $logger->info('[OrgMan] Seat calculation', array_merge($context, [
+        $logger->info('Seat calculation', array_merge($context, [
             'order_id' => $order_id,
             'membership_post_id' => (int) $membership_post_id,
             'subscription_id' => (int) $subscription_id,
@@ -521,7 +521,7 @@ final class OrgMan
 
         // If no membership data in session, try to reconstruct it
         if (!$membership_data) {
-            $logger->debug('[OrgMan] Reconstructing membership data for MDP payload', array_merge($context, [
+            $logger->debug('Reconstructing membership data for MDP payload', array_merge($context, [
                 'order_id' => $order_id,
                 'org_uuid_present' => $org_uuid !== '',
                 'membership_id_present' => $membership_id !== '',
@@ -532,12 +532,12 @@ final class OrgMan
         // Store comprehensive data in order meta for MDP processing
         if ($membership_data) {
             $order->update_meta_data('orgman_membership_data', $membership_data);
-            $logger->debug('[OrgMan] Stored membership data on order for MDP', array_merge($context, [
+            $logger->debug('Stored membership data on order for MDP', array_merge($context, [
                 'order_id' => $order_id,
                 'membership_data_keys' => is_array($membership_data) ? array_keys($membership_data) : null,
             ]));
         } else {
-            $logger->warning('[OrgMan] Missing membership data for MDP update', array_merge($context, [
+            $logger->warning('Missing membership data for MDP update', array_merge($context, [
                 'order_id' => $order_id,
                 'org_uuid_present' => $org_uuid !== '',
                 'membership_id_present' => $membership_id !== '',
@@ -546,7 +546,7 @@ final class OrgMan
 
         $subscription = function_exists('wcs_get_subscription') ? wcs_get_subscription($subscription_id) : null;
         if (!$subscription) {
-            $logger->error('[OrgMan] Subscription not found for membership post', [
+            $logger->error('Subscription not found for membership post', [
                 'source' => 'wicket-orgman',
                 'order_id' => $order_id,
                 'membership_post_id' => $membership_post_id,
@@ -558,7 +558,7 @@ final class OrgMan
 
         update_post_meta($membership_post_id, 'org_seats', $new_seats);
 
-        $logger->info('[OrgMan] Updated membership post org_seats', array_merge($context, [
+        $logger->info('Updated membership post org_seats', array_merge($context, [
             'order_id' => $order_id,
             'membership_post_id' => (int) $membership_post_id,
             'org_seats' => (int) $new_seats,
@@ -571,13 +571,13 @@ final class OrgMan
                     'membership_seats' => $new_seats,
                 ]);
 
-                $logger->info('[OrgMan] Amended membership json after additional seats', array_merge($context, [
+                $logger->info('Amended membership json after additional seats', array_merge($context, [
                     'order_id' => $order_id,
                     'membership_post_id' => (int) $membership_post_id,
                     'new_seats' => (int) $new_seats,
                 ]));
             } catch (\Throwable $e) {
-                $logger->error('[OrgMan] Failed to amend membership json after additional seats purchase: ' . $e->getMessage(), [
+                $logger->error('Failed to amend membership json after additional seats purchase: ' . $e->getMessage(), [
                     'source' => 'wicket-orgman',
                     'order_id' => $order_id,
                     'membership_post_id' => $membership_post_id,
@@ -594,7 +594,7 @@ final class OrgMan
                 if ($item_product_id === $membership_product_id) {
                     $subscription_item->set_quantity($new_seats);
                     $updated_subscription_item = true;
-                    $logger->info('[OrgMan] Updated subscription item quantity', array_merge($context, [
+                    $logger->info('Updated subscription item quantity', array_merge($context, [
                         'order_id' => $order_id,
                         'subscription_id' => (int) $subscription_id,
                         'membership_product_id' => (int) $membership_product_id,
@@ -606,7 +606,7 @@ final class OrgMan
             }
 
             if (!$updated_subscription_item) {
-                $logger->warning('[OrgMan] Did not find matching subscription item to update quantity', array_merge($context, [
+                $logger->warning('Did not find matching subscription item to update quantity', array_merge($context, [
                     'order_id' => $order_id,
                     'subscription_id' => (int) $subscription_id,
                     'membership_product_id' => (int) $membership_product_id,
@@ -616,7 +616,7 @@ final class OrgMan
             $subscription->update_meta_data('seat_limit', $new_seats);
             $subscription_changed = true;
         } else {
-            $logger->warning('[OrgMan] Membership product id missing; cannot update subscription item quantity', array_merge($context, [
+            $logger->warning('Membership product id missing; cannot update subscription item quantity', array_merge($context, [
                 'order_id' => $order_id,
                 'membership_post_id' => (int) $membership_post_id,
                 'subscription_id' => (int) $subscription_id,
@@ -635,7 +635,7 @@ final class OrgMan
                     $updated_discount_item = true;
                     $subscription_changed = true;
 
-                    $logger->info('[OrgMan] Updated discount subscription item quantity', array_merge($context, [
+                    $logger->info('Updated discount subscription item quantity', array_merge($context, [
                         'order_id' => $order_id,
                         'subscription_id' => (int) $subscription_id,
                         'discount_product_id' => (int) $discount_product_id,
@@ -656,7 +656,7 @@ final class OrgMan
                     if (!is_wp_error($added_item) && !empty($added_item)) {
                         $subscription_changed = true;
 
-                        $logger->info('[OrgMan] Added discount product to subscription', array_merge($context, [
+                        $logger->info('Added discount product to subscription', array_merge($context, [
                             'order_id' => $order_id,
                             'subscription_id' => (int) $subscription_id,
                             'discount_product_id' => (int) $discount_product_id,
@@ -664,7 +664,7 @@ final class OrgMan
                         ]));
                     } else {
                         $error_message = is_wp_error($added_item) ? $added_item->get_error_message() : 'unknown_error';
-                        $logger->error('[OrgMan] Failed to add discount product to subscription', array_merge($context, [
+                        $logger->error('Failed to add discount product to subscription', array_merge($context, [
                             'order_id' => $order_id,
                             'subscription_id' => (int) $subscription_id,
                             'discount_product_id' => (int) $discount_product_id,
@@ -673,7 +673,7 @@ final class OrgMan
                         ]));
                     }
                 } else {
-                    $logger->error('[OrgMan] Discount product could not be loaded', array_merge($context, [
+                    $logger->error('Discount product could not be loaded', array_merge($context, [
                         'order_id' => $order_id,
                         'subscription_id' => (int) $subscription_id,
                         'discount_product_id' => (int) $discount_product_id,
@@ -681,7 +681,7 @@ final class OrgMan
                 }
             }
         } else {
-            $logger->warning('[OrgMan] Additional seats discount product not found by SKU; skipping discount line update', array_merge($context, [
+            $logger->warning('Additional seats discount product not found by SKU; skipping discount line update', array_merge($context, [
                 'order_id' => $order_id,
                 'subscription_id' => (int) $subscription_id,
             ]));
@@ -691,7 +691,7 @@ final class OrgMan
             $subscription->calculate_totals(false);
             $subscription->save();
 
-            $logger->info('[OrgMan] Saved subscription after additional seats update', array_merge($context, [
+            $logger->info('Saved subscription after additional seats update', array_merge($context, [
                 'order_id' => $order_id,
                 'subscription_id' => (int) $subscription_id,
                 'seat_limit' => (int) $new_seats,
@@ -704,20 +704,20 @@ final class OrgMan
         }
 
         if (!empty($mdp_membership_id)) {
-            $logger->info('[OrgMan] Updating MDP max_assignments', array_merge($context, [
+            $logger->info('Updating MDP max_assignments', array_merge($context, [
                 'order_id' => $order_id,
                 'mdp_membership_id' => $mdp_membership_id,
                 'new_max_assignments' => (int) $new_seats,
             ]));
 
             $mdp_updated = $additional_seats_service->updateMdpMembershipMaxAssignments($mdp_membership_id, $new_seats);
-            $logger->info('[OrgMan] MDP update result', array_merge($context, [
+            $logger->info('MDP update result', array_merge($context, [
                 'order_id' => $order_id,
                 'mdp_membership_id' => $mdp_membership_id,
                 'success' => (bool) $mdp_updated,
             ]));
         } else {
-            $logger->warning('[OrgMan] Missing membership UUID for MDP update', array_merge($context, [
+            $logger->warning('Missing membership UUID for MDP update', array_merge($context, [
                 'order_id' => $order_id,
                 'membership_post_id' => (int) $membership_post_id,
             ]));
@@ -731,7 +731,7 @@ final class OrgMan
         $order->update_meta_data('membership_post_id_renew', $membership_post_id);
         $order->save();
 
-        $logger->info('[OrgMan] Stored additional seats tracking meta on order', array_merge($context, [
+        $logger->info('Stored additional seats tracking meta on order', array_merge($context, [
             'order_id' => $order_id,
             'additional_seats_processed' => true,
             'additional_seats_count' => (int) $total_additional_seats,
@@ -744,12 +744,12 @@ final class OrgMan
         // Clear user meta data after successful processing
         $additional_seats_service->clearPurchaseUserMeta($user_id);
 
-        $logger->debug('[OrgMan] Cleared purchase user meta', array_merge($context, [
+        $logger->debug('Cleared purchase user meta', array_merge($context, [
             'order_id' => $order_id,
             'customer_id' => (int) $user_id,
         ]));
 
-        $logger->info('[OrgMan] Additional seats order processed successfully', [
+        $logger->info('Additional seats order processed successfully', [
             'source' => 'wicket-orgman',
             'order_id' => $order_id,
             'subscription_id' => $subscription->get_id(),
@@ -771,7 +771,7 @@ final class OrgMan
             return $return_url;
         }
 
-        $logger->debug('[OrgMan] woocommerce_get_return_url invoked', array_merge($context, [
+        $logger->debug('woocommerce_get_return_url invoked', array_merge($context, [
             'order_id' => is_callable([$order, 'get_id']) ? (int) $order->get_id() : null,
             'order_status' => is_callable([$order, 'get_status']) ? (string) $order->get_status() : null,
             'return_url' => (string) $return_url,
@@ -779,7 +779,7 @@ final class OrgMan
 
         if ($order->get_meta('additional_seats_processed', true)) {
             $target_url = $this->getOrganizationMembersUrlFromOrder($order) ?: $return_url;
-            $logger->info('[OrgMan] Return URL overridden (already processed additional seats)', array_merge($context, [
+            $logger->info('Return URL overridden (already processed additional seats)', array_merge($context, [
                 'order_id' => (int) $order->get_id(),
                 'target_url' => (string) $target_url,
             ]));
@@ -792,7 +792,7 @@ final class OrgMan
         }
 
         $target_url = $this->getOrganizationMembersUrlFromOrder($order) ?: $return_url;
-        $logger->info('[OrgMan] Return URL overridden (additional seats order)', array_merge($context, [
+        $logger->info('Return URL overridden (additional seats order)', array_merge($context, [
             'order_id' => (int) $order->get_id(),
             'target_url' => (string) $target_url,
         ]));
@@ -807,7 +807,7 @@ final class OrgMan
 
         $additional_seats_service = $this->services['additional_seats'] ?? null;
         if (!$additional_seats_service) {
-            $logger->error('[OrgMan] Additional seats service missing; cannot detect product', array_merge($context, [
+            $logger->error('Additional seats service missing; cannot detect product', array_merge($context, [
                 'order_id' => is_callable([$order, 'get_id']) ? (int) $order->get_id() : null,
             ]));
 
@@ -816,7 +816,7 @@ final class OrgMan
 
         $product_id = $additional_seats_service->getAdditionalSeatsProduct();
         if (!$product_id) {
-            $logger->error('[OrgMan] Additional seats product not found; cannot detect additional seats order', array_merge($context, [
+            $logger->error('Additional seats product not found; cannot detect additional seats order', array_merge($context, [
                 'order_id' => is_callable([$order, 'get_id']) ? (int) $order->get_id() : null,
             ]));
 
@@ -826,7 +826,7 @@ final class OrgMan
         foreach ($order->get_items() as $item) {
             $product = $item->get_product();
             if ($product && (int) $product->get_id() === (int) $product_id) {
-                $logger->debug('[OrgMan] Additional seats product detected on order', array_merge($context, [
+                $logger->debug('Additional seats product detected on order', array_merge($context, [
                     'order_id' => (int) $order->get_id(),
                     'order_item_id' => $item->get_id(),
                     'product_id' => (int) $product_id,
@@ -854,7 +854,7 @@ final class OrgMan
             }
         }
 
-        $logger->debug('[OrgMan] Resolved org_uuid for return URL', array_merge($context, [
+        $logger->debug('Resolved org_uuid for return URL', array_merge($context, [
             'order_id' => is_callable([$order, 'get_id']) ? (int) $order->get_id() : null,
             'org_uuid_present' => $org_uuid !== '',
         ]));
@@ -862,14 +862,14 @@ final class OrgMan
         // Get WPML-aware URL for organization-members page
         $base_url = Helpers\Helper::getMyAccountPageUrl('organization-members', '/my-account/organization-members/');
 
-        $logger->debug('[OrgMan] Resolved base organization-members URL', array_merge($context, [
+        $logger->debug('Resolved base organization-members URL', array_merge($context, [
             'order_id' => is_callable([$order, 'get_id']) ? (int) $order->get_id() : null,
             'base_url' => (string) $base_url,
         ]));
 
         if ($org_uuid !== '') {
             $url = add_query_arg('org_uuid', $org_uuid, $base_url);
-            $logger->debug('[OrgMan] Built organization-members return URL', array_merge($context, [
+            $logger->debug('Built organization-members return URL', array_merge($context, [
                 'order_id' => is_callable([$order, 'get_id']) ? (int) $order->get_id() : null,
                 'url' => (string) $url,
             ]));
@@ -1240,7 +1240,7 @@ final class OrgMan
 
         if (!$user_meta_data) {
             $logger = \Wicket()->log();
-            $logger->warning('[OrgMan] No user meta data found for additional seats order item', [
+            $logger->warning('No user meta data found for additional seats order item', [
                 'source' => 'wicket-orgman',
                 'user_id' => $user_id,
                 'order_id' => $order->get_id(),
@@ -1262,7 +1262,7 @@ final class OrgMan
         }
 
         $logger = \Wicket()->log();
-        $logger->info('[OrgMan] Added additional seats data to order item', [
+        $logger->info('Added additional seats data to order item', [
             'source' => 'wicket-orgman',
             'user_id' => $user_id,
             'order_id' => $order->get_id(),
@@ -1342,6 +1342,6 @@ final class OrgMan
             )
         );
 
-        \Wicket()->log()->info('[OrgMan] Cleared all organization management cache', ['source' => 'wicket-orgman']);
+        \Wicket()->log()->info('Cleared all organization management cache', ['source' => 'wicket-orgman']);
     }
 }
