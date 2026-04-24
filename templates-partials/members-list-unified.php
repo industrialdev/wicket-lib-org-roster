@@ -306,7 +306,7 @@ $show_remove_policy_callout = (
                                 $has_details = false;
                                 if (!empty($member['relationship_description']) && OrgHelpers\Helper::should_show_member_description()) :
                                     $has_details = true;
-                                ?>
+                                    ?>
                                     <p class="member-description wt_text-sm wt_text-content wt_mb-0">
                                         <?php echo esc_html($member['relationship_description']); ?>
                                     </p>
@@ -314,7 +314,7 @@ $show_remove_policy_callout = (
 
                                 <?php if ($relationship_names !== '' && !OrgHelpers\Helper::should_hide_relationship_type()) :
                                     $has_details = true;
-                                ?>
+                                    ?>
                                     <div class="wt_flex wt_items-center wt_gap-2">
                                         <span class="wt_text-content"><?php echo esc_html($relationship_names); ?></span>
                                     </div>
@@ -322,7 +322,7 @@ $show_remove_policy_callout = (
 
                                 <?php if ($member_email !== '') :
                                     $has_details = true;
-                                ?>
+                                    ?>
                                     <div class="wt_flex wt_items-center wt_gap-2">
                                         <a href="mailto:<?php echo esc_attr($member_email); ?>" class="wt_text-sm wt_text-interactive wt_hover_underline">
                                             <?php echo esc_html($member_email); ?>
@@ -332,7 +332,7 @@ $show_remove_policy_callout = (
 
                                 <?php if (OrgHelpers\Helper::should_show_member_roles()) :
                                     $has_details = true;
-                                ?>
+                                    ?>
                                     <div class="wt_flex wt_items-baseline wt_gap-2 wt_text-sm">
                                         <strong><?php echo esc_html($role_label); ?></strong>
                                         <span class="wt_text-content"><?php echo esc_html($roles_text); ?></span>

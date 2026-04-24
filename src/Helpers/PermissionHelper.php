@@ -487,6 +487,7 @@ class PermissionHelper extends Helper
         }
 
         $role_only = self::can_access_role_only_management_surface($org_id);
+
         return $role_only;
     }
 
@@ -629,10 +630,12 @@ class PermissionHelper extends Helper
 
         if ($has_active) {
             $has_roles = self::role_check($manage_roles, $org_id, false);
+
             return $has_roles;
         }
 
         $bypass = self::can_bypass_active_membership_requirement($org_id, $manage_roles);
+
         return $bypass;
     }
 

@@ -90,6 +90,7 @@ class CacheService
     public function getMembershipGeneration(string $membershipUuid): int
     {
         $val = get_transient('orgman_mgen_' . md5($membershipUuid));
+
         return $val !== false ? (int) $val : 1;
     }
 

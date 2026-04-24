@@ -131,7 +131,7 @@ class TemplateHelper extends Helper
                 'source' => 'wicket-orgman',
                 'path' => $template_path,
                 'real_path' => $real_template_path ?: 'false',
-                'plugin_dir' => $real_plugin_dir
+                'plugin_dir' => $real_plugin_dir,
             ]);
             wp_die('Template not found.');
             exit;

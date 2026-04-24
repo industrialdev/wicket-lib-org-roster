@@ -827,17 +827,17 @@ class BulkMemberUploadService
 
         $logger = \Wicket()->log();
         if (method_exists($logger, $level)) {
-            $logger->{$level}( $message, $normalized_context);
+            $logger->{$level}($message, $normalized_context);
 
             return;
         }
         if (method_exists($logger, 'info')) {
-            $logger->info( $message, $normalized_context);
+            $logger->info($message, $normalized_context);
 
             return;
         }
 
-        \Wicket()->log()->error( $message . ' ' . wp_json_encode($normalized_context), ['source' => 'wicket-orgman']);
+        \Wicket()->log()->error($message . ' ' . wp_json_encode($normalized_context), ['source' => 'wicket-orgman']);
     }
 
     /**

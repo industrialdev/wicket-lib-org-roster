@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a58837f1a0b2aa6517e606198733014a",
+    "content-hash": "8ab4cff95a090a5a765e427c8e779275",
     "packages": [
         {
             "name": "starfederation/datastar-php",

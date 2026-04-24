@@ -905,6 +905,7 @@ class MemberService
                 'org_uuid'        => $orgUuid,
                 'response_keys'   => is_array($response) ? array_keys($response) : 'not_array',
             ]);
+
             return null;
         }
 
@@ -928,6 +929,7 @@ class MemberService
                 'org_uuid'        => $orgUuid,
                 'total_results'   => count($members),
             ]);
+
             return null;
         }
 
@@ -940,7 +942,7 @@ class MemberService
             'person_uuid' => $personUuid,
             'has_included' => isset($response['included']),
             'included_count' => isset($response['included']) ? count($response['included']) : 0,
-            'included_types' => isset($response['included']) ? array_map(fn($item) => $item['type'] ?? 'unknown', $response['included']) : [],
+            'included_types' => isset($response['included']) ? array_map(fn ($item) => $item['type'] ?? 'unknown', $response['included']) : [],
         ]);
 
         $result = $this->prepareMembersResult(

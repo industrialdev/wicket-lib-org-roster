@@ -308,7 +308,6 @@ $members_list_endpoint = $membersListEndpoint;
             $can_purchase_seats = $additional_seats_service->canPurchaseAdditionalSeats($org_uuid);
 $purchase_url = $can_purchase_seats ? $additional_seats_service->getPurchaseFormUrl($org_uuid, $membershipUuid) : '';
 
-
 if ($can_purchase_seats && !empty($purchase_url)):
     ?>
 		<?php

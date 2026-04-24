@@ -360,14 +360,14 @@ $no_members_message = __('No members found.', 'wicket-acc');
                                 // Check if relationship type should be hidden
                                 if (!empty($member['relationship_names']) && !OrgHelpers\Helper::should_hide_relationship_type()) :
                                     $has_details = true;
-                                ?>
+                                    ?>
                                     <div class="wt_flex wt_items-center wt_gap-2">
                                         <span class="wt_text-content"><?php echo esc_html($member['relationship_names']); ?></span>
                                     </div>
                                 <?php endif; ?>
                                 <?php if (!empty($member_email)) :
                                     $has_details = true;
-                                ?>
+                                    ?>
                                     <div class="wt_flex wt_items-center wt_gap-2">
                                         <a href="mailto:<?php echo esc_attr($member_email); ?>" class="wt_text-sm wt_text-interactive wt_hover_underline">
                                             <?php echo esc_html($member_email); ?>
@@ -376,7 +376,7 @@ $no_members_message = __('No members found.', 'wicket-acc');
                                 <?php endif; ?>
                                 <?php if (OrgHelpers\Helper\should_show_member_roles()) :
                                     $has_details = true;
-                                ?>
+                                    ?>
                                     <div class="wt_flex wt_items-baseline wt_gap-2 wt_text-sm">
                                         <strong><?php esc_html_e('Roles:', 'wicket-acc'); ?></strong>
                                         <span class="wt_text-content"><?php echo esc_html($roles_text); ?></span>
@@ -413,8 +413,8 @@ $no_members_message = __('No members found.', 'wicket-acc');
                         <?php
                             // Hide Remove button for membership owner
                             $is_current_user_owner = !empty($member['is_owner'])
-                                && !empty($current_user_uuid)
-                                && $member_uuid === $current_user_uuid;
+                                    && !empty($current_user_uuid)
+                                    && $member_uuid === $current_user_uuid;
             ?>
                         <?php if ($show_remove_button && !$is_current_user_owner): ?>
                             <button type="button" class="acc-remove-button remove-member-button button button--secondary wt_inline-flex wt_items-center wt_justify-between wt_gap-2 wt_px-4 wt_py-2 wt_bg-light-neutral wt_text-sm wt_border wt_border-bg-interactive wt_transition-colors wt_whitespace-nowrap component-button"
