@@ -129,14 +129,14 @@ if (!empty($member['relationship_description']) && \OrgManagement\Helpers\Helper
             <?php echo esc_html($member['relationship_description']); ?>
         </p>
     <?php endif; ?>
-    <?php if (!empty($member['relationship_names']) && !\OrgManagement\Helpers\Helper::should_hide_relationship_type()) :
+    <?php if (!empty($member['relationship_names']) && \OrgManagement\Helpers\Helper::should_show_member_relationship_type()) :
         $has_details = true;
         ?>
         <div class="wt_flex wt_items-center wt_gap-2">
             <span class="wt_text-content"><?php echo esc_html($member['relationship_names']); ?></span>
         </div>
     <?php endif; ?>
-    <?php if (!empty($member_email)) :
+    <?php if (!empty($member_email) && \OrgManagement\Helpers\Helper::should_show_member_email()) :
         $has_details = true;
         ?>
         <div class="wt_flex wt_items-center wt_gap-2">

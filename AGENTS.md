@@ -58,3 +58,17 @@
 - Sensitive data should not be logged; follow existing logging patterns and keep PII out of logs.
 - Configuration is filterable via `wicket/acc/orgman/config`.
 - Base paths/URLs are filterable via `wicket/acc/orgman/base_path` and `wicket/acc/orgman/base_url`.
+
+## Member Card Display — All Templates
+
+Any change to member card field visibility (name, email, job title, description, roles, relationship type) must be applied consistently across **all** templates that render per-member card output. These templates all call `Helper::should_show_*` / `Helper::should_hide_*` methods to gate each field:
+
+| Template | Context | Helper namespace used |
+|---|---|---|
+| `templates-partials/members-list.php` | Direct-assignment / default member list | `OrgHelpers\Helper::` (aliased) |
+| `templates-partials/members-list-unified.php` | Unified member list (org context) | `OrgHelpers\Helper::` (aliased) |
+| `templates-partials/member-details.php` | SSE lazy-load fragment (details block only; no name/header) | `\OrgManagement\Helpers\Helper::` |
+| `templates-partials/group-members-list.php` | Groups strategy member list | `OrgManagement\Helpers\Helper::` |
+| `templates-partials/members-view-unified.php` | Unified member view / read-only card display | `OrgHelpers\Helper::` (aliased) |
+
+**Rule:** when adding or modifying a `should_show_*` helper in `src/Helpers/Helper.php`, grep all five templates above and apply the guard everywhere the corresponding field is rendered. Skipping any one of them creates a config-inconsistency where the field appears in some views but not others.

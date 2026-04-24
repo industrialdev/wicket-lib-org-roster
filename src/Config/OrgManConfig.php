@@ -326,7 +326,6 @@ final class OrgManConfig
                 ],
                 'relationships' => [
                     'show_type' => false,
-                    'show_special_types' => false,
                 ],
                 'member_list' => [
                     'use_unified' => true,

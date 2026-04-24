@@ -234,6 +234,44 @@ abstract class Helper
     }
 
     /**
+     * Check if member name should be shown on cards.
+     *
+     * @return bool
+     */
+    public static function should_show_member_name(): bool
+    {
+        $config = self::get_config();
+
+        return $config['presentation']['member_card']['fields']['name']['enabled'] ?? true;
+    }
+
+    /**
+     * Check if member email should be shown on cards.
+     *
+     * @return bool
+     */
+    public static function should_show_member_email(): bool
+    {
+        $config = self::get_config();
+
+        return $config['presentation']['member_card']['fields']['email']['enabled'] ?? true;
+    }
+
+    /**
+     * Check if relationship type should be shown on member cards.
+     * Requires both the per-card field flag and the global show_type flag.
+     *
+     * @return bool
+     */
+    public static function should_show_member_relationship_type(): bool
+    {
+        $config = self::get_config();
+
+        return ($config['presentation']['member_card']['fields']['relationship_type']['enabled'] ?? false)
+            && ($config['presentation']['relationships']['show_type'] ?? false);
+    }
+
+    /**
      * Get the library version from composer.json.
      *
      * @return string

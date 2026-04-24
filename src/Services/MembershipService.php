@@ -269,13 +269,9 @@ class MembershipService
             return null;
         }
 
+        $cache = new CacheService();
         $cache_key = 'orgman_membership_' . md5($current_user_uuid . '_' . $organizationUuid);
-        $cached_data = false;
-
-        // Only check cache if enabled
-        if ($this->config['platform']['cache']['enabled'] ?? true) {
-            $cached_data = get_transient($cache_key);
-        }
+        $cached_data = $cache->get($cache_key);
 
         if (false !== $cached_data) {
             return $cached_data;
@@ -283,32 +279,20 @@ class MembershipService
 
         $resolved = $this->getOrganizationMembershipUuid($organizationUuid);
         if ($resolved) {
-            // Only cache if enabled
-            if ($this->config['platform']['cache']['enabled'] ?? true) {
-                $cache_duration = $this->config['platform']['cache']['duration'] ?? (5 * MINUTE_IN_SECONDS);
-                set_transient($cache_key, $resolved, $cache_duration);
-            }
+            $cache->set($cache_key, $resolved);
 
             return $resolved;
         }
 
         if (empty($organizationUuid) || !function_exists('wicket_get_current_person_memberships')) {
-            // Only cache if enabled
-            if ($this->config['platform']['cache']['enabled'] ?? true) {
-                $cache_duration = $this->config['platform']['cache']['duration'] ?? (5 * MINUTE_IN_SECONDS);
-                set_transient($cache_key, null, $cache_duration);
-            }
+            $cache->set($cache_key, null);
 
             return null;
         }
 
         $memberships = wicket_get_current_person_memberships();
         if (empty($memberships['included']) || !is_array($memberships['included'])) {
-            // Only cache if enabled
-            if ($this->config['platform']['cache']['enabled'] ?? true) {
-                $cache_duration = $this->config['platform']['cache']['duration'] ?? (5 * MINUTE_IN_SECONDS);
-                set_transient($cache_key, null, $cache_duration);
-            }
+            $cache->set($cache_key, null);
 
             return null;
         }
@@ -322,11 +306,7 @@ class MembershipService
             ) {
                 $isActive = $included['attributes']['active'] ?? null;
                 if ($isActive) {
-                    // Only cache if enabled
-                    if ($this->config['platform']['cache']['enabled'] ?? true) {
-                        $cache_duration = $this->config['platform']['cache']['duration'] ?? (5 * MINUTE_IN_SECONDS);
-                        set_transient($cache_key, $included['id'], $cache_duration);
-                    }
+                    $cache->set($cache_key, $included['id']);
 
                     return $included['id'];
                 }
@@ -336,11 +316,7 @@ class MembershipService
             }
         }
 
-        // Only cache if enabled
-        if ($this->config['platform']['cache']['enabled'] ?? true) {
-            $cache_duration = $this->config['platform']['cache']['duration'] ?? (5 * MINUTE_IN_SECONDS);
-            set_transient($cache_key, $fallback, $cache_duration);
-        }
+        $cache->set($cache_key, $fallback);
 
         return $fallback;
     }
@@ -357,25 +333,16 @@ class MembershipService
             return null;
         }
 
-        // Check cache first
+        $cache = new CacheService();
         $cache_key = 'orgman_membership_data_' . md5($membershipUuid);
-        $cached_data = false;
-
-        // Only check cache if enabled
-        if ($this->config['platform']['cache']['enabled'] ?? true) {
-            $cached_data = get_transient($cache_key);
-        }
+        $cached_data = $cache->get($cache_key);
 
         if (false !== $cached_data) {
             return $cached_data;
         }
 
         if (!function_exists('wicket_api_client')) {
-            // Only cache if enabled
-            if ($this->config['platform']['cache']['enabled'] ?? true) {
-                $cache_duration = $this->config['platform']['cache']['duration'] ?? (5 * MINUTE_IN_SECONDS);
-                set_transient($cache_key, null, $cache_duration);
-            }
+            $cache->set($cache_key, null);
 
             return null;
         }
@@ -386,19 +353,11 @@ class MembershipService
             $response = $client->get($endpoint);
             $data = isset($response['data']) ? $response : null;
 
-            // Cache the results using configured duration
-            if ($this->config['platform']['cache']['enabled'] ?? true) {
-                $cache_duration = $this->config['platform']['cache']['duration'] ?? (5 * MINUTE_IN_SECONDS);
-                set_transient($cache_key, $data, $cache_duration);
-            }
+            $cache->set($cache_key, $data);
 
             return $data;
         } catch (\Throwable $e) {
-            // Only cache if enabled
-            if ($this->config['platform']['cache']['enabled'] ?? true) {
-                $cache_duration = $this->config['platform']['cache']['duration'] ?? (5 * MINUTE_IN_SECONDS);
-                set_transient($cache_key, null, $cache_duration);
-            }
+            $cache->set($cache_key, null);
 
             return null;
         }

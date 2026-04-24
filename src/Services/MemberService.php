@@ -72,13 +72,14 @@ class MemberService
     /**
      * Helper method to set cached data if cache is enabled.
      *
-     * @param string $cache_key The cache key.
-     * @param mixed $data The data to cache.
+     * @param string   $cache_key The cache key.
+     * @param mixed    $data      The data to cache.
+     * @param int|null $duration  Optional TTL in seconds; null uses the configured default.
      * @return void
      */
-    private function setCachedData($cache_key, $data)
+    private function setCachedData($cache_key, $data, ?int $duration = null)
     {
-        (new CacheService())->set($cache_key, $data);
+        (new CacheService())->set($cache_key, $data, $duration);
     }
 
     /**
@@ -277,6 +278,14 @@ class MemberService
         }
 
         if ('' !== $searchTerm) {
+            $search_cache_key = 'orgman_search_' . md5($membershipUuid . $searchTerm . $page . $size);
+            $cached_search = $this->getCachedData($search_cache_key);
+            if (false !== $cached_search) {
+                return $cached_search;
+            }
+
+            $search_ttl = \OrgManagement\Helpers\ConfigHelper::get_search_cache_duration();
+
             try {
                 $searchResult = $this->membershipService()->membershipSearchMembers(
                     $membershipUuid,
@@ -290,6 +299,8 @@ class MemberService
                 if (!is_wp_error($searchResult) && is_array($searchResult)) {
                     $searchData = $searchResult['data'] ?? null;
                     if (is_array($searchData) && !empty($searchData)) {
+                        $this->setCachedData($search_cache_key, $searchResult, $search_ttl);
+
                         return $searchResult;
                     }
                 }
@@ -309,6 +320,9 @@ class MemberService
         }
 
         if ('' !== $searchTerm && function_exists('wicket_api_client')) {
+            $search_cache_key ??= 'orgman_search_' . md5($membershipUuid . $searchTerm . $page . $size);
+            $search_ttl ??= \OrgManagement\Helpers\ConfigHelper::get_search_cache_duration();
+
             $queryArgs = [
                 'page[number]' => $page,
                 'page[size]'   => $size,
@@ -332,6 +346,8 @@ class MemberService
 
                 $normalized = $this->normalizeMembershipResponse($response);
                 if (null !== $normalized) {
+                    $this->setCachedData($search_cache_key, $normalized, $search_ttl);
+
                     return $normalized;
                 }
             } catch (\Throwable $searchException) {

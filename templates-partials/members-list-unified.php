@@ -247,9 +247,11 @@ $show_remove_policy_callout = (
                     <div class="wt_flex wt_flex-col wt_gap-2 wt_w-full md_wt_w-4-5">
                         <div class="wt_flex wt_flex-col sm_wt_flex-row wt_items-start sm_wt_items-center wt_gap-2">
                             <div class="wt_flex wt_items-center wt_gap-2">
+                                <?php if (OrgHelpers\Helper::should_show_member_name()) : ?>
                                 <h3 class="wt_text-xl wt_font-medium wt_text-content wt_mb-0">
                                     <?php echo esc_html($member_name); ?>
                                 </h3>
+                                <?php endif; ?>
                                 <div id="member-status-<?php echo esc_attr($person_uuid_no_dashes); ?>"
                                      data-member-status="<?php echo esc_attr($person_uuid_no_dashes); ?>"
                                      class="wt_inline-flex wt_items-center">
@@ -312,7 +314,7 @@ $show_remove_policy_callout = (
                                     </p>
                                 <?php endif; ?>
 
-                                <?php if ($relationship_names !== '' && !OrgHelpers\Helper::should_hide_relationship_type()) :
+                                <?php if ($relationship_names !== '' && OrgHelpers\Helper::should_show_member_relationship_type()) :
                                     $has_details = true;
                                     ?>
                                     <div class="wt_flex wt_items-center wt_gap-2">
@@ -320,7 +322,7 @@ $show_remove_policy_callout = (
                                     </div>
                                 <?php endif; ?>
 
-                                <?php if ($member_email !== '') :
+                                <?php if ($member_email !== '' && OrgHelpers\Helper::should_show_member_email()) :
                                     $has_details = true;
                                     ?>
                                     <div class="wt_flex wt_items-center wt_gap-2">

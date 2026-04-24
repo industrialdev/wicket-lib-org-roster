@@ -146,9 +146,11 @@ $show_assignment_info = (bool) ($orgman_config['presentation']['member_list']['s
                     <div class="wt_flex wt_flex-col wt_gap-2 wt_w-full md_wt_w-4-5">
                         <div class="wt_flex wt_flex-col sm_wt_flex-row wt_items-start sm_wt_items-center wt_gap-2">
                             <div class="wt_flex wt_items-center wt_gap-2">
+                                <?php if (OrgManagement\Helpers\Helper::should_show_member_name()) : ?>
                                 <h3 class="wt_text-xl wt_font-medium wt_text-content wt_mb-0">
                                     <?php echo esc_html($member_name); ?>
                                 </h3>
+                                <?php endif; ?>
                                 <?php if ($is_confirmed) : ?>
                                     <span class="wt_text-content" title="<?php esc_attr_e('Account confirmed', 'wicket-acc'); ?>">
                                         <span class="wt_inline-block wt_w-2 wt_h-2 wt_rounded-full wt_bg-green-500" aria-hidden="true"></span>
@@ -163,7 +165,7 @@ $show_assignment_info = (bool) ($orgman_config['presentation']['member_list']['s
                                 <?php endif; ?>
                             </div>
                         </div>
-                        <?php if ($member_email) : ?>
+                        <?php if ($member_email && OrgManagement\Helpers\Helper::should_show_member_email()) : ?>
                             <div class="wt_flex wt_items-center wt_gap-2">
                                 <a href="mailto:<?php echo esc_attr($member_email); ?>" class="wt_text-sm wt_text-interactive wt_hover_underline">
                                     <?php echo esc_html($member_email); ?>

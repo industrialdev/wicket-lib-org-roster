@@ -2,6 +2,22 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.7.1] - 2026-04-24
+
+### Added
+- `Helper::should_show_member_name()`, `should_show_member_email()`, and `should_show_member_relationship_type()` — new per-card visibility helpers reading `presentation.member_card.fields.*` config keys that were previously defined but never consumed.
+- `should_show_member_relationship_type()` gates on both `member_card.fields.relationship_type.enabled` and `presentation.relationships.show_type` (AND logic) so both config knobs remain meaningful.
+
+### Changed
+- All five member card templates (`members-list.php`, `members-list-unified.php`, `member-details.php`, `group-members-list.php`, `members-view-unified.php`) now guard `name`, `email`, and `relationship_type` rendering through the new helpers, replacing the old `!should_hide_relationship_type()` calls and unconditional output.
+- `MembershipService::getMembershipForOrganization()` and `getOrgMembershipData()` converted from raw `get_transient`/`set_transient` to `CacheService`, giving their cached values salt-versioned keys that expire automatically on `cache_salt` bumps.
+- `MemberService::setCachedData()` now accepts an optional `?int $duration` parameter, passed through to `CacheService::set()`.
+- Search results in `MemberService` are now cached using `platform.cache.search_clear_cache_duration` as TTL (key scheme: `orgman_search_<md5>`), wiring a config key that was previously defined but never consumed.
+- Removed unused `show_special_types` key from `presentation.relationships` config.
+
+### Fixed
+- `members-list.php`: `OrgHelpers\Helper\should_show_member_roles()` corrected to `OrgHelpers\Helper::should_show_member_roles()` — backslash namespace separator instead of `::` would have caused a fatal error at runtime when rendering roles.
+
 ## [0.7.0] - 2026-04-24
 
 ### Added
