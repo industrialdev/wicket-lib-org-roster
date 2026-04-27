@@ -234,7 +234,7 @@ $groups_presentation = is_array($groups_config['presentation'] ?? null)
 $add_member_auto_close_on_success = (bool) ($groups_presentation['add_member_auto_close_on_success'] ?? false);
 $add_member_auto_close_delay_seconds = max(0, (int) ($groups_presentation['add_member_auto_close_delay_seconds'] ?? 7));
 $add_member_auto_close_delay_ms = $add_member_auto_close_delay_seconds * 1000;
-$add_member_modal_reset_actions = "(() => { const modal = document.getElementById('groupMembersAddModal'); const messages = modal ? modal.querySelector('#group-member-add-messages') : document.getElementById('group-member-add-messages'); if (messages) messages.innerHTML = ''; if (typeof \$addMemberForm !== 'undefined' && \$addMemberForm) \$addMemberForm.reset(); })(); \$membersLoading = false; \$addMemberSubmitting = false; \$addMemberSuccess = false; \$autoCloseCountdown = 0; \$addMemberModalOpen = false; \$addMemberSuccessMessage = '';";
+$add_member_modal_reset_actions = "(() => { const modal = document.getElementById('groupMembersAddModal'); const messages = modal ? modal.querySelector('#group-member-add-messages') : document.getElementById('group-member-add-messages'); if (messages) messages.innerHTML = ''; const form = modal ? modal.querySelector('form') : document.querySelector('#groupMembersAddModal form'); if (form && form.reset) form.reset(); })(); \$membersLoading = false; \$addMemberSubmitting = false; \$addMemberSuccess = false; \$autoCloseCountdown = 0; \$addMemberModalOpen = false; \$addMemberSuccessMessage = '';";
 $add_member_request_close_actions = '$addMemberModalOpen = false;';
 $add_member_success_actions = "console.log('Group member added successfully'); \$addMemberSubmitting = false; \$membersLoading = false; \$addMemberSuccess = true;";
 if ($add_member_auto_close_on_success && $add_member_auto_close_delay_seconds > 0) {
@@ -277,13 +277,12 @@ $observer_role = $group_roles['observer'] ?? ($groups_config['observer_role'] ??
             <form
                 method="post"
                 class="wt_flex wt_flex-col wt_gap-4"
-                data-ref="addMemberForm"
                 data-show="!$addMemberSuccess"
                 data-on:submit="if(!$addMemberSubmitting){ $addMemberSubmitting = true; $membersLoading = true; @post('<?php echo esc_js($add_member_endpoint); ?>', { contentType: 'form' }); }"
                 data-on:submit__prevent-default="true"
                 data-on:success="<?php echo esc_attr($add_member_success_actions); ?>"
                 data-on:error="<?php echo esc_attr($add_member_error_actions); ?>"
-                data-on:datastar-fetch="if (evt.detail.type === 'finished' && typeof $addMemberFormError !== 'undefined' && $addMemberFormError) { if ($addMemberForm && $addMemberForm.reset) $addMemberForm.reset(); $addMemberFormError = false; }"
+                data-on:datastar-fetch="if (evt.detail.type === 'finished' && typeof $addMemberFormError !== 'undefined' && $addMemberFormError) { if (el && el.reset) el.reset(); $addMemberFormError = false; }"
                 data-on:reset="$addMemberSubmitting = false">
                 <input type="hidden" name="group_uuid" value="<?php echo esc_attr($group_uuid); ?>">
                 <input type="hidden" name="org_uuid" value="<?php echo esc_attr($org_uuid); ?>">

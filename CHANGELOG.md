@@ -2,6 +2,19 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.7.2] - 2026-04-27
+
+### Fixed
+- Fixed Chrome-only member-search request failures (`ERR_CONNECTION_CLOSED`) caused by Datastar serializing DOM refs into the `datastar` GET query payload. Removed `data-ref` usage from search-adjacent member management templates so element refs are no longer transmitted in URL query signals.
+- Replaced ref-signal dependent handlers with DOM-safe reset/clear logic (`el.reset()` and `document.getElementById(...)`) across:
+  - `templates-partials/members-view-unified.php`
+  - `templates-partials/organization-members.php`
+  - `templates-partials/group-members.php`
+  - `templates-partials/members-list.php`
+- Fixed non-unified members-list modal actions to avoid dangling ref-signal usage after ref removal:
+  - Add Member button no longer calls `$addMemberForm.reset()`
+  - Edit Permissions/Remove actions no longer rely on `$updatePermissionsMessages` / `$removeMemberMessages`
+
 ## [0.7.1] - 2026-04-24
 
 ### Added

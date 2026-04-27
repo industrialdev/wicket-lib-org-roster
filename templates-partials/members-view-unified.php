@@ -273,7 +273,7 @@ $groups_presentation = is_array($groups_config['presentation'] ?? null)
 $group_add_member_auto_close_on_success = (bool) ($groups_presentation['add_member_auto_close_on_success'] ?? false);
 $group_add_member_auto_close_delay_seconds = max(0, (int) ($groups_presentation['add_member_auto_close_delay_seconds'] ?? 7));
 $group_add_member_auto_close_delay_ms = $group_add_member_auto_close_delay_seconds * 1000;
-$add_member_modal_reset_actions = "(() => { const modal = document.getElementById('membersAddModal'); const directMessages = modal ? modal.querySelector('[id^=\"add-member-messages-\"]') : document.querySelector('[id^=\"add-member-messages-\"]'); const groupMessages = modal ? modal.querySelector('#group-member-add-messages') : document.getElementById('group-member-add-messages'); if (directMessages) directMessages.innerHTML = ''; if (groupMessages) groupMessages.innerHTML = ''; if (typeof \$addMemberForm !== 'undefined' && \$addMemberForm) \$addMemberForm.reset(); })(); \$membersLoading = false; \$addMemberSubmitting = false; \$addMemberSuccess = false; \$autoCloseCountdown = 0; \$addMemberModalOpen = false; \$addMemberSuccessMessage = '';";
+$add_member_modal_reset_actions = "(() => { const modal = document.getElementById('membersAddModal'); const directMessages = modal ? modal.querySelector('[id^=\"add-member-messages-\"]') : document.querySelector('[id^=\"add-member-messages-\"]'); const groupMessages = modal ? modal.querySelector('#group-member-add-messages') : document.getElementById('group-member-add-messages'); if (directMessages) directMessages.innerHTML = ''; if (groupMessages) groupMessages.innerHTML = ''; const form = modal ? modal.querySelector('form') : document.querySelector('#membersAddModal form'); if (form && form.reset) form.reset(); })(); \$membersLoading = false; \$addMemberSubmitting = false; \$addMemberSuccess = false; \$autoCloseCountdown = 0; \$addMemberModalOpen = false; \$addMemberSuccessMessage = '';";
 $add_member_request_close_actions = '$addMemberModalOpen = false;';
 $org_add_member_auto_close_on_success = (bool) ($view_config['add_member_auto_close_on_success'] ?? false);
 $org_add_member_auto_close_delay_seconds = max(0, (int) ($view_config['add_member_auto_close_delay_seconds'] ?? 7));
@@ -338,7 +338,7 @@ $remove_member_auto_close_enabled = ($mode === 'groups')
         $update_permissions_local_sync_actions = "(() => { const modal = document.getElementById('editPermissionsModal'); if (!modal) return; const selected = Array.from(modal.querySelectorAll('input[name=\"roles[]\"]:checked')).map((node) => node.value); const selectedJson = JSON.stringify(selected); document.querySelectorAll('.edit-permissions-button[data-member-uuid=\"' + \$currentMemberUuid + '\"]').forEach((btn) => { btn.dataset.memberRoles = selectedJson; }); \$currentMemberRoles = selected; })();";
         $update_permissions_success_actions = "console.log('Permissions updated successfully'); \$editPermissionsSubmitting = false; \$editPermissionsSuccess = true; \$membersLoading = false; {$update_permissions_local_sync_actions}";
         $update_permissions_error_actions = "console.error('Failed to update permissions'); \$editPermissionsSubmitting = false; \$membersLoading = false;";
-        $edit_permissions_reset_actions = "\$editPermissionsSuccess = false; \$editPermissionsSubmitting = false; \$currentMemberUuid = ''; \$currentMemberName = ''; \$currentMemberRoles = []; \$currentMemberRelationshipType = ''; \$currentMemberDescription = ''; \$updatePermissionsMessages.innerHTML = '';";
+        $edit_permissions_reset_actions = "\$editPermissionsSuccess = false; \$editPermissionsSubmitting = false; \$currentMemberUuid = ''; \$currentMemberName = ''; \$currentMemberRoles = []; \$currentMemberRelationshipType = ''; \$currentMemberDescription = ''; (() => { const messages = document.getElementById('update-permissions-messages'); if (messages) messages.innerHTML = ''; })();";
         ?>
         <div class="wt_mt-6" data-signals='{"editPermissionsModalOpen": false, "editPermissionsSubmitting": false, "editPermissionsSuccess": false, "currentMemberUuid": "", "currentMemberName": "", "currentMemberRoles": [], "currentMemberRelationshipType": "", "currentMemberDescription": "", "removeMemberModalOpen": false, "removeMemberSubmitting": false, "removeMemberSuccess": false, "currentRemoveMemberUuid": "", "currentRemoveMemberName": "", "currentRemoveMemberEmail": "", "currentRemoveMemberConnectionId": "", "currentRemoveMemberPersonMembershipId": ""}'>
             <dialog id="editPermissionsModal" class="modal wt_m-auto max_wt_3xl wt_rounded-md wt_shadow-md backdrop_wt_bg-black-50"
@@ -367,7 +367,7 @@ $remove_member_auto_close_enabled = ($mode === 'groups')
                         </span>
                     </h2>
 
-                    <div id="update-permissions-messages" data-ref="updatePermissionsMessages"></div>
+                    <div id="update-permissions-messages"></div>
 
                     <form
                         method="POST"
@@ -512,13 +512,12 @@ $remove_member_auto_close_enabled = ($mode === 'groups')
                 <form
                     method="post"
                     class="wt_flex wt_flex-col wt_gap-4"
-                    data-ref="addMemberForm"
                     data-show="!$addMemberSuccess"
                     data-on:submit="if(!$addMemberSubmitting){ $addMemberSubmitting = true; $membersLoading = true; @post('<?php echo esc_js($add_member_endpoint); ?>', { contentType: 'form' }); }"
                     data-on:submit__prevent-default="true"
                     data-on:success="<?php echo esc_attr($group_add_member_success_actions); ?>"
                     data-on:error="<?php echo esc_attr($add_member_error_actions); ?>"
-                    data-on:datastar-fetch="if (evt.detail.type === 'finished' && typeof $addMemberFormError !== 'undefined' && $addMemberFormError) { if ($addMemberForm && $addMemberForm.reset) $addMemberForm.reset(); $addMemberFormError = false; }"
+                    data-on:datastar-fetch="if (evt.detail.type === 'finished' && typeof $addMemberFormError !== 'undefined' && $addMemberFormError) { if (el && el.reset) el.reset(); $addMemberFormError = false; }"
                     data-on:reset="$addMemberSubmitting = false">
                     <input type="hidden" name="group_uuid" value="<?php echo esc_attr($group_uuid); ?>">
                     <input type="hidden" name="org_uuid" value="<?php echo esc_attr($org_uuid); ?>">
@@ -603,13 +602,12 @@ $remove_member_auto_close_enabled = ($mode === 'groups')
                 <div id="add-member-messages-<?php echo esc_attr(sanitize_html_class($org_uuid ?: 'default')); ?>"></div>
                 <form name="add_new_person_membership_form" id="add_new_person_membership_form"
                     class="wt_flex wt_flex-col wt_gap-4" method="POST"
-                    data-ref="addMemberForm"
                     data-show="!$addMemberSuccess"
                     data-on:submit="if(!$addMemberSubmitting){ $addMemberSubmitting = true; $membersLoading = true; @post('<?php echo esc_js($add_member_endpoint); ?>', { contentType: 'form' }); }"
                     data-on:submit__prevent-default="true"
                     data-on:success="<?php echo esc_attr($add_member_success_actions); ?>"
                     data-on:error="<?php echo esc_attr($add_member_error_actions); ?>"
-                    data-on:datastar-fetch="if (evt.detail.type === 'finished' && typeof $addMemberFormError !== 'undefined' && $addMemberFormError) { if ($addMemberForm && $addMemberForm.reset) $addMemberForm.reset(); $addMemberFormError = false; }"
+                    data-on:datastar-fetch="if (evt.detail.type === 'finished' && typeof $addMemberFormError !== 'undefined' && $addMemberFormError) { if (el && el.reset) el.reset(); $addMemberFormError = false; }"
                     data-on:reset="$addMemberSubmitting = false">
                     <input type="hidden" name="org_uuid" value="<?php echo esc_attr($org_uuid); ?>">
                     <input type="hidden" name="org_dom_suffix" value="<?php echo esc_attr(sanitize_html_class($org_uuid ?: 'default')); ?>">

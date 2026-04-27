@@ -42,7 +42,7 @@ $encodedOrgUuid = rawurlencode((string) $org_uuid);
 
 $update_permissions_endpoint = OrgHelpers\template_url() . 'process/update-permissions';
 $update_permissions_error_actions = "console.error('Failed to update permissions'); $editPermissionsSubmitting = false; $membersLoading = false;";
-$edit_permissions_reset_actions = "$editPermissionsSuccess = false; $editPermissionsSubmitting = false; $currentMemberUuid = ''; $currentMemberName = ''; $currentMemberRoles = []; $currentMemberRelationshipType = ''; \$updatePermissionsMessages.innerHTML = '';";
+$edit_permissions_reset_actions = "$editPermissionsSuccess = false; $editPermissionsSubmitting = false; $currentMemberUuid = ''; $currentMemberName = ''; $currentMemberRoles = []; $currentMemberRelationshipType = ''; (() => { const messages = document.getElementById('update-permissions-messages'); if (messages) messages.innerHTML = ''; })();";
 $remove_member_endpoint = OrgHelpers\template_url() . 'process/remove-member';
 $remove_member_error_actions = "console.error('Failed to remove member'); $removeMemberSubmitting = false; $membersLoading = false;";
 
@@ -400,7 +400,7 @@ $no_members_message = __('No members found.', 'wicket-acc');
                                 data-on:click="
                                 $editPermissionsSuccess = false;
                                 $editPermissionsSubmitting = false;
-                                $updatePermissionsMessages.innerHTML = '';
+                                (() => { const messages = document.getElementById('update-permissions-messages'); if (messages) messages.innerHTML = ''; })();
                                 $currentMemberUuid = '<?php echo esc_js($member_uuid ?? ''); ?>';
                                 $currentMemberName = '<?php echo esc_js($member['full_name'] ?? ''); ?>';
                                 (() => { try { $currentMemberRoles = JSON.parse(evt.currentTarget.dataset.memberRoles || '[]'); } catch (e) { $currentMemberRoles = []; } })();
@@ -423,7 +423,7 @@ $no_members_message = __('No members found.', 'wicket-acc');
                                 data-on:click="
                                     $removeMemberSuccess = false;
                                     $removeMemberSubmitting = false;
-                                    $removeMemberMessages.innerHTML = '';
+                                    (() => { const messages = document.getElementById('remove-member-messages'); if (messages) messages.innerHTML = ''; })();
                                     $currentRemoveMemberUuid = '<?php echo esc_js($member_uuid ?? ''); ?>';
                                     $currentRemoveMemberName = '<?php echo esc_js($member['full_name'] ?? ''); ?>';
                                     $currentRemoveMemberEmail = '<?php echo esc_js($member['email'] ?? ''); ?>';
@@ -500,7 +500,7 @@ $no_members_message = __('No members found.', 'wicket-acc');
             <?php if ($has_seats_available): ?>
                 <button type="button"
                     class="button button--primary add-member-button wt_w-full wt_py-2 component-button"
-                    data-on:click="$addMemberSuccess = false; $addMemberSubmitting = false; $addMemberSuccessMessage = ''; $addMemberForm.reset(); (() => { const messages = document.querySelector('[id^=\'add-member-messages-\']'); if (messages) messages.innerHTML = ''; })(); $addMemberModalOpen = true"><?php esc_html_e('Add Member', 'wicket-acc'); ?></button>
+                    data-on:click="$addMemberSuccess = false; $addMemberSubmitting = false; $addMemberSuccessMessage = ''; (() => { const modal = document.getElementById('membersAddModal'); const form = modal ? modal.querySelector('form') : document.querySelector('#membersAddModal form'); if (form && form.reset) form.reset(); const messages = document.querySelector('[id^=\'add-member-messages-\']'); if (messages) messages.innerHTML = ''; })(); $addMemberModalOpen = true"><?php esc_html_e('Add Member', 'wicket-acc'); ?></button>
                 <?php if ($show_bulk_upload) : ?>
                     <div class="wt_mt-3">
                         <button type="button"
@@ -570,7 +570,7 @@ $no_members_message = __('No members found.', 'wicket-acc');
                 </span>
             </h2>
 
-            <div id="update-permissions-messages" data-ref="updatePermissionsMessages">
+            <div id="update-permissions-messages">
                 <!-- Messages will be inserted here by Datastar -->
             </div>
 
@@ -690,7 +690,7 @@ $no_members_message = __('No members found.', 'wicket-acc');
                 ×
             </button>
             <h2 class="wp-block-heading has-heading-sm-font-size wt_text-2xl wt_font-semibold wt_mb-4"><?php esc_html_e('Remove Member', 'wicket-acc'); ?></h2>
-            <div id="remove-member-messages" data-ref="removeMemberMessages">
+            <div id="remove-member-messages">
                 <!-- Messages will be inserted here by Datastar -->
             </div>
 

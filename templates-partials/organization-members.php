@@ -224,7 +224,7 @@ $members_list_endpoint = $membersListEndpoint;
 	    }
 
 	    $membership_query_fragment = $membershipUuid ? '&membership_uuid=' . rawurlencode((string) $membershipUuid) : '';
-	    $add_member_modal_reset_actions = "(() => { const modal = document.getElementById('membersAddModal'); const messages = modal ? modal.querySelector('[id^=\"add-member-messages-\"]') : document.querySelector('[id^=\"add-member-messages-\"]'); if (messages) messages.innerHTML = ''; if (typeof \$addMemberForm !== 'undefined' && \$addMemberForm) \$addMemberForm.reset(); })(); \$membersLoading = false; \$addMemberSubmitting = false; \$addMemberSuccess = false; \$autoCloseCountdown = 0; \$addMemberModalOpen = false; \$addMemberSuccessMessage = '';";
+	    $add_member_modal_reset_actions = "(() => { const modal = document.getElementById('membersAddModal'); const messages = modal ? modal.querySelector('[id^=\"add-member-messages-\"]') : document.querySelector('[id^=\"add-member-messages-\"]'); if (messages) messages.innerHTML = ''; const form = modal ? modal.querySelector('form') : document.querySelector('#membersAddModal form'); if (form && form.reset) form.reset(); })(); \$membersLoading = false; \$addMemberSubmitting = false; \$addMemberSuccess = false; \$autoCloseCountdown = 0; \$addMemberModalOpen = false; \$addMemberSuccessMessage = '';";
 	    $add_member_request_close_actions = '$addMemberModalOpen = false;';
 	    $add_member_success_actions = "console.log('Member added successfully'); \$addMemberSubmitting = false; \$membersLoading = false; \$addMemberSuccess = true;";
 	    $org_view_config = is_array($presentation_config['member_view'] ?? null) ? $presentation_config['member_view'] : [];
@@ -353,13 +353,12 @@ if ($can_purchase_seats && !empty($purchase_url)):
 
 				<form name="add_new_person_membership_form" id="add_new_person_membership_form"
 					class="wt_flex wt_flex-col wt_gap-4" method="POST"
-					data-ref="addMemberForm"
 					data-show="!$addMemberSuccess"
 					data-on:submit="if(!$addMemberSubmitting){ $addMemberSubmitting = true; $membersLoading = true; @post('<?php echo esc_js($add_member_endpoint); ?>', { contentType: 'form' }); }"
 					data-on:submit__prevent-default="true"
 					data-on:success="<?php echo esc_attr($add_member_success_actions); ?>"
 					data-on:error="<?php echo esc_attr($add_member_error_actions); ?>"
-					data-on:datastar-fetch="if (evt.detail.type === 'finished' && typeof $addMemberFormError !== 'undefined' && $addMemberFormError) { if ($addMemberForm && $addMemberForm.reset) $addMemberForm.reset(); $addMemberFormError = false; }"
+					data-on:datastar-fetch="if (evt.detail.type === 'finished' && typeof $addMemberFormError !== 'undefined' && $addMemberFormError) { if (el && el.reset) el.reset(); $addMemberFormError = false; }"
 					data-on:reset="$addMemberSubmitting = false">
 					<input type="hidden" name="org_uuid"
 						value="<?php echo esc_attr($org_uuid); ?>">
