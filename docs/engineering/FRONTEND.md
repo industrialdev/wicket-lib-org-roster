@@ -56,7 +56,7 @@ It also:
 
 - `presentation.organization_list.*`
 - `presentation.relationships.*`
-- `presentation.member_list.use_unified`
+- `presentation.member_list.use_legacy_list` (opt-in to legacy `members-list.php`; default `false`)
 - `presentation.member_list.show_edit_permissions`
 - `presentation.member_list.show_remove_button`
 - `presentation.member_list.show_bulk_upload`

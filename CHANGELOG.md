@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.7.3] - 2026-04-28
+
+### Changed
+- `members-list-unified.php` is now the default member list template. No configuration required.
+- `presentation.member_list.use_unified` removed. Replaced by `presentation.member_list.use_legacy_list` (default `false`). Set to `true` to opt into the legacy `members-list.php` template temporarily.
+- `OrgManConfig` default for `presentation.member_list` updated accordingly.
+
 ## [0.7.2] - 2026-04-27
 
 ### Fixed

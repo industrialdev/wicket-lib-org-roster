@@ -45,7 +45,6 @@ This document mirrors the current site override. If it drifts, update the site c
 
 ### `presentation`
 
-- `presentation.member_list.use_unified = true`
 - `presentation.member_list.show_assignment_info = true`
 - `presentation.member_list.display_roles.allowlist = ['membership_owner', 'membership_manager', 'org_editor', 'member']`
 - `presentation.member_list.account_status.enabled = true`
@@ -103,7 +102,6 @@ function wicket_orgman_config(array $config): array
     $config['member_management']['permissions_modal']['denylist'] = ['membership_owner'];
 
     // Team member list requirements: active-seat roster with status and security role visibility.
-    $config['presentation']['member_list']['use_unified'] = true;
     $config['presentation']['member_list']['show_assignment_info'] = true;
     $config['presentation']['member_list']['display_roles']['allowlist'] = ['membership_owner', 'membership_manager', 'org_editor', 'member'];
     $config['presentation']['member_list']['account_status']['enabled'] = true;

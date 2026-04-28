@@ -23,7 +23,6 @@ This document mirrors the current site override. If it drifts, update the site c
 
 - `presentation.member_view.use_unified = true`
 - `presentation.member_view.search_clear_requires_submit = true`
-- `presentation.member_list.use_unified = true`
 
 ### `integrations.additional_seats`
 
@@ -57,7 +56,6 @@ function wicket_child_orgman_config(array $config): array
 
     $config['membership']['cycle']['require_explicit_membership_uuid'] = true;
     $config['presentation']['member_view']['use_unified'] = true;
-    $config['presentation']['member_list']['use_unified'] = true;
     $config['presentation']['member_view']['search_clear_requires_submit'] = true;
     $config['integrations']['additional_seats']['enabled'] = true;
     $config['integrations']['additional_seats']['sku'] = 'additional-seats';

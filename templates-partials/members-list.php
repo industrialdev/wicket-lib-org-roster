@@ -95,8 +95,6 @@ $unconfirmed_tooltip = (string) ($account_status_config['unconfirmed_tooltip'] ?
 $unconfirmed_label = (string) ($account_status_config['unconfirmed_label'] ?? __('Account not confirmed', 'wicket-acc'));
 $remove_member_auto_close_on_success = (bool) ($member_view_config['add_member_auto_close_on_success'] ?? false);
 $remove_member_auto_close_delay_seconds = max(0, (int) ($member_view_config['add_member_auto_close_delay_seconds'] ?? 7));
-$use_unified_member_list = (bool) ($member_list_config['use_unified'] ?? false);
-
 if ((!isset($members) || !is_array($members)) && !empty($org_uuid)) {
     $configService = new OrgManagement\Services\ConfigService();
     $member_service = new OrgManagement\Services\MemberService($configService);
@@ -129,17 +127,7 @@ if ((!isset($members) || !is_array($members)) && !empty($org_uuid)) {
     }
 }
 
-if ($use_unified_member_list) {
-    $mode = isset($mode) ? (string) $mode : (string) (new OrgManagement\Services\ConfigService())->getRosterMode();
-    $members = isset($members) && is_array($members) ? $members : [];
-    $pagination = isset($pagination) && is_array($pagination) ? $pagination : [];
-    $query = isset($query) ? (string) $query : '';
-    $members_list_endpoint = isset($members_list_endpoint) ? (string) $members_list_endpoint : OrgHelpers\template_url() . 'members-list';
-    $members_list_target = isset($members_list_target) ? (string) $members_list_target : 'members-list-container-' . sanitize_html_class($org_uuid ?: 'default');
-    include __DIR__ . '/members-list-unified.php';
 
-    return;
-}
 
 // Seat availability check
 $max_seats = 0;

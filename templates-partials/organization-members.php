@@ -211,16 +211,16 @@ $members_list_endpoint = $membersListEndpoint;
 	    $member_list_config = is_array($orgman_config['presentation']['member_list'] ?? null)
 	        ? $orgman_config['presentation']['member_list']
 	        : [];
-	    $use_unified_member_list = (bool) ($member_list_config['use_unified'] ?? false);
-	    if ($use_unified_member_list) {
+	    $use_legacy_member_list = (bool) ($member_list_config['use_legacy_list'] ?? false);
+	    if ($use_legacy_member_list) {
+	        include __DIR__ . '/members-list.php';
+	    } else {
 	        $mode = (string) ($configService->getRosterMode() ?? 'direct');
 	        $members = $membersResult['members'] ?? [];
 	        $pagination = $membersResult['pagination'] ?? [];
 	        $query = $membersResult['query'] ?? '';
 	        $membership_uuid = $membershipUuid ?? '';
 	        include __DIR__ . '/members-list-unified.php';
-	    } else {
-	        include __DIR__ . '/members-list.php';
 	    }
 
 	    $membership_query_fragment = $membershipUuid ? '&membership_uuid=' . rawurlencode((string) $membershipUuid) : '';

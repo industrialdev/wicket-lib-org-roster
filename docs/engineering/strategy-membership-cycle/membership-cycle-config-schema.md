@@ -12,5 +12,5 @@ Membership-cycle mode uses the `membership_cycle` namespace plus shared UI confi
 - `membership.cycle.prevent_owner_removal`
 - `membership.cycle.require_explicit_membership_uuid`
 - `presentation.member_list.show_bulk_upload`
-- `presentation.member_list.use_unified`
+- `presentation.member_list.use_legacy_list`
 - `presentation.member_view.use_unified`

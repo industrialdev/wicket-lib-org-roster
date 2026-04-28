@@ -423,8 +423,8 @@ Use `docs/INSTALLATION.md` for setup wiring.
 
 #### `presentation.member_list`
 
-- `presentation.member_list.use_unified`
-  - Default: `true`
+- `presentation.member_list.use_legacy_list`
+  - Default: `false`. Set to `true` to opt into the legacy `members-list.php` template. Unified list is active by default.
 - `presentation.member_list.show_edit_permissions`
   - Default: `true`
 - `presentation.member_list.show_remove_button`
@@ -775,7 +775,7 @@ The runtime still uses the current paths below. These are the target destination
 - `ui.hide_relationship_type -> presentation.relationships.show_type`
   - Value inversion required: old `true` becomes new `false`.
 - `ui.show_special_relationships -> presentation.relationships.show_special_types`
-- `ui.member_list.use_unified -> presentation.member_list.use_unified`
+- `ui.member_list.use_unified -> presentation.member_list.use_unified` (removed; unified is now the default — use `presentation.member_list.use_legacy_list = true` to opt into the legacy template)
 - `ui.member_list.show_edit_permissions -> presentation.member_list.show_edit_permissions`
 - `ui.member_list.show_remove_button -> presentation.member_list.show_remove_button`
 - `ui.member_list.show_bulk_upload -> presentation.member_list.show_bulk_upload`

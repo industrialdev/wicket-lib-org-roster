@@ -22,6 +22,7 @@ PACE's MDP membership has "Cascading Membership Settings" enabled with cascade t
 
 - `relationships.defaults.type = employee`
 
+
 ### `integrations.additional_seats`
 
 - `integrations.additional_seats.enabled = true`

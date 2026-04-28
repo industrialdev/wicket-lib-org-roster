@@ -328,7 +328,7 @@ final class OrgManConfig
                     'show_type' => false,
                 ],
                 'member_list' => [
-                    'use_unified' => true,
+                    'use_legacy_list' => false,
                     'page_size' => 15,
                     'show_edit_permissions' => true,
                     'show_remove_button' => true,
