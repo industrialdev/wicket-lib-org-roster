@@ -10,6 +10,10 @@ This document mirrors the current site override. If it drifts, update the site c
 
 ## Current Override Paths
 
+### `access`
+
+- `access.roles.manager = membership_manager`
+
 ### `membership`
 
 - `membership.strategy = groups`
@@ -18,13 +22,16 @@ This document mirrors the current site override. If it drifts, update the site c
 
 - `groups.matching.tag_name = Roster Management`
 - `groups.matching.tag_case_sensitive = false`
-- `groups.roles.management = ['president', 'delegate', 'alternate_delegate', 'council_delegate', 'council_alternate_delegate', 'correspondent']`
+- `groups.roles.management = ['president', 'delegate', 'alternate_delegate', 'correspondent']`
+- `groups.roles.roster = ['member', 'observer']`
+- `groups.roles.seat_limited = ['member']`
 - `groups.additional_info.key = association`
 - `groups.additional_info.value_field = name`
 - `groups.additional_info.fallback_to_org_uuid = true`
+- `groups.removal.mode = end_date`
+- `groups.removal.end_date_anchor = day_start_utc`
 - `groups.ui.add_member_auto_close_on_success = true`
 - `groups.ui.add_member_auto_close_delay_seconds = 7`
-- `groups.removal.end_date_anchor = day_start_utc`
 - `groups.presentation.add_member_auto_close_on_success = true`
 - `groups.presentation.add_member_auto_close_delay_seconds = 7`
 
@@ -54,30 +61,52 @@ This document mirrors the current site override. If it drifts, update the site c
 function wicket_child_orgman_config(array $config): array
 {
     $config['membership']['strategy'] = 'groups';
+
+    // Access control
+    $config['access']['roles']['manager'] = 'membership_manager';
+
+    // Group matching
     $config['groups']['matching']['tag_name'] = 'Roster Management';
     $config['groups']['matching']['tag_case_sensitive'] = false;
+
+    // Roles and Limits
     $config['groups']['roles']['management'] = [
         'president',
         'delegate',
         'alternate_delegate',
-        'council_delegate',
-        'council_alternate_delegate',
         'correspondent',
     ];
+    $config['groups']['roles']['roster'] = [
+        'member',
+        'observer',
+    ];
+    $config['groups']['roles']['seat_limited'] = [
+        'member',
+    ];
+
+    // Scoping
     $config['groups']['additional_info'] = [
         'key' => 'association',
         'value_field' => 'name',
         'fallback_to_org_uuid' => true,
     ];
+
+    // Removal policy
+    $config['groups']['removal']['mode'] = 'end_date';
+    $config['groups']['removal']['end_date_anchor'] = 'day_start_utc';
+
+    // UI and Presentation
+    $config['presentation']['member_list']['show_assignment_info'] = false;
+    $config['member_management']['forms']['add_member']['clear_form_on_error'] = true;
+
     $config['presentation']['member_view']['add_member_auto_close_on_success'] = true;
     $config['presentation']['member_view']['add_member_auto_close_delay_seconds'] = 7;
     $config['groups']['ui']['add_member_auto_close_on_success'] = true;
     $config['groups']['ui']['add_member_auto_close_delay_seconds'] = 7;
-    $config['groups']['removal']['end_date_anchor'] = 'day_start_utc';
     $config['groups']['presentation']['add_member_auto_close_on_success'] = true;
     $config['groups']['presentation']['add_member_auto_close_delay_seconds'] = 7;
-    $config['member_management']['forms']['add_member']['clear_form_on_error'] = true;
-    $config['presentation']['member_list']['show_assignment_info'] = false;
+
+    // Integrations
     $config['integrations']['additional_seats']['enabled'] = true;
     $config['integrations']['additional_seats']['sku'] = 'additional-seats';
     $config['integrations']['additional_seats']['discount_sku'] = 'corporate-seat-discount';
