@@ -1,6 +1,8 @@
 # CSAE Configuration
 
-Source of truth: `../csae-website-wordpress/src/web/app/themes/wicket-child/custom/org-roster.php`
+Source of truth: `../csae-website-wordpress/src/web/app/themes/sassquatch/custom/org-roster.php`
+
+> **Note:** this file has not been created yet. The config below is the planned override.
 
 This document mirrors the current site override. If it drifts, update the site config first, then update this file.
 
