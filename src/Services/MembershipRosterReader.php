@@ -157,10 +157,10 @@ class MembershipRosterReader
         $isLazy = (bool) ($args['lazy'] ?? false);
 
         $logger = \Wicket()->log();
+        $gen = $this->cacheService()->getMembershipGeneration($membershipUuid);
 
         // Cache initial load only (no search term)
         if (empty($searchTerm)) {
-            $gen = $this->cacheService()->getMembershipGeneration($membershipUuid);
             $cache_key = 'orgman_members_' . md5($membershipUuid . $page . $size . (int) $isLazy . $gen);
             $cached_data = $this->getCachedData($cache_key);
 
@@ -170,7 +170,7 @@ class MembershipRosterReader
         }
 
         if ('' !== $searchTerm) {
-            $search_cache_key = 'orgman_search_' . md5($membershipUuid . $searchTerm . $page . $size);
+            $search_cache_key = 'orgman_search_' . md5($membershipUuid . $searchTerm . $page . $size . $gen);
             $cached_search = $this->getCachedData($search_cache_key);
             if (false !== $cached_search) {
                 return $cached_search;
@@ -212,7 +212,7 @@ class MembershipRosterReader
         }
 
         if ('' !== $searchTerm && function_exists('wicket_api_client')) {
-            $search_cache_key ??= 'orgman_search_' . md5($membershipUuid . $searchTerm . $page . $size);
+            $search_cache_key ??= 'orgman_search_' . md5($membershipUuid . $searchTerm . $page . $size . $gen);
             $search_ttl ??= \OrgManagement\Helpers\ConfigHelper::get_search_cache_duration();
 
             $queryArgs = [
