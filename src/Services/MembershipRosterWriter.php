@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace OrgManagement\Services;
 
+use OrgManagement\Services\Strategies\RosterManagementStrategy;
+
 /**
  * Membership roster write core.
  *
@@ -36,6 +38,11 @@ class MembershipRosterWriter
     protected ?ConnectionService $connectionService = null;
 
     /**
+     * @var RosterManagementStrategy[]
+     */
+    public array $strategies = [];
+
+    /**
      * Constructor.
      *
      * @param ConfigService          $configService
@@ -46,6 +53,30 @@ class MembershipRosterWriter
         $this->configService = $configService;
         $this->config = &$config;
         $this->reader = $reader;
+        $this->initStrategies();
+    }
+
+    /**
+     * Initialize the available strategies.
+     */
+    private function initStrategies(): void
+    {
+        $this->strategies['cascade'] = new Strategies\CascadeStrategy();
+        $this->strategies['direct'] = new Strategies\DirectAssignmentStrategy();
+        $this->strategies['groups'] = new Strategies\GroupsStrategy();
+        $this->strategies['membership_cycle'] = new Strategies\MembershipCycleStrategy();
+    }
+
+    /**
+     * Get the current roster management strategy.
+     *
+     * @return RosterManagementStrategy
+     */
+    private function getStrategy(): RosterManagementStrategy
+    {
+        $mode = $this->configService->getRosterMode();
+
+        return $this->strategies[$mode] ?? $this->strategies['cascade'];
     }
 
     /**
@@ -512,5 +543,65 @@ class MembershipRosterWriter
         } catch (\Exception $e) {
             return new \WP_Error('update_exception', 'Failed to update member description: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Add a member to an organization.
+     *
+     * Centralizes common validation, delegates mode-specific work to the
+     * active strategy, and invalidates membership read caches on success.
+     *
+     * @param string $org_id      The organization ID.
+     * @param array  $member_data Data for the new member.
+     * @param array  $context     Additional context for the operation.
+     * @return array|\WP_Error
+     */
+    public function addMember($org_id, $member_data, $context = [])
+    {
+        if (!function_exists('wicket_api_client')) {
+            return new \WP_Error('api_unavailable', 'Wicket API client is not available.');
+        }
+
+        $result = $this->getStrategy()->addMember($org_id, $member_data, $context);
+
+        // Invalidate read caches on success so the roster reflects the change immediately.
+        if (!is_wp_error($result) && is_array($result)) {
+            $membership_uuid = $context['membership_uuid'] ?? '';
+            if ($membership_uuid !== '') {
+                $this->reader->clearMembersCache($membership_uuid);
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Remove a member from an organization.
+     *
+     * Centralizes common validation, delegates mode-specific work to the
+     * active strategy, and invalidates membership read caches on success.
+     *
+     * @param string $org_id      The organization ID.
+     * @param string $person_uuid The UUID of the person to remove.
+     * @param array  $context     Additional context for the operation.
+     * @return array|\WP_Error
+     */
+    public function removeMember($org_id, $person_uuid, $context = [])
+    {
+        if (!function_exists('wicket_api_client')) {
+            return new \WP_Error('api_unavailable', 'Wicket API client is not available.');
+        }
+
+        $result = $this->getStrategy()->removeMember($org_id, $person_uuid, $context);
+
+        // Invalidate read caches on success so the roster reflects the change immediately.
+        if (!is_wp_error($result) && is_array($result)) {
+            $membership_uuid = $context['membership_uuid'] ?? '';
+            if ($membership_uuid !== '') {
+                $this->reader->clearMembersCache($membership_uuid);
+            }
+        }
+
+        return $result;
     }
 }

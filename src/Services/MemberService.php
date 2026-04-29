@@ -37,11 +37,6 @@ class MemberService
     private $configService;
 
     /**
-     * @var RosterManagementStrategy[]
-     */
-    private $strategies = [];
-
-    /**
      * @var array
      */
     private $config;
@@ -54,7 +49,7 @@ class MemberService
     /**
      * @var MembershipRosterWriter
      */
-    private MembershipRosterWriter $writer;
+    protected MembershipRosterWriter $writer;
 
     /**
      * Constructor.
@@ -68,30 +63,6 @@ class MemberService
         $this->reader = new MembershipRosterReader($configService);
         $configRef = &$this->config;
         $this->writer = new MembershipRosterWriter($configService, $this->reader, $configRef);
-        $this->initStrategies();
-    }
-
-    /**
-     * Initialize the available strategies.
-     */
-    private function initStrategies()
-    {
-        $this->strategies['cascade'] = new Strategies\CascadeStrategy();
-        $this->strategies['direct'] = new Strategies\DirectAssignmentStrategy();
-        $this->strategies['groups'] = new Strategies\GroupsStrategy();
-        $this->strategies['membership_cycle'] = new Strategies\MembershipCycleStrategy();
-    }
-
-    /**
-     * Get the current roster management strategy.
-     *
-     * @return RosterManagementStrategy
-     */
-    private function getStrategy()
-    {
-        $mode = $this->configService->getRosterMode();
-
-        return $this->strategies[$mode] ?? $this->strategies['cascade'];
     }
 
     /**
@@ -103,7 +74,7 @@ class MemberService
      */
     public function addMember($org_id, $member_data, $context = [])
     {
-        return $this->getStrategy()->addMember($org_id, $member_data, $context);
+        return $this->writer->addMember($org_id, $member_data, $context);
     }
 
     /**
@@ -116,7 +87,7 @@ class MemberService
      */
     public function removeMember($org_id, $person_uuid, $context = [])
     {
-        return $this->getStrategy()->removeMember($org_id, $person_uuid, $context);
+        return $this->writer->removeMember($org_id, $person_uuid, $context);
     }
 
     /**
