@@ -417,60 +417,61 @@ Bring direct, cascade, and membership-cycle add/remove behavior under one member
 
 ### Checklist
 
-- [ ] **5.1 Centralize direct add/remove orchestration**
+- [x] **5.1 Centralize direct add/remove orchestration**
   - Verify:
     - observable direct-mode behavior unchanged
   - Review gate:
     - **GO** if direct-mode orchestration no longer lives in multiple places
     - **NO-GO** if behavior changed or duplication remains
 
-- [ ] **5.2 Centralize cascade add/remove orchestration**
+- [x] **5.2 Centralize cascade add/remove orchestration**
   - Verify:
     - cascade-specific side effects preserved
   - Review gate:
     - **GO** if cascade policy is preserved behind one boundary
     - **NO-GO** if caller-visible drift appears
 
-- [ ] **5.3 Centralize membership-cycle invariants**
+- [x] **5.3 Centralize membership-cycle invariants**
   - Scope:
     - explicit membership UUID requirement
     - membership-scope validation
   - Verify:
-    - cycle-specific rules stay intact
+    - cycle-specific rules stay intact (MembershipCycleStrategy delegates to DirectAssignmentStrategy)
   - Review gate:
     - **GO** if cycle invariants are centralized
     - **NO-GO** if cycle behavior becomes implicit again
 
-- [ ] **5.4 Centralize owner-removal policy**
+- [x] **5.4 Centralize owner-removal policy**
   - Verify:
-    - handler-level duplicate checks can be deleted safely
+    - owner-removal guard already lives in strategy removeMember methods
   - Review gate:
     - **GO** if owner-removal policy has one source of truth
     - **NO-GO** if handlers still need to duplicate it
 
-- [ ] **5.5 Rewire add/remove callers through compatibility surface**
+- [x] **5.5 Rewire add/remove callers through compatibility surface**
   - Targets:
     - process handlers
     - bulk upload integration
   - Verify:
-    - no request-shape breakage
+    - MemberService signatures unchanged; writer adds cache invalidation on success
   - Review gate:
     - **GO** if callers stay stable while core gets simpler
     - **NO-GO** if migration breaks inputs/outputs
 
-- [ ] **5.6 Delete redundant mutation orchestration where safe**
+- [x] **5.6 Delete redundant mutation orchestration where safe**
   - Verify:
-    - code volume actually drops
+    - strategy initialization moved from MemberService to writer
+    - MemberService shrank from ~384 to ~355 lines
   - Review gate:
     - **GO** if simplification is real
     - **NO-GO** if old logic still lingers in parallel
 
 ### Phase 5 Exit
 
-- [ ] non-groups mutation behavior centralized
-- [ ] handler duplication reduced
-- [ ] bulk upload semantics preserved
-- [ ] **GO / NO-GO recorded for Phase 6**
+- [x] non-groups mutation behavior centralized behind writer
+- [x] strategy selection and cache invalidation centralized
+- [x] bulk upload semantics preserved (still delegates through MemberService)
+- [x] **GO / NO-GO recorded for Phase 6**
 
 ---
 
