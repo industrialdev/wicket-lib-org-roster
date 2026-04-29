@@ -360,7 +360,7 @@ Pull update behavior under the same membership roster boundary.
 
 ### Checklist
 
-- [ ] **4.1 Extract role update orchestration**
+- [x] **4.1 Extract role update orchestration**
   - Scope:
     - active-membership guard
     - role diffing
@@ -371,41 +371,41 @@ Pull update behavior under the same membership roster boundary.
     - **GO** if role update policy now has one home
     - **NO-GO** if it still leaks into callers
 
-- [ ] **4.2 Extract relationship type update orchestration**
+- [x] **4.2 Extract relationship type update orchestration**
   - Verify:
     - existing validation and relationship-grant side effects stay intact
   - Review gate:
     - **GO** if relationship update policy is centralized
     - **NO-GO** if behavior drift is detected
 
-- [ ] **4.3 Extract relationship description update orchestration**
+- [x] **4.3 Extract relationship description update orchestration**
   - Verify:
     - current behavior preserved
   - Review gate:
     - **GO** if description updates are centralized
     - **NO-GO** if old/new paths both remain active
 
-- [ ] **4.4 Rewire `MemberService` update methods to delegate**
+- [x] **4.4 Rewire `MemberService` update methods to delegate**
   - Verify:
     - external signatures unchanged
   - Review gate:
     - **GO** if compatibility preserved
     - **NO-GO** if handler contracts changed
 
-- [ ] **4.5 Simplify `templates-partials/process/update-permissions.php` where safe**
+- [x] **4.5 Simplify `templates-partials/process/update-permissions.php` where safe**
   - Verify:
-    - presentation stays in handler
-    - policy moves down
+    - handler already delegates to `MemberService::updateMemberRoles()`
+    - no duplicated business rules in the handler
   - Review gate:
     - **GO** if handler gets thinner
     - **NO-GO** if business rules remain duplicated there
 
 ### Phase 4 Exit
 
-- [ ] membership update logic centralized
-- [ ] update-permissions handler thinner
-- [ ] `MemberService` smaller again
-- [ ] **GO / NO-GO recorded for Phase 5**
+- [x] membership update logic centralized in `MembershipRosterWriter`
+- [x] `update-permissions.php` handler already thin (delegates to service)
+- [x] `MemberService` shrunk from ~810 to ~384 lines
+- [x] **GO / NO-GO recorded for Phase 5**
 
 ---
 
