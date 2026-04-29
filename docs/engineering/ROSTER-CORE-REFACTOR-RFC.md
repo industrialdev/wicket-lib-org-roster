@@ -483,39 +483,42 @@ Handle groups as its own shape instead of forcing it into the membership roster 
 
 ### Checklist
 
-- [ ] **6.1 Extract group read path separately**
+- [x] **6.1 Extract group read path separately**
   - Verify:
-    - group row contract stays distinct
+    - group row contract already distinct in GroupService
   - Review gate:
     - **GO** if group rows are modeled separately
     - **NO-GO** if group/member shapes are being forced together
 
-- [ ] **6.2 Extract group add/remove behavior separately**
+- [x] **6.2 Extract group add/remove behavior separately**
   - Verify:
-    - current group role semantics preserved
+    - group mutations already live in GroupsStrategy
   - Review gate:
     - **GO** if group mutations have one home
     - **NO-GO** if groups still piggyback awkwardly on non-group abstractions
 
-- [ ] **6.3 Centralize seat-limited group-role policy**
+- [x] **6.3 Centralize seat-limited group-role policy**
   - Verify:
-    - current group-mode seat behavior preserved
+    - added membership-level seat check to GroupsStrategy::addMember()
+    - group-level seat_limited_roles check already in GroupsStrategy
+    - removed duplicated seat check from add-group-member.php handler
   - Review gate:
     - **GO** if group seat policy is explicit and local
     - **NO-GO** if it remains scattered
 
-- [ ] **6.4 Thin group-related callers**
+- [x] **6.4 Thin group-related callers**
   - Verify:
-    - process handlers/templates lose business-rule duplication
+    - removed canManageGroup duplication from add-group-member.php and remove-group-member.php
+    - handlers now only validate nonce, build context, and delegate
   - Review gate:
     - **GO** if callers are thinner
     - **NO-GO** if orchestration still leaks upward
 
 ### Phase 6 Exit
 
-- [ ] groups have separate deep boundary
-- [ ] no forced unification with membership row shape
-- [ ] **GO / NO-GO recorded for Phase 7**
+- [x] groups have separate deep boundary (GroupService + GroupsStrategy)
+- [x] no forced unification with membership row shape
+- [x] **GO / NO-GO recorded for Phase 7**
 
 ---
 
