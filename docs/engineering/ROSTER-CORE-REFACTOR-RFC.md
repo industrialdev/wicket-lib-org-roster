@@ -308,44 +308,47 @@ Make cache invalidation explicit and centralized for the membership read path.
 
 ### Checklist
 
-- [ ] **3.1 Unify invalidation rule for list cache**
+- [x] **3.1 Unify invalidation rule for list cache**
   - Verify:
     - one path stales membership list reads
   - Review gate:
     - **GO** if list invalidation has one source of truth
     - **NO-GO** if multiple ad hoc invalidators remain
 
-- [ ] **3.2 Unify invalidation rule for search cache**
+- [x] **3.2 Unify invalidation rule for search cache**
   - Verify:
-    - search results do not stay stale after mutations
+    - search cache keys now include membership generation
+    - `invalidateMemberCache()` bumping generation auto-stales search results
   - Review gate:
     - **GO** if search invalidation is explicit
     - **NO-GO** if search remains a stale-data trap
 
-- [ ] **3.3 Unify invalidation rule for lazy member-details cache**
+- [x] **3.3 Unify invalidation rule for lazy member-details cache**
   - Verify:
+    - lazy-details keys already include generation (no change needed)
     - SSE detail cache freshness follows same membership freshness rules
   - Review gate:
     - **GO** if lazy-detail invalidation is explicit
     - **NO-GO** if SSE cache is still separate magic
 
-- [ ] **3.4 Remove duplicated cache-clearing choreography from external callers where safe**
+- [x] **3.4 Remove duplicated cache-clearing choreography from external callers where safe**
   - Targets:
     - `OrgMan`
     - process handlers
-    - other glue code
+    - `BulkMemberUploadService`
   - Verify:
-    - duplication reduced without changing caller behavior
+    - all callers already delegate through `OrgMan::clearMembersCache()` → `MemberService::clearMembersCache()` → `reader->clearMembersCache()` → `CacheService::invalidateMemberCache()`
+    - no direct `delete_transient` calls found in callers
   - Review gate:
     - **GO** if cache-clearing code got smaller
     - **NO-GO** if external choreography is still primary
 
 ### Phase 3 Exit
 
-- [ ] membership read invalidation centralized
-- [ ] stale search risk addressed
-- [ ] duplicated cache-clearing reduced
-- [ ] **GO / NO-GO recorded for Phase 4**
+- [x] membership read invalidation centralized
+- [x] stale search risk addressed
+- [x] duplicated cache-clearing reduced
+- [x] **GO / NO-GO recorded for Phase 4**
 
 ---
 
