@@ -8,6 +8,7 @@ namespace OrgManagement\Services\Strategies;
 
 use OrgManagement\Services\ConnectionService;
 use OrgManagement\Services\GroupService;
+use OrgManagement\Services\MembershipService;
 use OrgManagement\Services\NotificationService;
 use OrgManagement\Services\OrganizationService;
 use OrgManagement\Services\PermissionService;
@@ -64,6 +65,11 @@ class GroupsStrategy implements RosterManagementStrategy
      */
     private $touchpointService = null;
 
+    /**
+     * @var MembershipService|null
+     */
+    private $membershipService = null;
+
     public function addMember($org_id, $member_data, $context = [])
     {
         $logger = $this->getLogger();
@@ -108,6 +114,14 @@ class GroupsStrategy implements RosterManagementStrategy
 
             $org_identifier = (string) ($manager_access['org_identifier'] ?? '');
             $org_uuid = (string) ($manager_access['org_uuid'] ?? $org_id);
+
+            // Enforce organization-level seat availability when org membership exists.
+            if (!empty($org_uuid)) {
+                $seat_result = $this->ensureMembershipSeatAvailability($org_uuid, $log_context);
+                if (is_wp_error($seat_result)) {
+                    return $seat_result;
+                }
+            }
 
             $person_uuid = $this->personService()->createOrGetPerson(
                 $member_data['first_name'],
@@ -485,6 +499,54 @@ class GroupsStrategy implements RosterManagementStrategy
         }
 
         return $this->permissionService;
+    }
+
+    /**
+     * Lazily instantiate MembershipService.
+     *
+     * @return MembershipService
+     */
+    private function membershipService(): MembershipService
+    {
+        if (!isset($this->membershipService)) {
+            $this->membershipService = new MembershipService();
+        }
+
+        return $this->membershipService;
+    }
+
+    /**
+     * Ensure the target organization membership still has seat capacity.
+     *
+     * @param string $org_uuid
+     * @param array  $log_context
+     * @return true|\WP_Error
+     */
+    private function ensureMembershipSeatAvailability(string $org_uuid, array $log_context)
+    {
+        $membership_uuid = $this->membershipService()->getMembershipForOrganization($org_uuid);
+        if (empty($membership_uuid)) {
+            return true;
+        }
+
+        $membership_data = $this->membershipService()->getOrgMembershipData($membership_uuid);
+        if (!is_array($membership_data) || empty($membership_data['data'])) {
+            return true;
+        }
+
+        $max_seats = $this->membershipService()->getEffectiveMaxAssignments($membership_data);
+        $active_seats = (int) ($membership_data['data']['attributes']['active_assignments_count'] ?? 0);
+
+        if ($max_seats !== null && $active_seats >= (int) $max_seats) {
+            $this->getLogger()->warning('[OrgRoster] Groups add blocked by seat limit', array_merge($log_context, [
+                'max_seats' => $max_seats,
+                'active_seats' => $active_seats,
+            ]));
+
+            return new \WP_Error('seat_limit_reached', 'No seats available for this organization.');
+        }
+
+        return true;
     }
 
     /**

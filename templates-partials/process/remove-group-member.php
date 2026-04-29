@@ -5,7 +5,6 @@
  */
 
 use OrgManagement\Services\ConfigService;
-use OrgManagement\Services\GroupService;
 use OrgManagement\Services\MemberService;
 use starfederation\datastar\enums\ElementPatchMode;
 
@@ -51,17 +50,6 @@ if (empty($group_uuid) || empty($person_uuid)) {
     $logger->error('[OrgRoster] Remove group member missing identifiers', $log_context);
     status_header(200);
     OrgManagement\Helpers\DatastarSSE::renderError(__('Missing group or member identifiers.', 'wicket-acc'), '#remove-member-messages', ['removeMemberSubmitting' => false, 'membersLoading' => false]);
-
-    return;
-}
-
-$group_service = new GroupService();
-$current_user = wp_get_current_user();
-$access = $group_service->canManageGroup($group_uuid, (string) $current_user->user_login);
-if (empty($access['allowed'])) {
-    $logger->warning('[OrgRoster] Remove group member access denied', $log_context);
-    status_header(200);
-    OrgManagement\Helpers\DatastarSSE::renderError(__('You do not have permission to manage this group.', 'wicket-acc'), '#remove-member-messages', ['removeMemberSubmitting' => false, 'membersLoading' => false]);
 
     return;
 }
