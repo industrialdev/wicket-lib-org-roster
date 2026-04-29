@@ -240,7 +240,7 @@ Protect the read path through behavior tests instead of scattered helpers.
 
 ### Checklist
 
-- [ ] **2.1 Add parity test for non-search membership list**
+- [x] **2.1 Add parity test for non-search membership list**
   - Verify:
     - stable pagination
     - stable member row fields
@@ -248,35 +248,35 @@ Protect the read path through behavior tests instead of scattered helpers.
     - **GO** if base list behavior is pinned
     - **NO-GO** if row contract is still unprotected
 
-- [ ] **2.2 Add parity test for membership endpoint search hit**
+- [x] **2.2 Add parity test for membership endpoint search hit**
   - Verify:
     - does not fall through unnecessarily
   - Review gate:
     - **GO** if first search tier is pinned
     - **NO-GO** if fallback ordering is unverified
 
-- [ ] **2.3 Add parity test for `person_memberships` fallback**
+- [x] **2.3 Add parity test for `person_memberships` fallback**
   - Verify:
     - fallback path works when membership endpoint misses
   - Review gate:
     - **GO** if second search tier is pinned
     - **NO-GO** if fallback risk remains
 
-- [ ] **2.4 Add parity test for local-filter fallback**
+- [x] **2.4 Add parity test for local-filter fallback**
   - Verify:
     - local search fallback still returns expected filtered results
   - Review gate:
     - **GO** if third search tier is pinned
     - **NO-GO** if last-resort behavior is untested
 
-- [ ] **2.5 Add parity test for single-member SSE lookup**
+- [x] **2.5 Add parity test for single-member SSE lookup**
   - Verify:
     - member-details lookup returns same observable fields
   - Review gate:
     - **GO** if SSE contract is pinned
     - **NO-GO** if SSE remains fragile
 
-- [ ] **2.6 Add parity tests for read cache behavior**
+- [x] **2.6 Add parity tests for read cache behavior**
   - Verify:
     - cached list path
     - cached lazy-details path
@@ -284,18 +284,19 @@ Protect the read path through behavior tests instead of scattered helpers.
     - **GO** if read caching behavior is protected
     - **NO-GO** if read-cache regressions can still slip through
 
-- [ ] **2.7 Remove shallow tests made redundant by new boundary coverage**
+- [x] **2.7 Remove shallow tests made redundant by new boundary coverage**
   - Verify:
-    - only delete tests that add no unique signal
+    - removed "preserves member search query across roster modes" and "passes null query to membership fetch on initial list load" from MemberServiceTest
+    - only deleted tests that add no unique signal
   - Review gate:
     - **GO** if test suite is simpler and coverage stronger
     - **NO-GO** if deletions would drop unique behavior coverage
 
 ### Phase 2 Exit
 
-- [ ] read path behavior protected by boundary tests
-- [ ] redundant shallow tests removed where safe
-- [ ] **GO / NO-GO recorded for Phase 3**
+- [x] read path behavior protected by boundary tests
+- [x] redundant shallow tests removed where safe
+- [x] **GO / NO-GO recorded for Phase 3**
 
 ---
 
