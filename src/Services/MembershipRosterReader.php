@@ -922,8 +922,7 @@ class MembershipRosterReader
         $ownerId = null;
         if (!empty($membershipUuid)) {
             try {
-                $membershipService = new MembershipService();
-                $membershipData = $membershipService->getOrgMembershipData((string) $membershipUuid);
+                $membershipData = $this->membershipService()->getOrgMembershipData((string) $membershipUuid);
                 if (is_array($membershipData)) {
                     $ownerId = $membershipData['data']['relationships']['owner']['data']['id'] ?? null;
                 }

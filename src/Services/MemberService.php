@@ -22,16 +22,6 @@ class MemberService
     private $permissionService = null;
 
     /**
-     * @var ConnectionService|null
-     */
-    private $connectionService = null;
-
-    /**
-     * @var MembershipService|null
-     */
-    private $membershipService = null;
-
-    /**
      * @var ConfigService
      */
     private $configService;
@@ -174,34 +164,6 @@ class MemberService
         }
 
         return $this->permissionService;
-    }
-
-    /**
-     * Lazily instantiate ConnectionService.
-     *
-     * @return ConnectionService
-     */
-    private function connectionService(): ConnectionService
-    {
-        if (!isset($this->connectionService)) {
-            $this->connectionService = new ConnectionService();
-        }
-
-        return $this->connectionService;
-    }
-
-    /**
-     * Lazily instantiate MembershipService.
-     *
-     * @return MembershipService
-     */
-    private function membershipService(): MembershipService
-    {
-        if (!isset($this->membershipService)) {
-            $this->membershipService = new MembershipService();
-        }
-
-        return $this->membershipService;
     }
 
     /**
