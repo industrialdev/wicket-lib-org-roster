@@ -2,6 +2,17 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.8.1] - 2026-04-30
+
+### Added
+- `GroupService::resolveManagerOrgAccess()`: resolves the org UUID and identifier for a person who holds the manager MDP role (e.g. `membership_manager`) scoped to an organization, by querying `/people/{uuid}/roles` directly.
+- `GroupService::fetchRosterTaggedGroupsForOrg()`: fetches all groups for a given org UUID and filters to those tagged with the roster-management tag (respects `groups.matching.tag_name` / `tag_case_sensitive` config).
+- `GroupService::checkManagerGroupAccess()`: fallback used inside `canManageGroup` — grants access when a person holds the manager MDP role and the target group carries the roster tag, returning the correct org scope for downstream filtering.
+- `GroupService::applyManagerGroupFallback()`: fallback used inside `getManageableGroups` — appends "Roster Management" tagged groups for a manager's org when none were found via group-membership records. No-ops on non-`groups` strategy sites.
+
+### Fixed
+- `GroupService::canManageGroup()` and `getManageableGroups()` now correctly grant access to users whose management authority is an org-scoped MDP role (e.g. `membership_manager`) rather than a group member role (president, delegate, etc.). Previously both methods only checked `/group_members` records, so users with the MDP role but no group membership saw no groups and could not add, remove, or view roster entries.
+
 ## [0.8.0] - 2026-04-30
 
 ### Added
