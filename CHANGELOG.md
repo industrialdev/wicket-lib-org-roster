@@ -2,6 +2,27 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.8.0] - 2026-04-30
+
+### Added
+- `MembershipRosterReader`: new internal read-focused module that owns non-groups membership roster reads — normalized fetch, fallback search chain, enrichment, member row shaping, and single-member SSE lookup — extracted from `MemberService` (Phase 1).
+- `MembershipRosterWriter`: new internal write module that centralizes membership update orchestration — role updates, relationship-type updates, description updates, and add/remove member flows — extracted from `MemberService` (Phases 4–5).
+- Membership generation included in search cache keys (`MembershipRosterReader`), so search results auto-invalidate when membership generation is bumped — no more stale search results after mutations (Phase 3).
+- Centralized group mutation policy in `GroupsStrategy`: group add/remove policy validation now lives in the strategy itself, thinning the `add-group-member.php` and `remove-group-member.php` process handlers (Phase 6).
+- `ROSTER-CORE-REFACTOR-RFC.md` and `ROSTER-REFACTOR-PHASE0-NOTES.md`: engineering documentation for the phased deep-module refactor plan and baseline contract capture.
+- Planned CSAE org-roster configuration documentation (`docs/engineering/configs/CSAE.md`, `docs/guides/ACTIVE-SITES.md`).
+
+### Changed
+- `MemberService` reduced from ~810 lines to a thin compatibility facade (~355 lines) delegating reads to `MembershipRosterReader` and writes to `MembershipRosterWriter`.
+- `MembershipRosterWriter` now owns strategy initialization and cache invalidation for `addMember`/`removeMember`, removing duplicated orchestration from `MemberService` and process handlers.
+- Search cache keys now include membership generation alongside org UUID, search term, page, and size — matching the invalidation pattern already used for list caches.
+- Group add/remove process handlers (`add-group-member.php`, `remove-group-member.php`) no longer contain policy orchestration; `GroupsStrategy` handles duplicate checks, seat-capacity guards, and ownership protection directly.
+- IAA site config updated: added `access.roles.manager`, `groups.roles.roster`, `groups.roles.seat_limited`, `groups.removal.mode`, and reorganized override structure.
+- Dead code removed from `MemberService` after Phase 7 cleanup: redundant strategy initialization, inline mutation methods, and duplicated cache-clearing choreography.
+
+### Fixed
+- Fixed `MembershipRosterReader` service injection: reader now correctly receives its dependencies after Phase 7 dead-code cleanup resolved a wiring regression.
+
 ## [0.7.3] - 2026-04-28
 
 ### Changed
