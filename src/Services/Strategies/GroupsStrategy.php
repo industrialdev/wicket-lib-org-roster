@@ -82,10 +82,10 @@ class GroupsStrategy implements RosterManagementStrategy
         ];
 
         try {
-            $logger->info('[OrgRoster] Groups strategy add_member invoked', $log_context);
+            $logger->info('Groups strategy add_member invoked', $log_context);
 
             if (empty($context['group_uuid'])) {
-                $logger->error('[OrgRoster] Groups strategy missing group_uuid', $log_context);
+                $logger->error('Groups strategy missing group_uuid', $log_context);
 
                 return new \WP_Error('missing_group_uuid', 'Group UUID is required for this operation.');
             }
@@ -94,7 +94,7 @@ class GroupsStrategy implements RosterManagementStrategy
             $role_slug = sanitize_key((string) ($context['role'] ?? $context['roster_role'] ?? 'member'));
             $roster_roles = $this->groupService()->getRosterRoles();
             if (!in_array($role_slug, $roster_roles, true)) {
-                $logger->warning('[OrgRoster] Groups strategy invalid roster role', array_merge($log_context, [
+                $logger->warning('Groups strategy invalid roster role', array_merge($log_context, [
                     'role' => $role_slug,
                 ]));
 
@@ -105,7 +105,7 @@ class GroupsStrategy implements RosterManagementStrategy
             $manager_uuid = $current_person ? (string) $current_person->user_login : '';
             $manager_access = $this->groupService()->canManageGroup($group_uuid, $manager_uuid);
             if (empty($manager_access['allowed'])) {
-                $logger->warning('[OrgRoster] Groups strategy access denied', array_merge($log_context, [
+                $logger->warning('Groups strategy access denied', array_merge($log_context, [
                     'manager_uuid' => $manager_uuid,
                 ]));
 
@@ -117,8 +117,14 @@ class GroupsStrategy implements RosterManagementStrategy
 
             // Enforce organization-level seat availability when org membership exists.
             if (!empty($org_uuid)) {
+                $logger->debug('Groups strategy checking seat availability', array_merge($log_context, [
+                    'org_uuid' => $org_uuid,
+                ]));
                 $seat_result = $this->ensureMembershipSeatAvailability($org_uuid, $log_context);
                 if (is_wp_error($seat_result)) {
+                    $logger->warning('Groups strategy add_member blocked: seat limit', array_merge($log_context, [
+                        'error' => $seat_result->get_error_message(),
+                    ]));
                     return $seat_result;
                 }
             }
@@ -131,7 +137,7 @@ class GroupsStrategy implements RosterManagementStrategy
             );
 
             if (is_wp_error($person_uuid)) {
-                $logger->error('[OrgRoster] Groups strategy failed to create/get person', array_merge($log_context, [
+                $logger->error('Groups strategy failed to create/get person', array_merge($log_context, [
                     'error' => $person_uuid->get_error_message(),
                 ]));
 
@@ -139,7 +145,7 @@ class GroupsStrategy implements RosterManagementStrategy
             }
 
             $log_context['person_uuid'] = $person_uuid;
-            $logger->debug('[OrgRoster] Groups strategy resolved person', $log_context);
+            $logger->debug('Groups strategy resolved person', $log_context);
 
             $existing_group_member_id = $this->groupService()->findGroupMemberId(
                 $group_uuid,
@@ -149,7 +155,7 @@ class GroupsStrategy implements RosterManagementStrategy
                 $org_uuid
             );
             if ($existing_group_member_id !== '') {
-                $logger->info('[OrgRoster] Groups strategy duplicate group member blocked', array_merge($log_context, [
+                $logger->info('Groups strategy duplicate group member blocked', array_merge($log_context, [
                     'role' => $role_slug,
                     'existing_group_member_id' => $existing_group_member_id,
                 ]));
@@ -173,7 +179,7 @@ class GroupsStrategy implements RosterManagementStrategy
                         $relationship_type = \OrgManagement\Helpers\RelationshipHelper::get_default_relationship_type();
                     }
 
-                    $logger->debug('[OrgRoster] Groups strategy creating org connection', $log_context);
+                    $logger->debug('Groups strategy creating org connection', $log_context);
                     $connection_payload = $this->connectionService()->buildConnectionPayload(
                         $person_uuid,
                         $org_uuid,
@@ -184,7 +190,7 @@ class GroupsStrategy implements RosterManagementStrategy
                     $connection_result = $this->connectionService()->createConnection($connection_payload);
 
                     if (is_wp_error($connection_result)) {
-                        $logger->error('[OrgRoster] Groups strategy failed to create connection', array_merge($log_context, [
+                        $logger->error('Groups strategy failed to create connection', array_merge($log_context, [
                             'error' => $connection_result->get_error_message(),
                         ]));
 
@@ -213,7 +219,7 @@ class GroupsStrategy implements RosterManagementStrategy
                 ]);
                 foreach ($existing_members['members'] ?? [] as $member) {
                     if (sanitize_key((string) ($member['role'] ?? '')) === $role_slug) {
-                        $logger->info('[OrgRoster] Groups strategy seat already occupied', array_merge($log_context, [
+                        $logger->info('Groups strategy seat already occupied', array_merge($log_context, [
                             'role' => $role_slug,
                         ]));
 
@@ -222,13 +228,18 @@ class GroupsStrategy implements RosterManagementStrategy
                 }
             }
 
-            $logger->debug('[OrgRoster] Groups strategy adding member to group', array_merge($log_context, [
+            $logger->debug('Groups strategy adding member to group', array_merge($log_context, [
                 'role' => $role_slug,
             ]));
             $custom_data_field = $this->groupService()->buildCustomDataField($org_identifier);
             $group_member_result = $this->groupService()->createGroupMember($person_uuid, $group_uuid, $role_slug, $custom_data_field);
             if (is_wp_error($group_member_result)) {
                 return $group_member_result;
+            }
+
+            // Clear members cache to ensure the new member shows up immediately.
+            if (class_exists('\OrgManagement\OrgMan')) {
+                \OrgManagement\OrgMan::get_instance()->clearMembersCache();
             }
 
             $group_details = function_exists('wicket_get_group') ? wicket_get_group($group_uuid) : null;
@@ -242,11 +253,11 @@ class GroupsStrategy implements RosterManagementStrategy
             ]);
 
             if (is_wp_error($notification_result)) {
-                $logger->error('[OrgRoster] Groups strategy email notification failed', array_merge($log_context, [
+                $logger->error('Groups strategy email notification failed', array_merge($log_context, [
                     'error' => $notification_result->get_error_message(),
                 ]));
             } else {
-                $logger->info('[OrgRoster] Groups strategy email notification sent', array_merge($log_context, [
+                $logger->info('Groups strategy email notification sent', array_merge($log_context, [
                     'group_name' => $group_name,
                 ]));
             }
@@ -257,15 +268,15 @@ class GroupsStrategy implements RosterManagementStrategy
                         'strategy' => 'groups',
                     ]);
                     $this->touchpointService()->logMemberAdded($person_uuid, $org_uuid ?: $org_id, $member_data, $touchpoint_context);
-                    $logger->debug('[OrgRoster] Groups strategy touchpoint logged for member addition', $log_context);
+                    $logger->debug('Groups strategy touchpoint logged for member addition', $log_context);
                 } catch (\Throwable $e) {
-                    $logger->error('[OrgRoster] Groups strategy touchpoint write failed', array_merge($log_context, [
+                    $logger->error('Groups strategy touchpoint write failed', array_merge($log_context, [
                         'error' => $e->getMessage(),
                     ]));
                 }
             }
 
-            $logger->info('[OrgRoster] Groups strategy member addition complete', $log_context);
+            $logger->info('Groups strategy member addition complete', $log_context);
 
             return [
                 'status' => 'success',
@@ -274,7 +285,7 @@ class GroupsStrategy implements RosterManagementStrategy
             ];
 
         } catch (\Exception $e) {
-            $logger->error('[OrgRoster] Groups strategy add_member exception', array_merge($log_context, [
+            $logger->error('Groups strategy add_member exception', array_merge($log_context, [
                 'exception' => $e->getMessage(),
             ]));
 
@@ -294,10 +305,10 @@ class GroupsStrategy implements RosterManagementStrategy
         ];
 
         try {
-            $logger->info('[OrgRoster] Groups strategy remove_member invoked', $log_context);
+            $logger->info('Groups strategy remove_member invoked', $log_context);
 
             if (empty($context['group_uuid'])) {
-                $logger->error('[OrgRoster] Groups strategy remove_member missing group_uuid', $log_context);
+                $logger->error('Groups strategy remove_member missing group_uuid', $log_context);
 
                 return new \WP_Error('missing_group_uuid', 'Group UUID is required for this operation.');
             }
@@ -309,7 +320,7 @@ class GroupsStrategy implements RosterManagementStrategy
             $manager_uuid = $current_person ? (string) $current_person->user_login : '';
             $manager_access = $this->groupService()->canManageGroup($group_uuid, $manager_uuid);
             if (empty($manager_access['allowed'])) {
-                $logger->warning('[OrgRoster] Groups strategy remove_member access denied', array_merge($log_context, [
+                $logger->warning('Groups strategy remove_member access denied', array_merge($log_context, [
                     'manager_uuid' => $manager_uuid,
                 ]));
 
@@ -339,7 +350,7 @@ class GroupsStrategy implements RosterManagementStrategy
                     }
 
                     if ($owner_role_match) {
-                        $logger->warning('[OrgRoster] Groups strategy attempted to remove organization owner', $log_context);
+                        $logger->warning('Groups strategy attempted to remove organization owner', $log_context);
 
                         return new \WP_Error('owner_removal_forbidden', 'The organization owner (Primary Member) cannot be removed.');
                     }
@@ -349,31 +360,61 @@ class GroupsStrategy implements RosterManagementStrategy
             $groups_config = is_array($orgman_config['groups'] ?? null) ? $orgman_config['groups'] : [];
             $group_roles = is_array($groups_config['roles'] ?? null) ? $groups_config['roles'] : [];
             $manage_roles = is_array($group_roles['management'] ?? null) ? $group_roles['management'] : [];
+            
+            $group_member_id = (string) ($context['group_member_id'] ?? '');
+            if ('' === $group_member_id) {
+                $group_member_id = $this->groupService()->findGroupMemberId($group_uuid, $person_uuid, $org_identifier, [], $org_uuid);
+            }
+            if ('' === $group_member_id) {
+                $logger->error('Groups strategy could not locate group member', $log_context);
+
+                return new \WP_Error('group_member_not_found', 'Could not find the person in the specified group.');
+            }
+
+            // Verify the role of the member we are about to remove if role_slug was not provided or to be extra safe.
+            if (empty($role_slug) || in_array($role_slug, $manage_roles, true)) {
+                if (function_exists('wicket_api_client')) {
+                    try {
+                        $member_raw = wicket_api_client()->get('group_members/' . rawurlencode($group_member_id));
+                        $actual_role = sanitize_key((string) ($member_raw['data']['attributes']['type'] ?? ''));
+                        if (in_array($actual_role, $manage_roles, true)) {
+                            $logger->warning('Groups strategy attempted to remove managing role', array_merge($log_context, [
+                                'role' => $actual_role,
+                                'group_member_id' => $group_member_id,
+                            ]));
+
+                            return new \WP_Error('role_removal_forbidden', 'Managing roles cannot be removed.');
+                        }
+                    } catch (\Throwable $e) {
+                        // If we can't verify, we should probably be cautious if we don't know the role.
+                        if (empty($role_slug)) {
+                             $logger->error('Groups strategy could not verify role before removal', $log_context);
+                             return new \WP_Error('role_verification_failed', 'Could not verify member role before removal.');
+                        }
+                    }
+                }
+            }
+
             if ($role_slug && in_array($role_slug, $manage_roles, true)) {
-                $logger->warning('[OrgRoster] Groups strategy attempted to remove managing role', array_merge($log_context, [
+                $logger->warning('Groups strategy attempted to remove managing role', array_merge($log_context, [
                     'role' => $role_slug,
                 ]));
 
                 return new \WP_Error('role_removal_forbidden', 'Managing roles cannot be removed.');
             }
 
-            $group_member_id = (string) ($context['group_member_id'] ?? '');
-            if ('' === $group_member_id) {
-                $group_member_id = $this->groupService()->findGroupMemberId($group_uuid, $person_uuid, $org_identifier, [], $org_uuid);
-            }
-            if ('' === $group_member_id) {
-                $logger->error('[OrgRoster] Groups strategy could not locate group member', $log_context);
-
-                return new \WP_Error('group_member_not_found', 'Could not find the person in the specified group.');
-            }
-
             $remove_result = $this->groupService()->removeGroupMember($group_member_id);
             if (is_wp_error($remove_result)) {
-                $logger->error('[OrgRoster] Groups strategy failed to remove group member', array_merge($log_context, [
+                $logger->error('Groups strategy failed to remove group member', array_merge($log_context, [
                     'error' => $remove_result->get_error_message(),
                 ]));
 
                 return $remove_result;
+            }
+
+            // Clear members cache to ensure the removal is reflected immediately.
+            if (class_exists('\OrgManagement\OrgMan')) {
+                \OrgManagement\OrgMan::get_instance()->clearMembersCache();
             }
 
             if ($this->touchpointService()->isAvailable()) {
@@ -382,26 +423,27 @@ class GroupsStrategy implements RosterManagementStrategy
                         'strategy' => 'groups',
                     ]);
                     $this->touchpointService()->logMemberRemoved($person_uuid, $org_uuid ?: $org_id, $touchpoint_context);
-                    $logger->debug('[OrgRoster] Groups strategy touchpoint logged for member removal', $log_context);
+                    $logger->debug('Groups strategy touchpoint logged for member removal', $log_context);
                 } catch (\Throwable $e) {
-                    $logger->error('[OrgRoster] Groups strategy removal touchpoint write failed', array_merge($log_context, [
+                    $logger->error('Groups strategy removal touchpoint write failed', array_merge($log_context, [
                         'error' => $e->getMessage(),
                     ]));
                 }
             }
 
-            $logger->info('[OrgRoster] Groups strategy remove_member complete', $log_context);
+            $logger->info('Groups strategy remove_member complete', $log_context);
 
             return ['status' => 'success', 'message' => 'Group member removed successfully.'];
 
         } catch (\Exception $e) {
-            $logger->error('[OrgRoster] Groups strategy remove_member exception', array_merge($log_context, [
+            $logger->error('Groups strategy remove_member exception', array_merge($log_context, [
                 'exception' => $e->getMessage(),
             ]));
 
             return new \WP_Error('remove_group_member_exception', $e->getMessage());
         }
     }
+
 
     /**
      * Lazily instantiate ConnectionService.
@@ -538,7 +580,7 @@ class GroupsStrategy implements RosterManagementStrategy
         $active_seats = (int) ($membership_data['data']['attributes']['active_assignments_count'] ?? 0);
 
         if ($max_seats !== null && $active_seats >= (int) $max_seats) {
-            $this->getLogger()->warning('[OrgRoster] Groups add blocked by seat limit', array_merge($log_context, [
+            $this->getLogger()->warning('Groups add blocked by seat limit', array_merge($log_context, [
                 'max_seats' => $max_seats,
                 'active_seats' => $active_seats,
             ]));

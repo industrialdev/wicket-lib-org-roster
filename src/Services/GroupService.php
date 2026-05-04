@@ -157,7 +157,7 @@ class GroupService
             $roles = [];
         }
         $roles = array_values(array_filter(array_map('sanitize_key', $roles)));
-        $this->getLogger()->debug('[OrgRoster] Manage roles resolved', [
+        $this->getLogger()->debug('Manage roles resolved', [
             'source' => 'wicket-orgman',
             'roles' => $roles,
         ]);
@@ -177,7 +177,7 @@ class GroupService
             $roles = [];
         }
         $roles = array_values(array_filter(array_map('sanitize_key', $roles)));
-        $this->getLogger()->debug('[OrgRoster] Roster roles resolved', [
+        $this->getLogger()->debug('Roster roles resolved', [
             'source' => 'wicket-orgman',
             'roles' => $roles,
         ]);
@@ -194,7 +194,7 @@ class GroupService
     {
         $tag = (string) ($this->getGroupsConfig()['matching']['tag_name'] ?? '');
         $tag = trim($tag);
-        $this->getLogger()->debug('[OrgRoster] Roster tag name', [
+        $this->getLogger()->debug('Roster tag name', [
             'source' => 'wicket-orgman',
             'tag' => $tag,
         ]);
@@ -286,7 +286,7 @@ class GroupService
                 }
             }
         } catch (\Throwable $e) {
-            $this->getLogger()->error('[OrgRoster] Group detail tag fetch failed', [
+            $this->getLogger()->error('Group detail tag fetch failed', [
                 'source' => 'wicket-orgman',
                 'group_id' => $group_id,
                 'error' => $e->getMessage(),
@@ -354,7 +354,7 @@ class GroupService
 
         try {
             $client = wicket_api_client();
-            $this->getLogger()->info('[OrgRoster] Fetching group memberships', [
+            $this->getLogger()->info('Fetching group memberships', [
                 'source' => 'wicket-orgman',
                 'person_uuid' => $person_uuid,
                 'endpoint' => $endpoint,
@@ -375,7 +375,7 @@ class GroupService
 
             return $response;
         } catch (\Throwable $e) {
-            $this->getLogger()->error('[OrgRoster] Failed fetching group memberships', [
+            $this->getLogger()->error('Failed fetching group memberships', [
                 'source' => 'wicket-orgman',
                 'person_uuid' => $person_uuid,
                 'error' => $e->getMessage(),
@@ -543,6 +543,10 @@ class GroupService
     private function memberMatchesOrgScope(array $member, string $org_identifier, string $org_uuid = ''): bool
     {
         if ($org_identifier === '' && $org_uuid === '') {
+            $this->getLogger()->debug('memberMatchesOrgScope: empty scope — matching all', [
+                'source' => 'wicket-orgman',
+                'person_id' => $member['relationships']['person']['data']['id'] ?? 'unknown',
+            ]);
             return true;
         }
 
@@ -553,6 +557,11 @@ class GroupService
             }
         }
         if (empty($target_tokens)) {
+            $this->getLogger()->debug('memberMatchesOrgScope: no target tokens resolved — matching all', [
+                'source' => 'wicket-orgman',
+                'org_identifier' => $org_identifier,
+                'org_uuid' => $org_uuid,
+            ]);
             return true;
         }
 
@@ -567,17 +576,28 @@ class GroupService
             $member_scope_tokens[$token] = true;
         }
 
-        if (empty($member_scope_tokens)) {
-            return false;
-        }
-
-        foreach (array_keys($target_tokens) as $token) {
-            if (isset($member_scope_tokens[$token])) {
-                return true;
+        $is_match = false;
+        if (!empty($member_scope_tokens)) {
+            foreach (array_keys($target_tokens) as $token) {
+                if (isset($member_scope_tokens[$token])) {
+                    $is_match = true;
+                    break;
+                }
             }
         }
 
-        return false;
+        if (!$is_match) {
+            $this->getLogger()->debug('memberMatchesOrgScope: NO MATCH', [
+                'source' => 'wicket-orgman',
+                'person_id' => $member['relationships']['person']['data']['id'] ?? 'unknown',
+                'target_tokens' => array_keys($target_tokens),
+                'member_tokens' => array_keys($member_scope_tokens),
+                'member_org_uuid' => $member_org_uuid,
+                'member_identifier' => $member_identifier,
+            ]);
+        }
+
+        return $is_match;
     }
 
     /**
@@ -639,7 +659,7 @@ class GroupService
         ];
 
         if (!is_array($response) || empty($response['data'])) {
-            $this->getLogger()->debug('[OrgRoster] No group memberships found', [
+            $this->getLogger()->debug('No group memberships found', [
                 'source' => 'wicket-orgman',
                 'person_uuid' => $person_uuid,
             ]);
@@ -660,7 +680,7 @@ class GroupService
                 continue;
             }
             if ($include_all_roles && !$can_manage) {
-                $this->getLogger()->debug('[OrgRoster] Including non-manage group role for groups landing list', [
+                $this->getLogger()->debug('Including non-manage group role for groups landing list', [
                     'source' => 'wicket-orgman',
                     'person_uuid' => $person_uuid,
                     'role_slug' => $role_slug,
@@ -676,14 +696,14 @@ class GroupService
             $group = $this->ensureGroupTags($group_id, $included_lookup['groups'][$group_id]);
             $group_attrs = is_array($group) ? ($group['attributes'] ?? []) : [];
             $group_tags = is_array($group_attrs) ? ($group_attrs['tags'] ?? null) : null;
-            $this->getLogger()->debug('[OrgRoster] Group membership included group tags', [
+            $this->getLogger()->debug('Group membership included group tags', [
                 'source' => 'wicket-orgman',
                 'group_id' => $group_id,
                 'tags_present' => is_array($group_tags),
                 'tags' => is_array($group_tags) ? $group_tags : null,
             ]);
             if (!$this->groupHasRosterTag($group)) {
-                $this->getLogger()->debug('[OrgRoster] Group skipped by tag filter', [
+                $this->getLogger()->debug('Group skipped by tag filter', [
                     'source' => 'wicket-orgman',
                     'group_id' => $group_id,
                     'tags' => is_array($group_tags) ? $group_tags : null,
@@ -697,7 +717,7 @@ class GroupService
             }
             $org_identifier = $this->extractOrgIdentifier($membership, $org_id);
             if (empty($org_id) && empty($org_identifier)) {
-                $this->getLogger()->debug('[OrgRoster] Group has no organization scope metadata; keeping as manageable group', [
+                $this->getLogger()->debug('Group has no organization scope metadata; keeping as manageable group', [
                     'source' => 'wicket-orgman',
                     'group_id' => $group_id,
                     'membership_id' => $membership['id'] ?? '',
@@ -782,7 +802,7 @@ class GroupService
 
         $meta['page']['total_items'] = count($groups);
 
-        $this->getLogger()->info('[OrgRoster] Manageable groups resolved', [
+        $this->getLogger()->info('Manageable groups resolved', [
             'source' => 'wicket-orgman',
             'person_uuid' => $person_uuid,
             'count' => count($groups),
@@ -817,77 +837,84 @@ class GroupService
             return $result;
         }
 
+        // Try direct group membership check first.
+        // Increase page size to avoid missing memberships if person has many.
         $memberships = $this->getPersonGroupMemberships($person_uuid, [
             'page' => 1,
-            'size' => $this->getGroupListPageSize(),
+            'size' => 100,
             'active' => true,
         ]);
 
-        if (!is_array($memberships) || empty($memberships['data'])) {
-            $this->getLogger()->debug('[OrgRoster] No memberships for group access check', [
-                'source' => 'wicket-orgman',
-                'group_uuid' => $group_uuid,
-                'person_uuid' => $person_uuid,
-            ]);
+        if (is_array($memberships) && !empty($memberships['data'])) {
+            $included_lookup = $this->buildIncludedLookup($memberships['included'] ?? []);
+            $manage_roles = $this->getManageRoles();
+            foreach ($memberships['data'] as $membership) {
+                $role_slug = sanitize_key((string) ($membership['attributes']['type'] ?? ''));
+                if (!in_array($role_slug, $manage_roles, true)) {
+                    continue;
+                }
 
-            $result = $this->checkManagerGroupAccess($group_uuid, $person_uuid, $result);
+                $membership_group = $membership['relationships']['group']['data']['id'] ?? '';
+                if ($membership_group !== $group_uuid) {
+                    continue;
+                }
 
-            $this->getLogger()->info('[OrgRoster] Group access evaluated', [
-                'source' => 'wicket-orgman',
-                'group_uuid' => $group_uuid,
-                'person_uuid' => $person_uuid,
-                'allowed' => $result['allowed'],
-                'org_uuid' => $result['org_uuid'],
-                'role_slug' => $result['role_slug'],
-            ]);
+                $org_id = $membership['relationships']['organization']['data']['id'] ?? '';
+                if (empty($org_id) && $membership_group && isset($included_lookup['groups'][$membership_group])) {
+                    $group_item = $included_lookup['groups'][$membership_group];
+                    $org_id = $group_item['relationships']['organization']['data']['id'] ?? $org_id;
+                }
+                $org_identifier = $this->extractOrgIdentifier($membership, $org_id);
 
-            return $result;
-        }
+                // If org_identifier is a UUID, try to resolve a name for better association matching.
+                if ($org_identifier === $org_id && function_exists('wicket_get_organization')) {
+                    try {
+                        $org_response = wicket_get_organization($org_id);
+                        $org_attrs = is_array($org_response) ? ($org_response['data']['attributes'] ?? []) : [];
+                        $resolved_name = (string) ($org_attrs['legal_name'] ?? $org_attrs['legal_name_en'] ?? $org_attrs['name'] ?? '');
+                        if ($resolved_name !== '') {
+                            $org_identifier = $resolved_name;
+                        }
+                    } catch (\Throwable $e) {
+                        // Fallback to UUID
+                    }
+                }
 
-        $included_lookup = $this->buildIncludedLookup($memberships['included'] ?? []);
-        $manage_roles = $this->getManageRoles();
-        foreach ($memberships['data'] as $membership) {
-            $role_slug = sanitize_key((string) ($membership['attributes']['type'] ?? ''));
-            if (!in_array($role_slug, $manage_roles, true)) {
-                continue;
+                $result = [
+                    'allowed' => true,
+                    'org_uuid' => $org_id,
+                    'org_identifier' => $org_identifier,
+                    'role_slug' => $role_slug,
+                ];
+                $this->getLogger()->info('Group access granted via direct group membership', [
+                    'source' => 'wicket-orgman',
+                    'group_uuid' => $group_uuid,
+                    'person_uuid' => $person_uuid,
+                    'role_slug' => $role_slug,
+                    'org_uuid' => $org_id,
+                    'org_identifier' => $org_identifier,
+                ]);
+                break;
             }
-
-            $membership_group = $membership['relationships']['group']['data']['id'] ?? '';
-            if ($membership_group !== $group_uuid) {
-                continue;
-            }
-
-            $org_id = $membership['relationships']['organization']['data']['id'] ?? '';
-            if (empty($org_id) && $membership_group && isset($included_lookup['groups'][$membership_group])) {
-                $group_item = $included_lookup['groups'][$membership_group];
-                $org_id = $group_item['relationships']['organization']['data']['id'] ?? $org_id;
-            }
-            $org_identifier = $this->extractOrgIdentifier($membership, $org_id);
-
-            $result = [
-                'allowed' => true,
-                'org_uuid' => $org_id,
-                'org_identifier' => $org_identifier,
-                'role_slug' => $role_slug,
-            ];
-            break;
         }
 
         if (!$result['allowed']) {
             $result = $this->checkManagerGroupAccess($group_uuid, $person_uuid, $result);
         }
 
-        $this->getLogger()->info('[OrgRoster] Group access evaluated', [
+        $this->getLogger()->info('Group access evaluated', [
             'source' => 'wicket-orgman',
             'group_uuid' => $group_uuid,
             'person_uuid' => $person_uuid,
             'allowed' => $result['allowed'],
             'org_uuid' => $result['org_uuid'],
+            'org_identifier' => $result['org_identifier'],
             'role_slug' => $result['role_slug'],
         ]);
 
         return $result;
     }
+
 
     /**
      * Fetch group members list (roster roles only), filtered by org identifier.
@@ -908,7 +935,7 @@ class GroupService
         $roles = $this->getRosterRoles();
         $role_param = implode(',', $roles);
 
-        $this->getLogger()->debug('[OrgRoster] Group members fetch', [
+        $this->getLogger()->debug('Group members fetch', [
             'source' => 'wicket-orgman',
             'group_uuid' => $group_uuid,
             'page' => $page,
@@ -975,7 +1002,7 @@ class GroupService
             }
 
             if (is_wp_error($response) || !is_array($response)) {
-                $this->getLogger()->warning('[OrgRoster] Group members response error', [
+                $this->getLogger()->warning('Group members response error', [
                     'source' => 'wicket-orgman',
                     'error' => is_wp_error($response) ? $response->get_error_message() : 'invalid_response',
                     'group_uuid' => $group_uuid,
@@ -994,10 +1021,21 @@ class GroupService
                 ];
             }
 
-            $filtered_members = array_merge(
-                $filtered_members,
-                $this->extractFilteredGroupMembers($response, $org_identifier, $org_uuid, $active)
-            );
+            $members_before_filter = count($response['data'] ?? []);
+            $filtered_batch = $this->extractFilteredGroupMembers($response, $org_identifier, $org_uuid, $active);
+            $members_after_filter = count($filtered_batch);
+
+            $this->getLogger()->debug('Group members batch filtered', [
+                'source' => 'wicket-orgman',
+                'group_uuid' => $group_uuid,
+                'raw_page' => $raw_page,
+                'before' => $members_before_filter,
+                'after' => $members_after_filter,
+                'org_identifier' => $org_identifier,
+                'org_uuid' => $org_uuid,
+            ]);
+
+            $filtered_members = array_merge($filtered_members, $filtered_batch);
 
             $page_meta = $response['meta']['page'] ?? [];
             $raw_total_pages = is_array($page_meta)
@@ -1011,7 +1049,7 @@ class GroupService
         $page = min($page, $total_pages);
         $offset = ($page - 1) * $size;
 
-        $this->getLogger()->info('[OrgRoster] Group members normalized', [
+        $this->getLogger()->info('Group members normalized', [
             'source' => 'wicket-orgman',
             'count' => count($filtered_members),
             'page' => $page,
@@ -1113,7 +1151,7 @@ class GroupService
         ];
 
         if (is_wp_error($response) || !is_array($response)) {
-            $this->getLogger()->warning('[OrgRoster] Group members response error', [
+            $this->getLogger()->warning('Group members response error', [
                 'source' => 'wicket-orgman',
                 'error' => is_wp_error($response) ? $response->get_error_message() : 'invalid_response',
             ]);
@@ -1173,7 +1211,7 @@ class GroupService
             $pagination['totalItems'] = count($members);
         }
 
-        $this->getLogger()->info('[OrgRoster] Group members normalized', [
+        $this->getLogger()->info('Group members normalized', [
             'source' => 'wicket-orgman',
             'count' => count($members),
             'page' => $pagination['currentPage'],
@@ -1278,7 +1316,7 @@ class GroupService
 
         try {
             $client = wicket_api_client();
-            $this->getLogger()->info('[OrgRoster] Creating group member', [
+            $this->getLogger()->info('Creating group member', [
                 'source' => 'wicket-orgman',
                 'group_uuid' => $group_uuid,
                 'person_uuid' => $person_uuid,
@@ -1307,7 +1345,7 @@ class GroupService
         if ('delete' === $mode && function_exists('wicket_remove_group_member')) {
             $deleted = wicket_remove_group_member($group_member_id);
             if ($deleted) {
-                $this->getLogger()->info('[OrgRoster] Deleted group member', [
+                $this->getLogger()->info('Deleted group member', [
                     'source' => 'wicket-orgman',
                     'group_member_id' => $group_member_id,
                 ]);
@@ -1341,7 +1379,7 @@ class GroupService
 
         try {
             $client = wicket_api_client();
-            $this->getLogger()->info('[OrgRoster] End-dating group member', [
+            $this->getLogger()->info('End-dating group member', [
                 'source' => 'wicket-orgman',
                 'group_member_id' => $group_member_id,
                 'end_date' => $end_date,
@@ -1365,22 +1403,17 @@ class GroupService
     {
         $log_ctx = ['source' => 'wicket-orgman', 'group_uuid' => $group_uuid, 'person_uuid' => $person_uuid];
 
-        $this->getLogger()->debug('[OrgRoster] checkManagerGroupAccess: entering MDP role fallback', $log_ctx);
+        $this->getLogger()->debug('checkManagerGroupAccess: entering MDP role fallback', $log_ctx);
 
-        $manager_access = $this->resolveManagerOrgAccess($person_uuid);
-        if (empty($manager_access['org_uuid'])) {
-            $this->getLogger()->debug('[OrgRoster] checkManagerGroupAccess: person holds no manager MDP role — access denied', $log_ctx);
+        $all_manager_access = $this->resolveAllManagerOrgAccess($person_uuid);
+        if (empty($all_manager_access)) {
+            $this->getLogger()->debug('checkManagerGroupAccess: person holds no manager MDP role — access denied', $log_ctx);
 
             return $result;
         }
 
-        $log_ctx['mdp_org_uuid']       = $manager_access['org_uuid'];
-        $log_ctx['mdp_org_identifier'] = $manager_access['org_identifier'];
-
         try {
             if (!function_exists('wicket_api_client')) {
-                $this->getLogger()->warning('[OrgRoster] checkManagerGroupAccess: wicket_api_client unavailable — cannot verify group tag', $log_ctx);
-
                 return $result;
             }
 
@@ -1388,34 +1421,36 @@ class GroupService
             $group_data = is_array($raw) ? ($raw['data'] ?? []) : [];
 
             if (empty($group_data)) {
-                $this->getLogger()->warning('[OrgRoster] checkManagerGroupAccess: group fetch returned no data — access denied', $log_ctx);
-
                 return $result;
             }
 
-            $group_tags = $group_data['attributes']['tags'] ?? null;
-            $log_ctx['group_tags'] = is_array($group_tags) ? $group_tags : null;
+            $group_org_uuid = (string) ($group_data['relationships']['organization']['data']['id'] ?? '');
 
             if ($this->groupHasRosterTag($group_data)) {
-                $this->getLogger()->info('[OrgRoster] checkManagerGroupAccess: roster tag confirmed — MDP manager access granted', $log_ctx);
+                foreach ($all_manager_access as $access) {
+                    // Check if this manager org matches the group's org.
+                    // If no group org, we allow access if the user is a manager for ANY org (legacy fallback).
+                    if ($group_org_uuid === '' || $group_org_uuid === $access['org_uuid']) {
+                        $this->getLogger()->info('checkManagerGroupAccess: roster tag confirmed and org match — MDP manager access granted', array_merge($log_ctx, [
+                            'mdp_org_uuid' => $access['org_uuid'],
+                        ]));
 
-                return [
-                    'allowed'        => true,
-                    'org_uuid'       => $manager_access['org_uuid'],
-                    'org_identifier' => $manager_access['org_identifier'],
-                    'role_slug'      => '',
-                ];
+                        return [
+                            'allowed'        => true,
+                            'org_uuid'       => $access['org_uuid'],
+                            'org_identifier' => $access['org_identifier'],
+                            'role_slug'      => '',
+                        ];
+                    }
+                }
             }
-
-            $this->getLogger()->info('[OrgRoster] checkManagerGroupAccess: group exists but lacks roster tag — access denied', $log_ctx);
         } catch (\Throwable $e) {
-            $this->getLogger()->error('[OrgRoster] checkManagerGroupAccess: group fetch threw exception', array_merge($log_ctx, [
-                'error' => $e->getMessage(),
-            ]));
+            $this->getLogger()->error('checkManagerGroupAccess: exception', array_merge($log_ctx, ['error' => $e->getMessage()]));
         }
 
         return $result;
     }
+
 
     /**
      * Augment a groups list with groups accessible via the manager MDP org role.
@@ -1429,33 +1464,13 @@ class GroupService
     {
         $roster_strategy = (string) ($this->config['membership']['strategy'] ?? 'direct');
         if ('groups' !== $roster_strategy) {
-            $this->getLogger()->debug('[OrgRoster] applyManagerGroupFallback: skipped — strategy is not groups', [
-                'source'   => 'wicket-orgman',
-                'strategy' => $roster_strategy,
-            ]);
-
             return $groups;
         }
 
-        $log_ctx = ['source' => 'wicket-orgman', 'person_uuid' => $person_uuid, 'query' => $query];
-
-        $this->getLogger()->debug('[OrgRoster] applyManagerGroupFallback: entering MDP manager group fallback', array_merge($log_ctx, [
-            'groups_already_collected' => count($groups),
-        ]));
-
-        $manager_access = $this->resolveManagerOrgAccess($person_uuid);
-        if (empty($manager_access['org_uuid'])) {
-            $this->getLogger()->debug('[OrgRoster] applyManagerGroupFallback: person holds no manager MDP role — no groups added', $log_ctx);
-
+        $all_manager_access = $this->resolveAllManagerOrgAccess($person_uuid);
+        if (empty($all_manager_access)) {
             return $groups;
         }
-
-        $mgr_org_uuid       = $manager_access['org_uuid'];
-        $mgr_org_identifier = $manager_access['org_identifier'];
-        $org_name           = ($mgr_org_identifier !== $mgr_org_uuid) ? $mgr_org_identifier : '';
-
-        $log_ctx['mdp_org_uuid']       = $mgr_org_uuid;
-        $log_ctx['mdp_org_identifier'] = $mgr_org_identifier;
 
         $existing_ids = [];
         foreach ($groups as $g) {
@@ -1465,63 +1480,41 @@ class GroupService
             }
         }
 
-        $tagged     = $this->fetchRosterTaggedGroupsForOrg($mgr_org_uuid);
-        $added      = 0;
-        $skipped_dupe  = 0;
-        $skipped_query = 0;
+        foreach ($all_manager_access as $access) {
+            $mgr_org_uuid       = $access['org_uuid'];
+            $mgr_org_identifier = $access['org_identifier'];
+            $org_name           = ($mgr_org_identifier !== $mgr_org_uuid) ? $mgr_org_identifier : '';
 
-        $this->getLogger()->debug('[OrgRoster] applyManagerGroupFallback: tagged groups fetched for org', array_merge($log_ctx, [
-            'tagged_count'    => count($tagged),
-            'existing_count'  => count($existing_ids),
-        ]));
+            $tagged = $this->fetchRosterTaggedGroupsForOrg($mgr_org_uuid);
+            foreach ($tagged as $group) {
+                $group_id = (string) ($group['id'] ?? '');
+                if ('' === $group_id || isset($existing_ids[$group_id])) {
+                    continue;
+                }
 
-        foreach ($tagged as $group) {
-            $group_id = (string) ($group['id'] ?? '');
-            if ('' === $group_id) {
-                continue;
+                $group_attrs = is_array($group['attributes'] ?? null) ? $group['attributes'] : [];
+                $group_name  = $group_attrs['name'] ?? $group_attrs['name_en'] ?? $group_attrs['name_fr'] ?? '';
+
+                if ($query !== '' && false === stripos($group_name, $query)) {
+                    continue;
+                }
+
+                $groups[] = [
+                    'group'            => $group,
+                    'group_membership' => [],
+                    'org_uuid'         => $mgr_org_uuid,
+                    'org_identifier'   => $mgr_org_identifier,
+                    'org_name'         => $org_name,
+                    'role_slug'        => '',
+                    'can_manage'       => true,
+                ];
+                $existing_ids[$group_id] = true;
             }
-
-            if (isset($existing_ids[$group_id])) {
-                $skipped_dupe++;
-                $this->getLogger()->debug('[OrgRoster] applyManagerGroupFallback: group already in list — skipping', array_merge($log_ctx, [
-                    'group_id' => $group_id,
-                ]));
-                continue;
-            }
-
-            $group_attrs = is_array($group['attributes'] ?? null) ? $group['attributes'] : [];
-            $group_name  = $group_attrs['name'] ?? $group_attrs['name_en'] ?? $group_attrs['name_fr'] ?? '';
-
-            if ($query !== '' && false === stripos($group_name, $query)) {
-                $skipped_query++;
-                $this->getLogger()->debug('[OrgRoster] applyManagerGroupFallback: group excluded by search query', array_merge($log_ctx, [
-                    'group_id'   => $group_id,
-                    'group_name' => $group_name,
-                ]));
-                continue;
-            }
-
-            $groups[] = [
-                'group'            => $group,
-                'group_membership' => [],
-                'org_uuid'         => $mgr_org_uuid,
-                'org_identifier'   => $mgr_org_identifier,
-                'org_name'         => $org_name,
-                'role_slug'        => '',
-                'can_manage'       => true,
-            ];
-            $added++;
         }
-
-        $this->getLogger()->info('[OrgRoster] applyManagerGroupFallback: complete', array_merge($log_ctx, [
-            'added'         => $added,
-            'skipped_dupe'  => $skipped_dupe,
-            'skipped_query' => $skipped_query,
-            'total'         => count($groups),
-        ]));
 
         return $groups;
     }
+
 
     /**
      * Fetch "Roster Management" tagged groups for a given org.
@@ -1534,13 +1527,13 @@ class GroupService
         $log_ctx = ['source' => 'wicket-orgman', 'org_uuid' => $org_uuid];
 
         if ('' === $org_uuid) {
-            $this->getLogger()->warning('[OrgRoster] fetchRosterTaggedGroupsForOrg: called with empty org_uuid', $log_ctx);
+            $this->getLogger()->warning('fetchRosterTaggedGroupsForOrg: called with empty org_uuid', $log_ctx);
 
             return [];
         }
 
         if (!function_exists('wicket_api_client')) {
-            $this->getLogger()->warning('[OrgRoster] fetchRosterTaggedGroupsForOrg: wicket_api_client unavailable', $log_ctx);
+            $this->getLogger()->warning('fetchRosterTaggedGroupsForOrg: wicket_api_client unavailable', $log_ctx);
 
             return [];
         }
@@ -1548,7 +1541,7 @@ class GroupService
         $roster_tag = $this->getRosterTagName();
         $log_ctx['roster_tag'] = $roster_tag;
 
-        $this->getLogger()->debug('[OrgRoster] fetchRosterTaggedGroupsForOrg: fetching groups for org', $log_ctx);
+        $this->getLogger()->debug('fetchRosterTaggedGroupsForOrg: fetching groups for org', $log_ctx);
 
         try {
             $response = wicket_api_client()->get('/groups', [
@@ -1561,7 +1554,7 @@ class GroupService
 
             $all_groups = is_array($response) ? ($response['data'] ?? []) : [];
 
-            $this->getLogger()->debug('[OrgRoster] fetchRosterTaggedGroupsForOrg: API returned groups', array_merge($log_ctx, [
+            $this->getLogger()->debug('fetchRosterTaggedGroupsForOrg: API returned groups', array_merge($log_ctx, [
                 'total_returned' => count($all_groups),
                 'group_ids'      => array_map(static fn ($g) => $g['id'] ?? '', $all_groups),
             ]));
@@ -1575,26 +1568,26 @@ class GroupService
                 $group_tags = $group['attributes']['tags'] ?? null;
                 if ($this->groupHasRosterTag($group)) {
                     $tagged[] = $group;
-                    $this->getLogger()->debug('[OrgRoster] fetchRosterTaggedGroupsForOrg: group passed tag filter', array_merge($log_ctx, [
+                    $this->getLogger()->debug('fetchRosterTaggedGroupsForOrg: group passed tag filter', array_merge($log_ctx, [
                         'group_id'   => $group_id,
                         'group_tags' => is_array($group_tags) ? $group_tags : null,
                     ]));
                 } else {
-                    $this->getLogger()->debug('[OrgRoster] fetchRosterTaggedGroupsForOrg: group excluded — roster tag absent', array_merge($log_ctx, [
+                    $this->getLogger()->debug('fetchRosterTaggedGroupsForOrg: group excluded — roster tag absent', array_merge($log_ctx, [
                         'group_id'   => $group_id,
                         'group_tags' => is_array($group_tags) ? $group_tags : null,
                     ]));
                 }
             }
 
-            $this->getLogger()->info('[OrgRoster] fetchRosterTaggedGroupsForOrg: complete', array_merge($log_ctx, [
+            $this->getLogger()->info('fetchRosterTaggedGroupsForOrg: complete', array_merge($log_ctx, [
                 'total_returned' => count($all_groups),
                 'tagged_count'   => count($tagged),
             ]));
 
             return $tagged;
         } catch (\Throwable $e) {
-            $this->getLogger()->error('[OrgRoster] fetchRosterTaggedGroupsForOrg: API request failed', array_merge($log_ctx, [
+            $this->getLogger()->error('fetchRosterTaggedGroupsForOrg: API request failed', array_merge($log_ctx, [
                 'error' => $e->getMessage(),
             ]));
 
@@ -1603,26 +1596,26 @@ class GroupService
     }
 
     /**
-     * Resolve the org UUID and identifier for a person holding the manager MDP role.
+     * Resolve all org UUIDs and identifiers for a person holding the manager MDP org role.
      *
      * Reads access.roles.manager from config, queries /people/{uuid}/roles,
-     * and returns the first org-scoped match.
+     * and returns an array of all org-scoped matches.
      *
      * @param string $person_uuid
-     * @return array{org_uuid: string, org_identifier: string} or empty array
+     * @return array<int, array{org_uuid: string, org_identifier: string}>
      */
-    private function resolveManagerOrgAccess(string $person_uuid): array
+    private function resolveAllManagerOrgAccess(string $person_uuid): array
     {
         $log_ctx = ['source' => 'wicket-orgman', 'person_uuid' => $person_uuid];
 
         if ('' === $person_uuid) {
-            $this->getLogger()->warning('[OrgRoster] resolveManagerOrgAccess: called with empty person_uuid', $log_ctx);
+            $this->getLogger()->warning('resolveAllManagerOrgAccess: called with empty person_uuid', $log_ctx);
 
             return [];
         }
 
         if (!function_exists('wicket_api_client')) {
-            $this->getLogger()->warning('[OrgRoster] resolveManagerOrgAccess: wicket_api_client unavailable', $log_ctx);
+            $this->getLogger()->warning('resolveAllManagerOrgAccess: wicket_api_client unavailable', $log_ctx);
 
             return [];
         }
@@ -1631,13 +1624,13 @@ class GroupService
         $manager_role = sanitize_key((string) ($config['access']['roles']['manager'] ?? ''));
 
         if ('' === $manager_role) {
-            $this->getLogger()->warning('[OrgRoster] resolveManagerOrgAccess: access.roles.manager not set in config — cannot resolve manager access', $log_ctx);
+            $this->getLogger()->warning('resolveAllManagerOrgAccess: access.roles.manager not set in config — cannot resolve manager access', $log_ctx);
 
             return [];
         }
 
         $log_ctx['manager_role'] = $manager_role;
-        $this->getLogger()->debug('[OrgRoster] resolveManagerOrgAccess: scanning MDP roles for manager role', $log_ctx);
+        $this->getLogger()->debug('resolveAllManagerOrgAccess: scanning MDP roles for manager role', $log_ctx);
 
         try {
             $response = wicket_api_client()->get('/people/' . rawurlencode($person_uuid) . '/roles', [
@@ -1646,27 +1639,29 @@ class GroupService
             ]);
 
             if (!isset($response['data']) || !is_array($response['data'])) {
-                $this->getLogger()->warning('[OrgRoster] resolveManagerOrgAccess: roles API returned no data', $log_ctx);
+                $this->getLogger()->warning('resolveAllManagerOrgAccess: roles API returned no data', $log_ctx);
 
                 return [];
             }
 
-            $role_count = count($response['data']);
-            $log_ctx['total_roles_on_person'] = $role_count;
-            $this->getLogger()->debug('[OrgRoster] resolveManagerOrgAccess: roles fetched', $log_ctx);
-
+            $all_access = [];
             foreach ($response['data'] as $role) {
                 $role_name = sanitize_key((string) ($role['attributes']['name'] ?? ''));
 
                 if ($role_name !== $manager_role) {
+                    $this->getLogger()->debug('resolveAllManagerOrgAccess: skipping non-manager role', [
+                        'source' => 'wicket-orgman',
+                        'role_name' => $role_name,
+                        'expected' => $manager_role,
+                    ]);
                     continue;
                 }
 
                 if (!empty($role['attributes']['global'])) {
-                    $this->getLogger()->debug('[OrgRoster] resolveManagerOrgAccess: found manager role but it is global — skipping', array_merge($log_ctx, [
+                    $this->getLogger()->debug('resolveAllManagerOrgAccess: skipping global role', [
+                        'source' => 'wicket-orgman',
                         'role_name' => $role_name,
-                        'role_id'   => $role['id'] ?? '',
-                    ]));
+                    ]);
                     continue;
                 }
 
@@ -1677,19 +1672,19 @@ class GroupService
                 $resource_type = strtolower((string) (is_array($resource) ? ($resource['type'] ?? '') : ''));
 
                 if ('' === $org_uuid) {
-                    $this->getLogger()->debug('[OrgRoster] resolveManagerOrgAccess: manager role has no org scope — skipping', array_merge($log_ctx, [
+                    $this->getLogger()->debug('resolveAllManagerOrgAccess: skipping role with no org resource', [
+                        'source' => 'wicket-orgman',
                         'role_name' => $role_name,
-                        'role_id'   => $role['id'] ?? '',
-                    ]));
+                    ]);
                     continue;
                 }
 
                 if ('' !== $resource_type && !in_array($resource_type, ['organizations', 'organization'], true)) {
-                    $this->getLogger()->debug('[OrgRoster] resolveManagerOrgAccess: manager role scoped to non-org resource — skipping', array_merge($log_ctx, [
-                        'role_name'     => $role_name,
+                    $this->getLogger()->debug('resolveAllManagerOrgAccess: skipping role with invalid resource type', [
+                        'source' => 'wicket-orgman',
+                        'role_name' => $role_name,
                         'resource_type' => $resource_type,
-                        'org_uuid'      => $org_uuid,
-                    ]));
+                    ]);
                     continue;
                 }
 
@@ -1708,38 +1703,43 @@ class GroupService
                             );
                             if ('' !== $resolved) {
                                 $org_identifier = $resolved;
-                            } else {
-                                $this->getLogger()->debug('[OrgRoster] resolveManagerOrgAccess: org name fields empty — falling back to org_uuid as identifier', array_merge($log_ctx, [
-                                    'org_uuid' => $org_uuid,
-                                ]));
                             }
                         }
                     } catch (\Throwable $e) {
-                        $this->getLogger()->warning('[OrgRoster] resolveManagerOrgAccess: org lookup failed — falling back to org_uuid as identifier', array_merge($log_ctx, [
-                            'org_uuid' => $org_uuid,
-                            'error'    => $e->getMessage(),
-                        ]));
+                        // Keep UUID as fallback
                     }
                 }
 
-                $this->getLogger()->info('[OrgRoster] resolveManagerOrgAccess: manager org access resolved via MDP role', array_merge($log_ctx, [
-                    'org_uuid'                   => $org_uuid,
-                    'org_identifier'             => $org_identifier,
-                    'identifier_is_uuid_fallback' => ($org_identifier === $org_uuid),
-                ]));
-
-                return ['org_uuid' => $org_uuid, 'org_identifier' => $org_identifier];
+                $all_access[] = ['org_uuid' => $org_uuid, 'org_identifier' => $org_identifier];
             }
 
-            $this->getLogger()->debug('[OrgRoster] resolveManagerOrgAccess: no org-scoped manager role found on person', $log_ctx);
+            $this->getLogger()->info('resolveAllManagerOrgAccess: resolved manager access', array_merge($log_ctx, [
+                'count' => count($all_access),
+            ]));
+
+            return $all_access;
         } catch (\Throwable $e) {
-            $this->getLogger()->error('[OrgRoster] resolveManagerOrgAccess: roles API request failed', array_merge($log_ctx, [
+            $this->getLogger()->error('resolveAllManagerOrgAccess: roles API request failed', array_merge($log_ctx, [
                 'error' => $e->getMessage(),
             ]));
         }
 
         return [];
     }
+
+    /**
+     * Resolve the org UUID and identifier for a person holding the manager MDP role.
+     *
+     * @param string $person_uuid
+     * @return array{org_uuid: string, org_identifier: string} or empty array
+     */
+    private function resolveManagerOrgAccess(string $person_uuid): array
+    {
+        $all = $this->resolveAllManagerOrgAccess($person_uuid);
+
+        return !empty($all) ? $all[0] : [];
+    }
+
 
     /**
      * Retrieve shared logger.

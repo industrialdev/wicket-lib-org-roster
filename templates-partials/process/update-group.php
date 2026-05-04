@@ -24,7 +24,7 @@ $log_context = [
 
 $nonce = isset($_POST['nonce']) ? sanitize_text_field(wp_unslash($_POST['nonce'])) : '';
 if (!$nonce || !wp_verify_nonce($nonce, 'wicket-orgman-update-group')) {
-    $logger->warning('[OrgRoster] Update group invalid nonce', $log_context);
+    $logger->warning('Update group invalid nonce', $log_context);
     status_header(200);
     OrgManagement\Helpers\DatastarSSE::renderError(__('Invalid or missing security token. Please refresh and try again.', 'wicket-acc'), '#group-update-messages', []);
 
@@ -36,10 +36,10 @@ $org_uuid = isset($_POST['org_uuid']) ? sanitize_text_field(wp_unslash($_POST['o
 
 $log_context['group_uuid'] = $group_uuid;
 $log_context['org_uuid'] = $org_uuid;
-$logger->info('[OrgRoster] Update group request received', $log_context);
+$logger->info('Update group request received', $log_context);
 
 if (empty($group_uuid)) {
-    $logger->error('[OrgRoster] Update group missing group_uuid', $log_context);
+    $logger->error('Update group missing group_uuid', $log_context);
     status_header(200);
     OrgManagement\Helpers\DatastarSSE::renderError(__('Group identifier missing.', 'wicket-acc'), '#group-update-messages', []);
 
@@ -50,7 +50,7 @@ $group_service = new GroupService();
 $current_user = wp_get_current_user();
 $access = $group_service->canManageGroup($group_uuid, (string) $current_user->user_login);
 if (empty($access['allowed'])) {
-    $logger->warning('[OrgRoster] Update group access denied', $log_context);
+    $logger->warning('Update group access denied', $log_context);
     status_header(200);
     OrgManagement\Helpers\DatastarSSE::renderError(__('You do not have permission to manage this group.', 'wicket-acc'), '#group-update-messages', []);
 
@@ -80,7 +80,7 @@ if (in_array('description', $editable_fields, true)) {
 }
 
 if (empty($payload)) {
-    $logger->warning('[OrgRoster] Update group no editable fields provided', $log_context);
+    $logger->warning('Update group no editable fields provided', $log_context);
     status_header(200);
     OrgManagement\Helpers\DatastarSSE::renderError(__('No editable fields provided.', 'wicket-acc'), '#group-update-messages', []);
 
@@ -88,7 +88,7 @@ if (empty($payload)) {
 }
 
 if (!function_exists('wicket_api_client')) {
-    $logger->error('[OrgRoster] Update group API client unavailable', $log_context);
+    $logger->error('Update group API client unavailable', $log_context);
     status_header(200);
     OrgManagement\Helpers\DatastarSSE::renderError(__('API client unavailable.', 'wicket-acc'), '#group-update-messages', []);
 
@@ -106,13 +106,13 @@ $request_payload = [
 try {
     $client = wicket_api_client();
     $client->patch('groups/' . rawurlencode($group_uuid), ['json' => $request_payload]);
-    $logger->info('[OrgRoster] Update group succeeded', $log_context);
+    $logger->info('Update group succeeded', $log_context);
     status_header(200);
     OrgManagement\Helpers\DatastarSSE::renderSuccess(__('Group updated successfully.', 'wicket-acc'), '#group-update-messages', []);
 
     return;
 } catch (Throwable $e) {
-    $logger->error('[OrgRoster] Update group failed', array_merge($log_context, [
+    $logger->error('Update group failed', array_merge($log_context, [
         'error' => $e->getMessage(),
     ]));
     status_header(200);

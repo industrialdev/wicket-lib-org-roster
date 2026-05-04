@@ -256,21 +256,26 @@ $show_assignment_info = (bool) ($orgman_config['presentation']['member_list']['s
     </nav>
 
     <div class="wt_mt-6">
-        <?php if ($has_seats_available) : ?>
-            <button type="button"
-                class="button button--primary add-member-button wt_w-full wt_py-2 component-button"
-                data-on:click="$addMemberSuccess = false; $addMemberSubmitting = false; $addMemberSuccessMessage = ''; (() => { const modal = document.getElementById('groupMembersAddModal'); if (!modal) return; const form = modal.querySelector('form'); if (form) form.reset(); const messages = modal.querySelector('#group-member-add-messages'); if (messages) messages.innerHTML = ''; })(); $addMemberModalOpen = true"><?php esc_html_e('Add Member', 'wicket-acc'); ?></button>
-        <?php endif; ?>
+        <?php
+        // Always show the 'Add Member' button if the user can manage the group.
+        // The backend (GroupsStrategy) handles seat availability enforcement for seat-limited roles.
+        // This allows adding non-seat-limited roles (like Observers) even when seats are full.
+        ?>
+        <button type="button"
+            class="button button--primary add-member-button wt_w-full wt_py-2 component-button"
+            data-on:click="$addMemberSuccess = false; $addMemberSubmitting = false; $addMemberSuccessMessage = ''; (() => { const modal = document.getElementById('groupMembersAddModal'); if (!modal) return; const form = modal.querySelector('form'); if (form) form.reset(); const messages = modal.querySelector('#group-member-add-messages'); if (messages) messages.innerHTML = ''; })(); $addMemberModalOpen = true"><?php esc_html_e('Add Member', 'wicket-acc'); ?></button>
+        
         <?php if (!$has_seats_available) : ?>
             <div class="wt_mt-2 wt_p-3 wt_bg-yellow-50 wt_border wt_border-yellow-200 wt_rounded-md wt_text-yellow-800 wt_text-sm">
                 <div class="wt_flex wt_items-center wt_gap-2">
                     <svg class="wt_w-5 wt_h-5 wt_text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
                     </svg>
-                    <span><?php esc_html_e('All seats have been assigned. Please purchase additional seats to add more members.', 'wicket-acc'); ?></span>
+                    <span><?php esc_html_e('All seats have been assigned. You can still add Observers, but purchase additional seats to add more Members.', 'wicket-acc'); ?></span>
                 </div>
             </div>
         <?php endif; ?>
     </div>
+
     </div>
 </div>

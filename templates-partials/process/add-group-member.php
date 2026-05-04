@@ -29,7 +29,7 @@ $log_context = [
 
 $nonce = isset($_POST['nonce']) ? sanitize_text_field(wp_unslash($_POST['nonce'])) : '';
 if (!$nonce || !wp_verify_nonce($nonce, 'wicket-orgman-add-group-member')) {
-    $logger->warning('[OrgRoster] Add group member invalid nonce', $log_context);
+    $logger->warning('Add group member invalid nonce', $log_context);
     status_header(200);
     OrgManagement\Helpers\DatastarSSE::renderError(__('Invalid or missing security token. Please refresh and try again.', 'wicket-acc'), $message_target, ['addMemberSubmitting' => false, 'addMemberSuccess' => false, 'membersLoading' => false]);
 
@@ -43,10 +43,10 @@ $role = isset($_POST['role']) ? sanitize_text_field(wp_unslash($_POST['role'])) 
 $log_context['group_uuid'] = $group_uuid;
 $log_context['org_uuid'] = $org_uuid;
 $log_context['role'] = $role;
-$logger->info('[OrgRoster] Add group member request received', $log_context);
+$logger->info('Add group member request received', $log_context);
 
 if (empty($group_uuid)) {
-    $logger->error('[OrgRoster] Add group member missing group_uuid', $log_context);
+    $logger->error('Add group member missing group_uuid', $log_context);
     status_header(200);
     OrgManagement\Helpers\DatastarSSE::renderError(__('Group identifier missing.', 'wicket-acc'), $message_target, ['addMemberSubmitting' => false, 'addMemberSuccess' => false, 'membersLoading' => false]);
 
@@ -71,7 +71,7 @@ $context = [
 
 $result = $member_service->addMember($org_uuid, $member_data, $context);
 if (is_wp_error($result)) {
-    $logger->error('[OrgRoster] Add group member failed', array_merge($log_context, [
+    $logger->error('Add group member failed', array_merge($log_context, [
         'error' => $result->get_error_message(),
     ]));
     status_header(200);
@@ -80,7 +80,7 @@ if (is_wp_error($result)) {
     return;
 }
 
-$logger->info('[OrgRoster] Add group member succeeded', $log_context);
+$logger->info('Add group member succeeded', $log_context);
 
 $full_name = trim(($member_data['first_name'] ?? '') . ' ' . ($member_data['last_name'] ?? ''));
 $success_message = wp_sprintf(

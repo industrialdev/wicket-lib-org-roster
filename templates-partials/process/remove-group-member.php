@@ -26,7 +26,7 @@ $log_context = [
 
 $nonce = isset($_POST['nonce']) ? sanitize_text_field(wp_unslash($_POST['nonce'])) : '';
 if (!$nonce || !wp_verify_nonce($nonce, 'wicket-orgman-remove-group-member')) {
-    $logger->warning('[OrgRoster] Remove group member invalid nonce', $log_context);
+    $logger->warning('Remove group member invalid nonce', $log_context);
     status_header(200);
     OrgManagement\Helpers\DatastarSSE::renderError(__('Invalid or missing security token. Please refresh and try again.', 'wicket-acc'), '#remove-member-messages', ['removeMemberSubmitting' => false, 'membersLoading' => false]);
 
@@ -44,10 +44,10 @@ $log_context['org_uuid'] = $org_uuid;
 $log_context['person_uuid'] = $person_uuid;
 $log_context['group_member_id'] = $group_member_id;
 $log_context['role'] = $role;
-$logger->info('[OrgRoster] Remove group member request received', $log_context);
+$logger->info('Remove group member request received', $log_context);
 
 if (empty($group_uuid) || empty($person_uuid)) {
-    $logger->error('[OrgRoster] Remove group member missing identifiers', $log_context);
+    $logger->error('Remove group member missing identifiers', $log_context);
     status_header(200);
     OrgManagement\Helpers\DatastarSSE::renderError(__('Missing group or member identifiers.', 'wicket-acc'), '#remove-member-messages', ['removeMemberSubmitting' => false, 'membersLoading' => false]);
 
@@ -72,7 +72,7 @@ $context = [
 
 $result = $member_service->removeMember($org_uuid, $person_uuid, $context);
 if (is_wp_error($result)) {
-    $logger->error('[OrgRoster] Remove group member failed', array_merge($log_context, [
+    $logger->error('Remove group member failed', array_merge($log_context, [
         'error' => $result->get_error_message(),
     ]));
     status_header(200);
@@ -81,7 +81,7 @@ if (is_wp_error($result)) {
     return;
 }
 
-$logger->info('[OrgRoster] Remove group member succeeded', $log_context);
+$logger->info('Remove group member succeeded', $log_context);
 
 $members_list_target = 'group-members-list-container-' . sanitize_html_class($group_uuid);
 $list_html = '';
