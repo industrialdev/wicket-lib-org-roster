@@ -1186,7 +1186,10 @@ class GroupService
             $family = (string) ($attributes['family_name'] ?? '');
             $full_name = trim(trim($given) . ' ' . trim($family));
 
-            $email = (string) ($attributes['email'] ?? '');
+            $email = (string) ($attributes['primary_email_address'] ?? '');
+            if ('' === $email && isset($attributes['email'])) {
+                $email = (string) $attributes['email'];
+            }
             if ('' === $email && isset($attributes['primary_email'])) {
                 $email = (string) $attributes['primary_email'];
             }
@@ -1265,7 +1268,10 @@ class GroupService
             $family = (string) ($attributes['family_name'] ?? '');
             $full_name = trim(trim($given) . ' ' . trim($family));
 
-            $email = (string) ($attributes['email'] ?? '');
+            $email = (string) ($attributes['primary_email_address'] ?? '');
+            if ($email === '' && isset($attributes['email'])) {
+                $email = (string) $attributes['email'];
+            }
             if ($email === '' && isset($attributes['primary_email'])) {
                 $email = (string) $attributes['primary_email'];
             }
