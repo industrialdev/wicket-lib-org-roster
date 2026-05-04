@@ -35,7 +35,7 @@ $member_service = new MemberService($config_service);
 // Uses CacheService so the versioned cache_salt key invalidates this alongside the member list.
 $cache_service = new CacheService();
 $gen = $cache_service->getMembershipGeneration($membership_uuid);
-$cache_key = 'orgman_lazy_details_' . md5($person_uuid . $org_uuid . $membership_uuid . $gen);
+$cache_key = 'orgman_lazy_details_' . md5($person_uuid . $org_uuid . $membership_uuid . $mode . $group_uuid . $gen);
 $member = $cache_service->get($cache_key);
 
 if (false === $member) {
