@@ -2,6 +2,20 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.8.2] - 2026-05-04
+
+### Fixed
+- Group member cards disappearing from the DOM when `groups.presentation.use_unified_member_list` is enabled (default: `true`). Group members lacked `lazy_loaded=true`, causing the unified template to fire SSE `data-init` fetches. The SSE endpoint (`member-details.php`) queried `organization_memberships/{uuid}/person_memberships` — which does not contain group members — and the resulting `null` triggered `removeElements()` on the card container.
+- Group member roles displaying as em-dash (`\u2014`). The singular `role` field from group member API data was not promoted to the `roles` / `current_roles` arrays that the unified template's role resolution logic checks first. Both entry points (`group-members.php` page-level render and `group-members-list-endpoint.php` Datastar fetch) now promote the role into both arrays.
+- Group member emails blank. `GroupService::extractFilteredGroupMembers` and `GroupService::normalizeGroupMembersResponse` checked `attributes.email` and `attributes.primary_email` for the person's email address, but the Wicket API person serializer exposes the field as `primary_email_address`. Extraction now checks `primary_email_address` first, falling back to `email` then `primary_email`.
+- Group member confirmed-status badges missing. `GroupService` now extracts `confirmed_at` from person `included` data in both member-extraction methods.
+- N+1 API calls in `group-members-list.php` (non-unified fallback). Each card previously called `MemberService::isUserConfirmed()` per member; now reads `confirmed_at` directly from the member data array.
+
+### Added
+- Defense-in-depth in `member-details.php`: when `mode=groups` and the member is not found in the org membership endpoint, the SSE fallback uses the person API (`getPersonById`) for confirmed status and email instead of removing the card from the DOM.
+- `mode` and `group_uuid` forwarded to the lazy-details URL in `members-list-unified.php` so the SSE endpoint can identify group context.
+- Lazy-details cache key in `member-details.php` now includes `mode` and `group_uuid` to prevent cache collisions between org-member and group-member lookups for the same person.
+
 ## [0.8.1] - 2026-04-30
 
 ### Added
