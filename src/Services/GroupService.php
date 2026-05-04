@@ -1191,12 +1191,17 @@ class GroupService
                 $email = (string) $attributes['primary_email'];
             }
 
+            $confirmed_at = $attributes['user']['confirmed_at']
+                ?? $attributes['confirmed_at']
+                ?? null;
+
             $members[] = [
                 'group_member_id' => $item['id'] ?? '',
                 'person_uuid' => $person_id,
                 'full_name' => $full_name,
                 'email' => $email,
                 'role' => $item['attributes']['type'] ?? '',
+                'confirmed_at' => $confirmed_at,
                 'custom_data_field' => $item['attributes']['custom_data_field'] ?? null,
             ];
         }
@@ -1265,12 +1270,17 @@ class GroupService
                 $email = (string) $attributes['primary_email'];
             }
 
+            $confirmed_at = $attributes['user']['confirmed_at']
+                ?? $attributes['confirmed_at']
+                ?? null;
+
             $members[] = [
                 'group_member_id' => $item['id'] ?? '',
                 'person_uuid' => $person_id,
                 'full_name' => $full_name,
                 'email' => $email,
                 'role' => $item['attributes']['type'] ?? '',
+                'confirmed_at' => $confirmed_at,
                 'custom_data_field' => $item['attributes']['custom_data_field'] ?? null,
             ];
         }

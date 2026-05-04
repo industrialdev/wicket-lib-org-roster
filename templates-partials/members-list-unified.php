@@ -146,6 +146,12 @@ $lazy_details_base_args = [
     'org_uuid'        => (string) $org_uuid,
     'membership_uuid' => (string) $membership_uuid,
 ];
+if ($mode === 'groups') {
+    $lazy_details_base_args['mode'] = 'groups';
+    if (isset($group_uuid) && $group_uuid !== '') {
+        $lazy_details_base_args['group_uuid'] = (string) $group_uuid;
+    }
+}
 
 $role_label = __('Role(s):', 'wicket-acc');
 $show_remove_policy_callout = (

@@ -139,7 +139,7 @@ $show_assignment_info = (bool) ($orgman_config['presentation']['member_list']['s
             $member_email = $member['email'] ?? '';
             $member_role_label = $member['role'] ?? '';
             $group_member_id = $member['group_member_id'] ?? '';
-            $is_confirmed = $member_uuid ? $member_service->isUserConfirmed($member_uuid) : false;
+            $is_confirmed = !empty($member['confirmed_at']);
             ?>
             <div class="member-card wt_bg-light-neutral wt_rounded-card wt_p-6 wt_transition-opacity wt_duration-300">
                 <div class="wt_flex wt_w-full md_wt_flex-row wt_items-start wt_justify-between wt_gap-4">

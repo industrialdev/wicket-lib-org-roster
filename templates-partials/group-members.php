@@ -79,6 +79,21 @@ $group_presentation = is_array($orgman_config['groups']['presentation'] ?? null)
 $member_list_config = is_array($orgman_config['presentation']['member_list'] ?? null)
     ? $orgman_config['presentation']['member_list']
     : [];
+// Group members already carry all card data (name, email, role); set lazy_loaded=true
+// so the unified template renders details inline instead of firing SSE data-init fetches
+// that query the org membership endpoint (which does not contain group members).
+// Also promote the singular 'role' field to 'roles' and 'current_roles' arrays so the
+// unified template's role resolution logic picks up group-level roles correctly.
+if ((bool) ($group_presentation['use_unified_member_list'] ?? false)) {
+    $members = array_map(static function (array $member): array {
+        $member['lazy_loaded'] = true;
+        if (!empty($member['role']) && is_string($member['role'])) {
+            $member['roles'] = [$member['role']];
+            $member['current_roles'] = [$member['role']];
+        }
+        return $member;
+    }, $members);
+}
 $account_status_config = is_array($member_list_config['account_status'] ?? null)
     ? $member_list_config['account_status']
     : [];

@@ -21,6 +21,8 @@ if (!defined('ABSPATH')) {
 $person_uuid = isset($_REQUEST['person_uuid']) ? sanitize_text_field($_REQUEST['person_uuid']) : '';
 $org_uuid = isset($_REQUEST['org_uuid']) ? sanitize_text_field($_REQUEST['org_uuid']) : '';
 $membership_uuid = isset($_REQUEST['membership_uuid']) ? sanitize_text_field($_REQUEST['membership_uuid']) : '';
+$mode = isset($_REQUEST['mode']) ? sanitize_text_field($_REQUEST['mode']) : '';
+$group_uuid = isset($_REQUEST['group_uuid']) ? sanitize_text_field($_REQUEST['group_uuid']) : '';
 
 if (empty($person_uuid) || empty($org_uuid)) {
     exit;
@@ -51,17 +53,59 @@ $generator = new ServerSentEventGenerator();
 $generator->sendHeaders();
 $person_uuid_no_dashes = str_replace('-', '', $person_uuid);
 
-// If the member was filtered out by the full load (e.g. relationship filters), remove the card
+// If the member was filtered out by the full load (e.g. relationship filters), remove the card.
+// For groups mode, the member may not exist in the org membership endpoint (group members
+// live in /group_members, not /organization_memberships/person_memberships). Instead of
+// removing the card, do a best-effort render from the person API and the group member data.
 if (!$member) {
-    \Wicket()->log()->info('member-details: Member not found, removing card', [
-        'source' => 'wicket-orgman',
-        'person_uuid'     => $person_uuid,
-        'org_uuid'        => $org_uuid,
-        'membership_uuid' => $membership_uuid,
-    ]);
-    // Delete the entire card container
-    $generator->removeElements('#member-' . $person_uuid_no_dashes);
-    exit;
+    if ($mode === 'groups') {
+        \Wicket()->log()->info('member-details: Group member not in membership, using fallback', [
+            'source' => 'wicket-orgman',
+            'person_uuid' => $person_uuid,
+            'org_uuid' => $org_uuid,
+            'group_uuid' => $group_uuid,
+        ]);
+        // Build a minimal member array from person API (confirmed_at) and group role.
+        $member = [
+            'lazy_loaded' => true,
+            'is_confirmed' => false,
+            'roles' => [],
+            'current_roles' => [],
+        ];
+        if ($member_service) {
+            try {
+                $person = $member_service->getPersonById($person_uuid);
+                $personAttrs = is_array($person) ? ($person['data']['attributes'] ?? []) : [];
+                $member['confirmed_at'] = $personAttrs['user']['confirmed_at']
+                    ?? $personAttrs['confirmed_at']
+                    ?? null;
+                $member['is_confirmed'] = !empty($member['confirmed_at']);
+                $member['email'] = $personAttrs['email']
+                    ?? $personAttrs['primary_email_address']
+                    ?? '';
+                $member['full_name'] = trim(
+                    ($personAttrs['given_name'] ?? '') . ' ' . ($personAttrs['family_name'] ?? '')
+                );
+            } catch (\Throwable $e) {
+                \Wicket()->log()->warning('member-details: Person API fallback failed', [
+                    'person_uuid' => $person_uuid,
+                    'error' => $e->getMessage(),
+                ]);
+                // Card has useful placeholder content; do not remove it.
+                exit;
+            }
+        }
+    } else {
+        \Wicket()->log()->info('member-details: Member not found, removing card', [
+            'source' => 'wicket-orgman',
+            'person_uuid'     => $person_uuid,
+            'org_uuid'        => $org_uuid,
+            'membership_uuid' => $membership_uuid,
+        ]);
+        // Delete the entire card container
+        $generator->removeElements('#member-' . $person_uuid_no_dashes);
+        exit;
+    }
 }
 
 // Mark as lazy loaded for the template logic
