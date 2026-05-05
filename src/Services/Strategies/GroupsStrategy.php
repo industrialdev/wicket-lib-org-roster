@@ -223,7 +223,7 @@ class GroupsStrategy implements RosterManagementStrategy
                             'role' => $role_slug,
                         ]));
 
-                        return new \WP_Error('seat_unavailable', 'This group already has a member for your organization.');
+                        return new \WP_Error('seat_unavailable', "This group already has a person '{$role_slug}' for your organization.");
                     }
                 }
             }
@@ -231,15 +231,11 @@ class GroupsStrategy implements RosterManagementStrategy
             $logger->debug('Groups strategy adding member to group', array_merge($log_context, [
                 'role' => $role_slug,
             ]));
-            $custom_data_field = $this->groupService()->buildCustomDataField($org_identifier);
+            $custom_data_source = '' !== $org_uuid ? $org_uuid : $org_identifier;
+            $custom_data_field = $this->groupService()->buildCustomDataField($custom_data_source, $role_slug);
             $group_member_result = $this->groupService()->createGroupMember($person_uuid, $group_uuid, $role_slug, $custom_data_field);
             if (is_wp_error($group_member_result)) {
                 return $group_member_result;
-            }
-
-            // Clear members cache to ensure the new member shows up immediately.
-            if (class_exists('\OrgManagement\OrgMan')) {
-                \OrgManagement\OrgMan::get_instance()->clearMembersCache();
             }
 
             $group_details = function_exists('wicket_get_group') ? wicket_get_group($group_uuid) : null;
@@ -410,11 +406,6 @@ class GroupsStrategy implements RosterManagementStrategy
                 ]));
 
                 return $remove_result;
-            }
-
-            // Clear members cache to ensure the removal is reflected immediately.
-            if (class_exists('\OrgManagement\OrgMan')) {
-                \OrgManagement\OrgMan::get_instance()->clearMembersCache();
             }
 
             if ($this->touchpointService()->isAvailable()) {

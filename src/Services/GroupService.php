@@ -477,7 +477,7 @@ class GroupService
             $tokens[$normalized_candidate] = true;
         }
 
-        if (!$expand_lookup || $candidate === '' || !function_exists('wicket_get_organization')) {
+        if (!$expand_lookup || $candidate === '' || !function_exists('wicket_get_organization') || !function_exists('isValidUuid') || !isValidUuid($candidate)) {
             return array_keys($tokens);
         }
 
@@ -600,13 +600,7 @@ class GroupService
         return $is_match;
     }
 
-    /**
-     * Build custom_data_field payload for group membership.
-     *
-     * @param string $org_identifier
-     * @return array|null
-     */
-    public function buildCustomDataField(string $org_identifier): ?array
+    public function buildCustomDataField(string $org_identifier, string $role_slug = ''): ?array
     {
         if ('' === $org_identifier) {
             return null;
@@ -622,8 +616,10 @@ class GroupService
 
         $value = '' !== $value_field ? [$value_field => $org_identifier] : $org_identifier;
 
+        // Send $schema as null — the API auto-assigns the correct JsonSchema
+        // for the GroupMember type via validate_custom_data_field_data.
         return [
-            'key' => $key,
+            '$schema' => null,
             'value' => $value,
         ];
     }
@@ -741,21 +737,23 @@ class GroupService
                 foreach ($org_candidates as $org_candidate) {
                     if (!array_key_exists($org_candidate, $resolved_org_name_cache)) {
                         $resolved_name = '';
-                        try {
-                            $organization_response = wicket_get_organization($org_candidate);
-                            $organization_attrs = is_array($organization_response)
-                                ? ($organization_response['data']['attributes'] ?? [])
-                                : [];
-                            if (is_array($organization_attrs)) {
-                                $resolved_name = (string) (
-                                    $organization_attrs['legal_name']
-                                    ?? $organization_attrs['legal_name_en']
-                                    ?? $organization_attrs['name']
-                                    ?? ''
-                                );
+                        if (function_exists('isValidUuid') && isValidUuid($org_candidate)) {
+                            try {
+                                $organization_response = wicket_get_organization($org_candidate);
+                                $organization_attrs = is_array($organization_response)
+                                    ? ($organization_response['data']['attributes'] ?? [])
+                                    : [];
+                                if (is_array($organization_attrs)) {
+                                    $resolved_name = (string) (
+                                        $organization_attrs['legal_name']
+                                        ?? $organization_attrs['legal_name_en']
+                                        ?? $organization_attrs['name']
+                                        ?? ''
+                                    );
+                                }
+                            } catch (\Throwable $e) {
+                                $resolved_name = '';
                             }
-                        } catch (\Throwable $e) {
-                            $resolved_name = '';
                         }
                         $resolved_org_name_cache[$org_candidate] = $resolved_name;
                     }
@@ -1305,6 +1303,23 @@ class GroupService
      */
     public function createGroupMember(string $person_uuid, string $group_uuid, string $role_slug, $custom_data_field = null)
     {
+        // Prefer base helper for backwards-compatible group create behavior.
+        // Extended helper now supports optional custom_data_field without altering defaults.
+        if (function_exists('wicket_add_group_member')) {
+            $helper_response = wicket_add_group_member($person_uuid, $group_uuid, $role_slug, [
+                'start_date' => $this->currentTimestamp(),
+                'end_date' => null,
+                'skip_if_exists' => false,
+                'custom_data_field' => $custom_data_field,
+            ]);
+
+            if (is_wp_error($helper_response)) {
+                return $helper_response;
+            }
+
+            return $helper_response;
+        }
+
         if (!function_exists('wicket_api_client')) {
             return new \WP_Error('missing_client', 'MDP API client unavailable.');
         }
@@ -1337,6 +1352,7 @@ class GroupService
                 'group_uuid' => $group_uuid,
                 'person_uuid' => $person_uuid,
                 'role' => $role_slug,
+                'custom_data_field' => $custom_data_field,
             ]);
 
             return $client->post('group_members', ['json' => $payload]);
