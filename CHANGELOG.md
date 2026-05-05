@@ -2,6 +2,20 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.8.3] - 2026-05-05
+
+### Fixed
+- Seat-capacity error message now reports the actual conflicting role slug (e.g. `observer`) instead of hardcoded `member`.
+- Removed fatal crash during group member removal caused by invalid `clearMembersCache()` calls in `GroupsStrategy`; cache invalidation remains handled by `MembershipRosterWriter` after strategy execution.
+- Eliminated base-plugin 404 warnings from non-UUID org identifiers by adding UUID guards before `wicket_get_organization()` lookups in `GroupService` (`resolveScopeTokens` path and org-name resolution loop).
+- Resolved group-member create 422 errors (`schema does not match` and `#/name`) by aligning custom data payload semantics with working browser behavior:
+  - roster flow now uses org UUID as custom data source when available (fallback to org identifier),
+  - group create now runs through the shared helper path with custom data support.
+
+### Changed
+- `GroupService::createGroupMember()` is now helper-first (`wicket_add_group_member`) with direct API fallback only when the helper is unavailable.
+- Extended base helper `wicket_add_group_member()` to accept optional `custom_data_field` argument while preserving previous defaults/behavior (`custom_data_field` remains `null` unless explicitly provided).
+
 ## [0.8.2] - 2026-05-04
 
 ### Fixed

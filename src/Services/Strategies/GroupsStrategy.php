@@ -241,6 +241,8 @@ class GroupsStrategy implements RosterManagementStrategy
             $group_details = function_exists('wicket_get_group') ? wicket_get_group($group_uuid) : null;
             $group_name = $group_details['data']['attributes']['name'] ?? 'Unknown Group';
 
+            // NOTE: On local/dev hosts this often fails because SMTP is not configured
+            // (expected outside staging/production). Keep non-blocking.
             $notification_result = $this->notificationService()->emailToPersonOnGroupAssignment($person_uuid, [
                 'person_email'      => $member_data['email'],
                 'notification_type' => 'group_assignment',
