@@ -208,7 +208,7 @@ if ($use_unified_view) {
         $members_list_target = $group_members_list_target;
         include __DIR__ . '/members-list-unified.php';
     } else {
-        include __DIR__ . '/group-members-list.php';
+        include __DIR__ . '/members-list-groups.php';
     }
 }
 ?>

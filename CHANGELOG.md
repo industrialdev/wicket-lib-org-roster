@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.8.5] - 2026-05-06
+
+### Fixed
+- Remove button is no longer shown for organization owner rows when viewed by non-owner users (membership managers, etc.). Previously the visibility check only hid the button when the owner viewed their own row, allowing other managers to see (and attempt) removal of the org owner.
+- Added missing owner guard to group members list remove button (previously unguarded).
+- Renamed `group-members-list.php` to `members-list-groups.php` for consistent naming with other member list templates.
+
 ## [0.8.3] - 2026-05-05
 
 ### Fixed
@@ -23,7 +30,7 @@ All notable changes to this project are documented in this file.
 - Group member roles displaying as em-dash (`\u2014`). The singular `role` field from group member API data was not promoted to the `roles` / `current_roles` arrays that the unified template's role resolution logic checks first. Both entry points (`group-members.php` page-level render and `group-members-list-endpoint.php` Datastar fetch) now promote the role into both arrays.
 - Group member emails blank. `GroupService::extractFilteredGroupMembers` and `GroupService::normalizeGroupMembersResponse` checked `attributes.email` and `attributes.primary_email` for the person's email address, but the Wicket API person serializer exposes the field as `primary_email_address`. Extraction now checks `primary_email_address` first, falling back to `email` then `primary_email`.
 - Group member confirmed-status badges missing. `GroupService` now extracts `confirmed_at` from person `included` data in both member-extraction methods.
-- N+1 API calls in `group-members-list.php` (non-unified fallback). Each card previously called `MemberService::isUserConfirmed()` per member; now reads `confirmed_at` directly from the member data array.
+- N+1 API calls in `members-list-groups.php` (non-unified fallback). Each card previously called `MemberService::isUserConfirmed()` per member; now reads `confirmed_at` directly from the member data array.
 
 ### Added
 - Defense-in-depth in `member-details.php`: when `mode=groups` and the member is not found in the org membership endpoint, the SSE fallback uses the person API (`getPersonById`) for confirmed status and email instead of removing the card from the DOM.
@@ -89,7 +96,7 @@ All notable changes to this project are documented in this file.
 - `should_show_member_relationship_type()` gates on both `member_card.fields.relationship_type.enabled` and `presentation.relationships.show_type` (AND logic) so both config knobs remain meaningful.
 
 ### Changed
-- All five member card templates (`members-list.php`, `members-list-unified.php`, `member-details.php`, `group-members-list.php`, `members-view-unified.php`) now guard `name`, `email`, and `relationship_type` rendering through the new helpers, replacing the old `!should_hide_relationship_type()` calls and unconditional output.
+- All five member card templates (`members-list.php`, `members-list-unified.php`, `member-details.php`, `members-list-groups.php`, `members-view-unified.php`) now guard `name`, `email`, and `relationship_type` rendering through the new helpers, replacing the old `!should_hide_relationship_type()` calls and unconditional output.
 - `MembershipService::getMembershipForOrganization()` and `getOrgMembershipData()` converted from raw `get_transient`/`set_transient` to `CacheService`, giving their cached values salt-versioned keys that expire automatically on `cache_salt` bumps.
 - `MemberService::setCachedData()` now accepts an optional `?int $duration` parameter, passed through to `CacheService::set()`.
 - Search results in `MemberService` are now cached using `platform.cache.search_clear_cache_duration` as TTL (key scheme: `orgman_search_<md5>`), wiring a config key that was previously defined but never consumed.

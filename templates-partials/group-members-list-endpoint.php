@@ -90,5 +90,5 @@ if ($use_unified_member_list) {
     $show_remove_button = true;
     include __DIR__ . '/members-list-unified.php';
 } else {
-    include __DIR__ . '/group-members-list.php';
+    include __DIR__ . '/members-list-groups.php';
 }

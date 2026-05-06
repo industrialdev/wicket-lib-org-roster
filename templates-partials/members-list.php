@@ -401,12 +401,10 @@ $no_members_message = __('No members found.', 'wicket-acc');
                             </svg>
                         </button>
                         <?php
-                            // Hide Remove button for membership owner
-                            $is_current_user_owner = !empty($member['is_owner'])
-                                    && !empty($current_user_uuid)
-                                    && $member_uuid === $current_user_uuid;
+                            // Hide Remove button for organization owner (any viewer)
+                            $is_member_owner = !empty($member['is_owner']);
             ?>
-                        <?php if ($show_remove_button && !$is_current_user_owner): ?>
+                        <?php if ($show_remove_button && !$is_member_owner): ?>
                             <button type="button" class="acc-remove-button remove-member-button button button--secondary wt_inline-flex wt_items-center wt_justify-between wt_gap-2 wt_px-4 wt_py-2 wt_bg-light-neutral wt_text-sm wt_border wt_border-bg-interactive wt_transition-colors wt_whitespace-nowrap component-button"
                                 data-on:click="
                                     $removeMemberSuccess = false;
