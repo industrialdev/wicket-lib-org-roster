@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.8.6] - 2026-05-06
+
+### Fixed
+- Backward compatibility for themes still referencing pre-0.8 namespace (`OrgManagement\OrgMan`) and filter names (`wicket/acc/orgman/*`). Added `class_alias` so old `use` statements resolve, and dual `apply_filters` calls for both new (`wicket/org-roster/*`) and legacy (`wicket/acc/orgman/*`) filter names. Themes no longer need patching when the library is updated.
+
 ## [0.8.5] - 2026-05-06
 
 ### Fixed

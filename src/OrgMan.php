@@ -1048,7 +1048,10 @@ final class OrgMan
     {
         $base_path = dirname(__DIR__);
 
-        return (string) apply_filters('wicket/org-roster/base_path', $base_path);
+        $base_path = (string) apply_filters('wicket/org-roster/base_path', $base_path);
+        $base_path = (string) apply_filters('wicket/acc/orgman/base_path', $base_path);
+
+        return $base_path;
     }
 
     /**
@@ -1071,7 +1074,10 @@ final class OrgMan
             $base_uri = trailingslashit(site_url($relative_path));
         }
 
-        return trailingslashit((string) apply_filters('wicket/org-roster/base_url', $base_uri));
+        $base_uri = (string) apply_filters('wicket/org-roster/base_url', $base_uri);
+        $base_uri = (string) apply_filters('wicket/acc/orgman/base_url', $base_uri);
+
+        return trailingslashit($base_uri);
     }
 
     /**
@@ -1344,4 +1350,9 @@ final class OrgMan
 
         \Wicket()->log()->info('Cleared all organization management cache', ['source' => 'wicket-orgman']);
     }
+}
+
+// Backward-compatible alias for themes/plugins still referencing the pre-0.8 namespace.
+if (!class_exists(\OrgManagement\OrgMan::class, false)) {
+    class_alias(\WicketORM\OrgMan::class, 'OrgManagement\\OrgMan');
 }

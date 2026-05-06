@@ -477,6 +477,9 @@ final class OrgManConfig
             ],
         ];
 
-        return apply_filters('wicket/org-roster/config', $orgmanConfig);
+        $orgmanConfig = apply_filters('wicket/org-roster/config', $orgmanConfig);
+        $orgmanConfig = apply_filters('wicket/acc/orgman/config', $orgmanConfig);
+
+        return $orgmanConfig;
     }
 }
