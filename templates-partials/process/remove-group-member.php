@@ -4,9 +4,9 @@
  * Hypermedia partial for Remove Group Member processing.
  */
 
+use starfederation\datastar\enums\ElementPatchMode;
 use WicketORM\Services\ConfigService;
 use WicketORM\Services\MemberService;
-use starfederation\datastar\enums\ElementPatchMode;
 
 if (!defined('ABSPATH')) {
     exit;

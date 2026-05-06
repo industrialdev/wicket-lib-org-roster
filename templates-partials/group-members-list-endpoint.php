@@ -75,6 +75,7 @@ if ($use_unified_member_list) {
             $member['roles'] = [$member['role']];
             $member['current_roles'] = [$member['role']];
         }
+
         return $member;
     }, $group_members);
     $members = $group_members;

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace WicketORM\Templates;
 
+use starfederation\datastar\ServerSentEventGenerator;
 use WicketORM\Services\CacheService;
 use WicketORM\Services\ConfigService;
 use WicketORM\Services\MemberService;
-use starfederation\datastar\ServerSentEventGenerator;
 
 // Ensure this file is not accessed directly.
 if (!defined('ABSPATH')) {

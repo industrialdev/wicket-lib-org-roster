@@ -306,10 +306,12 @@ class MemberService
     {
         return $this->writer->updateMemberRoles($personUuid, $orgUuid, $membershipUuid, $roles);
     }
+
     public function updateMemberRelationship($personUuid, $orgUuid, $relationshipType)
     {
         return $this->writer->updateMemberRelationship($personUuid, $orgUuid, $relationshipType);
     }
+
     public function updateMemberDescription($personUuid, $orgUuid, $description)
     {
         return $this->writer->updateMemberDescription($personUuid, $orgUuid, $description);

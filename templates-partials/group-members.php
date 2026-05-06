@@ -91,6 +91,7 @@ if ((bool) ($group_presentation['use_unified_member_list'] ?? false)) {
             $member['roles'] = [$member['role']];
             $member['current_roles'] = [$member['role']];
         }
+
         return $member;
     }, $members);
 }

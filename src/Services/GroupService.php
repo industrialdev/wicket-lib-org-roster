@@ -547,6 +547,7 @@ class GroupService
                 'source' => 'wicket-orgman',
                 'person_id' => $member['relationships']['person']['data']['id'] ?? 'unknown',
             ]);
+
             return true;
         }
 
@@ -562,6 +563,7 @@ class GroupService
                 'org_identifier' => $org_identifier,
                 'org_uuid' => $org_uuid,
             ]);
+
             return true;
         }
 
@@ -912,7 +914,6 @@ class GroupService
 
         return $result;
     }
-
 
     /**
      * Fetch group members list (roster roles only), filtered by org identifier.
@@ -1449,7 +1450,7 @@ class GroupService
                 return $result;
             }
 
-            $raw        = wicket_api_client()->get('/groups/' . rawurlencode($group_uuid));
+            $raw = wicket_api_client()->get('/groups/' . rawurlencode($group_uuid));
             $group_data = is_array($raw) ? ($raw['data'] ?? []) : [];
 
             if (empty($group_data)) {
@@ -1483,7 +1484,6 @@ class GroupService
         return $result;
     }
 
-
     /**
      * Augment a groups list with groups accessible via the manager MDP org role.
      *
@@ -1513,9 +1513,9 @@ class GroupService
         }
 
         foreach ($all_manager_access as $access) {
-            $mgr_org_uuid       = $access['org_uuid'];
+            $mgr_org_uuid = $access['org_uuid'];
             $mgr_org_identifier = $access['org_identifier'];
-            $org_name           = ($mgr_org_identifier !== $mgr_org_uuid) ? $mgr_org_identifier : '';
+            $org_name = ($mgr_org_identifier !== $mgr_org_uuid) ? $mgr_org_identifier : '';
 
             $tagged = $this->fetchRosterTaggedGroupsForOrg($mgr_org_uuid);
             foreach ($tagged as $group) {
@@ -1525,7 +1525,7 @@ class GroupService
                 }
 
                 $group_attrs = is_array($group['attributes'] ?? null) ? $group['attributes'] : [];
-                $group_name  = $group_attrs['name'] ?? $group_attrs['name_en'] ?? $group_attrs['name_fr'] ?? '';
+                $group_name = $group_attrs['name'] ?? $group_attrs['name_en'] ?? $group_attrs['name_fr'] ?? '';
 
                 if ($query !== '' && false === stripos($group_name, $query)) {
                     continue;
@@ -1546,7 +1546,6 @@ class GroupService
 
         return $groups;
     }
-
 
     /**
      * Fetch "Roster Management" tagged groups for a given org.
@@ -1596,7 +1595,7 @@ class GroupService
                 if (!is_array($group)) {
                     continue;
                 }
-                $group_id   = (string) ($group['id'] ?? '');
+                $group_id = (string) ($group['id'] ?? '');
                 $group_tags = $group['attributes']['tags'] ?? null;
                 if ($this->groupHasRosterTag($group)) {
                     $tagged[] = $group;
@@ -1652,7 +1651,7 @@ class GroupService
             return [];
         }
 
-        $config       = \WicketORM\Config\OrgManConfig::get();
+        $config = \WicketORM\Config\OrgManConfig::get();
         $manager_role = sanitize_key((string) ($config['access']['roles']['manager'] ?? ''));
 
         if ('' === $manager_role) {
@@ -1697,10 +1696,10 @@ class GroupService
                     continue;
                 }
 
-                $resource      = $role['relationships']['resource']['data']
+                $resource = $role['relationships']['resource']['data']
                     ?? $role['relationships']['organization']['data']
                     ?? null;
-                $org_uuid      = is_array($resource) ? (string) ($resource['id'] ?? '') : '';
+                $org_uuid = is_array($resource) ? (string) ($resource['id'] ?? '') : '';
                 $resource_type = strtolower((string) (is_array($resource) ? ($resource['type'] ?? '') : ''));
 
                 if ('' === $org_uuid) {
@@ -1725,7 +1724,7 @@ class GroupService
                 if (function_exists('wicket_get_organization')) {
                     try {
                         $org_response = wicket_get_organization($org_uuid);
-                        $org_attrs    = is_array($org_response) ? ($org_response['data']['attributes'] ?? []) : [];
+                        $org_attrs = is_array($org_response) ? ($org_response['data']['attributes'] ?? []) : [];
                         if (is_array($org_attrs)) {
                             $resolved = (string) (
                                 $org_attrs['legal_name']
@@ -1771,7 +1770,6 @@ class GroupService
 
         return !empty($all) ? $all[0] : [];
     }
-
 
     /**
      * Retrieve shared logger.

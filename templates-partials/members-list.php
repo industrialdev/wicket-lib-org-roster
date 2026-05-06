@@ -127,8 +127,6 @@ if ((!isset($members) || !is_array($members)) && !empty($org_uuid)) {
     }
 }
 
-
-
 // Seat availability check
 $max_seats = 0;
 $active_seats = 0;

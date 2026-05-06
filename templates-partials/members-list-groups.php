@@ -263,7 +263,7 @@ $show_assignment_info = (bool) ($orgman_config['presentation']['member_list']['s
         // Always show the 'Add Member' button if the user can manage the group.
         // The backend (GroupsStrategy) handles seat availability enforcement for seat-limited roles.
         // This allows adding non-seat-limited roles (like Observers) even when seats are full.
-        ?>
+?>
         <button type="button"
             class="button button--primary add-member-button wt_w-full wt_py-2 component-button"
             data-on:click="$addMemberSuccess = false; $addMemberSubmitting = false; $addMemberSuccessMessage = ''; (() => { const modal = document.getElementById('groupMembersAddModal'); if (!modal) return; const form = modal.querySelector('form'); if (form) form.reset(); const messages = modal.querySelector('#group-member-add-messages'); if (messages) messages.innerHTML = ''; })(); $addMemberModalOpen = true"><?php esc_html_e('Add Member', 'wicket-acc'); ?></button>

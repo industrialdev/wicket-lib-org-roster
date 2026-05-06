@@ -1354,5 +1354,5 @@ final class OrgMan
 
 // Backward-compatible alias for themes/plugins still referencing the pre-0.8 namespace.
 if (!class_exists(\OrgManagement\OrgMan::class, false)) {
-    class_alias(\WicketORM\OrgMan::class, 'OrgManagement\\OrgMan');
+    class_alias(OrgMan::class, 'OrgManagement\\OrgMan');
 }

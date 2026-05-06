@@ -4,10 +4,10 @@
  * Hypermedia partial for Add Group Member processing.
  */
 
-use WicketORM\Services\ConfigService;
-use WicketORM\Services\MemberService;
 use starfederation\datastar\enums\ElementPatchMode;
 use starfederation\datastar\ServerSentEventGenerator;
+use WicketORM\Services\ConfigService;
+use WicketORM\Services\MemberService;
 
 if (!defined('ABSPATH')) {
     exit;

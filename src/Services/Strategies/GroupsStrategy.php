@@ -125,6 +125,7 @@ class GroupsStrategy implements RosterManagementStrategy
                     $logger->warning('Groups strategy add_member blocked: seat limit', array_merge($log_context, [
                         'error' => $seat_result->get_error_message(),
                     ]));
+
                     return $seat_result;
                 }
             }
@@ -358,7 +359,7 @@ class GroupsStrategy implements RosterManagementStrategy
             $groups_config = is_array($orgman_config['groups'] ?? null) ? $orgman_config['groups'] : [];
             $group_roles = is_array($groups_config['roles'] ?? null) ? $groups_config['roles'] : [];
             $manage_roles = is_array($group_roles['management'] ?? null) ? $group_roles['management'] : [];
-            
+
             $group_member_id = (string) ($context['group_member_id'] ?? '');
             if ('' === $group_member_id) {
                 $group_member_id = $this->groupService()->findGroupMemberId($group_uuid, $person_uuid, $org_identifier, [], $org_uuid);
@@ -386,8 +387,9 @@ class GroupsStrategy implements RosterManagementStrategy
                     } catch (\Throwable $e) {
                         // If we can't verify, we should probably be cautious if we don't know the role.
                         if (empty($role_slug)) {
-                             $logger->error('Groups strategy could not verify role before removal', $log_context);
-                             return new \WP_Error('role_verification_failed', 'Could not verify member role before removal.');
+                            $logger->error('Groups strategy could not verify role before removal', $log_context);
+
+                            return new \WP_Error('role_verification_failed', 'Could not verify member role before removal.');
                         }
                     }
                 }
@@ -436,7 +438,6 @@ class GroupsStrategy implements RosterManagementStrategy
             return new \WP_Error('remove_group_member_exception', $e->getMessage());
         }
     }
-
 
     /**
      * Lazily instantiate ConnectionService.
