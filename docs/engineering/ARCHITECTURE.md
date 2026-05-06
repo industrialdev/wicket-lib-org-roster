@@ -1,7 +1,7 @@
 ---
 title: "Architecture"
 audience: [developer]
-php_class: OrgManagement\OrgMan
+php_class: WicketORM\OrgMan
 source_files: ["src/OrgMan.php", "src/Config/OrgManConfig.php", "src/Services/", "src/Helpers/TemplateHelper.php"]
 ---
 
@@ -20,7 +20,7 @@ source_files: ["src/OrgMan.php", "src/Config/OrgManConfig.php", "src/Services/",
   - handles WooCommerce additional-seats order processing
 - `src/Config/OrgManConfig.php`
   - defines the full default config tree
-  - all site overrides are expected through `wicket/acc/orgman/config`
+  - all site overrides are expected through `wicket/org-roster/config`
 - `src/Services/*`
   - business logic for organizations, members, memberships, groups, documents, subsidiaries, permissions, bulk upload, additional seats, member exports, and engagement data
 - `src/Services/Strategies/*`

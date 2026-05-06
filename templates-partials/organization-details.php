@@ -6,7 +6,7 @@
  * Renders a single-organization summary view when org_id is present.
  */
 
-namespace OrgManagement\Templates;
+namespace WicketORM\Templates;
 
 // Exit if accessed directly.
 if (!defined('ABSPATH')) {
@@ -26,8 +26,8 @@ if (empty($org_uuid) && isset($_GET['org_id'])) {
 $user_uuid = wp_get_current_user()->user_login;
 
 // Services
-$membershipService = new \OrgManagement\Services\MembershipService();
-$configService = new \OrgManagement\Services\ConfigService();
+$membershipService = new \WicketORM\Services\MembershipService();
+$configService = new \WicketORM\Services\ConfigService();
 $roster_mode = $configService->getRosterMode();
 $group_uuid = isset($_GET['group_uuid']) ? sanitize_text_field($_GET['group_uuid']) : '';
 
@@ -214,21 +214,21 @@ if ($roster_mode !== 'groups') {
         <?php
         // Check user permissions for this organization
         if ($roster_mode === 'groups' && $group_uuid !== '') {
-            $group_service = new \OrgManagement\Services\GroupService();
+            $group_service = new \WicketORM\Services\GroupService();
             $group_access = $group_service->canManageGroup($group_uuid, $user_uuid);
             $can_edit_org = !empty($group_access['allowed']);
             $is_membership_manager = !empty($group_access['allowed']);
             $can_bulk_upload = !empty($group_access['allowed']);
         } else {
-            $can_edit_org = \OrgManagement\Helpers\PermissionHelper::can_edit_organization($org_uuid);
-            $is_membership_manager = \OrgManagement\Helpers\PermissionHelper::is_membership_manager($org_uuid);
-            $can_bulk_upload = \OrgManagement\Helpers\PermissionHelper::can_add_members($org_uuid);
+            $can_edit_org = \WicketORM\Helpers\PermissionHelper::can_edit_organization($org_uuid);
+            $is_membership_manager = \WicketORM\Helpers\PermissionHelper::is_membership_manager($org_uuid);
+            $can_bulk_upload = \WicketORM\Helpers\PermissionHelper::can_add_members($org_uuid);
         }
 
 // Get WPML-aware URLs for my-account pages
-$profile_url = \OrgManagement\Helpers\Helper::getMyAccountPageUrl('organization-profile', '/my-account/organization-profile/');
-$members_url = \OrgManagement\Helpers\Helper::getMyAccountPageUrl('organization-members', '/my-account/organization-members/');
-$members_bulk_url = \OrgManagement\Helpers\Helper::getMyAccountPageUrl('organization-members-bulk', '/my-account/organization-members-bulk/');
+$profile_url = \WicketORM\Helpers\Helper::getMyAccountPageUrl('organization-profile', '/my-account/organization-profile/');
+$members_url = \WicketORM\Helpers\Helper::getMyAccountPageUrl('organization-members', '/my-account/organization-members/');
+$members_bulk_url = \WicketORM\Helpers\Helper::getMyAccountPageUrl('organization-members-bulk', '/my-account/organization-members-bulk/');
 $profile_params = [];
 $members_params = [];
 if ($org_uuid !== '') {
@@ -252,7 +252,7 @@ if ($roster_mode === 'groups' && $group_uuid !== '') {
         <?php endif; ?>
 
         <?php
-        $member_list_config = \OrgManagement\Config\OrgManConfig::get()['presentation']['member_list'] ?? [];
+        $member_list_config = \WicketORM\Config\OrgManConfig::get()['presentation']['member_list'] ?? [];
 $show_bulk_upload = (bool) ($member_list_config['show_bulk_upload'] ?? false);
 if ($show_bulk_upload && $can_bulk_upload):
     ?>

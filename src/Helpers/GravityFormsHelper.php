@@ -4,7 +4,7 @@
  * Gravity Forms Helper for Additional Seats functionality.
  */
 
-namespace OrgManagement\Helpers;
+namespace WicketORM\Helpers;
 
 // Exit if accessed directly.
 if (!defined('ABSPATH')) {
@@ -58,7 +58,7 @@ class GravityFormsHelper extends Helper
     public static function handle_additional_seats_submission($submission, $form)
     {
         // Check if this is the additional seats form
-        $configService = new \OrgManagement\Services\ConfigService();
+        $configService = new \WicketORM\Services\ConfigService();
         $additional_seats_form_id = $configService->getAdditionalSeatsFormId();
 
         $logger = \Wicket()->log();
@@ -93,7 +93,7 @@ class GravityFormsHelper extends Helper
             $membership_id = self::get_request_membership_id();
         }
         if (empty($org_uuid) || empty($membership_id)) {
-            $additional_seats_service = new \OrgManagement\Services\AdditionalSeatsService($configService);
+            $additional_seats_service = new \WicketORM\Services\AdditionalSeatsService($configService);
             $purchase_meta = $additional_seats_service->getPurchaseUserMeta();
             if (is_array($purchase_meta)) {
                 if (empty($org_uuid) && !empty($purchase_meta['org_uuid'])) {
@@ -152,7 +152,7 @@ class GravityFormsHelper extends Helper
      */
     public static function add_to_cart_confirmation($confirmation, $form, $entry, $ajax)
     {
-        $configService = new \OrgManagement\Services\ConfigService();
+        $configService = new \WicketORM\Services\ConfigService();
         $additional_seats_form_id = $configService->getAdditionalSeatsFormId();
 
         $logger = \Wicket()->log();
@@ -177,7 +177,7 @@ class GravityFormsHelper extends Helper
         $seat_data = $_SESSION['orgman_additional_seats'];
 
         // Get the additional seats product
-        $additional_seats_service = new \OrgManagement\Services\AdditionalSeatsService($configService);
+        $additional_seats_service = new \WicketORM\Services\AdditionalSeatsService($configService);
         $product_id = $additional_seats_service->getAdditionalSeatsProduct();
 
         if (!$product_id) {
@@ -252,7 +252,7 @@ class GravityFormsHelper extends Helper
      */
     public static function capture_additional_seats_submission($form)
     {
-        $configService = new \OrgManagement\Services\ConfigService();
+        $configService = new \WicketORM\Services\ConfigService();
         $additional_seats_form_id = $configService->getAdditionalSeatsFormId();
 
         if ((int) ($form['id'] ?? 0) !== (int) $additional_seats_form_id) {
@@ -278,7 +278,7 @@ class GravityFormsHelper extends Helper
             $membership_id = self::get_request_membership_id();
         }
         if ($org_uuid === '' || $membership_id === '') {
-            $additional_seats_service = new \OrgManagement\Services\AdditionalSeatsService($configService);
+            $additional_seats_service = new \WicketORM\Services\AdditionalSeatsService($configService);
             $purchase_meta = $additional_seats_service->getPurchaseUserMeta();
             if (is_array($purchase_meta)) {
                 if ($org_uuid === '' && !empty($purchase_meta['org_uuid'])) {
@@ -382,7 +382,7 @@ class GravityFormsHelper extends Helper
      */
     public static function validate_seat_quantity($result, $value, $form, $field)
     {
-        $configService = new \OrgManagement\Services\ConfigService();
+        $configService = new \WicketORM\Services\ConfigService();
         $additional_seats_form_id = $configService->getAdditionalSeatsFormId();
 
         $field_map = self::get_additional_seats_field_map($form);
@@ -442,7 +442,7 @@ class GravityFormsHelper extends Helper
      */
     public static function get_form_html($org_uuid, $membership_id)
     {
-        $configService = new \OrgManagement\Services\ConfigService();
+        $configService = new \WicketORM\Services\ConfigService();
         $form_id = $configService->getAdditionalSeatsFormIdForCurrentLanguage();
         $query_form_id = isset($_GET['gf_id']) ? absint($_GET['gf_id']) : 0;
         if ($query_form_id > 0) {
@@ -505,7 +505,7 @@ class GravityFormsHelper extends Helper
             return $form;
         }
 
-        $configService = new \OrgManagement\Services\ConfigService();
+        $configService = new \WicketORM\Services\ConfigService();
         $configured_form_id = $configService->getAdditionalSeatsFormId();
         $localized_form_id = $configService->getAdditionalSeatsFormIdForCurrentLanguage();
         $form_id = (int) ($form['id'] ?? 0);
@@ -690,8 +690,8 @@ class GravityFormsHelper extends Helper
             return;
         }
 
-        $configService = new \OrgManagement\Services\ConfigService();
-        $additional_seats_service = new \OrgManagement\Services\AdditionalSeatsService($configService);
+        $configService = new \WicketORM\Services\ConfigService();
+        $additional_seats_service = new \WicketORM\Services\AdditionalSeatsService($configService);
         $product_id = $additional_seats_service->getAdditionalSeatsProduct();
         if (!$product_id) {
             wc_add_notice(__('Additional seats product not found. Please contact support.', 'wicket-acc'), 'error');

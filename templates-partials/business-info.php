@@ -50,7 +50,7 @@ $notice ??= null;
 
 	<?php
     // Check for seat limits or other informational banners using config
-    $configService = new OrgManagement\Services\ConfigService();
+    $configService = new WicketORM\Services\ConfigService();
 $seat_limit_info = $configService->getBusinessInfoSeatLimitInfo();
 if ($seat_limit_info) : ?>
 		<div class="seat-limit-notice">

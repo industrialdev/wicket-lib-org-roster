@@ -6,7 +6,7 @@
  * Replaces the additional-seats-config.php include file with a proper controller.
  */
 
-namespace OrgManagement\Controllers;
+namespace WicketORM\Controllers;
 
 // Exit if accessed directly.
 if (!defined('ABSPATH')) {
@@ -19,7 +19,7 @@ if (!defined('ABSPATH')) {
 class ConfigurationController
 {
     /**
-     * @var \OrgManagement\Services\ConfigService
+     * @var \WicketORM\Services\ConfigService
      */
     private $configService;
 
@@ -28,7 +28,7 @@ class ConfigurationController
      */
     public function __construct()
     {
-        $this->configService = new \OrgManagement\Services\ConfigService();
+        $this->configService = new \WicketORM\Services\ConfigService();
     }
 
     /**
@@ -48,33 +48,33 @@ class ConfigurationController
         $config = $this->configService;
 
         // Enable/disable additional seats functionality
-        add_filter('wicket/acc/orgman/additional_seats_enabled', function ($enabled) use ($config) {
+        add_filter('wicket/org-roster/additional_seats_enabled', function ($enabled) use ($config) {
             // Get config value directly to avoid recursion
-            $config_data = \OrgManagement\Config\OrgManConfig::get();
+            $config_data = \WicketORM\Config\OrgManConfig::get();
 
             return $config_data['integrations']['additional_seats']['enabled'] ?? false;
         });
 
         // Set the SKU for additional seats product
-        add_filter('wicket/acc/orgman/additional_seats_sku', function ($sku) use ($config) {
+        add_filter('wicket/org-roster/additional_seats_sku', function ($sku) use ($config) {
             // Get config value directly to avoid recursion
-            $config_data = \OrgManagement\Config\OrgManConfig::get();
+            $config_data = \WicketORM\Config\OrgManConfig::get();
 
             return $config_data['integrations']['additional_seats']['sku'] ?? 'additional-seats';
         });
 
         // Set the SKU for additional seats discount product
-        add_filter('wicket/acc/orgman/additional_seats_discount_sku', function ($sku) use ($config) {
+        add_filter('wicket/org-roster/additional_seats_discount_sku', function ($sku) use ($config) {
             // Get config value directly to avoid recursion
-            $config_data = \OrgManagement\Config\OrgManConfig::get();
+            $config_data = \WicketORM\Config\OrgManConfig::get();
 
             return $config_data['integrations']['additional_seats']['discount_sku'] ?? 'corporate-seat-discount';
         });
 
         // Set the Gravity Form ID for additional seats purchase
-        add_filter('wicket/acc/orgman/additional_seats_form_id', function ($form_id) use ($config) {
+        add_filter('wicket/org-roster/additional_seats_form_id', function ($form_id) use ($config) {
             // Get config value directly to avoid recursion, but still support auto-detection if set to 0
-            $config_data = \OrgManagement\Config\OrgManConfig::get();
+            $config_data = \WicketORM\Config\OrgManConfig::get();
             $default_form_id = $config_data['integrations']['additional_seats']['form_id'] ?? 0;
             if ($default_form_id === 0 && function_exists('wicket_gf_get_form_id_by_slug')) {
                 $slug = $config_data['integrations']['additional_seats']['form_slug'] ?? 'additional-seats';
@@ -88,17 +88,17 @@ class ConfigurationController
         });
 
         // Set a minimum quantity for additional seats purchase
-        add_filter('wicket/acc/orgman/additional_seats_min_quantity', function ($min_quantity) use ($config) {
+        add_filter('wicket/org-roster/additional_seats_min_quantity', function ($min_quantity) use ($config) {
             // Get config value directly to avoid recursion
-            $config_data = \OrgManagement\Config\OrgManConfig::get();
+            $config_data = \WicketORM\Config\OrgManConfig::get();
 
             return $config_data['integrations']['additional_seats']['min_quantity'] ?? 1;
         });
 
         // Set a maximum quantity for additional seats purchase
-        add_filter('wicket/acc/orgman/additional_seats_max_quantity', function ($max_quantity) use ($config) {
+        add_filter('wicket/org-roster/additional_seats_max_quantity', function ($max_quantity) use ($config) {
             // Get config value directly to avoid recursion
-            $config_data = \OrgManagement\Config\OrgManConfig::get();
+            $config_data = \WicketORM\Config\OrgManConfig::get();
 
             return $config_data['integrations']['additional_seats']['max_quantity'] ?? 100;
         });
@@ -124,7 +124,7 @@ class ConfigurationController
             return;
         }
 
-        $additional_seats_service = new \OrgManagement\Services\AdditionalSeatsService($this->configService);
+        $additional_seats_service = new \WicketORM\Services\AdditionalSeatsService($this->configService);
 
         if ($additional_seats_service->canPurchaseAdditionalSeats($org_uuid)) {
             ?>
@@ -242,12 +242,12 @@ class ConfigurationController
     public function getAdditionalSeatsConfig(): array
     {
         return [
-            'enabled' => apply_filters('wicket/acc/orgman/additional_seats_enabled', false),
-            'sku' => apply_filters('wicket/acc/orgman/additional_seats_sku', 'additional-seats'),
-            'discount_sku' => apply_filters('wicket/acc/orgman/additional_seats_discount_sku', 'corporate-seat-discount'),
-            'form_id' => apply_filters('wicket/acc/orgman/additional_seats_form_id', 0),
-            'min_quantity' => apply_filters('wicket/acc/orgman/additional_seats_min_quantity', 1),
-            'max_quantity' => apply_filters('wicket/acc/orgman/additional_seats_max_quantity', 100),
+            'enabled' => apply_filters('wicket/org-roster/additional_seats_enabled', false),
+            'sku' => apply_filters('wicket/org-roster/additional_seats_sku', 'additional-seats'),
+            'discount_sku' => apply_filters('wicket/org-roster/additional_seats_discount_sku', 'corporate-seat-discount'),
+            'form_id' => apply_filters('wicket/org-roster/additional_seats_form_id', 0),
+            'min_quantity' => apply_filters('wicket/org-roster/additional_seats_min_quantity', 1),
+            'max_quantity' => apply_filters('wicket/org-roster/additional_seats_max_quantity', 100),
         ];
     }
 
@@ -258,7 +258,7 @@ class ConfigurationController
      */
     public function isAdditionalSeatsEnabled(): bool
     {
-        return (bool) apply_filters('wicket/acc/orgman/additional_seats_enabled', false);
+        return (bool) apply_filters('wicket/org-roster/additional_seats_enabled', false);
     }
 
     /**
@@ -268,7 +268,7 @@ class ConfigurationController
      */
     public function getAdditionalSeatsSku(): string
     {
-        return (string) apply_filters('wicket/acc/orgman/additional_seats_sku', 'additional-seats');
+        return (string) apply_filters('wicket/org-roster/additional_seats_sku', 'additional-seats');
     }
 
     /**
@@ -278,7 +278,7 @@ class ConfigurationController
      */
     public function getAdditionalSeatsDiscountSku(): string
     {
-        return (string) apply_filters('wicket/acc/orgman/additional_seats_discount_sku', 'corporate-seat-discount');
+        return (string) apply_filters('wicket/org-roster/additional_seats_discount_sku', 'corporate-seat-discount');
     }
 
     /**
@@ -288,7 +288,7 @@ class ConfigurationController
      */
     public function getAdditionalSeatsFormId(): int
     {
-        return (int) apply_filters('wicket/acc/orgman/additional_seats_form_id', 0);
+        return (int) apply_filters('wicket/org-roster/additional_seats_form_id', 0);
     }
 
     /**
@@ -298,7 +298,7 @@ class ConfigurationController
      */
     public function getAdditionalSeatsMinQuantity(): int
     {
-        return (int) apply_filters('wicket/acc/orgman/additional_seats_min_quantity', 1);
+        return (int) apply_filters('wicket/org-roster/additional_seats_min_quantity', 1);
     }
 
     /**
@@ -308,6 +308,6 @@ class ConfigurationController
      */
     public function getAdditionalSeatsMaxQuantity(): int
     {
-        return (int) apply_filters('wicket/acc/orgman/additional_seats_max_quantity', 100);
+        return (int) apply_filters('wicket/org-roster/additional_seats_max_quantity', 100);
     }
 }

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace OrgManagement\Templates;
+namespace WicketORM\Templates;
 
-use OrgManagement\Services\CacheService;
-use OrgManagement\Services\ConfigService;
-use OrgManagement\Services\MemberService;
+use WicketORM\Services\CacheService;
+use WicketORM\Services\ConfigService;
+use WicketORM\Services\MemberService;
 use starfederation\datastar\ServerSentEventGenerator;
 
 // Ensure this file is not accessed directly.
@@ -114,7 +114,7 @@ $member['lazy_loaded'] = true;
 $member['is_confirmed'] = !empty($member['confirmed_at']);
 
 // Shared variables for the partials
-$config = \OrgManagement\Config\OrgManConfig::get();
+$config = \WicketORM\Config\OrgManConfig::get();
 $member_list_config = $config['presentation']['member_list'] ?? [];
 $show_account_status = (bool) ($member_list_config['account_status']['enabled'] ?? true);
 $show_unconfirmed_label = (bool) ($member_list_config['account_status']['show_unconfirmed_label'] ?? true);
@@ -166,21 +166,21 @@ ob_start();
 <div id="member-details-<?php echo esc_attr($person_uuid_no_dashes); ?>" class="wt_flex wt_flex-col wt_gap-2" data-member-details="<?php echo esc_attr($person_uuid_no_dashes); ?>">
     <?php
     $has_details = false;
-if (!empty($member['relationship_description']) && \OrgManagement\Helpers\Helper::should_show_member_description()) :
+if (!empty($member['relationship_description']) && \WicketORM\Helpers\Helper::should_show_member_description()) :
     $has_details = true;
     ?>
         <p class="member-description wt_text-sm wt_text-content wt_mb-0">
             <?php echo esc_html($member['relationship_description']); ?>
         </p>
     <?php endif; ?>
-    <?php if (!empty($member['relationship_names']) && \OrgManagement\Helpers\Helper::should_show_member_relationship_type()) :
+    <?php if (!empty($member['relationship_names']) && \WicketORM\Helpers\Helper::should_show_member_relationship_type()) :
         $has_details = true;
         ?>
         <div class="wt_flex wt_items-center wt_gap-2">
             <span class="wt_text-content"><?php echo esc_html($member['relationship_names']); ?></span>
         </div>
     <?php endif; ?>
-    <?php if (!empty($member_email) && \OrgManagement\Helpers\Helper::should_show_member_email()) :
+    <?php if (!empty($member_email) && \WicketORM\Helpers\Helper::should_show_member_email()) :
         $has_details = true;
         ?>
         <div class="wt_flex wt_items-center wt_gap-2">
@@ -189,7 +189,7 @@ if (!empty($member['relationship_description']) && \OrgManagement\Helpers\Helper
             </a>
         </div>
     <?php endif; ?>
-    <?php if (\OrgManagement\Helpers\Helper::should_show_member_roles()) :
+    <?php if (\WicketORM\Helpers\Helper::should_show_member_roles()) :
         $has_details = true;
         ?>
         <div class="wt_flex wt_items-baseline wt_gap-2 wt_text-sm">

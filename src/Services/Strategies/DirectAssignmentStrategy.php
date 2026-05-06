@@ -4,15 +4,15 @@
  * Direct Assignment Strategy for Roster Management.
  */
 
-namespace OrgManagement\Services\Strategies;
+namespace WicketORM\Services\Strategies;
 
-use OrgManagement\Services\ConfigService;
-use OrgManagement\Services\ConnectionService;
-use OrgManagement\Services\MembershipService;
-use OrgManagement\Services\OrganizationService;
-use OrgManagement\Services\PermissionService;
-use OrgManagement\Services\PersonService;
-use OrgManagement\Services\TouchpointService;
+use WicketORM\Services\ConfigService;
+use WicketORM\Services\ConnectionService;
+use WicketORM\Services\MembershipService;
+use WicketORM\Services\OrganizationService;
+use WicketORM\Services\PermissionService;
+use WicketORM\Services\PersonService;
+use WicketORM\Services\TouchpointService;
 use WP_Error;
 
 // Exit if accessed directly.
@@ -90,7 +90,7 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
             $logger->debug('Person record ready for membership assignment', $log_context);
 
             // Get configuration for member addition settings
-            $config = \OrgManagement\Config\OrgManConfig::get();
+            $config = \WicketORM\Config\OrgManConfig::get();
             $base_member_role = $config['member_management']['addition']['base_member_role'] ?? 'member';
             $auto_assign_roles = $config['member_management']['addition']['auto_assign_roles'] ?? [];
 
@@ -348,7 +348,7 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
         $roles = $this->normalizeRoles($roles);
 
         // Filter out membership_owner if configured to prevent assignment
-        $config = \OrgManagement\Config\OrgManConfig::get();
+        $config = \WicketORM\Config\OrgManConfig::get();
         if (!empty($config['access']['permissions']['prevent_owner_assignment'])) {
             $roles = array_values(array_diff($roles, ['membership_owner']));
         }
@@ -724,7 +724,7 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
         $subject = sprintf('Welcome to %s', $organization_name);
 
         // Get configuration for email
-        $config = \OrgManagement\Config\OrgManConfig::get();
+        $config = \WicketORM\Config\OrgManConfig::get();
         $confirmation_email_from = $config['integrations']['notifications']['confirmation_email_from'] ?? 'no-reply@wicketcloud.com';
 
         $body = sprintf(
@@ -800,7 +800,7 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
                 return new WP_Error('missing_person_membership_id', 'Person membership ID is required to remove a member.');
             }
 
-            $config = \OrgManagement\Config\OrgManConfig::get();
+            $config = \WicketORM\Config\OrgManConfig::get();
             $preserve_relationship = (bool) ($config['member_management']['removal']['direct']['preserve_relationship'] ?? false);
             $prevent_owner_removal = (bool) ($config['access']['permissions']['prevent_owner_removal'] ?? false);
             $owner_must_have_membership_owner = (bool) ($config['access']['permissions']['owner_removal_requires_membership_owner_role'] ?? false);

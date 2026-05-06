@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OrgManagement\Services;
+namespace WicketORM\Services;
 
 use WP_Error;
 
@@ -65,7 +65,7 @@ class BulkMemberUploadService
         string $roster_mode,
         string $group_uuid = ''
     ) {
-        $config = \OrgManagement\Config\OrgManConfig::get();
+        $config = \WicketORM\Config\OrgManConfig::get();
         $bulk_upload_config = is_array($config['member_management']['bulk_upload'] ?? null)
             ? $config['member_management']['bulk_upload']
             : [];
@@ -325,7 +325,7 @@ class BulkMemberUploadService
             return;
         }
 
-        $config = \OrgManagement\Config\OrgManConfig::get();
+        $config = \WicketORM\Config\OrgManConfig::get();
         $bulk_upload_config = is_array($config['member_management']['bulk_upload'] ?? null)
             ? $config['member_management']['bulk_upload']
             : [];
@@ -483,7 +483,7 @@ class BulkMemberUploadService
                 $roles = array_values(array_filter($roles, static function ($role): bool {
                     return $role !== '';
                 }));
-                $roles = \OrgManagement\Helpers\PermissionHelper::filter_role_submission(
+                $roles = \WicketORM\Helpers\PermissionHelper::filter_role_submission(
                     $roles,
                     $allowed_roles,
                     $excluded_roles
@@ -584,7 +584,7 @@ class BulkMemberUploadService
 
             $membership_uuid = (string) ($job['membership_uuid'] ?? '');
             if ((int) ($job['added'] ?? 0) > 0 && $membership_uuid !== '') {
-                $orgman_instance = \OrgManagement\OrgMan::getInstance();
+                $orgman_instance = \WicketORM\OrgMan::getInstance();
                 $orgman_instance->clearMembersCache($membership_uuid);
             }
 

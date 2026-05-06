@@ -4,7 +4,7 @@
  * Member Model for handling member data.
  */
 
-namespace OrgManagement\Services;
+namespace WicketORM\Services;
 
 // Exit if accessed directly.
 if (!defined('ABSPATH')) {
@@ -49,7 +49,7 @@ class MemberService
     public function __construct(ConfigService $configService)
     {
         $this->configService = $configService;
-        $this->config = \OrgManagement\Config\OrgManConfig::get();
+        $this->config = \WicketORM\Config\OrgManConfig::get();
         $this->reader = new MembershipRosterReader($configService);
         $configRef = &$this->config;
         $this->writer = new MembershipRosterWriter($configService, $this->reader, $configRef);

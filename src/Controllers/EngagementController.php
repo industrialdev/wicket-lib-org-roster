@@ -4,9 +4,9 @@
  * Engagement data controller.
  */
 
-namespace OrgManagement\Controllers;
+namespace WicketORM\Controllers;
 
-use OrgManagement\Services\EngagementService;
+use WicketORM\Services\EngagementService;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;

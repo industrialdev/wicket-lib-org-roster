@@ -40,7 +40,7 @@ If we add wrappers, DTOs, or adapters but do not delete old duplication, the ref
 - `membership.strategy` default behavior stays unchanged
 - current process-handler request shapes stay stable during migration
 - current `WP_Error` codes used by callers stay stable where they already branch on them
-- `OrgManagement\OrgMan::get_instance()` / `getInstance()` bridge stays intact
+- `WicketORM\OrgMan::get_instance()` / `getInstance()` bridge stays intact
 - no claim of packaged cycle resolver or cycle-tab UI
 - no forced unification of groups mode into non-groups semantics
 

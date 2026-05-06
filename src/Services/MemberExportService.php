@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OrgManagement\Services;
+namespace WicketORM\Services;
 
 use WP_Error;
 
@@ -70,7 +70,7 @@ class MemberExportService
             );
         }
 
-        $config = \OrgManagement\Config\OrgManConfig::get();
+        $config = \WicketORM\Config\OrgManConfig::get();
         $export_config = is_array($config['exports'] ?? null) ? $config['exports'] : [];
         $batch_size = max(1, min(500, (int) ($export_config['batch_size'] ?? 50)));
 
@@ -145,7 +145,7 @@ class MemberExportService
         $job['updated_at'] = $this->nowIso8601();
         $this->saveJob($job);
 
-        $config = \OrgManagement\Config\OrgManConfig::get();
+        $config = \WicketORM\Config\OrgManConfig::get();
         $export_config = is_array($config['exports'] ?? null) ? $config['exports'] : [];
         $batch_size = max(1, (int) ($job['batch_size'] ?? 50));
         $current_page = max(1, (int) ($job['current_page'] ?? 1));
@@ -287,7 +287,7 @@ class MemberExportService
             wp_die(esc_html__('This download link has expired.', 'wicket-acc'));
         }
 
-        $config = \OrgManagement\Config\OrgManConfig::get();
+        $config = \WicketORM\Config\OrgManConfig::get();
         $export_config = is_array($config['exports'] ?? null) ? $config['exports'] : [];
         $max_downloads = max(1, (int) ($export_config['max_downloads'] ?? 10));
         $download_count = (int) ($token_data['download_count'] ?? 0);
@@ -533,7 +533,7 @@ class MemberExportService
             return;
         }
 
-        $config = \OrgManagement\Config\OrgManConfig::get();
+        $config = \WicketORM\Config\OrgManConfig::get();
         $from_email = sanitize_email((string) ($config['integrations']['notifications']['confirmation_email_from'] ?? 'no-reply@wicketcloud.com'));
         $from_name = get_bloginfo('name');
         $expiration_days = max(1, (int) ($export_config['token_expiration_days'] ?? 30));
@@ -567,7 +567,7 @@ class MemberExportService
             return;
         }
 
-        $config = \OrgManagement\Config\OrgManConfig::get();
+        $config = \WicketORM\Config\OrgManConfig::get();
         $from_email = sanitize_email((string) ($config['integrations']['notifications']['confirmation_email_from'] ?? 'no-reply@wicketcloud.com'));
         $from_name = get_bloginfo('name');
 

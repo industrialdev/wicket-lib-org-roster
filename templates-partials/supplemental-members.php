@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-namespace OrgManagement\Templates;
+namespace WicketORM\Templates;
 
 // Ensure this file is not accessed directly.
 if (!defined('ABSPATH')) {
@@ -25,10 +25,10 @@ if (empty($membership_id) && isset($_GET['membership_uuid'])) {
 }
 
 // Helper function for back link (WPML-aware)
-if (!function_exists('OrgManagement\Templates\get_my_account_page_url')) {
+if (!function_exists('WicketORM\Templates\get_my_account_page_url')) {
     function get_my_account_page_url($slug)
     {
-        return \OrgManagement\Helpers\Helper::getMyAccountPageUrl($slug, "/my-account/{$slug}/");
+        return \WicketORM\Helpers\Helper::getMyAccountPageUrl($slug, "/my-account/{$slug}/");
     }
 }
 
@@ -45,7 +45,7 @@ if (!function_exists('OrgManagement\Templates\get_my_account_page_url')) {
         <?php
             // Render Gravity Forms form
             if (class_exists('GFForms')) {
-                echo \OrgManagement\Helpers\GravityFormsHelper::get_form_html($org_uuid, $membership_id);
+                echo \WicketORM\Helpers\GravityFormsHelper::get_form_html($org_uuid, $membership_id);
             } else {
                 ?>
         <div class="woocommerce-error">

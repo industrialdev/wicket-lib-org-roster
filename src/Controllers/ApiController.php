@@ -4,7 +4,7 @@
  * Base Controller for the REST API.
  */
 
-namespace OrgManagement\Controllers;
+namespace WicketORM\Controllers;
 
 // Exit if accessed directly.
 if (!defined('ABSPATH')) {
@@ -125,8 +125,8 @@ abstract class ApiController
         }
 
         // Use PermissionService directly
-        if (class_exists('\OrgManagement\Services\PermissionService')) {
-            $permissionService = new \OrgManagement\Services\PermissionService();
+        if (class_exists('\WicketORM\Services\PermissionService')) {
+            $permissionService = new \WicketORM\Services\PermissionService();
             $org_roles = $permissionService->getOrgRolesForPerson($person_uuid, $org_id);
 
             return is_array($org_roles) ? $org_roles : [];

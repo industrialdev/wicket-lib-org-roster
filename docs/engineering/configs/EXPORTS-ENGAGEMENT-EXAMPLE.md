@@ -1,6 +1,6 @@
 # Exports & Engagement Configuration Example
 
-This document shows how to enable and configure the member export and engagement features. These features are **disabled by default** and must be explicitly enabled via the `wicket/acc/orgman/config` filter.
+This document shows how to enable and configure the member export and engagement features. These features are **disabled by default** and must be explicitly enabled via the `wicket/org-roster/config` filter.
 
 ## Feature Overview
 
@@ -20,7 +20,7 @@ This document shows how to enable and configure the member export and engagement
 ## Enabling Both Features
 
 ```php
-add_filter('wicket/acc/orgman/config', function ($config) {
+add_filter('wicket/org-roster/config', function ($config) {
     // Enable async CSV member export
     $config['exports']['enabled'] = true;
     
@@ -220,7 +220,7 @@ When a person has an active membership in any of the listed orgs, sections with 
 ## Complete Example Function
 
 ```php
-add_filter('wicket/acc/orgman/config', function ($config) {
+add_filter('wicket/org-roster/config', function ($config) {
     // Enable exports
     $config['exports']['enabled'] = true;
     $config['exports']['batch_size'] = 100;

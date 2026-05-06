@@ -45,7 +45,7 @@ if (!defined('ABSPATH')) {
 					<div class="subsidiary-actions">
 						<form method="POST"
 							  action="?action=hypermedia&template=subsidiaries-remove"
-							  data-on:submit="submit->post('<?php echo \OrgManagement\Helpers\template_url(); ?>subsidiaries-remove&org_id=<?php echo esc_attr($org_id); ?>&subsidiary_org_id=<?php echo esc_attr($subsidiary['id']); ?>')
+							  data-on:submit="submit->post('<?php echo \WicketORM\Helpers\template_url(); ?>subsidiaries-remove&org_id=<?php echo esc_attr($org_id); ?>&subsidiary_org_id=<?php echo esc_attr($subsidiary['id']); ?>')
 							  data-on:success="innerHTML->#subsidiaries-list-container">
 							<input type="hidden" name="org_id" value="<?php echo esc_attr($org_id); ?>">
 							<input type="hidden" name="subsidiary_org_id" value="<?php echo esc_attr($subsidiary['id']); ?>">
@@ -81,8 +81,8 @@ if (!defined('ABSPATH')) {
 					   name="subsidiary_search"
 					   class="form-control"
 					   placeholder="<?php esc_attr_e('Type organization name...', 'wicket-acc'); ?>"
-					   data-on:input="input->debounce(500ms)->get('<?php echo \OrgManagement\Helpers\template_url(); ?>subsidiaries-search&org_id=<?php echo esc_attr($org_id); ?>&search=event.target.value')"
-					   data-init="@get('<?php echo \OrgManagement\Helpers\template_url(); ?>subsidiaries-search&org_id=<?php echo esc_attr($org_id); ?>&search=event.target.value')">
+					   data-on:input="input->debounce(500ms)->get('<?php echo \WicketORM\Helpers\template_url(); ?>subsidiaries-search&org_id=<?php echo esc_attr($org_id); ?>&search=event.target.value')"
+					   data-init="@get('<?php echo \WicketORM\Helpers\template_url(); ?>subsidiaries-search&org_id=<?php echo esc_attr($org_id); ?>&search=event.target.value')">
 				<div id="subsidiary-search-results" class="search-results-dropdown"></div>
 			</div>
 		</div>
@@ -94,7 +94,7 @@ if (!defined('ABSPATH')) {
 
 			<form method="POST"
 				  action="?action=hypermedia&template=subsidiaries-bulk-upload"
-				  data-on:submit="submit->post('<?php echo \OrgManagement\Helpers\template_url(); ?>subsidiaries-bulk-upload&org_id=<?php echo esc_attr($org_id); ?>')"
+				  data-on:submit="submit->post('<?php echo \WicketORM\Helpers\template_url(); ?>subsidiaries-bulk-upload&org_id=<?php echo esc_attr($org_id); ?>')"
 				  data-on:success="innerHTML->#subsidiaries-list-container"
 				  enctype="multipart/form-data">
 				<input type="hidden" name="org_id" value="<?php echo esc_attr($org_id); ?>">

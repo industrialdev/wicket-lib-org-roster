@@ -4,7 +4,7 @@
  * Permission Model for handling role data.
  */
 
-namespace OrgManagement\Services;
+namespace WicketORM\Services;
 
 // Exit if accessed directly.
 if (!defined('ABSPATH')) {
@@ -49,7 +49,7 @@ class PermissionService
      */
     private function getAvailableRolesNative(): array
     {
-        $config = \OrgManagement\Config\OrgManConfig::get();
+        $config = \WicketORM\Config\OrgManConfig::get();
 
         return $config['access']['roles']['labels'] ?? [];
     }

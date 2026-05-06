@@ -343,7 +343,7 @@ get_component('tabs', [
 **File:** `src/Helpers/ComponentHelper.php`
 
 ```php
-namespace OrgManagement\Helpers;
+namespace WicketORM\Helpers;
 
 class ComponentHelper {
     public static function get_component_safe(string $slug, array $args = []): string {

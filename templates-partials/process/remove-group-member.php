@@ -4,8 +4,8 @@
  * Hypermedia partial for Remove Group Member processing.
  */
 
-use OrgManagement\Services\ConfigService;
-use OrgManagement\Services\MemberService;
+use WicketORM\Services\ConfigService;
+use WicketORM\Services\MemberService;
 use starfederation\datastar\enums\ElementPatchMode;
 
 if (!defined('ABSPATH')) {
@@ -28,7 +28,7 @@ $nonce = isset($_POST['nonce']) ? sanitize_text_field(wp_unslash($_POST['nonce']
 if (!$nonce || !wp_verify_nonce($nonce, 'wicket-orgman-remove-group-member')) {
     $logger->warning('Remove group member invalid nonce', $log_context);
     status_header(200);
-    OrgManagement\Helpers\DatastarSSE::renderError(__('Invalid or missing security token. Please refresh and try again.', 'wicket-acc'), '#remove-member-messages', ['removeMemberSubmitting' => false, 'membersLoading' => false]);
+    WicketORM\Helpers\DatastarSSE::renderError(__('Invalid or missing security token. Please refresh and try again.', 'wicket-acc'), '#remove-member-messages', ['removeMemberSubmitting' => false, 'membersLoading' => false]);
 
     return;
 }
@@ -49,13 +49,13 @@ $logger->info('Remove group member request received', $log_context);
 if (empty($group_uuid) || empty($person_uuid)) {
     $logger->error('Remove group member missing identifiers', $log_context);
     status_header(200);
-    OrgManagement\Helpers\DatastarSSE::renderError(__('Missing group or member identifiers.', 'wicket-acc'), '#remove-member-messages', ['removeMemberSubmitting' => false, 'membersLoading' => false]);
+    WicketORM\Helpers\DatastarSSE::renderError(__('Missing group or member identifiers.', 'wicket-acc'), '#remove-member-messages', ['removeMemberSubmitting' => false, 'membersLoading' => false]);
 
     return;
 }
 
 $configService = new ConfigService();
-$orgman_config = OrgManagement\Config\OrgManConfig::get();
+$orgman_config = WicketORM\Config\OrgManConfig::get();
 $groups_config = is_array($orgman_config['groups'] ?? null) ? $orgman_config['groups'] : [];
 $groups_presentation = is_array($groups_config['presentation'] ?? null)
     ? $groups_config['presentation']
@@ -76,7 +76,7 @@ if (is_wp_error($result)) {
         'error' => $result->get_error_message(),
     ]));
     status_header(200);
-    OrgManagement\Helpers\DatastarSSE::renderError($result->get_error_message(), '#remove-member-messages', ['removeMemberSubmitting' => false, 'membersLoading' => false]);
+    WicketORM\Helpers\DatastarSSE::renderError($result->get_error_message(), '#remove-member-messages', ['removeMemberSubmitting' => false, 'membersLoading' => false]);
 
     return;
 }
@@ -105,7 +105,7 @@ if ($list_html !== '') {
 }
 
 status_header(200);
-OrgManagement\Helpers\DatastarSSE::renderSuccess(
+WicketORM\Helpers\DatastarSSE::renderSuccess(
     __('Group member removed successfully.', 'wicket-acc'),
     '#remove-member-messages',
     [

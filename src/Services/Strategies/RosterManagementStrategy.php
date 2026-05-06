@@ -4,7 +4,7 @@
  * Interface for Roster Management Strategies.
  */
 
-namespace OrgManagement\Services\Strategies;
+namespace WicketORM\Services\Strategies;
 
 // Exit if accessed directly.
 if (!defined('ABSPATH')) {

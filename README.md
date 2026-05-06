@@ -4,7 +4,7 @@ Composer library for Wicket organization and roster management in WordPress.
 
 ## Entrypoint
 
-- `OrgManagement\OrgMan`
+- `WicketORM\OrgMan`
 
 ## What Ships Today
 
@@ -25,10 +25,10 @@ composer require industrialdev/wicket-lib-org-roster
 ```
 
 ```php
-use OrgManagement\OrgMan;
+use WicketORM\OrgMan;
 
 add_action('after_setup_theme', static function (): void {
-    add_filter('wicket/acc/orgman/config', static function (array $config): array {
+    add_filter('wicket/org-roster/config', static function (array $config): array {
         return $config;
     });
 

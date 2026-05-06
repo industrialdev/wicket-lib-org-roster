@@ -4,7 +4,7 @@
  * Relationship Helper for Org Management.
  */
 
-namespace OrgManagement\Helpers;
+namespace WicketORM\Helpers;
 
 // Exit if accessed directly.
 if (!defined('ABSPATH')) {
@@ -20,7 +20,7 @@ class RelationshipHelper extends Helper
      * Get the default person-organization relationship type for ORM member additions.
      *
      * This function retrieves the configured default relationship type from the
-     * OrgManagement configuration, with a fallback to 'employee' for backwards compatibility.
+     * WicketORM configuration, with a fallback to 'employee' for backwards compatibility.
      *
      * @return string The default relationship type.
      */

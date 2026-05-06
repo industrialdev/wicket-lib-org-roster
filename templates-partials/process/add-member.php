@@ -6,8 +6,8 @@
  * Renders the form (GET) and processes submissions (POST).
  */
 
-use OrgManagement\Services\ConfigService;
-use OrgManagement\Services\MemberService;
+use WicketORM\Services\ConfigService;
+use WicketORM\Services\MemberService;
 use starfederation\datastar\enums\ElementPatchMode;
 use starfederation\datastar\ServerSentEventGenerator;
 
@@ -33,7 +33,7 @@ if ('POST' === strtoupper($request_method)) {
     $nonce = isset($_POST['nonce']) ? sanitize_text_field(wp_unslash($_POST['nonce'])) : '';
     if (!$nonce || !wp_verify_nonce($nonce, 'wicket-orgman-add-member')) {
         status_header(200);
-        OrgManagement\Helpers\DatastarSSE::renderError(
+        WicketORM\Helpers\DatastarSSE::renderError(
             __('Invalid or missing security token. Please refresh and try again.', 'wicket-acc'),
             '#add-member-messages-' . $posted_org_dom_suffix,
             $error_signals
@@ -50,7 +50,7 @@ if ('POST' === strtoupper($request_method)) {
 
     if (empty($org_uuid)) {
         status_header(200);
-        OrgManagement\Helpers\DatastarSSE::renderError(
+        WicketORM\Helpers\DatastarSSE::renderError(
             __('Organization identifier missing.', 'wicket-acc'),
             '#add-member-messages-' . $org_dom_suffix,
             $error_signals
@@ -59,9 +59,9 @@ if ('POST' === strtoupper($request_method)) {
         return;
     }
 
-    if (!OrgManagement\Helpers\PermissionHelper::can_add_members($org_uuid)) {
+    if (!WicketORM\Helpers\PermissionHelper::can_add_members($org_uuid)) {
         status_header(200);
-        OrgManagement\Helpers\DatastarSSE::renderError(
+        WicketORM\Helpers\DatastarSSE::renderError(
             __('You do not have permission to add members to this organization.', 'wicket-acc'),
             '#add-member-messages-' . $org_dom_suffix,
             $error_signals
@@ -73,7 +73,7 @@ if ('POST' === strtoupper($request_method)) {
     $requested_roster_mode = (new ConfigService())->getRosterMode();
     if ($requested_roster_mode === 'membership_cycle' && empty($membership_uuid)) {
         status_header(200);
-        OrgManagement\Helpers\DatastarSSE::renderError(
+        WicketORM\Helpers\DatastarSSE::renderError(
             __('Membership UUID is required for membership cycle additions.', 'wicket-acc'),
             '#add-member-messages-' . $org_dom_suffix,
             $error_signals
@@ -109,7 +109,7 @@ if ('POST' === strtoupper($request_method)) {
                     'member_email' => $member_data['email'],
                 ]);
                 status_header(200);
-                OrgManagement\Helpers\DatastarSSE::renderError(
+                WicketORM\Helpers\DatastarSSE::renderError(
                     __('Could not verify whether this person already exists. Please try again.', 'wicket-acc'),
                     '#add-member-messages-' . $org_dom_suffix,
                     array_merge($error_signals, ['addMemberFormError' => true])
@@ -125,7 +125,7 @@ if ('POST' === strtoupper($request_method)) {
                     $is_in_grace = $p_membership['attributes']['in_grace'] ?? false;
                     if ($is_active || $is_in_grace) {
                         status_header(200);
-                        OrgManagement\Helpers\DatastarSSE::renderError(
+                        WicketORM\Helpers\DatastarSSE::renderError(
                             sprintf(__('A member with the email %s already exists in this membership.', 'wicket-acc'), '<strong>' . esc_html($member_data['email']) . '</strong>'),
                             '#add-member-messages-' . $org_dom_suffix,
                             $error_signals
@@ -141,7 +141,7 @@ if ('POST' === strtoupper($request_method)) {
                 'error' => $e->getMessage(),
             ]);
             status_header(200);
-            OrgManagement\Helpers\DatastarSSE::renderError(
+            WicketORM\Helpers\DatastarSSE::renderError(
                 __('Could not verify whether this person already exists. Please try again.', 'wicket-acc'),
                 '#add-member-messages-' . $org_dom_suffix,
                 array_merge($error_signals, ['addMemberFormError' => true])
@@ -162,7 +162,7 @@ if ('POST' === strtoupper($request_method)) {
         }, $_POST['roles']);
     }
 
-    $orgman_config = OrgManagement\Config\OrgManConfig::get();
+    $orgman_config = WicketORM\Config\OrgManConfig::get();
     $permissions_field_config = $orgman_config['member_management']['forms']['add_member']['fields']['permissions'] ?? [];
     $allowed_roles = is_array($permissions_field_config['allowlist'] ?? null)
         ? $permissions_field_config['allowlist']
@@ -171,7 +171,7 @@ if ('POST' === strtoupper($request_method)) {
         ? $permissions_field_config['denylist']
         : [];
 
-    $roles = OrgManagement\Helpers\PermissionHelper::filter_role_submission(
+    $roles = WicketORM\Helpers\PermissionHelper::filter_role_submission(
         $roles,
         $allowed_roles,
         $excluded_roles
@@ -193,7 +193,7 @@ if ('POST' === strtoupper($request_method)) {
 
         if (is_wp_error($result)) {
             status_header(200);
-            OrgManagement\Helpers\DatastarSSE::renderError(
+            WicketORM\Helpers\DatastarSSE::renderError(
                 $result->get_error_message(),
                 '#add-member-messages-' . $org_dom_suffix,
                 array_merge($error_signals, ['addMemberFormError' => true])
@@ -242,11 +242,11 @@ if ('POST' === strtoupper($request_method)) {
         // Clear members cache for this organization after successful addition
         $cache_membership_uuid = $membership_uuid;
         if ($cache_membership_uuid === '') {
-            $membershipService = new OrgManagement\Services\MembershipService();
+            $membershipService = new WicketORM\Services\MembershipService();
             $cache_membership_uuid = (string) $membershipService->getMembershipForOrganization($org_uuid);
         }
         if ($cache_membership_uuid) {
-            $orgman_instance = OrgManagement\OrgMan::get_instance();
+            $orgman_instance = WicketORM\OrgMan::get_instance();
             $orgman_instance->clearMembersCache($cache_membership_uuid);
         }
 
@@ -259,7 +259,7 @@ if ('POST' === strtoupper($request_method)) {
             (string) ($member_data['email'] ?? '')
         );
 
-        $element_patches = OrgManagement\Helpers\MemberListRefresh::buildOrgMembersListPatches(
+        $element_patches = WicketORM\Helpers\MemberListRefresh::buildOrgMembersListPatches(
             $org_uuid,
             (string) $cache_membership_uuid,
             $org_dom_suffix,
@@ -268,7 +268,7 @@ if ('POST' === strtoupper($request_method)) {
         );
 
         status_header(200);
-        $orgman_config = OrgManagement\Config\OrgManConfig::get();
+        $orgman_config = WicketORM\Config\OrgManConfig::get();
         $presentation_config = is_array($orgman_config['presentation'] ?? null) ? $orgman_config['presentation'] : [];
         $member_view_config = is_array($presentation_config['member_view'] ?? null) ? $presentation_config['member_view'] : [];
         $auto_close_on_success = (bool) ($member_view_config['add_member_auto_close_on_success'] ?? false);
@@ -299,7 +299,7 @@ if ('POST' === strtoupper($request_method)) {
             'error_file' => $e->getFile(),
             'error_line' => $e->getLine(),
         ]);
-        OrgManagement\Helpers\DatastarSSE::renderError(
+        WicketORM\Helpers\DatastarSSE::renderError(
             __('An unexpected error occurred. Please try again.', 'wicket-acc'),
             '#add-member-messages-' . $org_dom_suffix,
             $error_signals

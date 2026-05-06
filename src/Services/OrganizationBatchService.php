@@ -4,7 +4,7 @@
  * Organization Batch Service for optimized organization fetching.
  */
 
-namespace OrgManagement\Services;
+namespace WicketORM\Services;
 
 // Exit if accessed directly.
 if (!defined('ABSPATH')) {
@@ -23,7 +23,7 @@ class OrganizationBatchService
 
     public function __construct()
     {
-        $this->config = \OrgManagement\Config\OrgManConfig::get();
+        $this->config = \WicketORM\Config\OrgManConfig::get();
     }
 
     /**

@@ -4,7 +4,7 @@
  * Membership Service for Org Management.
  */
 
-namespace OrgManagement\Services;
+namespace WicketORM\Services;
 
 // Exit if accessed directly.
 if (!defined('ABSPATH')) {
@@ -25,7 +25,7 @@ class MembershipService
 
     public function __construct()
     {
-        $this->config = \OrgManagement\Config\OrgManConfig::get();
+        $this->config = \WicketORM\Config\OrgManConfig::get();
     }
 
     /**

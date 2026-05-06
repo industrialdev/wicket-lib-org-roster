@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OrgManagement\Services;
+namespace WicketORM\Services;
 
 /**
  * Membership roster read core.
@@ -53,7 +53,7 @@ class MembershipRosterReader
     public function __construct(ConfigService $configService)
     {
         $this->configService = $configService;
-        $this->config = \OrgManagement\Config\OrgManConfig::get();
+        $this->config = \WicketORM\Config\OrgManConfig::get();
     }
 
     /**
@@ -176,7 +176,7 @@ class MembershipRosterReader
                 return $cached_search;
             }
 
-            $search_ttl = \OrgManagement\Helpers\ConfigHelper::get_search_cache_duration();
+            $search_ttl = \WicketORM\Helpers\ConfigHelper::get_search_cache_duration();
 
             try {
                 $searchResult = $this->membershipService()->membershipSearchMembers(
@@ -213,7 +213,7 @@ class MembershipRosterReader
 
         if ('' !== $searchTerm && function_exists('wicket_api_client')) {
             $search_cache_key ??= 'orgman_search_' . md5($membershipUuid . $searchTerm . $page . $size . $gen);
-            $search_ttl ??= \OrgManagement\Helpers\ConfigHelper::get_search_cache_duration();
+            $search_ttl ??= \WicketORM\Helpers\ConfigHelper::get_search_cache_duration();
 
             $queryArgs = [
                 'page[number]' => $page,

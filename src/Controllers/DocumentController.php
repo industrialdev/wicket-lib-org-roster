@@ -4,9 +4,9 @@
  * Document management controller.
  */
 
-namespace OrgManagement\Controllers;
+namespace WicketORM\Controllers;
 
-use OrgManagement\Services\DocumentService;
+use WicketORM\Services\DocumentService;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;

@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-namespace OrgManagement\Services;
+namespace WicketORM\Services;
 
 use DateTimeImmutable;
 use WP_Error;
@@ -27,7 +27,7 @@ class ConnectionService
 
     public function __construct()
     {
-        $this->config = \OrgManagement\Config\OrgManConfig::get();
+        $this->config = \WicketORM\Config\OrgManConfig::get();
     }
 
     /**
@@ -99,7 +99,7 @@ class ConnectionService
     public function ensurePersonConnection(string $personUuid, string $orgUuid, array $overrides = [])
     {
         // Use relationship type from overrides if provided, otherwise use configured default
-        $relationshipType = $overrides['type'] ?? \OrgManagement\Helpers\RelationshipHelper::get_default_relationship_type();
+        $relationshipType = $overrides['type'] ?? \WicketORM\Helpers\RelationshipHelper::get_default_relationship_type();
 
         // Remove 'type' from overrides since we're passing it as a separate parameter
         unset($overrides['type']);

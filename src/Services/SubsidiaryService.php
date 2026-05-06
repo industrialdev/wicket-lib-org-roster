@@ -4,7 +4,7 @@
  * Subsidiary management service.
  */
 
-namespace OrgManagement\Services;
+namespace WicketORM\Services;
 
 use WP_Error;
 

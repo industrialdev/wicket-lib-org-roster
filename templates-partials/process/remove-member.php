@@ -6,8 +6,8 @@
  * Renders the form (GET) and processes submissions (POST).
  */
 
-use OrgManagement\Services\ConfigService;
-use OrgManagement\Services\ConnectionService;
+use WicketORM\Services\ConfigService;
+use WicketORM\Services\ConnectionService;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -20,7 +20,7 @@ if ('POST' === strtoupper($request_method)) {
     $nonce = isset($_POST['nonce']) ? sanitize_text_field(wp_unslash($_POST['nonce'])) : '';
     if (!$nonce || !wp_verify_nonce($nonce, 'wicket-orgman-remove-member')) {
         status_header(200);
-        OrgManagement\Helpers\DatastarSSE::renderError(__('Invalid or missing security token. Please refresh and try again.', 'wicket-acc'), '#remove-member-messages', ['removeMemberSubmitting' => false, 'membersLoading' => false]);
+        WicketORM\Helpers\DatastarSSE::renderError(__('Invalid or missing security token. Please refresh and try again.', 'wicket-acc'), '#remove-member-messages', ['removeMemberSubmitting' => false, 'membersLoading' => false]);
 
         return;
     }
@@ -39,15 +39,15 @@ if ('POST' === strtoupper($request_method)) {
     // Require org_uuid and person_uuid, but allow either connection_id OR person_membership_id
     if (empty($org_uuid) || empty($person_uuid) || (empty($person_connection_ids) && empty($person_membership_id))) {
         status_header(200);
-        OrgManagement\Helpers\DatastarSSE::renderError(__('Organization UUID, person UUID, and connection IDs are required.', 'wicket-acc'), '#remove-member-messages', ['removeMemberSubmitting' => false, 'membersLoading' => false]);
+        WicketORM\Helpers\DatastarSSE::renderError(__('Organization UUID, person UUID, and connection IDs are required.', 'wicket-acc'), '#remove-member-messages', ['removeMemberSubmitting' => false, 'membersLoading' => false]);
 
         return;
     }
 
     // Check if user has permission to remove members
-    if (!OrgManagement\Helpers\PermissionHelper::can_remove_members($org_uuid)) {
+    if (!WicketORM\Helpers\PermissionHelper::can_remove_members($org_uuid)) {
         status_header(200);
-        OrgManagement\Helpers\DatastarSSE::renderError(__('You do not have permission to remove members from this organization.', 'wicket-acc'), '#remove-member-messages', ['removeMemberSubmitting' => false, 'membersLoading' => false]);
+        WicketORM\Helpers\DatastarSSE::renderError(__('You do not have permission to remove members from this organization.', 'wicket-acc'), '#remove-member-messages', ['removeMemberSubmitting' => false, 'membersLoading' => false]);
 
         return;
     }
@@ -63,19 +63,19 @@ if ('POST' === strtoupper($request_method)) {
     try {
         $configService = new ConfigService();
         $roster_mode = (string) $configService->getRosterMode();
-        $orgman_config = OrgManagement\Config\OrgManConfig::get();
+        $orgman_config = WicketORM\Config\OrgManConfig::get();
         $presentation_config = is_array($orgman_config['presentation'] ?? null) ? $orgman_config['presentation'] : [];
         $member_view_config = is_array($presentation_config['member_view'] ?? null) ? $presentation_config['member_view'] : [];
         $remove_auto_close_on_success = (bool) ($member_view_config['add_member_auto_close_on_success'] ?? false);
         $remove_auto_close_delay_seconds = max(0, (int) ($member_view_config['add_member_auto_close_delay_seconds'] ?? 7));
         $preserve_direct_relationship = (bool) ($orgman_config['member_management']['removal']['direct']['preserve_relationship'] ?? false);
-        $membershipService = new OrgManagement\Services\MembershipService();
-        $permissionService = new OrgManagement\Services\PermissionService();
-        $organizationService = new OrgManagement\Services\OrganizationService();
+        $membershipService = new WicketORM\Services\MembershipService();
+        $permissionService = new WicketORM\Services\PermissionService();
+        $organizationService = new WicketORM\Services\OrganizationService();
 
         if ($roster_mode === 'membership_cycle' && empty($membership_uuid)) {
             status_header(200);
-            OrgManagement\Helpers\DatastarSSE::renderError(
+            WicketORM\Helpers\DatastarSSE::renderError(
                 __('Membership UUID is required for membership cycle removals.', 'wicket-acc'),
                 '#remove-member-messages',
                 ['removeMemberSubmitting' => false, 'membersLoading' => false]
@@ -112,7 +112,7 @@ if ('POST' === strtoupper($request_method)) {
 
                 if ($owner_role_match) {
                     status_header(200);
-                    OrgManagement\Helpers\DatastarSSE::renderError(
+                    WicketORM\Helpers\DatastarSSE::renderError(
                         __('The organization owner (Primary Member) cannot be removed.', 'wicket-acc'),
                         '#remove-member-messages',
                         ['removeMemberSubmitting' => false, 'membersLoading' => false]
@@ -210,7 +210,7 @@ if ('POST' === strtoupper($request_method)) {
         if ($roster_mode === 'membership_cycle') {
             if (!$removal_success) {
                 status_header(200);
-                OrgManagement\Helpers\DatastarSSE::renderError(
+                WicketORM\Helpers\DatastarSSE::renderError(
                     __('Failed to remove member. Person membership ID is required.', 'wicket-acc'),
                     '#remove-member-messages',
                     ['removeMemberSubmitting' => false, 'membersLoading' => false]
@@ -220,7 +220,7 @@ if ('POST' === strtoupper($request_method)) {
             }
 
             if (!empty($membership_uuid)) {
-                $orgman_instance = OrgManagement\OrgMan::get_instance();
+                $orgman_instance = WicketORM\OrgMan::get_instance();
                 $orgman_instance->clearMembersCache($membership_uuid);
             }
 
@@ -228,7 +228,7 @@ if ('POST' === strtoupper($request_method)) {
                 esc_html__('Successfully removed %1$s from the organization.', 'wicket-acc'),
                 '<strong>' . esc_html($member_name) . '</strong>'
             );
-            $element_patches = OrgManagement\Helpers\MemberListRefresh::buildOrgMembersListPatches(
+            $element_patches = WicketORM\Helpers\MemberListRefresh::buildOrgMembersListPatches(
                 $org_uuid,
                 $membership_uuid,
                 $org_dom_suffix,
@@ -237,7 +237,7 @@ if ('POST' === strtoupper($request_method)) {
             );
 
             status_header(200);
-            OrgManagement\Helpers\DatastarSSE::renderSuccess($success_message, '#remove-member-messages', [
+            WicketORM\Helpers\DatastarSSE::renderSuccess($success_message, '#remove-member-messages', [
                 'removeMemberSubmitting' => false,
                 'removeMemberSuccess' => true,
                 'membersLoading' => false,
@@ -320,7 +320,7 @@ if ('POST' === strtoupper($request_method)) {
         // If still no success, throw an error
         if (!$removal_success) {
             status_header(200);
-            OrgManagement\Helpers\DatastarSSE::renderError(__('Failed to remove member. Person membership ID is required.', 'wicket-acc'), '#remove-member-messages', ['removeMemberSubmitting' => false, 'membersLoading' => false]);
+            WicketORM\Helpers\DatastarSSE::renderError(__('Failed to remove member. Person membership ID is required.', 'wicket-acc'), '#remove-member-messages', ['removeMemberSubmitting' => false, 'membersLoading' => false]);
 
             return;
         }
@@ -333,10 +333,10 @@ if ('POST' === strtoupper($request_method)) {
 
         // Clear members cache for this organization after successful removal
         if ($removal_success && !empty($membership_uuid)) {
-            $orgman_instance = OrgManagement\OrgMan::get_instance();
+            $orgman_instance = WicketORM\OrgMan::get_instance();
             $orgman_instance->clearMembersCache($membership_uuid);
         }
-        $element_patches = OrgManagement\Helpers\MemberListRefresh::buildOrgMembersListPatches(
+        $element_patches = WicketORM\Helpers\MemberListRefresh::buildOrgMembersListPatches(
             $org_uuid,
             $membership_uuid,
             $org_dom_suffix,
@@ -345,7 +345,7 @@ if ('POST' === strtoupper($request_method)) {
         );
 
         status_header(200);
-        OrgManagement\Helpers\DatastarSSE::renderSuccess($success_message, '#remove-member-messages', [
+        WicketORM\Helpers\DatastarSSE::renderSuccess($success_message, '#remove-member-messages', [
             'removeMemberSubmitting' => false,
             'removeMemberSuccess' => true,
             'membersLoading' => false,
@@ -357,7 +357,7 @@ if ('POST' === strtoupper($request_method)) {
     } catch (Throwable $e) {
         status_header(200);
         \Wicket()->log()->error('remove-member modal failed: ' . $e->getMessage(), ['source' => 'wicket-orgman', 'org_uuid' => $org_uuid, 'person_uuid' => $person_uuid, 'connection_ids' => $person_connection_ids]);
-        OrgManagement\Helpers\DatastarSSE::renderError(__('An unexpected error occurred. Please try again.', 'wicket-acc'), '#remove-member-messages', ['removeMemberSubmitting' => false, 'membersLoading' => false]);
+        WicketORM\Helpers\DatastarSSE::renderError(__('An unexpected error occurred. Please try again.', 'wicket-acc'), '#remove-member-messages', ['removeMemberSubmitting' => false, 'membersLoading' => false]);
 
         return;
     }

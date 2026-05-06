@@ -1,6 +1,6 @@
 <?php
 
-namespace OrgManagement\Services;
+namespace WicketORM\Services;
 
 if (!defined('ABSPATH') && !defined('WICKET_DOING_TESTS')) {
     exit;

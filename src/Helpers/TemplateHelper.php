@@ -4,7 +4,7 @@
  * Template Helper for Org Management.
  */
 
-namespace OrgManagement\Helpers;
+namespace WicketORM\Helpers;
 
 // Exit if accessed directly.
 if (!defined('ABSPATH')) {
@@ -141,7 +141,7 @@ class TemplateHelper extends Helper
             // Load services that templates might need
             if (!isset($args['organizations']) && $template === 'organization-list') {
                 // Initialize the organization service
-                $org_service = new \OrgManagement\Services\OrganizationService();
+                $org_service = new \WicketORM\Services\OrganizationService();
                 $user_uuid = wp_get_current_user()->user_login;
                 $organizations = $org_service->getUserOrganizations($user_uuid);
 
@@ -183,7 +183,7 @@ class TemplateHelper extends Helper
             return;
         }
 
-        self::log_error('Datastar SDK not autoloaded; ensure Composer autoload is loaded before OrgManagement templates render.');
+        self::log_error('Datastar SDK not autoloaded; ensure Composer autoload is loaded before WicketORM templates render.');
     }
 
     /**
@@ -251,42 +251,42 @@ class TemplateHelper extends Helper
 }
 
 // Legacy functions for backward compatibility
-if (!function_exists('OrgManagement\\Helpers\\template_url')) {
+if (!function_exists('WicketORM\\Helpers\\template_url')) {
     function template_url(): string
     {
         return TemplateHelper::template_url();
     }
 }
 
-if (!function_exists('OrgManagement\\Helpers\\is_orgman_template_request')) {
+if (!function_exists('WicketORM\\Helpers\\is_orgman_template_request')) {
     function is_orgman_template_request(): bool
     {
         return TemplateHelper::is_orgman_template_request();
     }
 }
 
-if (!function_exists('OrgManagement\\Helpers\\orgman_normalize_org_uuid_param')) {
+if (!function_exists('WicketORM\\Helpers\\orgman_normalize_org_uuid_param')) {
     function orgman_normalize_org_uuid_param(): void
     {
         TemplateHelper::normalize_org_uuid_param();
     }
 }
 
-if (!function_exists('OrgManagement\\Helpers\\wicket_orgman_get_template')) {
+if (!function_exists('WicketORM\\Helpers\\wicket_orgman_get_template')) {
     function wicket_orgman_get_template(string $template, array $args = []): void
     {
         TemplateHelper::wicket_orgman_get_template($template, $args);
     }
 }
 
-if (!function_exists('OrgManagement\\Helpers\\add_hypermedia_query_vars')) {
+if (!function_exists('WicketORM\\Helpers\\add_hypermedia_query_vars')) {
     function add_hypermedia_query_vars(array $query_vars): array
     {
         return TemplateHelper::add_hypermedia_query_vars($query_vars);
     }
 }
 
-if (!function_exists('OrgManagement\\Helpers\\maybe_handle_hypermedia_request')) {
+if (!function_exists('WicketORM\\Helpers\\maybe_handle_hypermedia_request')) {
     function maybe_handle_hypermedia_request($wp)
     {
         return TemplateHelper::maybe_handle_hypermedia_request($wp);

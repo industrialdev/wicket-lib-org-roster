@@ -4,7 +4,7 @@
  * Permission Helper for Org Management.
  */
 
-namespace OrgManagement\Helpers;
+namespace WicketORM\Helpers;
 
 // Exit if accessed directly.
 if (!defined('ABSPATH')) {
@@ -55,7 +55,7 @@ class PermissionHelper extends Helper
      */
     private static function get_role_only_management_access_config(): array
     {
-        $config = \OrgManagement\Config\OrgManConfig::get();
+        $config = \WicketORM\Config\OrgManConfig::get();
         $permissions = is_array($config['access']['permissions'] ?? null) ? $config['access']['permissions'] : [];
         $role_only = $permissions['role_only_management_access'] ?? [];
 
@@ -254,8 +254,8 @@ class PermissionHelper extends Helper
         // Get organization roles if org_id is provided
         $org_roles = [];
         if ($org_id) {
-            if (class_exists('\OrgManagement\Services\PermissionService')) {
-                $permissionService = new \OrgManagement\Services\PermissionService();
+            if (class_exists('\WicketORM\Services\PermissionService')) {
+                $permissionService = new \WicketORM\Services\PermissionService();
                 $org_roles = (array) $permissionService->getOrgRolesForPerson($user->user_login, $org_id);
             }
         }
@@ -342,8 +342,8 @@ class PermissionHelper extends Helper
             // with memberships inside, and user has org-level roles OR owns the membership
 
             // First check: user owns the organization membership
-            if (class_exists('\OrgManagement\Services\MembershipService')) {
-                $membershipService = new \OrgManagement\Services\MembershipService();
+            if (class_exists('\WicketORM\Services\MembershipService')) {
+                $membershipService = new \WicketORM\Services\MembershipService();
                 $membership_uuid = $membershipService->getMembershipForOrganization($org_id);
 
                 if (!empty($membership_uuid)) {
@@ -360,8 +360,8 @@ class PermissionHelper extends Helper
             }
 
             // Second check: user has any organization-level roles (not person-specific)
-            if (class_exists('\OrgManagement\Services\PermissionService')) {
-                $permissionService = new \OrgManagement\Services\PermissionService();
+            if (class_exists('\WicketORM\Services\PermissionService')) {
+                $permissionService = new \WicketORM\Services\PermissionService();
                 $org_roles = $permissionService->getOrgRolesForPerson($person_uuid, $org_id);
 
                 if (!empty($org_roles)) {
@@ -396,7 +396,7 @@ class PermissionHelper extends Helper
      */
     public static function can_edit_members($org_id = null): bool
     {
-        $manage_roles = function_exists('\OrgManagement\Helpers\ConfigHelper::get_manage_members_roles')
+        $manage_roles = function_exists('\WicketORM\Helpers\ConfigHelper::get_manage_members_roles')
             ? ConfigHelper::get_manage_members_roles()
             : ['membership_manager', 'membership_owner'];
 
@@ -416,7 +416,7 @@ class PermissionHelper extends Helper
      */
     public static function can_add_members($org_id = null): bool
     {
-        $config = \OrgManagement\Config\OrgManConfig::get();
+        $config = \WicketORM\Config\OrgManConfig::get();
         $add_roles = $config['access']['permissions']['add_member_roles'] ?? ['membership_manager', 'membership_owner'];
         $roster_strategy = $config['membership']['strategy'] ?? 'direct';
 
@@ -443,7 +443,7 @@ class PermissionHelper extends Helper
      */
     public static function can_remove_members($org_id = null): bool
     {
-        $config = \OrgManagement\Config\OrgManConfig::get();
+        $config = \WicketORM\Config\OrgManConfig::get();
         $remove_roles = $config['access']['permissions']['remove_member_roles'] ?? ['membership_manager', 'membership_owner'];
         $roster_strategy = $config['membership']['strategy'] ?? 'direct';
 
@@ -470,7 +470,7 @@ class PermissionHelper extends Helper
      */
     public static function can_edit_organization($org_id = null): bool
     {
-        $edit_roles = function_exists('\OrgManagement\Helpers\ConfigHelper::get_edit_organization_roles')
+        $edit_roles = function_exists('\WicketORM\Helpers\ConfigHelper::get_edit_organization_roles')
             ? ConfigHelper::get_edit_organization_roles()
             : ['org_editor'];
 
@@ -499,7 +499,7 @@ class PermissionHelper extends Helper
      */
     public static function has_management_roles($org_id = null): bool
     {
-        if (!function_exists('\OrgManagement\Helpers\ConfigHelper::get_any_management_roles')) {
+        if (!function_exists('\WicketORM\Helpers\ConfigHelper::get_any_management_roles')) {
             return self::role_check(['org_editor', 'membership_manager', 'membership_owner'], $org_id, false);
         }
 
@@ -517,7 +517,7 @@ class PermissionHelper extends Helper
      */
     public static function can_purchase_seats($org_id = null): bool
     {
-        $config = \OrgManagement\Config\OrgManConfig::get();
+        $config = \WicketORM\Config\OrgManConfig::get();
         $purchase_roles = $config['access']['permissions']['purchase_seat_roles'] ?? ['membership_owner'];
         $roster_strategy = $config['membership']['strategy'] ?? 'direct';
 
@@ -544,7 +544,7 @@ class PermissionHelper extends Helper
      */
     public static function is_membership_owner($org_id = null): bool
     {
-        if (!function_exists('\OrgManagement\Helpers\ConfigHelper::get_purchase_seats_roles')) {
+        if (!function_exists('\WicketORM\Helpers\ConfigHelper::get_purchase_seats_roles')) {
             return self::is_organization_membership_owner($org_id) && self::role_check(['membership_owner'], $org_id);
         }
 
@@ -575,7 +575,7 @@ class PermissionHelper extends Helper
 
         try {
             // Get the organization membership to find the owner
-            if (!class_exists('\OrgManagement\Services\MembershipService')) {
+            if (!class_exists('\WicketORM\Services\MembershipService')) {
                 \Wicket()->log()->info('MembershipService class not available', [
                     'source' => 'wicket-orgman',
                     'org_id' => $org_id,
@@ -584,7 +584,7 @@ class PermissionHelper extends Helper
                 return false;
             }
 
-            $membershipService = new \OrgManagement\Services\MembershipService();
+            $membershipService = new \WicketORM\Services\MembershipService();
             $membership_uuid = $membershipService->getMembershipForOrganization($org_id);
 
             if (empty($membership_uuid)) {
@@ -622,7 +622,7 @@ class PermissionHelper extends Helper
      */
     public static function is_membership_manager($org_id = null): bool
     {
-        $manage_roles = function_exists('\OrgManagement\Helpers\ConfigHelper::get_manage_members_roles')
+        $manage_roles = function_exists('\WicketORM\Helpers\ConfigHelper::get_manage_members_roles')
             ? ConfigHelper::get_manage_members_roles()
             : ['membership_manager'];
 
@@ -651,8 +651,8 @@ class PermissionHelper extends Helper
             return [];
         }
 
-        if (class_exists('\OrgManagement\Services\PermissionService')) {
-            $permissionService = new \OrgManagement\Services\PermissionService();
+        if (class_exists('\WicketORM\Services\PermissionService')) {
+            $permissionService = new \WicketORM\Services\PermissionService();
             $roles = $permissionService->getOrgRolesForPerson(wp_get_current_user()->user_login, $org_id);
 
             return is_array($roles) ? $roles : [];

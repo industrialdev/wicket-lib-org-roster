@@ -7,7 +7,7 @@
  * Only shows organizations with non-expired membership end dates.
  */
 
-namespace OrgManagement\Templates;
+namespace WicketORM\Templates;
 
 // Exit if accessed directly.
 if (!defined('ABSPATH')) {
@@ -20,7 +20,7 @@ if (!is_user_logged_in()) {
 } ?>
 
 <?php
-$configService = new \OrgManagement\Services\ConfigService();
+$configService = new \WicketORM\Services\ConfigService();
 $roster_mode = $configService->getRosterMode();
 
 // Get current user identifier
@@ -28,7 +28,7 @@ $user_uuid = wp_get_current_user()->user_login;
 
 // Get organizations data from template helper or fallback to service
 if (!isset($organizations)) {
-    $org_service = new \OrgManagement\Services\OrganizationService();
+    $org_service = new \WicketORM\Services\OrganizationService();
     $organizations = $org_service->getUserOrganizations($user_uuid);
 }
 
@@ -65,14 +65,14 @@ if (($roster_mode !== 'groups') && (empty($organizations) || !is_array($organiza
 }
 
 // Apply active membership filtering using the service
-$org_service = new \OrgManagement\Services\OrganizationService();
+$org_service = new \WicketORM\Services\OrganizationService();
 $organizations = $org_service->filterActiveOrganizations($organizations, $user_uuid);
 
 // Map roster-management groups per organization for card display.
 $logger = \Wicket()->log();
 $groups_by_org = [];
 $groups_by_org_tagged = [];
-$group_service = new \OrgManagement\Services\GroupService();
+$group_service = new \WicketORM\Services\GroupService();
 $group_page = 1;
 $group_total_pages = 1;
 $logger->info('Organization list group mapping start', [
@@ -208,7 +208,7 @@ if ($roster_mode === 'groups') {
     });
 
     $groups_count = count($manageable_groups);
-    $group_members_url = \OrgManagement\Helpers\Helper::getMyAccountPageUrl(
+    $group_members_url = \WicketORM\Helpers\Helper::getMyAccountPageUrl(
         'organization-members',
         '/my-account/organization-members/'
     );
@@ -251,7 +251,7 @@ if ($roster_mode === 'groups') {
                     $item_params['org_uuid'] = (string) $group_item['org_uuid'];
                 }
                 $can_manage_group = !empty($group_item['can_manage']);
-                $group_profile_url_base = \OrgManagement\Helpers\Helper::getMyAccountPageUrl(
+                $group_profile_url_base = \WicketORM\Helpers\Helper::getMyAccountPageUrl(
                     'organization-profile',
                     '/my-account/organization-profile/'
                 );
@@ -467,7 +467,7 @@ if (empty($organizations)) {
 
 <div id="organization-list-container">
     <?php
-    $orgman_config = \OrgManagement\Config\OrgManConfig::get();
+    $orgman_config = \WicketORM\Config\OrgManConfig::get();
 $org_list_config = is_array($orgman_config['presentation']['organization_list'] ?? null)
     ? $orgman_config['presentation']['organization_list']
     : [];
@@ -492,7 +492,7 @@ echo "<p class='mb-2'>" . __('Organizations Found:', 'wicket-acc') . ' ' . (int)
 // Start organization list
 echo '<div class="wt_w-full wt_flex wt_flex-col wt_gap-4" role="list">';
 // Initialize membership service once for the loop
-$membershipService = new \OrgManagement\Services\MembershipService();
+$membershipService = new \WicketORM\Services\MembershipService();
 foreach ($organizations_page as $org) :
     $org_id = (string) ($org['id'] ?? '');
     $org_name = $org['org_name'] ?? __('Unknown', 'wicket-acc');
@@ -692,7 +692,7 @@ foreach ($organizations_page as $org) :
 
     // Get user roles for this organization using PermissionHelper
     $raw_roles = $org_uuid_for_scope !== ''
-        ? \OrgManagement\Helpers\PermissionHelper::get_user_org_roles($org_uuid_for_scope)
+        ? \WicketORM\Helpers\PermissionHelper::get_user_org_roles($org_uuid_for_scope)
         : [];
     if (empty($raw_roles) && !empty($org['roles']) && is_array($org['roles'])) {
         $raw_roles = $org['roles'];
@@ -707,7 +707,7 @@ foreach ($organizations_page as $org) :
     }
 
     // Prepare roles for display using PermissionHelper
-    $formatted_roles = \OrgManagement\Helpers\PermissionHelper::format_roles_for_display($raw_roles);
+    $formatted_roles = \WicketORM\Helpers\PermissionHelper::format_roles_for_display($raw_roles);
 
     $primary_group_uuid = '';
     if ($roster_mode === 'groups' && !empty($group_details)) {
@@ -715,17 +715,17 @@ foreach ($organizations_page as $org) :
     }
     $has_active_membership = $roster_mode === 'groups'
         ? true
-        : \OrgManagement\Helpers\PermissionHelper::has_active_membership($org_uuid_for_scope);
+        : \WicketORM\Helpers\PermissionHelper::has_active_membership($org_uuid_for_scope);
     $is_group_manager = ($roster_mode === 'groups' && !empty($group_details));
     $is_membership_manager = $is_group_manager
         ? true
-        : \OrgManagement\Helpers\PermissionHelper::is_membership_manager($org_uuid_for_scope);
+        : \WicketORM\Helpers\PermissionHelper::is_membership_manager($org_uuid_for_scope);
     $can_edit_org = $roster_mode === 'groups'
         ? $is_group_manager
-        : \OrgManagement\Helpers\PermissionHelper::can_edit_organization($org_uuid_for_scope);
+        : \WicketORM\Helpers\PermissionHelper::can_edit_organization($org_uuid_for_scope);
     $has_any_roles = $is_group_manager
         ? true
-        : \OrgManagement\Helpers\PermissionHelper::has_management_roles($org_uuid_for_scope);
+        : \WicketORM\Helpers\PermissionHelper::has_management_roles($org_uuid_for_scope);
     $org_uuid_for_links = $org_uuid_for_scope;
     $logger->debug('Org list manage members link context', [
         'source' => 'wicket-orgman',
@@ -758,7 +758,7 @@ endforeach; ?>
         }
         unset($base_query_args['org_page']);
 
-        $base_list_url = \OrgManagement\Helpers\Helper::getMyAccountPageUrl(
+        $base_list_url = \WicketORM\Helpers\Helper::getMyAccountPageUrl(
             'organization-management',
             '/my-account/organization-management/'
         );

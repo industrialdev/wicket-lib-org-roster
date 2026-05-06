@@ -3,9 +3,9 @@
  * Group members list partial.
  */
 
-use OrgManagement\Services\AdditionalSeatsService;
-use OrgManagement\Services\ConfigService;
-use OrgManagement\Services\MembershipService;
+use WicketORM\Services\AdditionalSeatsService;
+use WicketORM\Services\ConfigService;
+use WicketORM\Services\MembershipService;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -18,7 +18,7 @@ $members = isset($group_members) && is_array($group_members) ? $group_members : 
 $pagination = isset($group_pagination) && is_array($group_pagination) ? $group_pagination : [];
 $query = isset($group_query) ? (string) $group_query : '';
 
-$members_list_endpoint = isset($group_members_list_endpoint) ? (string) $group_members_list_endpoint : OrgManagement\Helpers\TemplateHelper::template_url() . 'group-members-list';
+$members_list_endpoint = isset($group_members_list_endpoint) ? (string) $group_members_list_endpoint : WicketORM\Helpers\TemplateHelper::template_url() . 'group-members-list';
 $members_list_target = isset($group_members_list_target) ? (string) $group_members_list_target : 'group-members-list-container-' . sanitize_html_class($group_uuid ?: 'default');
 
 $page = (int) ($pagination['currentPage'] ?? 1);
@@ -32,7 +32,7 @@ $total_pages = max(1, $total_pages);
 $membershipService = new MembershipService();
 $configService = new ConfigService();
 $additional_seats_service = new AdditionalSeatsService($configService);
-$member_service = new OrgManagement\Services\MemberService($configService);
+$member_service = new WicketORM\Services\MemberService($configService);
 
 $membership_uuid = '';
 if (!empty($org_uuid)) {
@@ -81,10 +81,10 @@ $build_action = static function (int $page_number) use ($build_url) {
     return '$listLoading = true; @get(\'' . $build_url($page_number) . '\')';
 };
 
-$remove_member_endpoint = OrgManagement\Helpers\TemplateHelper::template_url() . 'process/remove-group-member';
+$remove_member_endpoint = WicketORM\Helpers\TemplateHelper::template_url() . 'process/remove-group-member';
 $refresh_action = "@get('" . $build_url(1) . "') >> select('#" . $members_list_target . "') | set(html)";
 
-$orgman_config = OrgManagement\Config\OrgManConfig::get();
+$orgman_config = WicketORM\Config\OrgManConfig::get();
 $show_assignment_info = (bool) ($orgman_config['presentation']['member_list']['show_assignment_info'] ?? true);
 
 ?>
@@ -146,7 +146,7 @@ $show_assignment_info = (bool) ($orgman_config['presentation']['member_list']['s
                     <div class="wt_flex wt_flex-col wt_gap-2 wt_w-full md_wt_w-4-5">
                         <div class="wt_flex wt_flex-col sm_wt_flex-row wt_items-start sm_wt_items-center wt_gap-2">
                             <div class="wt_flex wt_items-center wt_gap-2">
-                                <?php if (OrgManagement\Helpers\Helper::should_show_member_name()) : ?>
+                                <?php if (WicketORM\Helpers\Helper::should_show_member_name()) : ?>
                                 <h3 class="wt_text-xl wt_font-medium wt_text-content wt_mb-0">
                                     <?php echo esc_html($member_name); ?>
                                 </h3>
@@ -165,14 +165,14 @@ $show_assignment_info = (bool) ($orgman_config['presentation']['member_list']['s
                                 <?php endif; ?>
                             </div>
                         </div>
-                        <?php if ($member_email && OrgManagement\Helpers\Helper::should_show_member_email()) : ?>
+                        <?php if ($member_email && WicketORM\Helpers\Helper::should_show_member_email()) : ?>
                             <div class="wt_flex wt_items-center wt_gap-2">
                                 <a href="mailto:<?php echo esc_attr($member_email); ?>" class="wt_text-sm wt_text-interactive wt_hover_underline">
                                     <?php echo esc_html($member_email); ?>
                                 </a>
                             </div>
                         <?php endif; ?>
-                        <?php if ($member_role_label && OrgManagement\Helpers\Helper::should_show_member_roles()) : ?>
+                        <?php if ($member_role_label && WicketORM\Helpers\Helper::should_show_member_roles()) : ?>
                             <div class="wt_flex wt_items-baseline wt_gap-2 wt_text-sm">
                                 <strong><?php esc_html_e('Role:', 'wicket-acc'); ?></strong>
                                 <span class="wt_text-content">

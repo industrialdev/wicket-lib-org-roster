@@ -159,7 +159,7 @@ All notable changes to this project are documented in this file.
 - OrgManConfig: Added `exports` and `engagement` top-level config sections (both `enabled => false` by default).
 - OrgMan: Conditional service/controller initialization for exports and engagement based on config flags.
 - OrgMan: Added cron hooks for export processing and cleanup, plus download query var registration.
-- WP shims: Added namespace-scoped WordPress function shims in `OrgManagement\Services\` for isolated unit testing.
+- WP shims: Added namespace-scoped WordPress function shims in `WicketORM\Services\` for isolated unit testing.
 
 ## [0.5.30] - 2026-04-13
 
@@ -175,7 +175,7 @@ All notable changes to this project are documented in this file.
 - Kept edit-permissions success handling server-driven (no client-side `@get` list refetch) while preserving existing modal success state behavior.
 
 ### Added
-- Added `OrgManagement\Helpers\MemberListRefresh::buildOrgMembersListPatches()` to centralize Datastar members-list patch generation for org roster mutations.
+- Added `WicketORM\Helpers\MemberListRefresh::buildOrgMembersListPatches()` to centralize Datastar members-list patch generation for org roster mutations.
 - Added hidden `org_dom_suffix` form posting in legacy and unified member views for edit-permissions and remove-member forms to ensure refresh patches target the exact list container.
 - Added QA regression coverage in `qa/tests/Unit/Roster/Helpers/MemberListRefreshRegressionTest.php` to guard the shared helper path and server-driven edit-permissions refresh wiring.
 
@@ -626,7 +626,7 @@ All notable changes to this project are documented in this file.
 
 ### Added
 - Asynchronous bulk member upload processing with WP-Cron job batches:
-  - New service: `OrgManagement\Services\BulkMemberUploadService`.
+  - New service: `WicketORM\Services\BulkMemberUploadService`.
   - New cron hook: `wicket_orgman_process_bulk_upload_job`.
   - Per-job option storage with isolated records for parallel execution:
     - job index key: `wicket_orgman_bulk_upload_job_ids`
@@ -643,7 +643,7 @@ All notable changes to this project are documented in this file.
 - Refactored `templates-partials/process/bulk-upload-members.php` into a thin request handler:
   - keeps nonce/permission/context checks and SSE response rendering.
   - delegates CSV processing/enqueueing to `BulkMemberUploadService`.
-- Added background processing wiring in `OrgManagement\OrgMan`:
+- Added background processing wiring in `WicketORM\OrgMan`:
   - service dependency loading/initialization.
   - cron action registration and scheduled batch dispatch.
 - Updated bulk processor CSV parsing calls to explicit `fgetcsv(..., escape)` arguments for forward compatibility.
@@ -717,7 +717,7 @@ All notable changes to this project are documented in this file.
 ## [0.1.0] - 2026-02-04
 
 ### Added
-- Initial Composer library packaging for `industrialdev/wicket-lib-org-roster` with `OrgManagement\OrgMan` singleton entrypoint.
+- Initial Composer library packaging for `industrialdev/wicket-lib-org-roster` with `WicketORM\OrgMan` singleton entrypoint.
 - Core WordPress integration hooks for:
   - page-content injection on Org Roster my-account screens
   - REST route registration

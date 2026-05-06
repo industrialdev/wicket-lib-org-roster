@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OrgManagement\Templates;
+namespace WicketORM\Templates;
 
 // Ensure this file is not accessed directly.
 if (!defined('ABSPATH')) {
@@ -27,15 +27,15 @@ $org_uuid_dom_suffix = sanitize_html_class($org_uuid ?? 'default');
 $lang = wicket_get_current_language();
 
 // Fetch organization members if the Wicket function exists.
-$membershipService = new \OrgManagement\Services\MembershipService();
-$configService = new \OrgManagement\Services\ConfigService();
-$member_service = new \OrgManagement\Services\MemberService($configService);
-$permissionService = new \OrgManagement\Services\PermissionService();
+$membershipService = new \WicketORM\Services\MembershipService();
+$configService = new \WicketORM\Services\ConfigService();
+$member_service = new \WicketORM\Services\MemberService($configService);
+$permissionService = new \WicketORM\Services\PermissionService();
 
-$additional_seats_service = new \OrgManagement\Services\AdditionalSeatsService($configService);
+$additional_seats_service = new \WicketORM\Services\AdditionalSeatsService($configService);
 
 // Load org management configuration
-$orgman_config = \OrgManagement\Config\OrgManConfig::get();
+$orgman_config = \WicketORM\Config\OrgManConfig::get();
 $requested_membership_uuid = isset($_GET['membership_uuid']) ? sanitize_text_field((string) wp_unslash($_GET['membership_uuid'])) : '';
 
 $membershipUuid = $requested_membership_uuid !== ''
@@ -100,7 +100,7 @@ $available_roles = $permissionService->getAvailableRoles();
 $role_descriptions = $orgman_config['access']['roles']['descriptions'] ?? [];
 
 $containerId = 'members-list-container-' . $org_uuid_dom_suffix;
-$membersListEndpoint = \OrgManagement\Helpers\template_url() . 'members-list';
+$membersListEndpoint = \WicketORM\Helpers\template_url() . 'members-list';
 $membersListSeparator = str_contains($membersListEndpoint, '?') ? '&' : '?';
 $encodedOrgUuid = rawurlencode((string) $org_uuid);
 $searchAction = '';
@@ -237,7 +237,7 @@ $members_list_endpoint = $membersListEndpoint;
 	    if ($clear_form_on_error) {
 	        $add_member_error_actions .= " el.closest('form').reset();";
 	    }
-	    $add_member_endpoint = \OrgManagement\Helpers\template_url() . 'process/add-member';
+	    $add_member_endpoint = \WicketORM\Helpers\template_url() . 'process/add-member';
 	    ?>
 
 	<div class="wt_mt-6">
@@ -330,7 +330,7 @@ if ($can_purchase_seats && !empty($purchase_url)):
     ?>
 		<?php endif; ?>
 
-		<?php if (\OrgManagement\Helpers\PermissionHelper::can_add_members($org_uuid)): ?>
+		<?php if (\WicketORM\Helpers\PermissionHelper::can_add_members($org_uuid)): ?>
 		<dialog id="membersAddModal"
 			class="modal wt_m-auto max_wt_3xl wt_rounded-md wt_shadow-md backdrop_wt_bg-black-50"
 			data-show="$addMemberModalOpen" data-effect="if ($addMemberModalOpen) el.showModal(); else el.close();"
@@ -445,7 +445,7 @@ if ($can_purchase_seats && !empty($purchase_url)):
 		    if (!empty($orgman_config['access']['permissions']['prevent_owner_assignment'])) {
 		        unset($available_roles['membership_owner']);
 		    }
-		    $available_roles = \OrgManagement\Helpers\PermissionHelper::filter_role_choices(
+		    $available_roles = \WicketORM\Helpers\PermissionHelper::filter_role_choices(
 		        $available_roles,
 		        is_array($allowed_roles) ? $allowed_roles : [],
 		        is_array($excluded_roles) ? $excluded_roles : []
@@ -513,7 +513,7 @@ if ($can_purchase_seats && !empty($purchase_url)):
 
 		<?php if ($show_bulk_upload) : ?>
 		<?php
-		    $bulk_upload_endpoint = \OrgManagement\Helpers\template_url() . 'process/bulk-upload-members';
+		    $bulk_upload_endpoint = \WicketORM\Helpers\template_url() . 'process/bulk-upload-members';
 		    $bulk_upload_messages_id = 'bulk-upload-messages-' . sanitize_html_class($org_uuid ?: 'default');
 		    $membership_uuid = $membershipUuid;
 		    $bulk_upload_wrapper_class = 'wt_rounded-md wt_border wt_border-color wt_bg-white wt_p-4';

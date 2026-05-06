@@ -14,7 +14,7 @@
   },
   "autoload": {
     "psr-4": {
-      "OrgManagement\\": "src/"
+      "WicketORM\\": "src/"
     }
   },
   "scripts": {

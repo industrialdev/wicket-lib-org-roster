@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use OrgManagement\Helpers as OrgHelpers;
+use WicketORM\Helpers as OrgHelpers;
 
 /*
  * Unified members list partial.
@@ -43,7 +43,7 @@ $members = isset($members) && is_array($members) ? $members : [];
 $total_pages = max(1, $total_pages);
 $page = min(max(1, $page), $total_pages);
 
-$orgman_config = OrgManagement\Config\OrgManConfig::get();
+$orgman_config = WicketORM\Config\OrgManConfig::get();
 $role_display_map = $orgman_config['access']['roles']['labels'] ?? [];
 $presentation_config = is_array($orgman_config['presentation'] ?? null)
     ? $orgman_config['presentation']
@@ -126,7 +126,7 @@ $has_seats_available = true;
 $current_user_uuid = function_exists('wicket_current_person_uuid') ? wicket_current_person_uuid() : null;
 
 if ($membership_uuid !== '') {
-    $membershipService = new OrgManagement\Services\MembershipService();
+    $membershipService = new WicketORM\Services\MembershipService();
     $membership_data = $membershipService->getOrgMembershipData($membership_uuid);
     if ($membership_data && isset($membership_data['data']['attributes'])) {
         $max_seats = $membershipService->getEffectiveMaxAssignments($membership_data);

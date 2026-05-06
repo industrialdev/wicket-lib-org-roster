@@ -6,9 +6,9 @@
  * Renders the form (GET) and processes submissions (POST).
  */
 
-use OrgManagement\Services\ConfigService;
-use OrgManagement\Services\MemberService;
-use OrgManagement\Services\MembershipService;
+use WicketORM\Services\ConfigService;
+use WicketORM\Services\MemberService;
+use WicketORM\Services\MembershipService;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -21,7 +21,7 @@ if ('POST' === strtoupper($request_method)) {
     $nonce = isset($_POST['nonce']) ? sanitize_text_field(wp_unslash($_POST['nonce'])) : '';
     if (!$nonce || !wp_verify_nonce($nonce, 'wicket-orgman-update-permissions')) {
         status_header(200);
-        OrgManagement\Helpers\DatastarSSE::renderError(__('Invalid or missing security token. Please refresh and try again.', 'wicket-acc'), '#update-permissions-messages', ['editPermissionsSubmitting' => false]);
+        WicketORM\Helpers\DatastarSSE::renderError(__('Invalid or missing security token. Please refresh and try again.', 'wicket-acc'), '#update-permissions-messages', ['editPermissionsSubmitting' => false]);
 
         return;
     }
@@ -36,7 +36,7 @@ if ('POST' === strtoupper($request_method)) {
 
     if (empty($org_uuid) || empty($membership_uuid) || empty($person_uuid)) {
         status_header(200);
-        OrgManagement\Helpers\DatastarSSE::renderError(__('Organization UUID, membership UUID, and person UUID are required.', 'wicket-acc'), '#update-permissions-messages', ['editPermissionsSubmitting' => false]);
+        WicketORM\Helpers\DatastarSSE::renderError(__('Organization UUID, membership UUID, and person UUID are required.', 'wicket-acc'), '#update-permissions-messages', ['editPermissionsSubmitting' => false]);
 
         return;
     }
@@ -60,7 +60,7 @@ if ('POST' === strtoupper($request_method)) {
         $log_context = ['source' => 'wicket-orgman', 'action' => 'update-permissions'];
 
         // First update relationship type if provided and enabled
-        $config = OrgManagement\Config\OrgManConfig::get();
+        $config = WicketORM\Config\OrgManConfig::get();
         $edit_permissions_config = $config['edit_permissions_modal'] ?? [];
         if (!is_array($edit_permissions_config) || $edit_permissions_config === []) {
             $edit_permissions_config = $config['member_management']['permissions_modal'] ?? [];
@@ -89,7 +89,7 @@ if ('POST' === strtoupper($request_method)) {
                 $edit_excluded_roles[] = 'membership_owner';
             }
         }
-        $roles = OrgManagement\Helpers\PermissionHelper::filter_role_submission(
+        $roles = WicketORM\Helpers\PermissionHelper::filter_role_submission(
             $roles,
             $edit_allowed_roles,
             $edit_excluded_roles
@@ -114,7 +114,7 @@ if ('POST' === strtoupper($request_method)) {
 
             if (is_wp_error($relationship_result)) {
                 status_header(200);
-                OrgManagement\Helpers\DatastarSSE::renderError($relationship_result->get_error_message(), '#update-permissions-messages', ['editPermissionsSubmitting' => false]);
+                WicketORM\Helpers\DatastarSSE::renderError($relationship_result->get_error_message(), '#update-permissions-messages', ['editPermissionsSubmitting' => false]);
 
                 return;
             }
@@ -125,7 +125,7 @@ if ('POST' === strtoupper($request_method)) {
 
             if (is_wp_error($description_result)) {
                 status_header(200);
-                OrgManagement\Helpers\DatastarSSE::renderError($description_result->get_error_message(), '#update-permissions-messages', ['editPermissionsSubmitting' => false]);
+                WicketORM\Helpers\DatastarSSE::renderError($description_result->get_error_message(), '#update-permissions-messages', ['editPermissionsSubmitting' => false]);
 
                 return;
             }
@@ -159,7 +159,7 @@ if ('POST' === strtoupper($request_method)) {
                 ]);
             }
             status_header(200);
-            OrgManagement\Helpers\DatastarSSE::renderError($result->get_error_message(), '#update-permissions-messages', ['editPermissionsSubmitting' => false]);
+            WicketORM\Helpers\DatastarSSE::renderError($result->get_error_message(), '#update-permissions-messages', ['editPermissionsSubmitting' => false]);
 
             return;
         }
@@ -185,10 +185,10 @@ if ('POST' === strtoupper($request_method)) {
             ]);
         }
         if ($effective_membership_uuid !== '') {
-            $orgman_instance = OrgManagement\OrgMan::get_instance();
+            $orgman_instance = WicketORM\OrgMan::get_instance();
             $orgman_instance->clearMembersCache($effective_membership_uuid);
         }
-        $element_patches = OrgManagement\Helpers\MemberListRefresh::buildOrgMembersListPatches(
+        $element_patches = WicketORM\Helpers\MemberListRefresh::buildOrgMembersListPatches(
             $org_uuid,
             $effective_membership_uuid,
             $org_dom_suffix,
@@ -197,7 +197,7 @@ if ('POST' === strtoupper($request_method)) {
         );
 
         status_header(200);
-        OrgManagement\Helpers\DatastarSSE::renderSuccess($success_message, '#update-permissions-messages', [
+        WicketORM\Helpers\DatastarSSE::renderSuccess($success_message, '#update-permissions-messages', [
             'editPermissionsSubmitting' => false,
             'editPermissionsSuccess' => true,
             'membersLoading' => false,
@@ -208,7 +208,7 @@ if ('POST' === strtoupper($request_method)) {
     } catch (Throwable $e) {
         status_header(200);
         \Wicket()->log()->error('update-permissions modal failed: ' . $e->getMessage(), ['source' => 'wicket-orgman', 'org_uuid' => $org_uuid, 'membership_uuid' => $membership_uuid, 'person_uuid' => $person_uuid]);
-        OrgManagement\Helpers\DatastarSSE::renderError(__('An unexpected error occurred. Please try again.', 'wicket-acc'), '#update-permissions-messages', ['editPermissionsSubmitting' => false]);
+        WicketORM\Helpers\DatastarSSE::renderError(__('An unexpected error occurred. Please try again.', 'wicket-acc'), '#update-permissions-messages', ['editPermissionsSubmitting' => false]);
 
         return;
     }

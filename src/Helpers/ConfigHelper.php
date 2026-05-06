@@ -4,7 +4,7 @@
  * Config Helper for Org Management.
  */
 
-namespace OrgManagement\Helpers;
+namespace WicketORM\Helpers;
 
 // Exit if accessed directly.
 if (!defined('ABSPATH')) {

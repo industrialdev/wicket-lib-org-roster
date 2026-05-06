@@ -2,7 +2,7 @@
 title: "Additional Seats"
 audience: [implementer, support]
 config_path: integrations.additional_seats
-php_class: OrgManagement\Services\AdditionalSeatsService
+php_class: WicketORM\Services\AdditionalSeatsService
 critical_doc_contract: true
 critical_section_start: "<!-- CRITICAL:ADDITIONAL_SEATS_START -->"
 critical_section_end: "<!-- CRITICAL:ADDITIONAL_SEATS_END -->"
@@ -43,7 +43,7 @@ WordPress administrators see an in-page setup warning when additional-seats prer
 By default, additional seats is disabled. Enable it in your bootstrap config filter:
 
 ```php
-add_filter('wicket/acc/orgman/config', static function (array $config): array {
+add_filter('wicket/org-roster/config', static function (array $config): array {
     $config['integrations']['additional_seats']['enabled']  = true;
     $config['integrations']['additional_seats']['sku']      = 'additional-seats';
     $config['integrations']['additional_seats']['form_id']  = 42; // your GF form ID

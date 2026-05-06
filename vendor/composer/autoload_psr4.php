@@ -7,5 +7,5 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'starfederation\\datastar\\' => array($vendorDir . '/starfederation/datastar-php/src'),
-    'OrgManagement\\' => array($baseDir . '/src'),
+    'WicketORM\\' => array($baseDir . '/src'),
 );

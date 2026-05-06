@@ -4,12 +4,12 @@
  * Membership Cycle Strategy for Roster Management.
  */
 
-namespace OrgManagement\Services\Strategies;
+namespace WicketORM\Services\Strategies;
 
-use OrgManagement\Services\MembershipService;
-use OrgManagement\Services\OrganizationService;
-use OrgManagement\Services\PermissionService;
-use OrgManagement\Services\TouchpointService;
+use WicketORM\Services\MembershipService;
+use WicketORM\Services\OrganizationService;
+use WicketORM\Services\PermissionService;
+use WicketORM\Services\TouchpointService;
 use WP_Error;
 
 // Exit if accessed directly.
@@ -62,7 +62,7 @@ class MembershipCycleStrategy implements RosterManagementStrategy
             return new WP_Error('missing_membership_uuid', 'Membership UUID is required for membership_cycle strategy.');
         }
 
-        if (!\OrgManagement\Helpers\PermissionHelper::can_add_members($org_id)) {
+        if (!\WicketORM\Helpers\PermissionHelper::can_add_members($org_id)) {
             return new WP_Error('no_permission', 'You do not have permission to add members to this organization.');
         }
 
@@ -96,7 +96,7 @@ class MembershipCycleStrategy implements RosterManagementStrategy
             return new WP_Error('missing_person_membership_id', 'Person membership ID is required.');
         }
 
-        if (!\OrgManagement\Helpers\PermissionHelper::can_remove_members($org_id)) {
+        if (!\WicketORM\Helpers\PermissionHelper::can_remove_members($org_id)) {
             return new WP_Error('no_permission', 'You do not have permission to remove members from this organization.');
         }
 
@@ -105,7 +105,7 @@ class MembershipCycleStrategy implements RosterManagementStrategy
             return $scope_valid;
         }
 
-        $config = \OrgManagement\Config\OrgManConfig::get();
+        $config = \WicketORM\Config\OrgManConfig::get();
         $cycle_config = is_array($config['membership']['cycle'] ?? null) ? $config['membership']['cycle'] : [];
         $access_permissions = is_array($config['access']['permissions'] ?? null) ? $config['access']['permissions'] : [];
         $prevent_owner_removal = (bool) ($cycle_config['prevent_owner_removal'] ?? true);

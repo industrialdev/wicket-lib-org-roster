@@ -12,8 +12,8 @@ if (!defined('ABSPATH')) {
 
 use Datastar\Events\PatchElements;
 use Datastar\ServerSentEventGenerator;
-use OrgManagement\Services\ConfigService;
-use OrgManagement\Services\SubsidiaryService;
+use WicketORM\Services\ConfigService;
+use WicketORM\Services\SubsidiaryService;
 
 // Instantiate services
 $configService = new ConfigService();

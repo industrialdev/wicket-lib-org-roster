@@ -1,7 +1,7 @@
 ---
 title: "Strategies"
 audience: [developer, implementer]
-php_class: OrgManagement\Services\MemberService
+php_class: WicketORM\Services\MemberService
 source_files: ["src/Services/Strategies/", "src/Services/MemberService.php"]
 ---
 

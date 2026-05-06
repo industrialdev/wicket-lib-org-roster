@@ -4,7 +4,7 @@
  * Main orchestrator class for the Organization Management feature.
  */
 
-namespace OrgManagement;
+namespace WicketORM;
 
 // Exit if accessed directly.
 if (!defined('ABSPATH') && !defined('WICKET_DOING_TESTS')) {
@@ -1048,7 +1048,7 @@ final class OrgMan
     {
         $base_path = dirname(__DIR__);
 
-        return (string) apply_filters('wicket/acc/orgman/base_path', $base_path);
+        return (string) apply_filters('wicket/org-roster/base_path', $base_path);
     }
 
     /**
@@ -1071,7 +1071,7 @@ final class OrgMan
             $base_uri = trailingslashit(site_url($relative_path));
         }
 
-        return trailingslashit((string) apply_filters('wicket/acc/orgman/base_url', $base_uri));
+        return trailingslashit((string) apply_filters('wicket/org-roster/base_url', $base_uri));
     }
 
     /**

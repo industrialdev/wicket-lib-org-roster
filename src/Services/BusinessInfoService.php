@@ -4,7 +4,7 @@
  * Business information service.
  */
 
-namespace OrgManagement\Services;
+namespace WicketORM\Services;
 
 use WP_Error;
 

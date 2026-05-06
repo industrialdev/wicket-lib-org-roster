@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use OrgManagement\Helpers as OrgHelpers;
+use WicketORM\Helpers as OrgHelpers;
 
 /*
  * Members list Datastar partial.
@@ -68,7 +68,7 @@ $update_permissions_success_actions = "console.log('Permissions updated successf
 $remove_member_reset_actions = "(() => { const modal = document.getElementById('removeMemberModal'); const messages = modal ? modal.querySelector('#remove-member-messages') : document.getElementById('remove-member-messages'); if (messages) messages.innerHTML = ''; if (modal && modal.open) modal.close(); })(); \$removeMemberModalOpen = false; \$removeMemberSubmitting = false; \$removeMemberSuccess = false; \$membersLoading = false; \$autoCloseCountdown = 0; \$currentRemoveMemberUuid = ''; \$currentRemoveMemberName = ''; \$currentRemoveMemberEmail = ''; \$currentRemoveMemberConnectionId = ''; \$currentRemoveMemberPersonMembershipId = '';";
 $remove_member_success_actions = "console.log('Member removed successfully'); $removeMemberSubmitting = false; $removeMemberSuccess = true; $membersLoading = false;";
 
-$orgman_config = OrgManagement\Config\OrgManConfig::get();
+$orgman_config = WicketORM\Config\OrgManConfig::get();
 $presentation_config = is_array($orgman_config['presentation'] ?? null)
     ? $orgman_config['presentation']
     : [];
@@ -96,9 +96,9 @@ $unconfirmed_label = (string) ($account_status_config['unconfirmed_label'] ?? __
 $remove_member_auto_close_on_success = (bool) ($member_view_config['add_member_auto_close_on_success'] ?? false);
 $remove_member_auto_close_delay_seconds = max(0, (int) ($member_view_config['add_member_auto_close_delay_seconds'] ?? 7));
 if ((!isset($members) || !is_array($members)) && !empty($org_uuid)) {
-    $configService = new OrgManagement\Services\ConfigService();
-    $member_service = new OrgManagement\Services\MemberService($configService);
-    $membership = new OrgManagement\Services\MembershipService();
+    $configService = new WicketORM\Services\ConfigService();
+    $member_service = new WicketORM\Services\MemberService($configService);
+    $membership = new WicketORM\Services\MembershipService();
     if (!isset($membership_uuid)) {
         $membership_uuid = $membership->getMembershipForOrganization($org_uuid);
     }
@@ -135,7 +135,7 @@ $active_seats = 0;
 $has_seats_available = true;
 
 if (!empty($membership_uuid)) {
-    $membershipService = new OrgManagement\Services\MembershipService();
+    $membershipService = new WicketORM\Services\MembershipService();
     $membership_data = $membershipService->getOrgMembershipData($membership_uuid);
 
     if ($membership_data && isset($membership_data['data']['attributes'])) {
@@ -153,7 +153,7 @@ $total_pages = max(1, $total_pages);
 $page = min(max(1, $page), $total_pages);
 
 // Load available roles for the edit permissions modal
-$permissionService = new OrgManagement\Services\PermissionService();
+$permissionService = new WicketORM\Services\PermissionService();
 $available_roles = $permissionService->getAvailableRoles();
 
 // Load config for relationship type editing

@@ -1,7 +1,7 @@
 ---
 title: "Configuration"
 audience: [implementer, support, developer]
-php_class: OrgManagement\Config\OrgManConfig
+php_class: WicketORM\Config\OrgManConfig
 config_path: ""
 source_files: ["src/Config/OrgManConfig.php"]
 ---
@@ -560,8 +560,8 @@ Async CSV member export with secure download tokens and WP-Cron batch processing
 | Config path | `exports` |
 | PHP access | `ConfigService::get('exports')` |
 | Template | `templates-partials/export-members-modal.php` |
-| Service | `OrgManagement\Services\MemberExportService` |
-| Controller | `OrgManagement\Controllers\MemberExportController` |
+| Service | `WicketORM\Services\MemberExportService` |
+| Controller | `WicketORM\Controllers\MemberExportController` |
 
 ### `engagement`
 
@@ -601,8 +601,8 @@ Available formats for field values:
 | Config path | `engagement` |
 | PHP access | `ConfigService::get('engagement')` |
 | Template | `templates-partials/engagement-summary.php` |
-| Service | `OrgManagement\Services\EngagementService` |
-| Controller | `OrgManagement\Controllers\EngagementController` |
+| Service | `WicketORM\Services\EngagementService` |
+| Controller | `WicketORM\Controllers\EngagementController` |
 
 ### `platform`
 

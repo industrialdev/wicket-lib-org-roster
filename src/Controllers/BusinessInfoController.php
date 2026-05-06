@@ -4,9 +4,9 @@
  * Business information controller.
  */
 
-namespace OrgManagement\Controllers;
+namespace WicketORM\Controllers;
 
-use OrgManagement\Services\BusinessInfoService;
+use WicketORM\Services\BusinessInfoService;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;

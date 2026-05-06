@@ -5,14 +5,14 @@
  * This template is injected after page content on my-account slug: organization-members-bulk.
  */
 
-namespace OrgManagement\Templates;
+namespace WicketORM\Templates;
 
 if (!is_user_logged_in()) {
     wp_redirect(wp_login_url());
     exit;
 }
 
-$configService = new \OrgManagement\Services\ConfigService();
+$configService = new \WicketORM\Services\ConfigService();
 $roster_mode = (string) $configService->getRosterMode();
 
 $org_uuid = isset($_GET['org_uuid']) ? sanitize_text_field((string) $_GET['org_uuid']) : '';
@@ -28,12 +28,12 @@ if (empty($org_uuid) && !empty($org_id_fallback)) {
     exit;
 }
 
-$member_list_config = \OrgManagement\Config\OrgManConfig::get()['ui']['member_list'] ?? [];
+$member_list_config = \WicketORM\Config\OrgManConfig::get()['ui']['member_list'] ?? [];
 $show_bulk_upload = (bool) ($member_list_config['show_bulk_upload'] ?? false);
 
-$membershipService = new \OrgManagement\Services\MembershipService();
+$membershipService = new \WicketORM\Services\MembershipService();
 $user_uuid = (string) wp_get_current_user()->user_login;
-$bulk_page_url = \OrgManagement\Helpers\Helper::getMyAccountPageUrl(
+$bulk_page_url = \WicketORM\Helpers\Helper::getMyAccountPageUrl(
     'organization-members-bulk',
     '/my-account/organization-members-bulk/'
 );
@@ -56,7 +56,7 @@ $build_base_query_args = static function (): array {
 $membership_uuid = '';
 
 if ($roster_mode === 'groups') {
-    $group_service = new \OrgManagement\Services\GroupService();
+    $group_service = new \WicketORM\Services\GroupService();
     $manageable_groups = [];
     $seen_group_ids = [];
     $page = 1;
@@ -173,7 +173,7 @@ if ($roster_mode === 'groups') {
             </div>
         <?php else : ?>
             <?php
-            $bulk_upload_endpoint = \OrgManagement\Helpers\template_url() . 'process/bulk-upload-members';
+            $bulk_upload_endpoint = \WicketORM\Helpers\template_url() . 'process/bulk-upload-members';
             $bulk_upload_messages_id = 'bulk-upload-messages-' . sanitize_html_class($org_uuid ?: $group_uuid ?: 'default');
             include dirname(__DIR__) . '/templates-partials/members-bulk-upload.php';
             ?>
@@ -184,7 +184,7 @@ if ($roster_mode === 'groups') {
     return;
 }
 
-$organizationService = new \OrgManagement\Services\OrganizationService();
+$organizationService = new \WicketORM\Services\OrganizationService();
 $organizations = $organizationService->getUserOrganizations($user_uuid);
 if (!is_array($organizations)) {
     $organizations = [];
@@ -198,7 +198,7 @@ foreach ($organizations as $organization) {
         continue;
     }
 
-    if (!\OrgManagement\Helpers\PermissionHelper::can_add_members($candidate_org_uuid)) {
+    if (!\WicketORM\Helpers\PermissionHelper::can_add_members($candidate_org_uuid)) {
         continue;
     }
 
@@ -264,7 +264,7 @@ if ($org_uuid !== '') {
         </div>
     <?php else : ?>
         <?php
-        $bulk_upload_endpoint = \OrgManagement\Helpers\template_url() . 'process/bulk-upload-members';
+        $bulk_upload_endpoint = \WicketORM\Helpers\template_url() . 'process/bulk-upload-members';
         $bulk_upload_messages_id = 'bulk-upload-messages-' . sanitize_html_class($org_uuid ?: 'default');
         include dirname(__DIR__) . '/templates-partials/members-bulk-upload.php';
         ?>

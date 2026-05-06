@@ -4,7 +4,7 @@
  * Organization Model for handling organization data.
  */
 
-namespace OrgManagement\Services;
+namespace WicketORM\Services;
 
 // Exit if accessed directly.
 if (!defined('ABSPATH')) {
@@ -23,7 +23,7 @@ class OrganizationService
 
     public function __construct()
     {
-        $this->config = \OrgManagement\Config\OrgManConfig::get();
+        $this->config = \WicketORM\Config\OrgManConfig::get();
     }
 
     /**
@@ -63,7 +63,7 @@ class OrganizationService
      */
     private function getCachedData($cache_key)
     {
-        if (!\OrgManagement\Helpers\ConfigHelper::is_cache_enabled()) {
+        if (!\WicketORM\Helpers\ConfigHelper::is_cache_enabled()) {
             return false;
         }
 
@@ -79,8 +79,8 @@ class OrganizationService
      */
     private function setCachedData($cache_key, $data)
     {
-        if (\OrgManagement\Helpers\ConfigHelper::is_cache_enabled()) {
-            $cache_duration = \OrgManagement\Helpers\ConfigHelper::get_cache_duration();
+        if (\WicketORM\Helpers\ConfigHelper::is_cache_enabled()) {
+            $cache_duration = \WicketORM\Helpers\ConfigHelper::get_cache_duration();
             set_transient($cache_key, $data, $cache_duration);
         }
     }

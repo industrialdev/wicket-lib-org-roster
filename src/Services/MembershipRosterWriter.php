@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace OrgManagement\Services;
+namespace WicketORM\Services;
 
-use OrgManagement\Services\Strategies\RosterManagementStrategy;
+use WicketORM\Services\Strategies\RosterManagementStrategy;
 
 /**
  * Membership roster write core.
@@ -461,7 +461,7 @@ class MembershipRosterWriter
             }
 
             // Check if we should automatically update roles based on relationship type
-            $config = \OrgManagement\Config\OrgManConfig::get();
+            $config = \WicketORM\Config\OrgManConfig::get();
             $relationship_based_permissions = $config['access']['permissions']['relationship_grants']['enabled'] ?? false;
 
             if ($relationship_based_permissions) {

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-use OrgManagement\Services\BulkMemberUploadService;
-use OrgManagement\Services\ConfigService;
-use OrgManagement\Services\GroupService;
-use OrgManagement\Services\MembershipService;
+use WicketORM\Services\BulkMemberUploadService;
+use WicketORM\Services\ConfigService;
+use WicketORM\Services\GroupService;
+use WicketORM\Services\MembershipService;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -19,7 +19,7 @@ if ('POST' !== strtoupper((string) $request_method)) {
 $nonce = isset($_POST['nonce']) ? sanitize_text_field(wp_unslash($_POST['nonce'])) : '';
 if (!$nonce || !wp_verify_nonce($nonce, 'wicket-orgman-bulk-upload-members')) {
     status_header(200);
-    OrgManagement\Helpers\DatastarSSE::renderError(
+    WicketORM\Helpers\DatastarSSE::renderError(
         __('Invalid or missing security token. Please refresh and try again.', 'wicket-acc'),
         '#bulk-upload-messages-default',
         ['membersLoading' => false, 'bulkUploadSubmitting' => false]
@@ -34,7 +34,7 @@ $membership_uuid = isset($_POST['membership_uuid']) ? sanitize_text_field(wp_uns
 $message_dom_suffix_source = $org_uuid !== '' ? $org_uuid : ($group_uuid !== '' ? $group_uuid : 'default');
 $org_dom_suffix = sanitize_html_class($message_dom_suffix_source);
 $message_target = '#bulk-upload-messages-' . $org_dom_suffix;
-$orgman_config = OrgManagement\Config\OrgManConfig::get();
+$orgman_config = WicketORM\Config\OrgManConfig::get();
 $member_list_config = is_array($orgman_config['presentation']['member_list'] ?? null)
     ? $orgman_config['presentation']['member_list']
     : [];
@@ -42,7 +42,7 @@ $bulk_upload_enabled = (bool) ($member_list_config['show_bulk_upload'] ?? false)
 
 if (!$bulk_upload_enabled) {
     status_header(200);
-    OrgManagement\Helpers\DatastarSSE::renderError(
+    WicketORM\Helpers\DatastarSSE::renderError(
         __('Bulk upload is disabled.', 'wicket-acc'),
         $message_target,
         ['membersLoading' => false, 'bulkUploadSubmitting' => false]
@@ -53,7 +53,7 @@ if (!$bulk_upload_enabled) {
 
 if (empty($_FILES['bulk_file']['tmp_name']) || !is_uploaded_file((string) $_FILES['bulk_file']['tmp_name'])) {
     status_header(200);
-    OrgManagement\Helpers\DatastarSSE::renderError(
+    WicketORM\Helpers\DatastarSSE::renderError(
         __('Please select a valid CSV file.', 'wicket-acc'),
         $message_target,
         ['membersLoading' => false, 'bulkUploadSubmitting' => false]
@@ -77,7 +77,7 @@ $group_service = null;
 if ($roster_mode === 'groups') {
     if ($group_uuid === '') {
         status_header(200);
-        OrgManagement\Helpers\DatastarSSE::renderError(
+        WicketORM\Helpers\DatastarSSE::renderError(
             __('Group identifier missing.', 'wicket-acc'),
             $message_target,
             ['membersLoading' => false, 'bulkUploadSubmitting' => false]
@@ -93,7 +93,7 @@ if ($roster_mode === 'groups') {
 
     if (empty($group_access['allowed'])) {
         status_header(200);
-        OrgManagement\Helpers\DatastarSSE::renderError(
+        WicketORM\Helpers\DatastarSSE::renderError(
             __('You do not have permission to bulk add members to this group.', 'wicket-acc'),
             $message_target,
             ['membersLoading' => false, 'bulkUploadSubmitting' => false]
@@ -109,7 +109,7 @@ if ($roster_mode === 'groups') {
 } else {
     if (empty($org_uuid)) {
         status_header(200);
-        OrgManagement\Helpers\DatastarSSE::renderError(
+        WicketORM\Helpers\DatastarSSE::renderError(
             __('Organization identifier missing.', 'wicket-acc'),
             $message_target,
             ['membersLoading' => false, 'bulkUploadSubmitting' => false]
@@ -118,9 +118,9 @@ if ($roster_mode === 'groups') {
         return;
     }
 
-    if (!OrgManagement\Helpers\PermissionHelper::can_add_members($org_uuid)) {
+    if (!WicketORM\Helpers\PermissionHelper::can_add_members($org_uuid)) {
         status_header(200);
-        OrgManagement\Helpers\DatastarSSE::renderError(
+        WicketORM\Helpers\DatastarSSE::renderError(
             __('You do not have permission to bulk add members to this organization.', 'wicket-acc'),
             $message_target,
             ['membersLoading' => false, 'bulkUploadSubmitting' => false]
@@ -136,7 +136,7 @@ if ($membership_uuid === '' && $org_uuid !== '') {
 
 if ($roster_mode !== 'groups' && $membership_uuid === '') {
     status_header(200);
-    OrgManagement\Helpers\DatastarSSE::renderError(
+    WicketORM\Helpers\DatastarSSE::renderError(
         __('No active organization membership was found for this organization.', 'wicket-acc'),
         $message_target,
         ['membersLoading' => false, 'bulkUploadSubmitting' => false]
@@ -157,7 +157,7 @@ $result = $bulk_upload_service->enqueueUpload(
 
 if (is_wp_error($result)) {
     status_header(200);
-    OrgManagement\Helpers\DatastarSSE::renderError(
+    WicketORM\Helpers\DatastarSSE::renderError(
         $result->get_error_message(),
         $message_target,
         ['membersLoading' => false, 'bulkUploadSubmitting' => false]
@@ -178,7 +178,7 @@ $summary = sprintf(
 $summary .= '<br>' . esc_html__('Processing runs in the background with WordPress Cron.', 'wicket-acc');
 
 status_header(200);
-OrgManagement\Helpers\DatastarSSE::renderSuccess($summary, $message_target, [
+WicketORM\Helpers\DatastarSSE::renderSuccess($summary, $message_target, [
     'membersLoading' => false,
     'bulkUploadSubmitting' => false,
 ], 0, 'bulk-upload-countdown');

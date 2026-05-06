@@ -1,6 +1,6 @@
 <?php
 
-namespace OrgManagement\Helpers;
+namespace WicketORM\Helpers;
 
 use starfederation\datastar\enums\ElementPatchMode;
 

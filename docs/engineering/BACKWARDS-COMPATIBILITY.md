@@ -1,7 +1,7 @@
 ---
 title: "Backwards Compatibility"
 audience: [developer]
-php_class: OrgManagement\OrgMan
+php_class: WicketORM\OrgMan
 source_files: ["src/OrgMan.php", "src/Config/OrgManConfig.php"]
 ---
 
@@ -14,7 +14,7 @@ Released behavior in this library is expected to stay stable unless a breaking c
 - keep `membership.strategy` defaulting to `direct`
 - keep additive config keys opt-in
 - do not silently change permission defaults
-- keep `OrgManagement\OrgMan::get_instance()` as the theme-facing alias
+- keep `WicketORM\OrgMan::get_instance()` as the theme-facing alias
 - keep internal PHP APIs on camelCase naming
 - keep upstream WordPress, WooCommerce, and Wicket helper names unchanged when they use underscores
 

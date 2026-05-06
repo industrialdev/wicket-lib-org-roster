@@ -4,9 +4,9 @@
  * Subsidiary management controller.
  */
 
-namespace OrgManagement\Controllers;
+namespace WicketORM\Controllers;
 
-use OrgManagement\Services\SubsidiaryService;
+use WicketORM\Services\SubsidiaryService;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;

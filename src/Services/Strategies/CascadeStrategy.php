@@ -4,16 +4,16 @@
  * Cascade Strategy for Roster Management.
  */
 
-namespace OrgManagement\Services\Strategies;
+namespace WicketORM\Services\Strategies;
 
-use OrgManagement\Services\ConfigService;
-use OrgManagement\Services\ConnectionService;
-use OrgManagement\Services\MembershipService;
-use OrgManagement\Services\NotificationService;
-use OrgManagement\Services\OrganizationService;
-use OrgManagement\Services\PermissionService;
-use OrgManagement\Services\PersonService;
-use OrgManagement\Services\TouchpointService;
+use WicketORM\Services\ConfigService;
+use WicketORM\Services\ConnectionService;
+use WicketORM\Services\MembershipService;
+use WicketORM\Services\NotificationService;
+use WicketORM\Services\OrganizationService;
+use WicketORM\Services\PermissionService;
+use WicketORM\Services\PersonService;
+use WicketORM\Services\TouchpointService;
 
 // Exit if accessed directly.
 if (!defined('ABSPATH')) {
@@ -261,7 +261,7 @@ class CascadeStrategy implements RosterManagementStrategy
             $log_context['membership_uuid'] = $membership_uuid;
 
             $has_membership = $this->connectionService()->personHasMembership($person_uuid, $membership_uuid);
-            $config = \OrgManagement\Config\OrgManConfig::get();
+            $config = \WicketORM\Config\OrgManConfig::get();
             if (is_wp_error($has_membership)) {
                 $logger->error('[OrgMan] Cascade membership lookup failed', array_merge($log_context, [
                     'error' => $has_membership->get_error_message(),
@@ -476,7 +476,7 @@ class CascadeStrategy implements RosterManagementStrategy
                 return new \WP_Error('missing_person_membership_id', 'Person membership ID is required to remove a member.');
             }
 
-            $config = \OrgManagement\Config\OrgManConfig::get();
+            $config = \WicketORM\Config\OrgManConfig::get();
             $access_permissions = is_array($config['access']['permissions'] ?? null) ? $config['access']['permissions'] : [];
             $prevent_owner_removal = (bool) ($access_permissions['prevent_owner_removal'] ?? false);
             $owner_must_have_membership_owner = (bool) ($access_permissions['owner_removal_requires_membership_owner_role'] ?? false);
@@ -600,7 +600,7 @@ class CascadeStrategy implements RosterManagementStrategy
             $relationship_type = '';
         }
         if (empty($relationship_type)) {
-            $relationship_type = \OrgManagement\Helpers\RelationshipHelper::get_default_relationship_type();
+            $relationship_type = \WicketORM\Helpers\RelationshipHelper::get_default_relationship_type();
         }
 
         return [$relationship_type, $relationship_description];

@@ -5,7 +5,7 @@
  * This template contains only the OrgMan members content to be injected after the_content.
  */
 
-namespace OrgManagement\Templates;
+namespace WicketORM\Templates;
 
 if (!is_user_logged_in()) {
     wp_redirect(wp_login_url());
@@ -13,8 +13,8 @@ if (!is_user_logged_in()) {
 }
 
 // Roster mode selection
-$configService = new \OrgManagement\Services\ConfigService();
-$orgman_config = \OrgManagement\Config\OrgManConfig::get();
+$configService = new \WicketORM\Services\ConfigService();
+$orgman_config = \WicketORM\Config\OrgManConfig::get();
 $roster_mode = $configService->getRosterMode();
 $default_organization_title = __('Manage Organizations', 'wicket-acc');
 $use_custom_organization_title = !empty($orgman_config['ui']['organization_list']['use_custom_title']);

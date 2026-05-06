@@ -25,7 +25,7 @@ This file describes what the library does today.
 
 ## Implemented Runtime Capabilities
 
-- singleton bootstrap through `OrgManagement\OrgMan`
+- singleton bootstrap through `WicketORM\OrgMan`
 - strategy-based member add and remove flows
 - shared CSV bulk-upload process handler
 - async CSV member export with secure download tokens (opt-in via `exports.enabled`)

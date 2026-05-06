@@ -11,9 +11,9 @@ class ComposerStaticInit8ab4cff95a090a5a765e427c8e779275
         array (
             'starfederation\\datastar\\' => 24,
         ),
-        'O' =>
+        'W' =>
         array (
-            'OrgManagement\\' => 14,
+            'WicketORM\\' => 10,
         ),
     );
 
@@ -22,7 +22,7 @@ class ComposerStaticInit8ab4cff95a090a5a765e427c8e779275
         array (
             0 => __DIR__ . '/..' . '/starfederation/datastar-php/src',
         ),
-        'OrgManagement\\' =>
+        'WicketORM\\' =>
         array (
             0 => __DIR__ . '/../..' . '/src',
         ),
@@ -30,60 +30,6 @@ class ComposerStaticInit8ab4cff95a090a5a765e427c8e779275
 
     public static $classMap = array (
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
-        'OrgManagement\\Config\\OrgManConfig' => __DIR__ . '/../..' . '/src/Config/OrgManConfig.php',
-        'OrgManagement\\Controllers\\ApiController' => __DIR__ . '/../..' . '/src/Controllers/ApiController.php',
-        'OrgManagement\\Controllers\\BusinessInfoController' => __DIR__ . '/../..' . '/src/Controllers/BusinessInfoController.php',
-        'OrgManagement\\Controllers\\ConfigurationController' => __DIR__ . '/../..' . '/src/Controllers/ConfigurationController.php',
-        'OrgManagement\\Controllers\\DocumentController' => __DIR__ . '/../..' . '/src/Controllers/DocumentController.php',
-        'OrgManagement\\Controllers\\EngagementController' => __DIR__ . '/../..' . '/src/Controllers/EngagementController.php',
-        'OrgManagement\\Controllers\\MemberExportController' => __DIR__ . '/../..' . '/src/Controllers/MemberExportController.php',
-        'OrgManagement\\Controllers\\SubsidiaryController' => __DIR__ . '/../..' . '/src/Controllers/SubsidiaryController.php',
-        'OrgManagement\\Helpers\\ConfigHelper' => __DIR__ . '/../..' . '/src/Helpers/ConfigHelper.php',
-        'OrgManagement\\Helpers\\DatastarSSE' => __DIR__ . '/../..' . '/src/Helpers/DatastarSSE.php',
-        'OrgManagement\\Helpers\\GravityFormsHelper' => __DIR__ . '/../..' . '/src/Helpers/GravityFormsHelper.php',
-        'OrgManagement\\Helpers\\Helper' => __DIR__ . '/../..' . '/src/Helpers/Helper.php',
-        'OrgManagement\\Helpers\\MemberListRefresh' => __DIR__ . '/../..' . '/src/Helpers/MemberListRefresh.php',
-        'OrgManagement\\Helpers\\PermissionHelper' => __DIR__ . '/../..' . '/src/Helpers/PermissionHelper.php',
-        'OrgManagement\\Helpers\\RelationshipHelper' => __DIR__ . '/../..' . '/src/Helpers/RelationshipHelper.php',
-        'OrgManagement\\Helpers\\TemplateHelper' => __DIR__ . '/../..' . '/src/Helpers/TemplateHelper.php',
-        'OrgManagement\\OrgMan' => __DIR__ . '/../..' . '/src/OrgMan.php',
-        'OrgManagement\\Services\\AdditionalSeatsService' => __DIR__ . '/../..' . '/src/Services/AdditionalSeatsService.php',
-        'OrgManagement\\Services\\BulkMemberUploadService' => __DIR__ . '/../..' . '/src/Services/BulkMemberUploadService.php',
-        'OrgManagement\\Services\\BusinessInfoService' => __DIR__ . '/../..' . '/src/Services/BusinessInfoService.php',
-        'OrgManagement\\Services\\CacheService' => __DIR__ . '/../..' . '/src/Services/CacheService.php',
-        'OrgManagement\\Services\\ConfigService' => __DIR__ . '/../..' . '/src/Services/ConfigService.php',
-        'OrgManagement\\Services\\ConnectionService' => __DIR__ . '/../..' . '/src/Services/ConnectionService.php',
-        'OrgManagement\\Services\\DocumentService' => __DIR__ . '/../..' . '/src/Services/DocumentService.php',
-        'OrgManagement\\Services\\EngagementService' => __DIR__ . '/../..' . '/src/Services/EngagementService.php',
-        'OrgManagement\\Services\\GroupService' => __DIR__ . '/../..' . '/src/Services/GroupService.php',
-        'OrgManagement\\Services\\MemberExportService' => __DIR__ . '/../..' . '/src/Services/MemberExportService.php',
-        'OrgManagement\\Services\\MemberService' => __DIR__ . '/../..' . '/src/Services/MemberService.php',
-        'OrgManagement\\Services\\MembershipService' => __DIR__ . '/../..' . '/src/Services/MembershipService.php',
-        'OrgManagement\\Services\\NotificationService' => __DIR__ . '/../..' . '/src/Services/NotificationService.php',
-        'OrgManagement\\Services\\OrganizationBatchService' => __DIR__ . '/../..' . '/src/Services/OrganizationBatchService.php',
-        'OrgManagement\\Services\\OrganizationService' => __DIR__ . '/../..' . '/src/Services/OrganizationService.php',
-        'OrgManagement\\Services\\PermissionService' => __DIR__ . '/../..' . '/src/Services/PermissionService.php',
-        'OrgManagement\\Services\\PersonService' => __DIR__ . '/../..' . '/src/Services/PersonService.php',
-        'OrgManagement\\Services\\Strategies\\CascadeStrategy' => __DIR__ . '/../..' . '/src/Services/Strategies/CascadeStrategy.php',
-        'OrgManagement\\Services\\Strategies\\DirectAssignmentStrategy' => __DIR__ . '/../..' . '/src/Services/Strategies/DirectAssignmentStrategy.php',
-        'OrgManagement\\Services\\Strategies\\GroupsStrategy' => __DIR__ . '/../..' . '/src/Services/Strategies/GroupsStrategy.php',
-        'OrgManagement\\Services\\Strategies\\MembershipCycleStrategy' => __DIR__ . '/../..' . '/src/Services/Strategies/MembershipCycleStrategy.php',
-        'OrgManagement\\Services\\Strategies\\RosterManagementStrategy' => __DIR__ . '/../..' . '/src/Services/Strategies/RosterManagementStrategy.php',
-        'OrgManagement\\Services\\SubsidiaryService' => __DIR__ . '/../..' . '/src/Services/SubsidiaryService.php',
-        'OrgManagement\\Services\\TouchpointService' => __DIR__ . '/../..' . '/src/Services/TouchpointService.php',
-        'starfederation\\datastar\\Consts' => __DIR__ . '/..' . '/starfederation/datastar-php/src/Consts.php',
-        'starfederation\\datastar\\ServerSentEventData' => __DIR__ . '/..' . '/starfederation/datastar-php/src/ServerSentEventData.php',
-        'starfederation\\datastar\\ServerSentEventGenerator' => __DIR__ . '/..' . '/starfederation/datastar-php/src/ServerSentEventGenerator.php',
-        'starfederation\\datastar\\enums\\ElementPatchMode' => __DIR__ . '/..' . '/starfederation/datastar-php/src/enums/ElementPatchMode.php',
-        'starfederation\\datastar\\enums\\EventType' => __DIR__ . '/..' . '/starfederation/datastar-php/src/enums/EventType.php',
-        'starfederation\\datastar\\enums\\NamespaceType' => __DIR__ . '/..' . '/starfederation/datastar-php/src/enums/NamespaceType.php',
-        'starfederation\\datastar\\events\\EventInterface' => __DIR__ . '/..' . '/starfederation/datastar-php/src/events/EventInterface.php',
-        'starfederation\\datastar\\events\\EventTrait' => __DIR__ . '/..' . '/starfederation/datastar-php/src/events/EventTrait.php',
-        'starfederation\\datastar\\events\\ExecuteScript' => __DIR__ . '/..' . '/starfederation/datastar-php/src/events/ExecuteScript.php',
-        'starfederation\\datastar\\events\\Location' => __DIR__ . '/..' . '/starfederation/datastar-php/src/events/Location.php',
-        'starfederation\\datastar\\events\\PatchElements' => __DIR__ . '/..' . '/starfederation/datastar-php/src/events/PatchElements.php',
-        'starfederation\\datastar\\events\\PatchSignals' => __DIR__ . '/..' . '/starfederation/datastar-php/src/events/PatchSignals.php',
-        'starfederation\\datastar\\events\\RemoveElements' => __DIR__ . '/..' . '/starfederation/datastar-php/src/events/RemoveElements.php',
     );
 
     public static function getInitializer(ClassLoader $loader)

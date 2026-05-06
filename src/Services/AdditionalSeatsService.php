@@ -4,7 +4,7 @@
  * Additional Seats Service for handling seat purchase functionality.
  */
 
-namespace OrgManagement\Services;
+namespace WicketORM\Services;
 
 // Exit if accessed directly.
 if (!defined('ABSPATH') && !defined('WICKET_DOING_TESTS')) {
@@ -93,7 +93,7 @@ class AdditionalSeatsService
         // --- 2. Gravity Form ---
         $form_id = $this->configService->getAdditionalSeatsFormId();
         if (empty($form_id)) {
-            $config = \OrgManagement\Config\OrgManConfig::get();
+            $config = \WicketORM\Config\OrgManConfig::get();
             $form_slug = $config['integrations']['additional_seats']['form_slug'] ?? 'additional-seats';
             $issues[] = ['parts' => [
                 ['type' => 'text',  'value' => __('No Gravity Form configured for additional seats. Create a Gravity Form and map its slug ', 'wicket-acc')],
@@ -145,7 +145,7 @@ class AdditionalSeatsService
 
         // Use PermissionHelper to check if user has purchase_seats permission for this organization
         // This includes active membership requirement and proper role checking
-        return \OrgManagement\Helpers\PermissionHelper::can_purchase_seats($org_uuid);
+        return \WicketORM\Helpers\PermissionHelper::can_purchase_seats($org_uuid);
     }
 
     /**

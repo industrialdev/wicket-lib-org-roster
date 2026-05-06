@@ -11,7 +11,7 @@ $group_uuid = isset($group_uuid) ? (string) $group_uuid : '';
 $membership_uuid = isset($membership_uuid) ? (string) $membership_uuid : '';
 $bulk_upload_endpoint = isset($bulk_upload_endpoint)
     ? (string) $bulk_upload_endpoint
-    : \OrgManagement\Helpers\template_url() . 'process/bulk-upload-members';
+    : \WicketORM\Helpers\template_url() . 'process/bulk-upload-members';
 $bulk_upload_dom_suffix_raw = $org_uuid !== '' ? $org_uuid : ($group_uuid !== '' ? $group_uuid : 'default');
 $bulk_upload_dom_suffix = sanitize_html_class($bulk_upload_dom_suffix_raw);
 $bulk_upload_messages_id = isset($bulk_upload_messages_id)
@@ -28,9 +28,9 @@ if ($content_dir !== '' && strpos($library_base_path, $content_dir) === 0) {
     $relative_path = ltrim(str_replace($content_dir, '', $library_base_path), '/');
     $library_base_url = trailingslashit((string) content_url($relative_path));
 }
-$library_base_url = trailingslashit((string) apply_filters('wicket/acc/orgman/base_url', $library_base_url));
+$library_base_url = trailingslashit((string) apply_filters('wicket/org-roster/base_url', $library_base_url));
 $csv_template_url = $library_base_url . 'public/templates/roster_template.csv';
-$orgman_config = OrgManagement\Config\OrgManConfig::get();
+$orgman_config = WicketORM\Config\OrgManConfig::get();
 $bulk_upload_config = is_array($orgman_config['member_management']['bulk_upload'] ?? null)
     ? $orgman_config['member_management']['bulk_upload']
     : [];

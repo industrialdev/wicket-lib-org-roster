@@ -15,7 +15,7 @@ if (empty($group_uuid)) {
     return;
 }
 
-$orgman_config = OrgManagement\Config\OrgManConfig::get();
+$orgman_config = WicketORM\Config\OrgManConfig::get();
 $groups_config = is_array($orgman_config['groups'] ?? null) ? $orgman_config['groups'] : [];
 $presentation_config = is_array($groups_config['presentation'] ?? null) ? $groups_config['presentation'] : [];
 $editable_fields = is_array($presentation_config['editable_fields'] ?? null) ? $presentation_config['editable_fields'] : [];
@@ -32,7 +32,7 @@ $desc_key = 'description_' . $lang;
 $group_name = $group_attrs[$name_key] ?? $group_attrs['name'] ?? '';
 $group_description = $group_attrs[$desc_key] ?? $group_attrs['description'] ?? '';
 
-$update_endpoint = OrgManagement\Helpers\TemplateHelper::template_url() . 'process/update-group';
+$update_endpoint = WicketORM\Helpers\TemplateHelper::template_url() . 'process/update-group';
 ?>
 <div class="wt_rounded-card wt_bg-light-neutral wt_p-6">
     <h3 class="wt_text-lg wt_font-semibold wt_mb-4"><?php esc_html_e('Group Information', 'wicket-acc'); ?></h3>

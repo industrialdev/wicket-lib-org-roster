@@ -4,7 +4,7 @@
  * Hypermedia endpoint for group members list.
  */
 
-use OrgManagement\Services\GroupService;
+use WicketORM\Services\GroupService;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -48,10 +48,10 @@ $result = $group_service->getGroupMembers($group_uuid, $org_identifier, [
 $group_members = $result['members'] ?? [];
 $group_pagination = $result['pagination'] ?? [];
 $group_query = $result['query'] ?? '';
-$group_members_list_endpoint = \OrgManagement\Helpers\template_url() . 'group-members-list';
+$group_members_list_endpoint = \WicketORM\Helpers\template_url() . 'group-members-list';
 $group_members_list_target = 'group-members-list-container-' . sanitize_html_class($group_uuid);
 
-$orgman_config = OrgManagement\Config\OrgManConfig::get();
+$orgman_config = WicketORM\Config\OrgManConfig::get();
 $group_presentation = is_array($orgman_config['groups']['presentation'] ?? null)
     ? $orgman_config['groups']['presentation']
     : [];
@@ -82,7 +82,7 @@ if ($use_unified_member_list) {
     $query = $group_query;
     $members_list_endpoint = $group_members_list_endpoint;
     $members_list_target = $group_members_list_target;
-    $membershipService = new OrgManagement\Services\MembershipService();
+    $membershipService = new WicketORM\Services\MembershipService();
     $membership_uuid = $org_uuid ? $membershipService->getMembershipForOrganization($org_uuid) : '';
     $show_edit_permissions = (bool) ($group_presentation['show_edit_permissions'] ?? false);
     $show_account_status = (bool) ($account_status_config['enabled'] ?? true);

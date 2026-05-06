@@ -4,7 +4,7 @@
  * Base Helper class for Org Management.
  */
 
-namespace OrgManagement\Helpers;
+namespace WicketORM\Helpers;
 
 // Exit if accessed directly.
 if (!defined('ABSPATH')) {
@@ -47,7 +47,7 @@ abstract class Helper
 
         // Allow overriding via filter
         /**
-         * Filter the allowed log levels for OrgManagement.
+         * Filter the allowed log levels for WicketORM.
          *
          * @param array $allowed_levels Array of allowed log levels.
          * @param string $env Current environment type.
@@ -170,7 +170,7 @@ abstract class Helper
      */
     protected static function get_config(): array
     {
-        return \OrgManagement\Config\OrgManConfig::get();
+        return \WicketORM\Config\OrgManConfig::get();
     }
 
     /**

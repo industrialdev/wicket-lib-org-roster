@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace OrgManagement\Services;
+namespace WicketORM\Services;
 
-use OrgManagement\Helpers\ConfigHelper;
+use WicketORM\Helpers\ConfigHelper;
 
 // Exit if accessed directly.
 if (!defined('ABSPATH')) {

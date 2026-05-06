@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OrgManagement\Config;
+namespace WicketORM\Config;
 
 final class OrgManConfig
 {
@@ -477,6 +477,6 @@ final class OrgManConfig
             ],
         ];
 
-        return apply_filters('wicket/acc/orgman/config', $orgmanConfig);
+        return apply_filters('wicket/org-roster/config', $orgmanConfig);
     }
 }

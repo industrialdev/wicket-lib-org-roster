@@ -4,7 +4,7 @@
  * Group Service for Org Management.
  */
 
-namespace OrgManagement\Services;
+namespace WicketORM\Services;
 
 // Exit if accessed directly.
 if (!defined('ABSPATH')) {
@@ -25,7 +25,7 @@ class GroupService
 
     public function __construct()
     {
-        $this->config = \OrgManagement\Config\OrgManConfig::get();
+        $this->config = \WicketORM\Config\OrgManConfig::get();
     }
 
     /**
@@ -1652,7 +1652,7 @@ class GroupService
             return [];
         }
 
-        $config       = \OrgManagement\Config\OrgManConfig::get();
+        $config       = \WicketORM\Config\OrgManConfig::get();
         $manager_role = sanitize_key((string) ($config['access']['roles']['manager'] ?? ''));
 
         if ('' === $manager_role) {

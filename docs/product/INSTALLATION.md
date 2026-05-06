@@ -1,7 +1,7 @@
 ---
 title: "Installation"
 audience: [implementer, support]
-php_class: OrgManagement\OrgMan
+php_class: WicketORM\OrgMan
 source_files: ["src/OrgMan.php"]
 ---
 
@@ -188,7 +188,7 @@ Use a layout-aware bootstrap that works for both Standard WordPress and Bedrock.
 ```php
 <?php
 
-use OrgManagement\OrgMan;
+use WicketORM\OrgMan;
 
 defined('ABSPATH') || exit;
 
@@ -344,14 +344,14 @@ add_action('after_setup_theme', static function (): void {
 
     wicket_orgman_load_autoloader();
 
-    if (!has_filter('wicket/acc/orgman/config', 'wicket_orgman_config')) {
-        add_filter('wicket/acc/orgman/config', 'wicket_orgman_config');
+    if (!has_filter('wicket/org-roster/config', 'wicket_orgman_config')) {
+        add_filter('wicket/org-roster/config', 'wicket_orgman_config');
     }
-    if (!has_filter('wicket/acc/orgman/base_path', 'wicket_orgman_base_path')) {
-        add_filter('wicket/acc/orgman/base_path', 'wicket_orgman_base_path');
+    if (!has_filter('wicket/org-roster/base_path', 'wicket_orgman_base_path')) {
+        add_filter('wicket/org-roster/base_path', 'wicket_orgman_base_path');
     }
-    if (!has_filter('wicket/acc/orgman/base_url', 'wicket_orgman_base_url')) {
-        add_filter('wicket/acc/orgman/base_url', 'wicket_orgman_base_url');
+    if (!has_filter('wicket/org-roster/base_url', 'wicket_orgman_base_url')) {
+        add_filter('wicket/org-roster/base_url', 'wicket_orgman_base_url');
     }
 
     if (class_exists(OrgMan::class)) {
@@ -360,7 +360,7 @@ add_action('after_setup_theme', static function (): void {
 }, 20);
 ```
 
-Important: register `wicket/acc/orgman/config` before `OrgMan::get_instance()` so initial service/config boot uses your overrides.
+Important: register `wicket/org-roster/config` before `OrgMan::get_instance()` so initial service/config boot uses your overrides.
 
 ## 3) Theme Styling Overrides (Recommended)
 
@@ -427,7 +427,7 @@ $wicket_child_includes = [
 Inside the bootstrap filter, set strategy and client-specific config:
 
 ```php
-add_filter('wicket/acc/orgman/config', static function (array $config): array {
+add_filter('wicket/org-roster/config', static function (array $config): array {
     $config['membership']['strategy'] = 'membership_cycle';
     $config['presentation']['member_list']['show_bulk_upload'] = true; // default false
 
@@ -455,8 +455,8 @@ The library auto-resolves asset paths for common layouts, including:
 
 You can override this with:
 
-- `wicket/acc/orgman/base_path`
-- `wicket/acc/orgman/base_url`
+- `wicket/org-roster/base_path`
+- `wicket/org-roster/base_url`
 
 ## 8) Verification Checklist
 

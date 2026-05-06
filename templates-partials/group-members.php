@@ -3,10 +3,10 @@
  * Group members partial.
  */
 
-use OrgManagement\Services\AdditionalSeatsService;
-use OrgManagement\Services\ConfigService;
-use OrgManagement\Services\GroupService;
-use OrgManagement\Services\MembershipService;
+use WicketORM\Services\AdditionalSeatsService;
+use WicketORM\Services\ConfigService;
+use WicketORM\Services\GroupService;
+use WicketORM\Services\MembershipService;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -42,7 +42,7 @@ if (empty($org_uuid) && function_exists('wicket_get_group')) {
 $membershipService = new MembershipService();
 $configService = new ConfigService();
 $additional_seats_service = new AdditionalSeatsService($configService);
-$orgman_config = OrgManagement\Config\OrgManConfig::get();
+$orgman_config = WicketORM\Config\OrgManConfig::get();
 $clear_form_on_error = $orgman_config['member_management']['forms']['add_member']['clear_form_on_error'] ?? false;
 
 $membership_uuid = '';
@@ -61,7 +61,7 @@ $members = $result['members'] ?? [];
 $pagination = $result['pagination'] ?? [];
 $query = $result['query'] ?? '';
 
-$members_list_endpoint = \OrgManagement\Helpers\template_url() . 'group-members-list';
+$members_list_endpoint = \WicketORM\Helpers\template_url() . 'group-members-list';
 $members_list_target = 'group-members-list-container-' . sanitize_html_class($group_uuid);
 $encoded_group_uuid = rawurlencode($group_uuid);
 $encoded_org_uuid = rawurlencode($org_uuid);
@@ -263,8 +263,8 @@ $remove_member_success_actions = "console.log('Group member removed successfully
 $remove_member_error_actions = "console.error('Failed to remove group member'); \$removeMemberSubmitting = false; \$membersLoading = false;";
 $remove_member_reset_actions = "(() => { const modal = document.getElementById('groupMembersRemoveModal'); const messages = modal ? modal.querySelector('#remove-member-messages') : document.getElementById('remove-member-messages'); if (messages) messages.innerHTML = ''; })(); \$removeMemberModalOpen = false; \$removeMemberSubmitting = false; \$removeMemberSuccess = false; \$membersLoading = false; \$autoCloseCountdown = 0; \$currentRemoveMemberUuid = ''; \$currentRemoveMemberName = ''; \$currentRemoveMemberEmail = ''; \$currentRemoveMemberGroupMemberId = ''; \$currentRemoveMemberRole = '';";
 $remove_member_request_close_actions = '$removeMemberModalOpen = false;';
-$add_member_endpoint = OrgManagement\Helpers\TemplateHelper::template_url() . 'process/add-group-member';
-$remove_member_endpoint = OrgManagement\Helpers\TemplateHelper::template_url() . 'process/remove-group-member';
+$add_member_endpoint = WicketORM\Helpers\TemplateHelper::template_url() . 'process/add-group-member';
+$remove_member_endpoint = WicketORM\Helpers\TemplateHelper::template_url() . 'process/remove-group-member';
 $group_roles = is_array($groups_config['roles'] ?? null) ? $groups_config['roles'] : [];
 $member_role = $group_roles['member'] ?? ($groups_config['member_role'] ?? 'member');
 $observer_role = $group_roles['observer'] ?? ($groups_config['observer_role'] ?? 'observer');

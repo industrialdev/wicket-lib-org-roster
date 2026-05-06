@@ -4,7 +4,7 @@
  * Shared Datastar SSE response utilities for Org Management modals.
  */
 
-namespace OrgManagement\Helpers;
+namespace WicketORM\Helpers;
 
 use starfederation\datastar\enums\ElementPatchMode;
 use starfederation\datastar\ServerSentEventGenerator;

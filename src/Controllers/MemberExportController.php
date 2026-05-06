@@ -4,9 +4,9 @@
  * Member export controller.
  */
 
-namespace OrgManagement\Controllers;
+namespace WicketORM\Controllers;
 
-use OrgManagement\Services\MemberExportService;
+use WicketORM\Services\MemberExportService;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
@@ -73,7 +73,7 @@ class MemberExportController extends ApiController
         ];
 
         if (empty($org_id)) {
-            \OrgManagement\Helpers\DatastarSSE::renderError(
+            \WicketORM\Helpers\DatastarSSE::renderError(
                 __('Organization identifier is missing.', 'wicket-acc'),
                 '#export-messages-' . $org_dom_suffix,
                 $error_signals
@@ -84,7 +84,7 @@ class MemberExportController extends ApiController
 
         $nonce = $request->get_param('_wpnonce');
         if (!$nonce || !wp_verify_nonce($nonce, 'wicket_orgman_export_' . $org_id)) {
-            \OrgManagement\Helpers\DatastarSSE::renderError(
+            \WicketORM\Helpers\DatastarSSE::renderError(
                 __('Security verification failed. Please refresh and try again.', 'wicket-acc'),
                 '#export-messages-' . $org_dom_suffix,
                 $error_signals
@@ -94,7 +94,7 @@ class MemberExportController extends ApiController
         }
 
         if (!$this->userCanManageOrganization($org_id)) {
-            \OrgManagement\Helpers\DatastarSSE::renderError(
+            \WicketORM\Helpers\DatastarSSE::renderError(
                 __('You do not have permission to export members for this organization.', 'wicket-acc'),
                 '#export-messages-' . $org_dom_suffix,
                 $error_signals
@@ -109,7 +109,7 @@ class MemberExportController extends ApiController
         $result = $this->export_service->enqueueExport($org_id, $membership_uuid, $recipient_email);
 
         if (is_wp_error($result)) {
-            \OrgManagement\Helpers\DatastarSSE::renderError(
+            \WicketORM\Helpers\DatastarSSE::renderError(
                 $result->get_error_message(),
                 '#export-messages-' . $org_dom_suffix,
                 $error_signals
@@ -118,7 +118,7 @@ class MemberExportController extends ApiController
             return;
         }
 
-        \OrgManagement\Helpers\DatastarSSE::renderSuccess(
+        \WicketORM\Helpers\DatastarSSE::renderSuccess(
             sprintf(
                 /* translators: %s: email address */
                 esc_html__('Your export has been queued. You will receive an email at %s when it is ready to download.', 'wicket-acc'),

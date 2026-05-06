@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use OrgManagement\Helpers as OrgHelpers;
+use WicketORM\Helpers as OrgHelpers;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -13,7 +13,7 @@ $org_uuid = isset($org_uuid) ? (string) $org_uuid : '';
 $group_uuid = isset($group_uuid) ? (string) $group_uuid : '';
 $org_identifier = isset($org_identifier) ? (string) $org_identifier : '';
 
-$orgman_config = OrgManagement\Config\OrgManConfig::get();
+$orgman_config = WicketORM\Config\OrgManConfig::get();
 $presentation_config = is_array($orgman_config['presentation'] ?? null) ? $orgman_config['presentation'] : [];
 $view_config = is_array($presentation_config['member_view'] ?? null) ? $presentation_config['member_view'] : [];
 $member_list_config = is_array($presentation_config['member_list'] ?? null) ? $presentation_config['member_list'] : [];
@@ -61,9 +61,9 @@ $signals = [
 ];
 
 $membership_uuid = isset($membership_uuid) ? (string) $membership_uuid : '';
-$membershipService = new OrgManagement\Services\MembershipService();
-$configService = new OrgManagement\Services\ConfigService();
-$additional_seats_service = new OrgManagement\Services\AdditionalSeatsService($configService);
+$membershipService = new WicketORM\Services\MembershipService();
+$configService = new WicketORM\Services\ConfigService();
+$additional_seats_service = new WicketORM\Services\AdditionalSeatsService($configService);
 if ($membership_uuid === '' && $org_uuid !== '') {
     $membership_uuid = $membershipService->getMembershipForOrganization($org_uuid);
 }
@@ -308,7 +308,7 @@ $remove_member_auto_close_enabled = ($mode === 'groups')
 
     <?php if ($mode !== 'groups' && $show_edit_permissions) : ?>
         <?php
-    $permissionService = new OrgManagement\Services\PermissionService();
+    $permissionService = new WicketORM\Services\PermissionService();
         $available_roles = $permissionService->getAvailableRoles();
         $role_descriptions = $orgman_config['access']['roles']['descriptions'] ?? [];
 
@@ -699,7 +699,7 @@ $remove_member_auto_close_enabled = ($mode === 'groups')
                 $permissions_field_config = $orgman_config['member_management']['forms']['add_member']['fields']['permissions'] ?? [];
 $allowed_roles = $permissions_field_config['allowlist'] ?? [];
 $excluded_roles = $permissions_field_config['denylist'] ?? [];
-$permissionService = new OrgManagement\Services\PermissionService();
+$permissionService = new WicketORM\Services\PermissionService();
 $available_roles = $permissionService->getAvailableRoles();
 $role_descriptions = $orgman_config['access']['roles']['descriptions'] ?? [];
 if (!empty($orgman_config['access']['permissions']['prevent_owner_assignment'])) {

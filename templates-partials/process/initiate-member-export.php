@@ -6,8 +6,8 @@
  * Handles POST: validates nonce + permission, enqueues export job, sends SSE response.
  */
 
-use OrgManagement\Services\ConfigService;
-use OrgManagement\Services\MemberExportService;
+use WicketORM\Services\ConfigService;
+use WicketORM\Services\MemberExportService;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -29,7 +29,7 @@ $error_signals = ['exportSubmitting' => false];
 $nonce = isset($_POST['_wpnonce']) ? sanitize_text_field(wp_unslash($_POST['_wpnonce'])) : '';
 if (!$nonce || !wp_verify_nonce($nonce, 'wicket_orgman_export_' . $org_uuid)) {
     status_header(200);
-    OrgManagement\Helpers\DatastarSSE::renderError(
+    WicketORM\Helpers\DatastarSSE::renderError(
         __('Security verification failed. Please refresh and try again.', 'wicket-acc'),
         '#export-messages-' . $org_dom_suffix,
         $error_signals
@@ -40,7 +40,7 @@ if (!$nonce || !wp_verify_nonce($nonce, 'wicket_orgman_export_' . $org_uuid)) {
 
 if (empty($org_uuid)) {
     status_header(200);
-    OrgManagement\Helpers\DatastarSSE::renderError(
+    WicketORM\Helpers\DatastarSSE::renderError(
         __('Organization identifier is missing.', 'wicket-acc'),
         '#export-messages-' . $org_dom_suffix,
         $error_signals
@@ -50,9 +50,9 @@ if (empty($org_uuid)) {
 }
 
 // Permission check
-if (!OrgManagement\Helpers\PermissionHelper::can_manage_members($org_uuid)) {
+if (!WicketORM\Helpers\PermissionHelper::can_manage_members($org_uuid)) {
     status_header(200);
-    OrgManagement\Helpers\DatastarSSE::renderError(
+    WicketORM\Helpers\DatastarSSE::renderError(
         __('You do not have permission to export members for this organization.', 'wicket-acc'),
         '#export-messages-' . $org_dom_suffix,
         $error_signals
@@ -72,7 +72,7 @@ $result = $export_service->enqueueExport($org_uuid, $membership_uuid, $recipient
 status_header(200);
 
 if (is_wp_error($result)) {
-    OrgManagement\Helpers\DatastarSSE::renderError(
+    WicketORM\Helpers\DatastarSSE::renderError(
         $result->get_error_message(),
         '#export-messages-' . $org_dom_suffix,
         $error_signals
@@ -81,7 +81,7 @@ if (is_wp_error($result)) {
     return;
 }
 
-OrgManagement\Helpers\DatastarSSE::renderSuccess(
+WicketORM\Helpers\DatastarSSE::renderSuccess(
     sprintf(
         /* translators: %s: email address */
         esc_html__('Your export has been queued. You will receive an email at %s when the download link is ready.', 'wicket-acc'),

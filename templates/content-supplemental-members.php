@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-namespace OrgManagement\Templates;
+namespace WicketORM\Templates;
 
 // Ensure this file is not accessed directly.
 if (!defined('ABSPATH')) {
@@ -22,16 +22,16 @@ if (empty($membership_id) && isset($_GET['membership_uuid'])) {
 $gf_id = isset($_GET['gf_id']) ? absint($_GET['gf_id']) : 0;
 
 // Helper function to get my-account CPT page URL (WPML-aware)
-if (!function_exists('OrgManagement\Templates\get_my_account_page_url')) {
+if (!function_exists('WicketORM\Templates\get_my_account_page_url')) {
     function get_my_account_page_url($slug)
     {
-        return \OrgManagement\Helpers\Helper::getMyAccountPageUrl($slug, "/my-account/{$slug}/");
+        return \WicketORM\Helpers\Helper::getMyAccountPageUrl($slug, "/my-account/{$slug}/");
     }
 }
 
 // Check if user can purchase additional seats
-$configService = new \OrgManagement\Services\ConfigService();
-$additional_seats_service = new \OrgManagement\Services\AdditionalSeatsService($configService);
+$configService = new \WicketORM\Services\ConfigService();
+$additional_seats_service = new \WicketORM\Services\AdditionalSeatsService($configService);
 
 if (!$additional_seats_service->canPurchaseAdditionalSeats($org_uuid)) {
     ?>
@@ -53,7 +53,7 @@ if (!$additional_seats_service->canPurchaseAdditionalSeats($org_uuid)) {
 }
 
 // Get organization information
-$organizationService = new \OrgManagement\Services\OrganizationService();
+$organizationService = new \WicketORM\Services\OrganizationService();
 $organizations = $organizationService->getUserOrganizations(wp_get_current_user()->user_login);
 $current_organization = null;
 $form_id = $gf_id > 0 ? $gf_id : 59;

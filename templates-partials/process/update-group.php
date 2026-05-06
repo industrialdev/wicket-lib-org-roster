@@ -4,7 +4,7 @@
  * Hypermedia partial for Group update processing.
  */
 
-use OrgManagement\Services\GroupService;
+use WicketORM\Services\GroupService;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -26,7 +26,7 @@ $nonce = isset($_POST['nonce']) ? sanitize_text_field(wp_unslash($_POST['nonce']
 if (!$nonce || !wp_verify_nonce($nonce, 'wicket-orgman-update-group')) {
     $logger->warning('Update group invalid nonce', $log_context);
     status_header(200);
-    OrgManagement\Helpers\DatastarSSE::renderError(__('Invalid or missing security token. Please refresh and try again.', 'wicket-acc'), '#group-update-messages', []);
+    WicketORM\Helpers\DatastarSSE::renderError(__('Invalid or missing security token. Please refresh and try again.', 'wicket-acc'), '#group-update-messages', []);
 
     return;
 }
@@ -41,7 +41,7 @@ $logger->info('Update group request received', $log_context);
 if (empty($group_uuid)) {
     $logger->error('Update group missing group_uuid', $log_context);
     status_header(200);
-    OrgManagement\Helpers\DatastarSSE::renderError(__('Group identifier missing.', 'wicket-acc'), '#group-update-messages', []);
+    WicketORM\Helpers\DatastarSSE::renderError(__('Group identifier missing.', 'wicket-acc'), '#group-update-messages', []);
 
     return;
 }
@@ -52,12 +52,12 @@ $access = $group_service->canManageGroup($group_uuid, (string) $current_user->us
 if (empty($access['allowed'])) {
     $logger->warning('Update group access denied', $log_context);
     status_header(200);
-    OrgManagement\Helpers\DatastarSSE::renderError(__('You do not have permission to manage this group.', 'wicket-acc'), '#group-update-messages', []);
+    WicketORM\Helpers\DatastarSSE::renderError(__('You do not have permission to manage this group.', 'wicket-acc'), '#group-update-messages', []);
 
     return;
 }
 
-$orgman_config = OrgManagement\Config\OrgManConfig::get();
+$orgman_config = WicketORM\Config\OrgManConfig::get();
 $groups_config = is_array($orgman_config['groups'] ?? null) ? $orgman_config['groups'] : [];
 $presentation_config = is_array($groups_config['presentation'] ?? null) ? $groups_config['presentation'] : [];
 $editable_fields = is_array($presentation_config['editable_fields'] ?? null) ? $presentation_config['editable_fields'] : [];
@@ -82,7 +82,7 @@ if (in_array('description', $editable_fields, true)) {
 if (empty($payload)) {
     $logger->warning('Update group no editable fields provided', $log_context);
     status_header(200);
-    OrgManagement\Helpers\DatastarSSE::renderError(__('No editable fields provided.', 'wicket-acc'), '#group-update-messages', []);
+    WicketORM\Helpers\DatastarSSE::renderError(__('No editable fields provided.', 'wicket-acc'), '#group-update-messages', []);
 
     return;
 }
@@ -90,7 +90,7 @@ if (empty($payload)) {
 if (!function_exists('wicket_api_client')) {
     $logger->error('Update group API client unavailable', $log_context);
     status_header(200);
-    OrgManagement\Helpers\DatastarSSE::renderError(__('API client unavailable.', 'wicket-acc'), '#group-update-messages', []);
+    WicketORM\Helpers\DatastarSSE::renderError(__('API client unavailable.', 'wicket-acc'), '#group-update-messages', []);
 
     return;
 }
@@ -108,7 +108,7 @@ try {
     $client->patch('groups/' . rawurlencode($group_uuid), ['json' => $request_payload]);
     $logger->info('Update group succeeded', $log_context);
     status_header(200);
-    OrgManagement\Helpers\DatastarSSE::renderSuccess(__('Group updated successfully.', 'wicket-acc'), '#group-update-messages', []);
+    WicketORM\Helpers\DatastarSSE::renderSuccess(__('Group updated successfully.', 'wicket-acc'), '#group-update-messages', []);
 
     return;
 } catch (Throwable $e) {
@@ -116,7 +116,7 @@ try {
         'error' => $e->getMessage(),
     ]));
     status_header(200);
-    OrgManagement\Helpers\DatastarSSE::renderError(__('Failed to update group.', 'wicket-acc'), '#group-update-messages', []);
+    WicketORM\Helpers\DatastarSSE::renderError(__('Failed to update group.', 'wicket-acc'), '#group-update-messages', []);
 
     return;
 }
