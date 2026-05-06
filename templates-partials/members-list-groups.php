@@ -140,6 +140,7 @@ $show_assignment_info = (bool) ($orgman_config['presentation']['member_list']['s
             $member_role_label = $member['role'] ?? '';
             $group_member_id = $member['group_member_id'] ?? '';
             $is_confirmed = !empty($member['confirmed_at']);
+            $is_member_owner = !empty($member['is_owner']);
             ?>
             <div class="member-card wt_bg-light-neutral wt_rounded-card wt_p-6 wt_transition-opacity wt_duration-300">
                 <div class="wt_flex wt_w-full md_wt_flex-row wt_items-start wt_justify-between wt_gap-4">
@@ -181,6 +182,7 @@ $show_assignment_info = (bool) ($orgman_config['presentation']['member_list']['s
                             </div>
                         <?php endif; ?>
                     </div>
+                    <?php if (!$is_member_owner) : ?>
                     <div class="wt_flex wt_flex-col sm_wt_flex-row wt_items-stretch sm_wt_items-start wt_gap-2 wt_justify-between md_wt_auto wt_shrink-0">
                         <button type="button" class="acc-remove-button remove-member-button button button--secondary wt_inline-flex wt_items-center wt_justify-between wt_gap-2 wt_px-4 wt_py-2 wt_bg-light-neutral wt_text-sm wt_border wt_border-bg-interactive wt_transition-colors wt_whitespace-nowrap component-button"
                             data-on:click="
@@ -200,6 +202,7 @@ $show_assignment_info = (bool) ($orgman_config['presentation']['member_list']['s
                             </svg>
                         </button>
                     </div>
+                    <?php endif; ?>
                 </div>
             </div>
         <?php endforeach; ?>

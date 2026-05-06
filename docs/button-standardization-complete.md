@@ -160,7 +160,7 @@ Before considering complete:
 - `templates-partials/subsidiaries-search.php`
 - `templates-partials/group-profile.php`
 - `templates-partials/documents-list.php`
-- `templates-partials/group-members-list.php`
+- `templates-partials/members-list-groups.php`
 
 **Estimated effort:** 4-6 hours to convert all remaining buttons using established patterns.
 

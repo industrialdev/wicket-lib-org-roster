@@ -37,7 +37,7 @@ Fields consumed by group templates:
 | role | yes | group-members-list | single group role display |
 | group_member_id | yes | group-members-list | passed to remove-group-member modal |
 
-Note: `is_confirmed` is checked via `MemberService::isUserConfirmed()` in group-members-list.php, not from the row itself.
+Note: `is_confirmed` is checked via `MemberService::isUserConfirmed()` in members-list-groups.php, not from the row itself.
 
 ## 0.3 Read-Path Caller Inventory
 
@@ -54,7 +54,7 @@ Group read callers:
 | Caller | Method | Type |
 |---|---|---|
 | templates-partials/group-members.php | `GroupService::getGroupMembers()` | template |
-| templates-partials/group-members-list-endpoint.php | `GroupService::getGroupMembers()` | hypermedia endpoint |
+| templates-partials/members-list-groups-endpoint.php | `GroupService::getGroupMembers()` | hypermedia endpoint |
 | src/Services/MemberService.php | `getGroupMembers()` | facade (delegates to GroupService) |
 | src/Services/Strategies/GroupsStrategy.php | `GroupService::getGroupMembers()` | strategy internal |
 

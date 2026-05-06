@@ -68,7 +68,7 @@ Any change to member card field visibility (name, email, job title, description,
 | `templates-partials/members-list.php` | Direct-assignment / default member list | `OrgHelpers\Helper::` (aliased) |
 | `templates-partials/members-list-unified.php` | Unified member list (org context) | `OrgHelpers\Helper::` (aliased) |
 | `templates-partials/member-details.php` | SSE lazy-load fragment (details block only; no name/header) | `\WicketORM\Helpers\Helper::` |
-| `templates-partials/group-members-list.php` | Groups strategy member list | `WicketORM\Helpers\Helper::` |
+| `templates-partials/members-list-groups.php` | Groups strategy member list | `WicketORM\Helpers\Helper::` |
 | `templates-partials/members-view-unified.php` | Unified member view / read-only card display | `OrgHelpers\Helper::` (aliased) |
 
 **Rule:** when adding or modifying a `should_show_*` helper in `src/Helpers/Helper.php`, grep all five templates above and apply the guard everywhere the corresponding field is rendered. Skipping any one of them creates a config-inconsistency where the field appears in some views but not others.
