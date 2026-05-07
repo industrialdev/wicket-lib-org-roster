@@ -44,7 +44,9 @@ class EngagementService
             return new WP_Error('engagement_missing_person', __('Person UUID is required.', 'wicket-acc'));
         }
 
-        if (!function_exists('wicket_api_client')) {
+        $client = function_exists('wicket_api_client') ? wicket_api_client() : null;
+
+        if ($client === null) {
             return new WP_Error('engagement_missing_api', __('Wicket API client is unavailable.', 'wicket-acc'));
         }
 
@@ -54,7 +56,6 @@ class EngagementService
         $data_fields_key = (string) ($engagement_config['person_data_fields_key'] ?? 'data_fields');
 
         try {
-            $client = wicket_api_client();
             $response = $client->get('/people/' . rawurlencode($person_uuid));
         } catch (\Throwable $e) {
             return new WP_Error('engagement_api_error', $e->getMessage());
@@ -138,7 +139,9 @@ class EngagementService
             return new WP_Error('engagement_missing_org', __('Organization ID is required.', 'wicket-acc'));
         }
 
-        if (!function_exists('wicket_api_client')) {
+        $client = function_exists('wicket_api_client') ? wicket_api_client() : null;
+
+        if ($client === null) {
             return new WP_Error('engagement_missing_api', __('Wicket API client is unavailable.', 'wicket-acc'));
         }
 
@@ -148,7 +151,6 @@ class EngagementService
         $data_fields_key = (string) ($engagement_config['org_data_fields_key'] ?? 'data_fields');
 
         try {
-            $client = wicket_api_client();
             $response = $client->get('/organizations/' . rawurlencode($org_id));
         } catch (\Throwable $e) {
             return new WP_Error('engagement_api_error', $e->getMessage());

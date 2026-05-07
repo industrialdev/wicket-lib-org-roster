@@ -38,14 +38,7 @@ class RelationshipHelper extends Helper
      */
     public static function get_available_relationship_types(): array
     {
-        return [
-            'employee_staff' => 'Employee',
-            'manager' => 'Manager',
-            'owner' => 'Owner',
-            'member' => 'Member',
-            'contact' => 'Contact',
-            'representative' => 'Representative',
-        ];
+        return wicket_get_person_org_relationship_types();
     }
 
     /**
@@ -56,8 +49,6 @@ class RelationshipHelper extends Helper
      */
     public static function is_valid_relationship_type(string $type): bool
     {
-        $available_types = self::get_available_relationship_types();
-
-        return array_key_exists($type, $available_types);
+        return wicket_is_valid_person_org_relationship_type($type);
     }
 }

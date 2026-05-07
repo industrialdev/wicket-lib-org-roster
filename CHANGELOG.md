@@ -2,6 +2,26 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.9.0] - 2026-05-07
+
+**Requires wicket-wp-base-plugin 2.4.0 or greater.**
+
+### Changed
+- Delegated person-organization connection and membership operations to wicket-wp-base-plugin helper functions, removing ~400 lines of duplicated API-client code:
+  - `RelationshipHelper::get_available_relationship_types()` → `wicket_get_person_org_relationship_types()`
+  - `RelationshipHelper::is_valid_relationship_type()` → `wicket_is_valid_person_org_relationship_type()`
+  - `ConnectionService::personHasMembership()` → `wicket_person_has_membership()`
+  - `ConnectionService::createPersonToOrgConnection()` → `wicket_ensure_person_org_connection()`
+  - `ConnectionService::endRelationshipToday()` → `wicket_end_person_org_connection()`
+  - `ConnectionService::getActivePersonOrgConnections()` → `wicket_get_active_person_org_connections()`
+  - `PersonService::getOrCreatePerson()` → `wicket_ensure_person()`
+  - `BulkMemberUploadService::resolveCsvHeaders()` → `wicket_csv_resolve_headers()`
+  - Time helpers now use `wicket_time_get_current_iso8601_utc()` and `wicket_time_get_mdp_day_start_iso8601_utc()`.
+- Duplicate member detection in `DirectAssignmentStrategy` and `CascadeStrategy` now returns an explicit `WP_Error` (`member_already_exists`) instead of silently skipping with a warning log. Add-member UIs will now surface duplicate errors to users.
+
+### Fixed
+- Removed `DateTimeImmutable` import from `ConnectionService` (no longer needed after delegating to base plugin time helpers).
+
 ## [0.8.8] - 2026-05-07
 
 ### Fixed

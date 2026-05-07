@@ -346,6 +346,16 @@ class CascadeStrategy implements RosterManagementStrategy
                         ]));
                     }
                 }
+            } else {
+                $logger->info('[OrgMan] Cascade strategy rejecting duplicate member', $log_context);
+                $email = $member_data['email'] ?? '';
+
+                return new \WP_Error(
+                    'member_already_exists',
+                    $email !== ''
+                        ? sprintf('A member with email %s already exists in this organization.', $email)
+                        : 'This person is already a member of this organization.'
+                );
             }
 
             // Get configuration for member addition settings

@@ -159,7 +159,15 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
                 }
                 $logger->info('Assigned person to membership seat', $log_context);
             } else {
-                $logger->warning('Person already has membership; skipping seat assignment to prevent duplicate', $log_context);
+                $logger->warning('Person already has membership; rejecting duplicate add', $log_context);
+                $email = $member_data['email'] ?? '';
+
+                return new WP_Error(
+                    'member_already_exists',
+                    $email !== ''
+                        ? sprintf('A member with email %s already exists in this organization.', $email)
+                        : 'This person is already a member of this organization.'
+                );
             }
 
             // Assign base member role from config

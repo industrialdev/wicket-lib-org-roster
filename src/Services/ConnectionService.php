@@ -8,7 +8,6 @@ declare(strict_types=1);
 
 namespace WicketORM\Services;
 
-use DateTimeImmutable;
 use WP_Error;
 
 if (!defined('ABSPATH')) {
@@ -39,53 +38,7 @@ class ConnectionService
      */
     public function personHasMembership(string $personUuid, string $membershipUuid)
     {
-        if (!function_exists('wicket_api_client')) {
-            return new WP_Error('missing_dependency', 'Wicket API client is unavailable.');
-        }
-
-        try {
-            $client = wicket_api_client();
-            $endpoint = '/organization_memberships/' . rawurlencode($membershipUuid) . '/person_memberships';
-            $page = 1;
-            $totalPages = 1;
-
-            do {
-                $response = $client->get($endpoint . '?' . http_build_query([
-                    'page[number]' => $page,
-                    'page[size]' => 100,
-                    'include' => 'person',
-                ]));
-
-                if (empty($response['data']) || !is_array($response['data'])) {
-                    return false;
-                }
-
-                foreach ($response['data'] as $member) {
-                    $currentId = $member['relationships']['person']['data']['id'] ?? null;
-                    if ($currentId !== $personUuid) {
-                        continue;
-                    }
-
-                    $isActive = (bool) ($member['attributes']['active'] ?? false);
-                    $inGrace = (bool) ($member['attributes']['in_grace'] ?? false);
-                    $endsAt = $member['attributes']['ends_at'] ?? null;
-                    if ($isActive || $inGrace || empty($endsAt)) {
-                        return true;
-                    }
-
-                    // Keep idempotency for legacy memberships even when not active.
-                    return true;
-                }
-
-                $pageMeta = $response['meta']['page'] ?? [];
-                $totalPages = max(1, (int) ($pageMeta['total_pages'] ?? 1));
-                $page++;
-            } while ($page <= $totalPages);
-        } catch (\Throwable $e) {
-            return new WP_Error('membership_lookup_failed', $e->getMessage());
-        }
-
-        return false;
+        return wicket_person_has_membership($personUuid, $membershipUuid);
     }
 
     /**
@@ -98,37 +51,12 @@ class ConnectionService
      */
     public function ensurePersonConnection(string $personUuid, string $orgUuid, array $overrides = [])
     {
-        // Use relationship type from overrides if provided, otherwise use configured default
         $relationshipType = $overrides['type'] ?? \WicketORM\Helpers\RelationshipHelper::get_default_relationship_type();
-
-        // Remove 'type' from overrides since we're passing it as a separate parameter
         unset($overrides['type']);
 
-        if (!function_exists('wicket_create_person_to_org_connection')) {
-            return new WP_Error('missing_dependency', 'Connection helper is unavailable.');
-        }
+        $atts = array_merge(['connection_type' => 'person_to_organization'], $overrides);
 
-        $attributes = array_merge(
-            [
-                'connection_type' => 'person_to_organization',
-                'starts_at'       => $this->currentStartDate(),
-            ],
-            $overrides
-        );
-
-        $result = wicket_create_person_to_org_connection($personUuid, $orgUuid, $relationshipType, true, $attributes);
-
-        if (false === $result) {
-            return new WP_Error('connection_failed', 'Failed to create organization connection.');
-        }
-
-        if (isset($result['error']) && true === $result['error']) {
-            $message = is_array($result['message'] ?? null) ? wp_json_encode($result['message']) : ($result['message'] ?? 'Failed to create organization connection.');
-
-            return new WP_Error('connection_failed', $message);
-        }
-
-        return true;
+        return wicket_ensure_person_org_connection($personUuid, $orgUuid, $relationshipType, $atts);
     }
 
     /**
@@ -138,11 +66,7 @@ class ConnectionService
      */
     private function currentStartDate(): string
     {
-        if (function_exists('wicket_time_get_current_iso8601_utc')) {
-            return wicket_time_get_current_iso8601_utc();
-        }
-
-        return (new DateTimeImmutable('now', new \DateTimeZone('UTC')))->format('Y-m-d\TH:i:s\Z');
+        return wicket_time_get_current_iso8601_utc();
     }
 
     /**
@@ -152,11 +76,7 @@ class ConnectionService
      */
     private function currentDayStartDate(): string
     {
-        if (function_exists('wicket_time_get_mdp_day_start_iso8601_utc')) {
-            return wicket_time_get_mdp_day_start_iso8601_utc();
-        }
-
-        return (new DateTimeImmutable('today', new \DateTimeZone('UTC')))->format('Y-m-d\TH:i:s\Z');
+        return wicket_time_get_mdp_day_start_iso8601_utc();
     }
 
     /**
@@ -208,7 +128,7 @@ class ConnectionService
      * @param string $person_uuid The UUID of the person.
      * @param string $relationship_id The ID of the relationship to end.
      * @param string $org_id The ID of the organization.
-     * @return array|WP_Error The updated connection data or WP_Error on failure.
+     * @return true|WP_Error True on success, WP_Error on failure.
      */
     public function endRelationshipToday($person_uuid, $relationship_id, $org_id)
     {
@@ -216,81 +136,11 @@ class ConnectionService
             return new WP_Error('invalid_params', 'Person UUID, relationship ID, and organization ID are required.');
         }
 
-        try {
-            $client = wicket_api_client();
+        $ends_at = $this->getRemovalAnchor() === 'day_start_utc'
+            ? $this->currentDayStartDate()
+            : $this->currentStartDate();
 
-            // Get the current connection
-            $connection = wicket_get_connection_by_id($relationship_id);
-            if (!$connection || empty($connection['data'])) {
-                return new WP_Error('connection_not_found', 'Connection not found.');
-            }
-
-            // Prepare the update payload with end date set to today
-            $connection_data = $connection['data'];
-            $attributes = $connection_data['attributes'];
-
-            $ends_at = $this->getRemovalAnchor() === 'day_start_utc'
-                ? $this->currentDayStartDate()
-                : $this->currentStartDate();
-
-            // Fix tags, if empty or null, make it an empty array
-            $attributes['tags'] = !empty($attributes['tags']) ? $attributes['tags'] : [];
-            if ($attributes['tags'] === null) {
-                $attributes['tags'] = [];
-            }
-
-            // Ensure empty fields stay null
-            $attributes['description'] = !empty($attributes['description']) ? $attributes['description'] : null;
-            $attributes['custom_data_field'] = !empty($attributes['custom_data_field']) ? $attributes['custom_data_field'] : null;
-
-            $update_payload = [
-                'data' => [
-                    'type'          => $connection_data['type'],
-                    'id'            => $relationship_id,
-                    'attributes'    => [
-                        'type'              => $attributes['type'],
-                        'starts_at'         => $attributes['starts_at'],
-                        'ends_at'           => $ends_at,
-                        'description'       => $attributes['description'],
-                        'tags'              => $attributes['tags'],
-                        'custom_data_field' => $attributes['custom_data_field'],
-                    ],
-                    'relationships' => [
-                        'from' => [
-                            'data' => [
-                                'type' => $connection_data['relationships']['from']['data']['type'],
-                                'id'   => $connection_data['relationships']['from']['data']['id'],
-                                'meta' => [
-                                    'can_manage' => true,
-                                    'can_update' => true,
-                                ],
-                            ],
-                        ],
-                        'to'   => [
-                            'data' => [
-                                'type' => $connection_data['relationships']['to']['data']['type'],
-                                'id'   => $connection_data['relationships']['to']['data']['id'],
-                            ],
-                        ],
-                    ],
-                ],
-            ];
-
-            $response = $client->patch("connections/{$relationship_id}", ['json' => $update_payload]);
-
-            if (!empty($response['errors'])) {
-                \Wicket()->log()->error('ConnectionService::end_relationship_today() - API error: ' . wp_json_encode($response['errors']), ['source' => 'wicket-orgman']);
-
-                return new WP_Error('api_error', 'Failed to end relationship: ' . ($response['errors'][0]['detail'] ?? 'Unknown error'));
-            }
-
-            return $response;
-
-        } catch (\Exception $e) {
-            \Wicket()->log()->error('ConnectionService::end_relationship_today() - Exception: ' . $e->getMessage(), ['source' => 'wicket-orgman']);
-
-            return new WP_Error('end_relationship_exception', $e->getMessage());
-        }
+        return wicket_end_person_org_connection($person_uuid, $relationship_id, $org_id, ['ends_at' => $ends_at]);
     }
 
     /**
@@ -691,58 +541,19 @@ class ConnectionService
             return new WP_Error('invalid_params', 'Person UUID and organization ID are required.');
         }
 
+        $result = wicket_get_active_person_org_connections($person_uuid, $org_id);
+
         $logger = \Wicket()->log();
-        $log_context = [
-            'source' => 'wicket-orgman',
-            'service' => 'connection',
-            'action' => 'get_active_person_org_connections',
-            'person_uuid' => $person_uuid,
-            'org_id' => $org_id,
-        ];
-
-        $connections = $this->getPersonConnectionsById($person_uuid);
-        if ($connections === false) {
-            if ($logger) {
-                $logger->warning('[OrgMan] Active connection lookup failed', $log_context);
-            }
-
-            return new WP_Error('relationship_lookup_failed', 'Unable to load person connections.');
-        }
-
-        $matches = [];
-        foreach (($connections['data'] ?? []) as $connection) {
-            if (
-                ($connection['type'] ?? '') !== 'connections'
-                || ($connection['attributes']['connection_type'] ?? '') !== 'person_to_organization'
-                || ($connection['relationships']['organization']['data']['id'] ?? '') !== $org_id
-            ) {
-                continue;
-            }
-
-            if (empty($connection['attributes']['active'])) {
-                continue;
-            }
-
-            $matches[] = $connection;
-        }
-
-        if ($logger) {
-            $logger->debug('[OrgMan] Active person-org connections resolved', $log_context + [
-                'active_connection_count' => count($matches),
-                'active_connections' => array_map(static function (array $connection): array {
-                    return [
-                        'connection_id' => (string) ($connection['id'] ?? ''),
-                        'type' => (string) ($connection['attributes']['type'] ?? ''),
-                        'connection_type' => (string) ($connection['attributes']['connection_type'] ?? ''),
-                        'active' => (bool) ($connection['attributes']['active'] ?? false),
-                        'starts_at' => $connection['attributes']['starts_at'] ?? null,
-                        'ends_at' => $connection['attributes']['ends_at'] ?? null,
-                    ];
-                }, $matches),
+        if ($logger && is_array($result)) {
+            $logger->debug('[OrgMan] Active person-org connections resolved', [
+                'source'                 => 'wicket-orgman',
+                'person_uuid'            => $person_uuid,
+                'org_id'                 => $org_id,
+                'active_connection_count' => count($result),
             ]);
         }
 
-        return $matches;
+        return $result;
     }
 
     /**

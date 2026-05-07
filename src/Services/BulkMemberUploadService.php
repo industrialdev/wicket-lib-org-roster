@@ -919,40 +919,7 @@ class BulkMemberUploadService
      */
     private function resolveHeaderIndex(array $headers, array $bulk_column_definitions): array
     {
-        $normalized = [];
-        foreach ($headers as $idx => $header) {
-            $key = strtolower(trim((string) $header));
-            $key = str_replace(['_', '-'], ' ', $key);
-            $normalized[$key] = (int) $idx;
-        }
-
-        $index_map = [];
-        foreach ($bulk_column_definitions as $column_key => $column_definition) {
-            $index_map[$column_key] = -1;
-            if (empty($column_definition['enabled'])) {
-                continue;
-            }
-
-            $matching_keys = [];
-            $aliases = is_array($column_definition['aliases'] ?? null) ? $column_definition['aliases'] : [];
-            foreach ($aliases as $alias) {
-                $matching_keys[] = strtolower(trim((string) $alias));
-            }
-            $header_label = strtolower(trim((string) ($column_definition['header'] ?? '')));
-            if ($header_label !== '') {
-                $matching_keys[] = $header_label;
-            }
-            $matching_keys[] = strtolower(str_replace('_', ' ', (string) $column_key));
-
-            foreach (array_values(array_unique($matching_keys)) as $key) {
-                if (isset($normalized[$key])) {
-                    $index_map[$column_key] = $normalized[$key];
-                    break;
-                }
-            }
-        }
-
-        return $index_map;
+        return wicket_csv_resolve_headers($headers, $bulk_column_definitions);
     }
 
     /**
@@ -1039,41 +1006,11 @@ class BulkMemberUploadService
      */
     private function activeMembershipExists(string $membership_uuid, string $email): bool
     {
-        if ($membership_uuid === '' || $email === '' || !function_exists('wicket_api_client')) {
+        if ($membership_uuid === '' || $email === '') {
             return false;
         }
 
-        try {
-            $client = wicket_api_client();
-            $response = $client->post('/person_memberships/query', [
-                'json' => [
-                    'filter' => [
-                        'organization_membership_uuid_in' => [$membership_uuid],
-                        'person_emails_address_eq' => $email,
-                        'active_at' => 'now',
-                    ],
-                ],
-            ]);
-
-            if (is_wp_error($response) || empty($response['data']) || !is_array($response['data'])) {
-                return false;
-            }
-
-            foreach ($response['data'] as $person_membership) {
-                $is_active = (bool) ($person_membership['attributes']['active'] ?? false);
-                if ($is_active) {
-                    return true;
-                }
-            }
-        } catch (\Throwable $e) {
-            \Wicket()->log()->error('Bulk upload duplicate check failed: ' . $e->getMessage(), [
-                'source' => 'wicket-orgman',
-                'membership_uuid' => $membership_uuid,
-                'email' => $email,
-            ]);
-        }
-
-        return false;
+        return wicket_person_in_membership($membership_uuid, $email);
     }
 
     /**
@@ -1087,24 +1024,12 @@ class BulkMemberUploadService
             return false;
         }
 
-        try {
-            $person_uuid = $this->resolvePersonUuidByEmail($email);
-            if ($person_uuid === '') {
-                return false;
-            }
-
-            $has_membership = $this->connection_service->personHasMembership($person_uuid, $membership_uuid);
-
-            return $has_membership === true;
-        } catch (\Throwable $e) {
-            \Wicket()->log()->error('Bulk upload person duplicate check failed: ' . $e->getMessage(), [
-                'source' => 'wicket-orgman',
-                'membership_uuid' => $membership_uuid,
-                'email' => $email,
-            ]);
+        $person_uuid = $this->resolvePersonUuidByEmail($email);
+        if ($person_uuid === '') {
+            return false;
         }
 
-        return false;
+        return wicket_person_has_membership($person_uuid, $membership_uuid);
     }
 
     /**
@@ -1177,7 +1102,7 @@ class BulkMemberUploadService
      */
     private function resolvePersonUuidByEmail(string $email): string
     {
-        if ($email === '' || !function_exists('wicket_get_person_by_email')) {
+        if ($email === '') {
             return '';
         }
 
