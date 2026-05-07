@@ -147,19 +147,20 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
                         );
                     }
                 }
+
+                // Assign person to membership seat to give them active membership
+                $membership_assignment_result = $this->assignPersonToMembershipSeat($person_uuid, $membership_uuid);
+                if (is_wp_error($membership_assignment_result)) {
+                    $logger->error('Membership assignment failed', array_merge($log_context, [
+                        'error' => $membership_assignment_result->get_error_message(),
+                    ]));
+
+                    return $membership_assignment_result;
+                }
+                $logger->info('Assigned person to membership seat', $log_context);
+            } else {
+                $logger->warning('Person already has membership; skipping seat assignment to prevent duplicate', $log_context);
             }
-
-            // Assign person to membership seat to give them active membership
-
-            $membership_assignment_result = $this->assignPersonToMembershipSeat($person_uuid, $membership_uuid);
-            if (is_wp_error($membership_assignment_result)) {
-                $logger->error('Membership assignment failed', array_merge($log_context, [
-                    'error' => $membership_assignment_result->get_error_message(),
-                ]));
-
-                return $membership_assignment_result;
-            }
-            $logger->info('Assigned person to membership seat', $log_context);
 
             // Assign base member role from config
             $role_result = $this->assignRole($person_uuid, $base_member_role, $org_id);

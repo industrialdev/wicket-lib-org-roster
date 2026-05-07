@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.8.8] - 2026-05-07
+
+### Fixed
+- Prevented duplicate membership seat assignment in `DirectAssignmentStrategy::addMember()`. When `personHasMembership()` returned true (person already had a membership), connection creation was skipped but `assignPersonToMembershipSeat()` still ran unconditionally, creating a second seat and consuming an extra seat. Seat assignment now only executes when the person does not already hold a membership, with a warning log on the skip path.
+
 ## [0.8.7] - 2026-05-06
 
 ### Fixed
