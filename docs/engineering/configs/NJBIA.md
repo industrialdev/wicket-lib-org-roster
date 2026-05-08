@@ -79,6 +79,7 @@ This document mirrors the current site override. If it drifts, update the site c
 - `presentation.member_card.fields.job_title.label = Job Title`
 - `presentation.member_card.fields.description.enabled = true`
 - `presentation.member_list.show_bulk_upload = true`
+- `ui.member_list.show_bulk_upload = true`
 
 ### `integrations.additional_seats`
 
@@ -124,7 +125,9 @@ function njbia_orgman_config(array $config): array
     $config['presentation']['member_card']['fields']['job_title']['label'] = __('Job Title', 'wicket-acc');
     $config['presentation']['member_card']['fields']['description']['enabled'] = true;
     $config['presentation']['relationships']['show_type'] = true;
+    // Keep both flags enabled for backward compatibility across lib config schemas.
     $config['presentation']['member_list']['show_bulk_upload'] = true;
+    $config['ui']['member_list']['show_bulk_upload'] = true;
 
     // Bulk upload: keep all imported columns enabled for this site.
     $config['member_management']['bulk_upload']['columns'] = [

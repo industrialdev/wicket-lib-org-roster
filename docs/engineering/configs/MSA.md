@@ -60,6 +60,7 @@ This document mirrors the current site override. If it drifts, update the site c
 ### `presentation`
 
 - `presentation.relationships.show_type = true`
+- `presentation.member_list.use_unified = true`
 - `presentation.member_view.use_unified = true`
 - `presentation.member_list.show_remove_button = false`
 - `presentation.member_list.show_bulk_upload = false`
@@ -140,6 +141,7 @@ function wicket_child_orgman_config(array $config): array
     $config['presentation']['relationships']['show_type'] = true;
 
     // Unified member views + remove policy + seat limit behavior
+    $config['presentation']['member_list']['use_unified'] = true;
     $config['presentation']['member_view']['use_unified'] = true;
     $config['presentation']['member_list']['show_remove_button'] = false;
     $config['presentation']['member_list']['show_bulk_upload'] = false;

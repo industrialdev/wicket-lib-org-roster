@@ -1,8 +1,6 @@
 # CSAE Configuration
 
-Source of truth: `../csae-website-wordpress/src/web/app/themes/sassquatch/custom/org-roster.php`
-
-> **Note:** this file has not been created yet. The config below is the planned override.
+Source of truth: `../csae-portal-wordpress/src/web/app/themes/wicket-child/custom/org-roster.php`
 
 This document mirrors the current site override. If it drifts, update the site config first, then update this file.
 
@@ -45,6 +43,7 @@ This document mirrors the current site override. If it drifts, update the site c
 
 ### `presentation`
 
+- `presentation.member_list.use_unified = true`
 - `presentation.member_list.show_assignment_info = true`
 - `presentation.member_list.display_roles.allowlist = ['membership_owner', 'membership_manager', 'org_editor', 'member']`
 - `presentation.member_list.account_status.enabled = true`
@@ -53,6 +52,7 @@ This document mirrors the current site override. If it drifts, update the site c
 - `presentation.member_list.account_status.unconfirmed_label = Has not confirmed their account`
 - `presentation.member_list.seat_limit_message = You have reached the maximum number of assignable people under this membership.`
 - `presentation.member_card.fields.job_title.label = Title`
+- `presentation.member_card.fields.description.enabled = false`
 
 ### `integrations.additional_seats`
 
@@ -102,6 +102,7 @@ function wicket_orgman_config(array $config): array
     $config['member_management']['permissions_modal']['denylist'] = ['membership_owner'];
 
     // Team member list requirements: active-seat roster with status and security role visibility.
+    $config['presentation']['member_list']['use_unified'] = true;
     $config['presentation']['member_list']['show_assignment_info'] = true;
     $config['presentation']['member_list']['display_roles']['allowlist'] = ['membership_owner', 'membership_manager', 'org_editor', 'member'];
     $config['presentation']['member_list']['account_status']['enabled'] = true;
@@ -110,8 +111,9 @@ function wicket_orgman_config(array $config): array
     $config['presentation']['member_list']['account_status']['unconfirmed_label'] = __('Has not confirmed their account', 'wicket-acc');
     $config['presentation']['member_list']['seat_limit_message'] = __('You have reached the maximum number of assignable people under this membership.', 'wicket-acc');
 
-    // Match "Title" wording in roster cards.
+    // Match "Title" wording in roster cards; hide description field.
     $config['presentation']['member_card']['fields']['job_title']['label'] = __('Title', 'wicket-acc');
+    $config['presentation']['member_card']['fields']['description']['enabled'] = false;
 
     // CSAE does not use additional seat purchasing.
     $config['integrations']['additional_seats']['enabled'] = false;
