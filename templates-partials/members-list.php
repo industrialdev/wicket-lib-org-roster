@@ -291,7 +291,7 @@ $no_members_message = __('No members found.', 'wicket-acc');
                                     <?php echo esc_html($member['full_name'] ?? ''); ?>
                                 </h3>
                                 <?php endif; ?>
-                                <div id="member-status-<?php echo esc_attr($person_uuid_no_dashes); ?>" class="wt_inline-flex wt_items-center">
+                                <div id="member-status-<?php echo esc_attr($person_uuid_no_dashes); ?>" class="wt_inline-flex wt_items-center" data-member-status="<?php echo esc_attr($person_uuid_no_dashes); ?>">
                                     <?php if (!empty($member['lazy_loaded'])) : ?>
                                         <?php if ($show_account_status) : ?>
                                             <?php if (!empty($member['confirmed_at'])) : ?>
@@ -324,7 +324,7 @@ $no_members_message = __('No members found.', 'wicket-acc');
                             </p>
                         <?php endif; ?>
 
-                        <div id="member-details-<?php echo esc_attr($person_uuid_no_dashes); ?>" class="wt_flex wt_flex-col wt_gap-2">
+                        <div id="member-details-<?php echo esc_attr($person_uuid_no_dashes); ?>" class="wt_flex wt_flex-col wt_gap-2" data-member-details="<?php echo esc_attr($person_uuid_no_dashes); ?>">
                             <?php if (empty($member['lazy_loaded'])) : ?>
                                 <?php
                                     $lazy_details_url = add_query_arg([
