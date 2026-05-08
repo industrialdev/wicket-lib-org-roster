@@ -90,61 +90,14 @@ if ('POST' === strtoupper($request_method)) {
         'job_title'  => isset($_POST['job_title']) ? sanitize_text_field(wp_unslash($_POST['job_title'])) : '',
     ];
 
-    // 1. Check for duplicates in the same membership UUID
-    if (!empty($membership_uuid) && !empty($member_data['email'])) {
-        try {
-            $client = wicket_api_client();
-            $filter_data = [
-                'filter' => [
-                    'organization_membership_uuid_in' => [$membership_uuid],
-                    'person_emails_address_eq' => $member_data['email'],
-                ],
-            ];
-
-            $response = $client->post('/person_memberships/query', ['json' => $filter_data]);
-            if (is_wp_error($response) || !empty($response['errors'])) {
-                \Wicket()->log()->error('Duplicate check returned an API error', [
-                    'source' => 'wicket-orgman',
-                    'membership_uuid' => $membership_uuid,
-                    'member_email' => $member_data['email'],
-                ]);
-                status_header(200);
-                WicketORM\Helpers\DatastarSSE::renderError(
-                    __('Could not verify whether this person already exists. Please try again.', 'wicket-acc'),
-                    '#add-member-messages-' . $org_dom_suffix,
-                    array_merge($error_signals, ['addMemberFormError' => true])
-                );
-
-                return;
-            }
-
-            if (!empty($response['data'])) {
-                // Check for active memberships
-                foreach ($response['data'] as $p_membership) {
-                    $is_active = $p_membership['attributes']['active'] ?? false;
-                    $is_in_grace = $p_membership['attributes']['in_grace'] ?? false;
-                    if ($is_active || $is_in_grace) {
-                        status_header(200);
-                        WicketORM\Helpers\DatastarSSE::renderError(
-                            sprintf(__('A member with the email %s already exists in this membership.', 'wicket-acc'), '<strong>' . esc_html($member_data['email']) . '</strong>'),
-                            '#add-member-messages-' . $org_dom_suffix,
-                            $error_signals
-                        );
-
-                        return;
-                    }
-                }
-            }
-        } catch (Throwable $e) {
-            \Wicket()->log()->error('Duplicate check failed', [
-                'source' => 'wicket-orgman',
-                'error' => $e->getMessage(),
-            ]);
+    // 1. Check for duplicates by email before creating/updating the person record.
+    if (!empty($membership_uuid) && !empty($member_data['email']) && function_exists('wicket_person_in_membership')) {
+        if (wicket_person_in_membership($membership_uuid, $member_data['email'])) {
             status_header(200);
             WicketORM\Helpers\DatastarSSE::renderError(
-                __('Could not verify whether this person already exists. Please try again.', 'wicket-acc'),
+                sprintf(__('A member with the email %s already exists in this membership.', 'wicket-acc'), '<strong>' . esc_html($member_data['email']) . '</strong>'),
                 '#add-member-messages-' . $org_dom_suffix,
-                array_merge($error_signals, ['addMemberFormError' => true])
+                $error_signals
             );
 
             return;
