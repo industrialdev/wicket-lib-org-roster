@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.9.1] - 2026-05-08
+
+### Changed
+- Add-member duplicate check in `process/add-member.php` now delegates to `wicket_person_in_membership()` (with `function_exists` guard) instead of issuing an inline `/person_memberships/query` API call and manually inspecting `active`/`in_grace` attributes. Centralizes duplicate detection, removes ~50 lines of inline query/error-handling logic, and simplifies the control flow.
+
+### Fixed
+- Added `data-member-status` and `data-member-details` data attributes to member card elements in `members-list.php` for reliable Datastar element targeting.
+
 ## [0.9.0] - 2026-05-07
 
 **Requires wicket-wp-base-plugin 2.4.0 or greater.**
