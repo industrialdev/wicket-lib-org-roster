@@ -7,6 +7,7 @@ Membership-cycle mode currently reuses the shared organization-centric UI.
 - organization cards render through shared non-groups templates
 - member list and view use shared templates
 - unified view can be enabled through shared UI config
+- organization-list cards source membership tier data from the org-scoped endpoint (`MembershipService::getOrganizationMemberships()`) rather than the manager's personal membership entries; all active and in-grace org memberships are shown per card
 
 ## Current Limits
 

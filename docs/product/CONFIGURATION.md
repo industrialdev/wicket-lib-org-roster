@@ -126,8 +126,6 @@ Use `docs/INSTALLATION.md` for setup wiring.
   - Default: `['membership_owner', 'membership_manager', 'org_editor']`
 - `membership.cycle.prevent_owner_removal`
   - Default: `true`
-- `membership.cycle.require_explicit_membership_uuid`
-  - Default: `true`
 - `membership.cycle.removal.end_date_anchor`
   - Default: inherits `removal.end_date_anchor`
   - Allowed: `action_time`, `day_start_utc`
@@ -680,7 +678,6 @@ The runtime still uses the current paths below. These are the target destination
 - `membership_cycle.permissions.remove_roles -> membership.cycle.permissions.remove_member_roles`
 - `membership_cycle.permissions.purchase_seats_roles -> membership.cycle.permissions.purchase_seat_roles`
 - `membership_cycle.permissions.prevent_owner_removal -> membership.cycle.prevent_owner_removal`
-- `membership_cycle.member_management.require_explicit_membership_uuid -> membership.cycle.require_explicit_membership_uuid`
 
 - `seat_policy.tier_max_assignments -> membership.seat_limits.tier_max_assignments`
 - `seat_policy.tier_name_case_sensitive -> membership.seat_limits.tier_name_case_sensitive`

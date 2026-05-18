@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.9.2] - 2026-05-18
+
+### Fixed
+- `membership_cycle` strategy org list now shows all active and in-grace org memberships per organization card, not just the membership the manager is personally enrolled in. The org list template now sources membership entries from the org-scoped endpoint (`MembershipService::getOrganizationMemberships()` → `wicket_get_org_memberships()`) instead of the manager's personal `membership_entries`, so organizations with multiple active rosters display a separate "Manage Members" link for each one.
+
+### Removed
+- `membership.cycle.require_explicit_membership_uuid` config key. The flag was defined in `OrgManConfig` but never read by any service, strategy, helper, or template — `MembershipCycleStrategy` always hard-enforces explicit membership UUID for mutations unconditionally. Removed from config defaults and all documentation.
+
 ## [0.9.1] - 2026-05-08
 
 ### Changed

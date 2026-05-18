@@ -454,6 +454,55 @@ if (function_exists('wicket_get_current_person_memberships')) {
     }
 }
 
+// For membership_cycle: rebuild tiers from org-scoped memberships so all active/grace
+// org membership records are visible, not just the ones the manager personally holds.
+if ($roster_mode === 'membership_cycle') {
+    $membership_tiers = [];
+    $membership_entries_by_org = [];
+    $_mc_ms = new \WicketORM\Services\MembershipService();
+
+    foreach ($organizations as $_mc_org) {
+        $_mc_oid = (string) ($_mc_org['id'] ?? '');
+        if ($_mc_oid === '' || str_starts_with($_mc_oid, 'org-scope-') || str_starts_with($_mc_oid, 'group-scope-')) {
+            continue;
+        }
+
+        try {
+            $_mc_org_memberships = $_mc_ms->getOrganizationMemberships($_mc_oid);
+        } catch (\Throwable $_mc_e) {
+            $logger->error('membership_cycle org memberships fetch failed', [
+                'source'   => 'wicket-orgman',
+                'org_uuid' => $_mc_oid,
+                'error'    => $_mc_e->getMessage(),
+            ]);
+            $_mc_org_memberships = [];
+        }
+
+        foreach ($_mc_org_memberships as $_mc_om_uuid => $_mc_om_data) {
+            $_mc_om_attrs = (array) ($_mc_om_data['membership']['attributes'] ?? []);
+            $_mc_is_active = (bool) ($_mc_om_attrs['active'] ?? false);
+            $_mc_in_grace = (bool) ($_mc_om_attrs['in_grace'] ?? false);
+
+            if (!$_mc_is_active && !$_mc_in_grace) {
+                continue;
+            }
+
+            $_mc_tier_attrs = (array) ($_mc_om_data['included']['attributes'] ?? []);
+            $_mc_name = (string) ($_mc_tier_attrs['name'] ?? $_mc_tier_attrs['name_en'] ?? $_mc_tier_attrs['name_fr'] ?? '');
+            if ($_mc_name === '') {
+                $_mc_name = __('Active Membership', 'wicket-acc');
+            }
+
+            $membership_tiers[$_mc_oid][] = $_mc_name;
+            $membership_entries_by_org[$_mc_oid][] = [
+                'membership_uuid' => (string) $_mc_om_uuid,
+                'membership_name' => $_mc_name,
+                'is_active'       => $_mc_is_active || $_mc_in_grace,
+            ];
+        }
+    }
+}
+
 // Handle case where no active memberships found
 if (empty($organizations)) {
     ?>

@@ -113,7 +113,6 @@ final class OrgManConfig
                         ],
                     ],
                     'prevent_owner_removal' => true,
-                    'require_explicit_membership_uuid' => true,
                 ],
                 'seat_limits' => [
                     'tier_max_assignments' => [],
