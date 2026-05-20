@@ -441,6 +441,8 @@ if (function_exists('wicket_get_current_person_memberships')) {
                                     'membership_uuid' => (string) ($included['id'] ?? ''),
                                     'membership_name' => $membership_name,
                                     'is_active' => (bool) $is_active,
+                                    'starts_at' => (string) ($included['attributes']['starts_at'] ?? ''),
+                                    'ends_at' => (string) ($included['attributes']['ends_at'] ?? ''),
                                 ];
                             } else {
                                 $membership_tiers[$org_id] = $membership_name;
@@ -469,6 +471,10 @@ if ($roster_mode === 'membership_cycle') {
 
         try {
             $_mc_org_memberships = $_mc_ms->getOrganizationMemberships($_mc_oid);
+            $logger->info('wicket-orgman: Raw org memberships response', [
+                'org_id' => $_mc_oid,
+                'response' => $_mc_org_memberships,
+            ]);
         } catch (\Throwable $_mc_e) {
             $logger->error('membership_cycle org memberships fetch failed', [
                 'source'   => 'wicket-orgman',
@@ -498,6 +504,8 @@ if ($roster_mode === 'membership_cycle') {
                 'membership_uuid' => (string) $_mc_om_uuid,
                 'membership_name' => $_mc_name,
                 'is_active'       => $_mc_is_active || $_mc_in_grace,
+                'starts_at'       => (string) ($_mc_om_attrs['starts_at'] ?? ''),
+                'ends_at'         => (string) ($_mc_om_attrs['ends_at'] ?? ''),
             ];
         }
     }
@@ -721,6 +729,8 @@ foreach ($organizations_page as $org) :
                 'membership_uuid' => $entry_uuid,
                 'membership_name' => (string) ($entry['membership_name'] ?? ''),
                 'is_active' => (bool) ($entry['is_active'] ?? false),
+                'starts_at' => (string) ($entry['starts_at'] ?? ''),
+                'ends_at' => (string) ($entry['ends_at'] ?? ''),
             ];
         }
     }
@@ -736,6 +746,8 @@ foreach ($organizations_page as $org) :
             'is_active' => $roster_mode === 'groups'
                 ? true
                 : $membership_is_active,
+            'starts_at' => (string) ($membership_data['data']['attributes']['starts_at'] ?? ''),
+            'ends_at' => (string) ($membership_data['data']['attributes']['ends_at'] ?? ''),
         ];
     }
 

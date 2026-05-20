@@ -322,6 +322,7 @@ final class OrgManConfig
                     'page_size' => 15,
                     'use_custom_title' => false,
                     'custom_title' => '',
+                    'show_membership_details' => false,
                 ],
                 'relationships' => [
                     'show_type' => false,

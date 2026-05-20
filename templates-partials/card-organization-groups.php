@@ -105,7 +105,7 @@
                     <?php endif; ?>
                 <?php endif; ?>
 
-                <div class="wt_flex wt_items-stretch wt_gap-4 wt_mt-4">
+                <div class="wt_flex wt_items-stretch wt_gap-4 wt_mt-1">
                     <?php if ($can_edit_org): ?>
                         <?php
                         $profile_url_base = WicketORM\Helpers\Helper::getMyAccountPageUrl('organization-profile', '/my-account/organization-profile/');

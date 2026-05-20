@@ -210,7 +210,7 @@ if ($roster_mode !== 'groups') {
         <?php endif; ?>
     </div>
 
-    <div class="org-details__actions wt_w-full wt_flex wt_items-stretch wt_gap-4 wt_mt-4">
+    <div class="org-details__actions wt_w-full wt_flex wt_items-stretch wt_gap-4 wt_mt-2">
         <?php
         // Check user permissions for this organization
         if ($roster_mode === 'groups' && $group_uuid !== '') {

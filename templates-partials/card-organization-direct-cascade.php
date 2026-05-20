@@ -20,6 +20,63 @@
             $entry_membership_uuid = (string) ($membership_entry['membership_uuid'] ?? '');
             $entry_membership_name = (string) ($membership_entry['membership_name'] ?? '');
             $entry_is_active = (bool) ($membership_entry['is_active'] ?? false);
+
+            $show_membership_details = (bool) ($org_list_config['show_membership_details'] ?? false);
+            if ($show_membership_details && $entry_membership_name !== '') {
+                $entry_starts_at = (string) ($membership_entry['starts_at'] ?? '');
+                $entry_ends_at = (string) ($membership_entry['ends_at'] ?? '');
+
+                $duration_str = '';
+                if ($entry_starts_at !== '' && $entry_ends_at !== '') {
+                    $start_dt = date_create($entry_starts_at);
+                    $end_dt = date_create($entry_ends_at);
+                    if ($start_dt && $end_dt) {
+                        $diff = date_diff($start_dt, $end_dt);
+                        $years = $diff->y;
+                        $total_days = $diff->days;
+                        if ($total_days !== false) {
+                            if ($total_days >= 330 && $total_days <= 390) {
+                                $years = 1;
+                            } elseif ($total_days >= 700 && $total_days <= 760) {
+                                $years = 2;
+                            } elseif ($total_days >= 1060 && $total_days <= 1120) {
+                                $years = 3;
+                            } elseif ($total_days >= 1430 && $total_days <= 1490) {
+                                $years = 4;
+                            } elseif ($total_days >= 1790 && $total_days <= 1850) {
+                                $years = 5;
+                            }
+                        }
+                        if ($years > 0) {
+                            $duration_str = sprintf(_n('%d Year', '%d Year', $years, 'wicket-acc'), $years);
+                        } else {
+                            $months = $diff->m;
+                            if ($months > 0) {
+                                $duration_str = sprintf(_n('%d Month', '%d Month', $months, 'wicket-acc'), $months);
+                            }
+                        }
+                    }
+                }
+
+                $start_year_str = '';
+                if ($entry_starts_at !== '') {
+                    $start_dt = date_create($entry_starts_at);
+                    if ($start_dt) {
+                        $start_year_str = $start_dt->format('Y');
+                    }
+                }
+
+                $extra_details = '';
+                if ($duration_str !== '' && $start_year_str !== '') {
+                    $extra_details = sprintf(' - %s (Start %s)', $duration_str, $start_year_str);
+                } elseif ($duration_str !== '') {
+                    $extra_details = sprintf(' - %s', $duration_str);
+                } elseif ($start_year_str !== '') {
+                    $extra_details = sprintf(' (Start %s)', $start_year_str);
+                }
+
+                $entry_membership_name .= $extra_details;
+            }
             ?>
             <div class="wt_flex wt_flex-col wt_gap-2<?php echo $entry_index > 0 ? ' wt_pt-4 wt_mt-1 wt_border-t wt_border-color' : ''; ?>">
                 <div class="wt_flex wt_items-center wt_text-content">
@@ -83,7 +140,7 @@
                     </div>
                 <?php endif; ?>
 
-                <div class="wt_flex wt_items-stretch wt_gap-4 wt_mt-4">
+                <div class="wt_flex wt_items-stretch wt_gap-4 wt_mt-1">
                     <?php if ($can_edit_org): ?>
                         <?php
                     $profile_url_base = WicketORM\Helpers\Helper::getMyAccountPageUrl('organization-profile', '/my-account/organization-profile/');

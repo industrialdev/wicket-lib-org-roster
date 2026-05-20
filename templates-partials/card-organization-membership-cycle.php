@@ -20,6 +20,46 @@
             $entry_membership_uuid = (string) ($membership_entry['membership_uuid'] ?? '');
             $entry_membership_name = (string) ($membership_entry['membership_name'] ?? '');
             $entry_is_active = (bool) ($membership_entry['is_active'] ?? false);
+
+            $show_membership_details = (bool) ($org_list_config['show_membership_details'] ?? false);
+            if ($show_membership_details && $entry_membership_name !== '') {
+                $entry_starts_at = (string) ($membership_entry['starts_at'] ?? '');
+                $entry_ends_at = (string) ($membership_entry['ends_at'] ?? '');
+
+                $duration_str = '';
+                if ($entry_starts_at !== '' && $entry_ends_at !== '') {
+                    $start_dt = date_create($entry_starts_at);
+                    $end_dt = date_create($entry_ends_at);
+                    if ($start_dt && $end_dt) {
+                        $diff = date_diff($start_dt, $end_dt);
+                        $total_months = ($diff->y * 12) + $diff->m + ($diff->d > 0 ? 1 : 0);
+                        $years = (int) ceil($total_months / 12);
+                        if ($years <= 0) {
+                            $years = 1;
+                        }
+                        $duration_str = sprintf(_n('%d Year', '%d Year', $years, 'wicket-acc'), $years);
+                    }
+                }
+
+                $start_year_str = '';
+                if ($entry_starts_at !== '') {
+                    $start_dt = date_create($entry_starts_at);
+                    if ($start_dt) {
+                        $start_year_str = $start_dt->format('Y');
+                    }
+                }
+
+                $extra_details = '';
+                if ($duration_str !== '' && $start_year_str !== '') {
+                    $extra_details = sprintf(' - %s (Start %s)', $duration_str, $start_year_str);
+                } elseif ($duration_str !== '') {
+                    $extra_details = sprintf(' - %s', $duration_str);
+                } elseif ($start_year_str !== '') {
+                    $extra_details = sprintf(' (Start %s)', $start_year_str);
+                }
+
+                $entry_membership_name .= $extra_details;
+            }
             ?>
             <div class="wt_flex wt_flex-col wt_gap-2<?php echo $entry_index > 0 ? ' wt_pt-4 wt_mt-1 wt_border-t wt_border-color' : ''; ?>">
                 <div class="wt_flex wt_items-center wt_text-content">
@@ -83,7 +123,7 @@
                     </div>
                 <?php endif; ?>
 
-                <div class="wt_flex wt_items-stretch wt_gap-4 wt_mt-4">
+                <div class="wt_flex wt_items-stretch wt_gap-4 wt_mt-1">
                     <?php if ($can_edit_org): ?>
                         <?php
                     $profile_url_base = WicketORM\Helpers\Helper::getMyAccountPageUrl('organization-profile', '/my-account/organization-profile/');
