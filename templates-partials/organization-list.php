@@ -485,11 +485,50 @@ if ($roster_mode === 'membership_cycle') {
         }
 
         foreach ($_mc_org_memberships as $_mc_om_uuid => $_mc_om_data) {
-            $_mc_om_attrs = (array) ($_mc_om_data['membership']['attributes'] ?? []);
+            $_mc_om_attrs  = (array) ($_mc_om_data['membership']['attributes'] ?? []);
             $_mc_is_active = (bool) ($_mc_om_attrs['active'] ?? false);
-            $_mc_in_grace = (bool) ($_mc_om_attrs['in_grace'] ?? false);
+            $_mc_in_grace  = (bool) ($_mc_om_attrs['in_grace'] ?? false);
 
-            if (!$_mc_is_active && !$_mc_in_grace) {
+            /**
+             * Filters whether a membership_cycle entry is included in the organization list.
+             *
+             * Called once per membership record while building the per-organization membership
+             * rows on the organization list page (/my-account/organization-management/). Only
+             * runs when the roster mode is membership_cycle.
+             *
+             * The default value passed to this filter is true when the membership is currently
+             * active (active=true) or in its grace period (in_grace=true), and false otherwise.
+             * Returning true causes a membership tier row to be rendered inside the organization
+             * card; returning false skips the record entirely. The rendered row appears in
+             * templates-partials/card-organization-membership-cycle.php and shows the tier name,
+             * an Active Member (green) or Inactive Membership (grey) badge derived from
+             * active || in_grace, and the Manage Members / Edit Organization action links if the
+             * current user holds the required roles for that membership.
+             *
+             * @param bool   $include   Whether to include this entry. Default true for active or
+             *                          grace-period memberships; false for all others.
+             * @param array  $attrs     Membership attributes from the Wicket API, including:
+             *                            'active'    (bool)   — membership is currently active.
+             *                            'in_grace'  (bool)   — membership is in its grace period.
+             *                            'starts_at' (string) — ISO 8601 start date of the period.
+             *                            'ends_at'   (string) — ISO 8601 end date of the period.
+             * @param array  $data      Full membership data array for this entry, containing:
+             *                            'membership' — the raw Wicket API membership object.
+             *                            'included'   — the related membership tier/type object.
+             * @param string $org_uuid  UUID of the organization whose memberships are evaluated.
+             *
+             * @return bool True to include the row; false to skip it.
+             */
+            $_mc_include = $_mc_is_active || $_mc_in_grace;
+            $_mc_include = (bool) apply_filters(
+                'wicket/acc/orgman/membership_cycle_include_entry',
+                $_mc_include,
+                $_mc_om_attrs,
+                $_mc_om_data,
+                $_mc_oid
+            );
+
+            if (!$_mc_include) {
                 continue;
             }
 

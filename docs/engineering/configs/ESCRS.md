@@ -34,6 +34,49 @@ This document mirrors the current site override. If it drifts, update the site c
 - `integrations.additional_seats.min_quantity = 1`
 - `integrations.additional_seats.max_quantity = 900`
 
+## Active Filters
+
+### `wicket/acc/orgman/membership_cycle_include_entry` — include delayed memberships
+
+| | |
+|---|---|
+| Hook | `wicket/acc/orgman/membership_cycle_include_entry` |
+| Priority / accepted args | `10 / 4` |
+| Registered in | `after_setup_theme` (priority 20) |
+| Source file | `src/web/app/themes/wicket-child/custom/org-roster.php` |
+| Provided by | `wicket-lib-org-roster` — `templates-partials/organization-list.php` |
+
+**Problem.** By default the library only surfaces memberships where `active=true` or `in_grace=true`. Memberships purchased ahead of time carry both flags as `false` until `starts_at` is reached, so they are silently dropped from the organization list.
+
+**Solution.** The child theme re-includes any membership whose `starts_at` is a non-empty ISO 8601 date that has not yet been reached (`strtotime($starts_at) > time()`). Already-included entries short-circuit immediately.
+
+```php
+function wicket_child_orgman_membership_cycle_include_entry(bool $include, array $attrs, array $data, string $org_uuid): bool
+{
+    if ($include) {
+        return true;
+    }
+
+    $starts_at = (string) ($attrs['starts_at'] ?? '');
+
+    return $starts_at !== '' && strtotime($starts_at) > time();
+}
+```
+
+**Rendering.** A delayed entry renders with a grey **Inactive Membership** badge because `card-organization-membership-cycle.php` derives the active state from `active || in_grace`, both of which are `false` for delayed memberships. The **Manage Members** and **Edit Organization** action links still appear if the current user holds the required roles for that membership.
+
+**Filter signature (from the library).**
+
+```
+apply_filters(
+    'wicket/acc/orgman/membership_cycle_include_entry',
+    bool   $include,   // true when active or in_grace — short-circuit if already true
+    array  $attrs,     // membership attributes: active, in_grace, starts_at, ends_at, …
+    array  $data,      // full membership entry: ['membership' => […], 'included' => […]]
+    string $org_uuid   // UUID of the organization being evaluated
+)
+```
+
 ## Current Config Function
 
 ```php
