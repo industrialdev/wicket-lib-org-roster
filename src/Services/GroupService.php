@@ -423,6 +423,9 @@ class GroupService
         $value_field = isset($config['value_field']) ? (string) $config['value_field'] : '';
         $fallback_to_org_uuid = (bool) ($config['fallback_to_org_uuid'] ?? true);
 
+        $membership_id = $group_membership['id'] ?? 'unknown';
+        $person_id = $group_membership['relationships']['person']['data']['id'] ?? 'unknown';
+
         if (is_array($info)) {
             $key = $info['key'] ?? '';
             if ($expected_key === '' || $key === $expected_key) {
@@ -431,14 +434,51 @@ class GroupService
                     $value = $value[$value_field];
                 }
                 if (is_string($value) && '' !== trim($value)) {
+                    $this->getLogger()->debug('extractOrgIdentifier: resolved from custom_data_field', [
+                        'source' => 'wicket-orgman',
+                        'membership_id' => $membership_id,
+                        'person_id' => $person_id,
+                        'key' => $key,
+                        'value_field' => $value_field,
+                        'resolved' => trim($value),
+                    ]);
+
                     return trim($value);
                 }
             }
+            $this->getLogger()->debug('extractOrgIdentifier: custom_data_field present but no match', [
+                'source' => 'wicket-orgman',
+                'membership_id' => $membership_id,
+                'person_id' => $person_id,
+                'expected_key' => $expected_key,
+                'actual_key' => $key,
+                'value_field' => $value_field,
+                'raw_value' => $info['value'] ?? null,
+            ]);
+        } else {
+            $this->getLogger()->debug('extractOrgIdentifier: no custom_data_field', [
+                'source' => 'wicket-orgman',
+                'membership_id' => $membership_id,
+                'person_id' => $person_id,
+            ]);
         }
 
         if ($fallback_to_org_uuid && $fallback_org_uuid) {
+            $this->getLogger()->debug('extractOrgIdentifier: fallback to org_uuid', [
+                'source' => 'wicket-orgman',
+                'membership_id' => $membership_id,
+                'person_id' => $person_id,
+                'fallback_org_uuid' => $fallback_org_uuid,
+            ]);
+
             return $fallback_org_uuid;
         }
+
+        $this->getLogger()->debug('extractOrgIdentifier: returning empty', [
+            'source' => 'wicket-orgman',
+            'membership_id' => $membership_id,
+            'person_id' => $person_id,
+        ]);
 
         return '';
     }
@@ -571,6 +611,16 @@ class GroupService
         $member_org_uuid = (string) ($member['relationships']['organization']['data']['id'] ?? '');
         $member_identifier = $this->extractOrgIdentifier($member, $member_org_uuid);
 
+        $this->getLogger()->debug('memberMatchesOrgScope: evaluating member', [
+            'source' => 'wicket-orgman',
+            'person_id' => $member['relationships']['person']['data']['id'] ?? 'unknown',
+            'membership_id' => $member['id'] ?? 'unknown',
+            'target_org_identifier' => $org_identifier,
+            'target_org_uuid' => $org_uuid,
+            'member_org_uuid' => $member_org_uuid,
+            'member_identifier' => $member_identifier,
+        ]);
+
         foreach ($this->resolveScopeTokens($member_identifier, false) as $token) {
             $member_scope_tokens[$token] = true;
         }
@@ -592,10 +642,23 @@ class GroupService
             $this->getLogger()->debug('memberMatchesOrgScope: NO MATCH', [
                 'source' => 'wicket-orgman',
                 'person_id' => $member['relationships']['person']['data']['id'] ?? 'unknown',
+                'membership_id' => $member['id'] ?? 'unknown',
                 'target_tokens' => array_keys($target_tokens),
                 'member_tokens' => array_keys($member_scope_tokens),
                 'member_org_uuid' => $member_org_uuid,
                 'member_identifier' => $member_identifier,
+            ]);
+        } else {
+            $this->getLogger()->info('memberMatchesOrgScope: MATCH', [
+                'source' => 'wicket-orgman',
+                'person_id' => $member['relationships']['person']['data']['id'] ?? 'unknown',
+                'membership_id' => $member['id'] ?? 'unknown',
+                'target_org_identifier' => $org_identifier,
+                'target_org_uuid' => $org_uuid,
+                'member_org_uuid' => $member_org_uuid,
+                'member_identifier' => $member_identifier,
+                'target_tokens' => array_keys($target_tokens),
+                'member_tokens' => array_keys($member_scope_tokens),
             ]);
         }
 
