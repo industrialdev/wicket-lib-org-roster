@@ -1460,22 +1460,21 @@ class GroupService
             $group_org_uuid = (string) ($group_data['relationships']['organization']['data']['id'] ?? '');
 
             if ($this->groupHasRosterTag($group_data)) {
-                foreach ($all_manager_access as $access) {
-                    // Check if this manager org matches the group's org.
-                    // If no group org, we allow access if the user is a manager for ANY org (legacy fallback).
-                    if ($group_org_uuid === '' || $group_org_uuid === $access['org_uuid']) {
-                        $this->getLogger()->info('checkManagerGroupAccess: roster tag confirmed and org match — MDP manager access granted', array_merge($log_ctx, [
-                            'mdp_org_uuid' => $access['org_uuid'],
-                        ]));
+                // Any membership_manager can access any roster-tagged group.
+                // Member list scoping happens downstream in getGroupMembers() via memberMatchesOrgScope().
+                $primary_access = $all_manager_access[0];
 
-                        return [
-                            'allowed'        => true,
-                            'org_uuid'       => $access['org_uuid'],
-                            'org_identifier' => $access['org_identifier'],
-                            'role_slug'      => '',
-                        ];
-                    }
-                }
+                $this->getLogger()->info('checkManagerGroupAccess: roster tag confirmed — MDP manager access granted', array_merge($log_ctx, [
+                    'mdp_org_uuid' => $primary_access['org_uuid'],
+                    'group_org_uuid' => $group_org_uuid,
+                ]));
+
+                return [
+                    'allowed'        => true,
+                    'org_uuid'       => $primary_access['org_uuid'],
+                    'org_identifier' => $primary_access['org_identifier'],
+                    'role_slug'      => '',
+                ];
             }
         } catch (\Throwable $e) {
             $this->getLogger()->error('checkManagerGroupAccess: exception', array_merge($log_ctx, ['error' => $e->getMessage()]));
@@ -1512,59 +1511,59 @@ class GroupService
             }
         }
 
-        foreach ($all_manager_access as $access) {
-            $mgr_org_uuid = $access['org_uuid'];
-            $mgr_org_identifier = $access['org_identifier'];
-            $org_name = ($mgr_org_identifier !== $mgr_org_uuid) ? $mgr_org_identifier : '';
+        // Fetch ALL roster-tagged groups regardless of owning org.
+        // Member scoping happens downstream in getGroupMembers() via memberMatchesOrgScope().
+        $all_tagged = $this->fetchAllRosterTaggedGroups();
 
-            $tagged = $this->fetchRosterTaggedGroupsForOrg($mgr_org_uuid);
-            foreach ($tagged as $group) {
-                $group_id = (string) ($group['id'] ?? '');
-                if ('' === $group_id || isset($existing_ids[$group_id])) {
-                    continue;
-                }
+        // Use the first manager access entry for org_uuid/org_identifier on appended entries.
+        // These drive member-scoping in getGroupMembers() — members from other orgs are filtered out.
+        $primary_access = $all_manager_access[0];
+        $mgr_org_uuid = $primary_access['org_uuid'];
+        $mgr_org_identifier = $primary_access['org_identifier'];
+        $org_name = ($mgr_org_identifier !== $mgr_org_uuid) ? $mgr_org_identifier : '';
 
-                $group_attrs = is_array($group['attributes'] ?? null) ? $group['attributes'] : [];
-                $group_name = $group_attrs['name'] ?? $group_attrs['name_en'] ?? $group_attrs['name_fr'] ?? '';
-
-                if ($query !== '' && false === stripos($group_name, $query)) {
-                    continue;
-                }
-
-                $groups[] = [
-                    'group'            => $group,
-                    'group_membership' => [],
-                    'org_uuid'         => $mgr_org_uuid,
-                    'org_identifier'   => $mgr_org_identifier,
-                    'org_name'         => $org_name,
-                    'role_slug'        => '',
-                    'can_manage'       => true,
-                ];
-                $existing_ids[$group_id] = true;
+        foreach ($all_tagged as $group) {
+            $group_id = (string) ($group['id'] ?? '');
+            if ('' === $group_id || isset($existing_ids[$group_id])) {
+                continue;
             }
+
+            $group_attrs = is_array($group['attributes'] ?? null) ? $group['attributes'] : [];
+            $group_name = $group_attrs['name'] ?? $group_attrs['name_en'] ?? $group_attrs['name_fr'] ?? '';
+
+            if ($query !== '' && false === stripos($group_name, $query)) {
+                continue;
+            }
+
+            $groups[] = [
+                'group'            => $group,
+                'group_membership' => [],
+                'org_uuid'         => $mgr_org_uuid,
+                'org_identifier'   => $mgr_org_identifier,
+                'org_name'         => $org_name,
+                'role_slug'        => '',
+                'can_manage'       => true,
+            ];
+            $existing_ids[$group_id] = true;
         }
 
         return $groups;
     }
 
     /**
-     * Fetch "Roster Management" tagged groups for a given org.
+     * Fetch ALL groups tagged with the roster-management tag, regardless of owning org.
      *
-     * @param string $org_uuid
+     * Uses server-side tags_name_eq filter when available, with local tag verification
+     * as a safety net. Paginates through all results.
+     *
      * @return array Array of group data objects
      */
-    private function fetchRosterTaggedGroupsForOrg(string $org_uuid): array
+    private function fetchAllRosterTaggedGroups(): array
     {
-        $log_ctx = ['source' => 'wicket-orgman', 'org_uuid' => $org_uuid];
-
-        if ('' === $org_uuid) {
-            $this->getLogger()->warning('fetchRosterTaggedGroupsForOrg: called with empty org_uuid', $log_ctx);
-
-            return [];
-        }
+        $log_ctx = ['source' => 'wicket-orgman'];
 
         if (!function_exists('wicket_api_client')) {
-            $this->getLogger()->warning('fetchRosterTaggedGroupsForOrg: wicket_api_client unavailable', $log_ctx);
+            $this->getLogger()->warning('fetchAllRosterTaggedGroups: wicket_api_client unavailable', $log_ctx);
 
             return [];
         }
@@ -1572,53 +1571,59 @@ class GroupService
         $roster_tag = $this->getRosterTagName();
         $log_ctx['roster_tag'] = $roster_tag;
 
-        $this->getLogger()->debug('fetchRosterTaggedGroupsForOrg: fetching groups for org', $log_ctx);
+        $this->getLogger()->debug('fetchAllRosterTaggedGroups: fetching all tagged groups', $log_ctx);
 
         try {
-            $response = wicket_api_client()->get('/groups', [
-                'query' => [
-                    'page'   => ['number' => 1, 'size' => 100],
-                    'filter' => ['organization_uuid_eq' => $org_uuid],
-                    'sort'   => 'name_en',
-                ],
-            ]);
-
-            $all_groups = is_array($response) ? ($response['data'] ?? []) : [];
-
-            $this->getLogger()->debug('fetchRosterTaggedGroupsForOrg: API returned groups', array_merge($log_ctx, [
-                'total_returned' => count($all_groups),
-                'group_ids'      => array_map(static fn ($g) => $g['id'] ?? '', $all_groups),
-            ]));
-
             $tagged = [];
-            foreach ($all_groups as $group) {
-                if (!is_array($group)) {
-                    continue;
-                }
-                $group_id = (string) ($group['id'] ?? '');
-                $group_tags = $group['attributes']['tags'] ?? null;
-                if ($this->groupHasRosterTag($group)) {
-                    $tagged[] = $group;
-                    $this->getLogger()->debug('fetchRosterTaggedGroupsForOrg: group passed tag filter', array_merge($log_ctx, [
-                        'group_id'   => $group_id,
-                        'group_tags' => is_array($group_tags) ? $group_tags : null,
-                    ]));
-                } else {
-                    $this->getLogger()->debug('fetchRosterTaggedGroupsForOrg: group excluded — roster tag absent', array_merge($log_ctx, [
-                        'group_id'   => $group_id,
-                        'group_tags' => is_array($group_tags) ? $group_tags : null,
-                    ]));
-                }
-            }
+            $page = 1;
+            $total_pages = 1;
 
-            $this->getLogger()->info('fetchRosterTaggedGroupsForOrg: complete', array_merge($log_ctx, [
-                'total_returned' => count($all_groups),
-                'tagged_count'   => count($tagged),
+            do {
+                $filter = [];
+                if ($roster_tag !== '') {
+                    $filter['tags_name_eq'] = $roster_tag;
+                }
+
+                $response = wicket_api_client()->get('/groups', [
+                    'query' => [
+                        'page'   => ['number' => $page, 'size' => 100],
+                        'filter' => $filter,
+                        'sort'   => 'name_en',
+                    ],
+                ]);
+
+                $batch = is_array($response) ? ($response['data'] ?? []) : [];
+
+                $this->getLogger()->debug('fetchAllRosterTaggedGroups: API batch', array_merge($log_ctx, [
+                    'page' => $page,
+                    'batch_count' => count($batch),
+                ]));
+
+                foreach ($batch as $group) {
+                    if (!is_array($group)) {
+                        continue;
+                    }
+                    // Local tag check as safety net (handles case-sensitivity config).
+                    if (!$this->groupHasRosterTag($group)) {
+                        continue;
+                    }
+                    $tagged[] = $group;
+                }
+
+                $page_meta = is_array($response) ? ($response['meta']['page'] ?? []) : [];
+                $total_pages = is_array($page_meta)
+                    ? max(1, (int) ($page_meta['total_pages'] ?? 1))
+                    : 1;
+                $page++;
+            } while ($page <= $total_pages);
+
+            $this->getLogger()->info('fetchAllRosterTaggedGroups: complete', array_merge($log_ctx, [
+                'tagged_count' => count($tagged),
             ]));
 
             return $tagged;
         } catch (\Throwable $e) {
-            $this->getLogger()->error('fetchRosterTaggedGroupsForOrg: API request failed', array_merge($log_ctx, [
+            $this->getLogger()->error('fetchAllRosterTaggedGroups: API request failed', array_merge($log_ctx, [
                 'error' => $e->getMessage(),
             ]));
 

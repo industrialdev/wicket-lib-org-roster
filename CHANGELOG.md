@@ -2,6 +2,15 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.9.5] - 2026-06-02
+
+### Fixed
+- `GroupService::applyManagerGroupFallback()` now fetches ALL roster-tagged groups regardless of owning org. Previously it called `fetchRosterTaggedGroupsForOrg()` with `filter[organization_uuid_eq]`, so a `membership_manager` for Org A only saw groups owned by Org A. Groups belonging to other orgs (B, C, D...) were invisible in the org management list despite carrying the correct tag. The new `fetchAllRosterTaggedGroups()` method uses server-side `tags_name_eq` filtering with pagination and local tag verification as a safety net.
+- `GroupService::checkManagerGroupAccess()` no longer requires the group's owning org to match the manager's org. Previously a `membership_manager` could see a cross-org group in the list but got access-denied when clicking into it (the single-group access check still enforced `$group_org_uuid === $access['org_uuid']`). Member list scoping remains correct via `getGroupMembers()` → `memberMatchesOrgScope()`.
+
+### Removed
+- `GroupService::fetchRosterTaggedGroupsForOrg()` (private method). Replaced by `fetchAllRosterTaggedGroups()`. No external callers.
+
 ## [0.9.2] - 2026-05-18
 
 ### Fixed
