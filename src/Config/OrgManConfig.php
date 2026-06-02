@@ -322,6 +322,7 @@ final class OrgManConfig
                     'show_actions' => true,
                 ],
                 'organization_list' => [
+                    'show_my_role' => true,
                     'page_size' => 10,
                     'use_custom_title' => false,
                     'custom_title' => '',

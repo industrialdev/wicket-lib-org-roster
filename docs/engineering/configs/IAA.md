@@ -38,6 +38,7 @@ This document mirrors the current site override. If it drifts, update the site c
 ### `presentation`
 
 - `presentation.organization_details.show_actions = false` — hides the Org. Profile / Manage Members / Bulk Upload action buttons from the organization details summary card.
+- `presentation.organization_list.show_my_role = false` — hides the "My Role" display from organization summary cards.
 - `presentation.organization_list.page_size = 10`
 
 ### `presentation.member_list`
@@ -102,6 +103,8 @@ function wicket_child_orgman_config(array $config): array
 
     // UI and Presentation
     $config['presentation']['organization_details']['show_actions'] = false;
+    $config['presentation']['organization_list']['show_my_role'] = false;
+    $config['presentation']['organization_list']['page_size'] = 10;
     $config['presentation']['member_list']['show_assignment_info'] = false;
     $config['member_management']['forms']['add_member']['clear_form_on_error'] = true;
 

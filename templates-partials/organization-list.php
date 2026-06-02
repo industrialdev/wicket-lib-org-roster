@@ -328,7 +328,11 @@ if ($roster_mode === 'groups') {
                             <?php echo esc_html(sprintf(__('Organization: %s', 'wicket-acc'), $group_org_label)); ?>
                         </div>
                     <?php endif; ?>
-                    <?php if ($group_role_label !== '') : ?>
+                    <?php
+                    $org_list_config = \WicketORM\Config\OrgManConfig::get()['presentation']['organization_list'] ?? [];
+                    $show_my_role = (bool) ($org_list_config['show_my_role'] ?? true);
+                    ?>
+                    <?php if ($show_my_role && $group_role_label !== '') : ?>
                         <div class="wt_text-sm wt_text-content wt_mt-1">
                             <?php echo esc_html(sprintf(__('My Role: %s', 'wicket-acc'), $group_role_label)); ?>
                         </div>

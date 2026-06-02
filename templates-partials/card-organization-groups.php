@@ -59,6 +59,11 @@
                     </div>
                 <?php endif; ?>
 
+                <?php
+                $card_org_list_config = \WicketORM\Config\OrgManConfig::get()['presentation']['organization_list'] ?? [];
+                $card_show_my_role = (bool) ($card_org_list_config['show_my_role'] ?? true);
+                ?>
+                <?php if ($card_show_my_role) : ?>
                 <div class="wt_text-base wt_font-bold wt_text-content">
                     <span><?php esc_html_e('My Role(s):', 'wicket-acc'); ?></span>
                     <?php if (!empty($formatted_roles)): ?>
@@ -67,6 +72,7 @@
                         <?php esc_html_e('No roles assigned', 'wicket-acc'); ?>
                     <?php endif; ?>
                 </div>
+                <?php endif; ?>
 
                 <?php if (!empty($group_details)): ?>
                     <?php

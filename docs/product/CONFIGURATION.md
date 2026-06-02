@@ -412,6 +412,10 @@ Use `docs/INSTALLATION.md` for setup wiring.
 
 #### `presentation.organization_list`
 
+- `presentation.organization_list.show_my_role`
+  - Default: `true`
+  - When `false`, hides the "My Role" / "My Role(s)" display from organization summary cards on the list page and detail cards.
+  - Strategy-agnostic: applies to all roster modes (direct, cascade, groups, membership_cycle).
 - `presentation.organization_list.page_size`
   - Default: `5`
 - `presentation.organization_list.use_custom_title`
