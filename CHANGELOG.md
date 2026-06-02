@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.9.7] - 2026-06-02
+
+### Added
+- `presentation.organization_details.show_actions` config (default `true`). When `false`, hides the Org. Profile / Manage Members / Bulk Upload action buttons from the organization details summary card. Strategy-agnostic.
+- `presentation.organization_list.show_my_role` config (default `true`). When `false`, hides the "My Role" / "My Role(s)" display from organization summary cards. Applies to `organization-list.php`, `card-organization-groups.php`, `card-organization-direct-cascade.php`, and `card-organization-membership-cycle.php`. Strategy-agnostic.
+
 ## [0.9.6] - 2026-06-02
 
 ### Fixed
