@@ -592,7 +592,10 @@ class GroupService
         }
 
         $target_tokens = [];
-        foreach ([$org_identifier, $org_uuid] as $target_candidate) {
+        $scope_candidates = $org_identifier !== ''
+            ? [$org_identifier]
+            : ($org_uuid !== '' ? [$org_uuid] : []);
+        foreach ($scope_candidates as $target_candidate) {
             foreach ($this->resolveScopeTokens((string) $target_candidate, true) as $token) {
                 $target_tokens[$token] = true;
             }
