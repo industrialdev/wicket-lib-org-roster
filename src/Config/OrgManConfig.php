@@ -318,6 +318,9 @@ final class OrgManConfig
                 ],
             ],
             'presentation' => [
+                'organization_details' => [
+                    'show_actions' => true,
+                ],
                 'organization_list' => [
                     'page_size' => 10,
                     'use_custom_title' => false,

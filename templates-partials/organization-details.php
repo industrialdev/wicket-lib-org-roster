@@ -210,6 +210,12 @@ if ($roster_mode !== 'groups') {
         <?php endif; ?>
     </div>
 
+    <?php
+    $details_config = \WicketORM\Config\OrgManConfig::get()['presentation']['organization_details'] ?? [];
+    $show_actions = (bool) ($details_config['show_actions'] ?? true);
+    ?>
+
+    <?php if ($show_actions) : ?>
     <div class="org-details__actions wt_w-full wt_flex wt_items-stretch wt_gap-4 wt_mt-2">
         <?php
         // Check user permissions for this organization
@@ -260,4 +266,5 @@ if ($show_bulk_upload && $can_bulk_upload):
                 class="button button--secondary component-button wt_flex-equal wt_inline-flex wt_items-center wt_justify-center wt_text-center"><?php esc_html_e('Bulk Upload', 'wicket-acc'); ?></a>
         <?php endif; ?>
     </div>
+    <?php endif; ?>
 </div>
