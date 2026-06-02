@@ -239,11 +239,28 @@ if ($roster_mode === 'groups') {
 
         return;
     }
+
+    // Paginate the groups list using the same org_page parameter as the org list.
+    $groups_list_config = is_array($orgman_config['presentation']['organization_list'] ?? null)
+        ? $orgman_config['presentation']['organization_list']
+        : [];
+    $groups_list_page_size = max(1, (int) ($groups_list_config['page_size'] ?? 5));
+    $groups_list_total_pages = max(1, (int) ceil($groups_count / $groups_list_page_size));
+    $groups_list_page_raw = isset($_GET['org_page']) ? wp_unslash($_GET['org_page']) : 1;
+    if (!is_scalar($groups_list_page_raw)) {
+        $groups_list_page_raw = 1;
+    }
+    $groups_list_page = max(1, absint((string) $groups_list_page_raw));
+    if ($groups_list_page > $groups_list_total_pages) {
+        $groups_list_page = $groups_list_total_pages;
+    }
+    $groups_list_offset = ($groups_list_page - 1) * $groups_list_page_size;
+    $manageable_groups_page = array_slice($manageable_groups, $groups_list_offset, $groups_list_page_size);
     ?>
     <div id="group-list-container">
         <p class="mb-2"><?php echo esc_html(__('Groups Found:', 'wicket-acc') . ' ' . (int) $groups_count); ?></p>
         <div class="wt_w-full wt_flex wt_flex-col wt_gap-4" role="list">
-            <?php foreach ($manageable_groups as $group_item) :
+            <?php foreach ($manageable_groups_page as $group_item) :
                 $item_params = [
                     'group_uuid' => (string) ($group_item['group_uuid'] ?? ''),
                 ];
@@ -332,6 +349,71 @@ if ($roster_mode === 'groups') {
                 </div>
             <?php endforeach; ?>
         </div>
+
+        <?php if ($groups_list_total_pages > 1) : ?>
+            <?php
+            $groups_list_query_args = [];
+            foreach ($_GET as $query_key => $query_value) {
+                if (is_scalar($query_value)) {
+                    $groups_list_query_args[$query_key] = sanitize_text_field(wp_unslash((string) $query_value));
+                }
+            }
+            unset($groups_list_query_args['org_page']);
+
+            $groups_list_base_url = \WicketORM\Helpers\Helper::getMyAccountPageUrl(
+                'organization-management',
+                '/my-account/organization-management/'
+            );
+
+            $build_groups_page_url = static function (int $page_number) use ($groups_list_query_args, $groups_list_base_url): string {
+                $args = $groups_list_query_args;
+                if ($page_number > 1) {
+                    $args['org_page'] = $page_number;
+                }
+
+                return add_query_arg($args, $groups_list_base_url);
+            };
+
+            $groups_list_first_item = $groups_list_offset + 1;
+            $groups_list_last_item = min($groups_count, $groups_list_offset + count($manageable_groups_page));
+            ?>
+            <nav class="members-pagination wt_mt-6 wt_flex wt_flex-col wt_gap-4" aria-label="<?php esc_attr_e('Groups pagination', 'wicket-acc'); ?>">
+                <div class="members-pagination__info wt_w-full wt_text-left wt_text-sm wt_text-content">
+                    <?php
+                    printf(
+                        /* translators: 1: first item number, 2: last item number, 3: total items. */
+                        esc_html__('Showing %1$d-%2$d of %3$d groups', 'wicket-acc'),
+                        (int) $groups_list_first_item,
+                        (int) $groups_list_last_item,
+                        (int) $groups_count
+                    );
+                    ?>
+                </div>
+                <div class="members-pagination__controls wt_w-full wt_flex wt_items-center wt_gap-2 wt_justify-end wt_self-end">
+                    <?php if ($groups_list_page > 1) : ?>
+                        <a href="<?php echo esc_url($build_groups_page_url($groups_list_page - 1)); ?>"
+                            class="members-pagination__btn members-pagination__btn--prev button button--secondary wt_px-3 wt_py-2 wt_text-sm">
+                            <?php esc_html_e('Previous', 'wicket-acc'); ?>
+                        </a>
+                    <?php endif; ?>
+                    <div class="members-pagination__pages wt_flex wt_items-center wt_gap-1">
+                        <?php for ($gi = 1; $gi <= $groups_list_total_pages; $gi++) : ?>
+                            <a href="<?php echo esc_url($build_groups_page_url($gi)); ?>"
+                                class="members-pagination__btn members-pagination__btn--page button wt_px-3 wt_py-2 wt_text-sm <?php echo $gi === $groups_list_page ? 'button--primary' : 'button--secondary'; ?>"
+                                <?php if ($gi === $groups_list_page) : ?>aria-current="page"<?php endif; ?>>
+                                <?php echo esc_html((string) $gi); ?>
+                            </a>
+                        <?php endfor; ?>
+                    </div>
+                    <?php if ($groups_list_page < $groups_list_total_pages) : ?>
+                        <a href="<?php echo esc_url($build_groups_page_url($groups_list_page + 1)); ?>"
+                            class="members-pagination__btn members-pagination__btn--next button button--secondary wt_px-3 wt_py-2 wt_text-sm">
+                            <?php esc_html_e('Next', 'wicket-acc'); ?>
+                        </a>
+                    <?php endif; ?>
+                </div>
+            </nav>
+        <?php endif; ?>
     </div>
     <?php
 

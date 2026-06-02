@@ -290,8 +290,8 @@ final class OrgManConfig
                     'seat_limited' => ['member'],
                 ],
                 'list' => [
-                    'page_size' => 15,
-                    'member_page_size' => 15,
+                    'page_size' => 10,
+                    'member_page_size' => 10,
                 ],
                 'additional_info' => [
                     'key' => 'association',
@@ -319,7 +319,7 @@ final class OrgManConfig
             ],
             'presentation' => [
                 'organization_list' => [
-                    'page_size' => 15,
+                    'page_size' => 10,
                     'use_custom_title' => false,
                     'custom_title' => '',
                     'show_membership_details' => false,
@@ -329,7 +329,7 @@ final class OrgManConfig
                 ],
                 'member_list' => [
                     'use_legacy_list' => false,
-                    'page_size' => 15,
+                    'page_size' => 10,
                     'show_edit_permissions' => true,
                     'show_remove_button' => true,
                     'show_bulk_upload' => false,
