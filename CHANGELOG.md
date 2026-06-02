@@ -2,6 +2,15 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.9.6] - 2026-06-02
+
+### Fixed
+- `GroupService::memberMatchesOrgScope()` now uses `org_identifier` as the sole filter scope, with `org_uuid` as fallback only when `org_identifier` is empty. Previously both were expanded into target tokens, so when a manager's association (`org_identifier`) and the group-owning org (`org_uuid`) were different organizations, members from either org matched the filter. This caused members affiliated with the group owner to appear in rosters they should not have access to.
+- `group-members.php` and `group-members-list-endpoint.php` now prefer `canManageGroup()`'s `org_uuid` over the URL `$_GET['org_uuid']` parameter. Previously the user-supplied URL value took priority, which allowed org scope manipulation via URL tampering.
+
+### Changed
+- Added diagnostic logging to `extractOrgIdentifier()` (per-membership resolution source: `custom_data_field`, fallback, or empty) and `memberMatchesOrgScope()` (MATCH decisions with full token context, in addition to existing NO MATCH logging).
+
 ## [0.9.5] - 2026-06-02
 
 ### Fixed
