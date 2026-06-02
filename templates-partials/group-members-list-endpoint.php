@@ -31,7 +31,7 @@ if (empty($access['allowed'])) {
 }
 
 $org_identifier = (string) ($access['org_identifier'] ?? '');
-$org_uuid = $org_uuid ?: (string) ($access['org_uuid'] ?? '');
+$org_uuid = !empty($access['org_uuid']) ? (string) $access['org_uuid'] : $org_uuid;
 if (empty($org_uuid) && function_exists('wicket_get_group')) {
     $group_data = wicket_get_group($group_uuid);
     if (is_array($group_data)) {
