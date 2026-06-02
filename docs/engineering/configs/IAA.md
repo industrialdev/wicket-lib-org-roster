@@ -35,6 +35,11 @@ This document mirrors the current site override. If it drifts, update the site c
 - `groups.presentation.add_member_auto_close_on_success = true`
 - `groups.presentation.add_member_auto_close_delay_seconds = 7`
 
+### `presentation`
+
+- `presentation.organization_details.show_actions = false` — hides the Org. Profile / Manage Members / Bulk Upload action buttons from the organization details summary card.
+- `presentation.organization_list.page_size = 10`
+
 ### `presentation.member_list`
 
 - `presentation.member_list.show_assignment_info = false` — hides the seats/assignment count summary above the member list.
@@ -96,6 +101,7 @@ function wicket_child_orgman_config(array $config): array
     $config['groups']['removal']['end_date_anchor'] = 'day_start_utc';
 
     // UI and Presentation
+    $config['presentation']['organization_details']['show_actions'] = false;
     $config['presentation']['member_list']['show_assignment_info'] = false;
     $config['member_management']['forms']['add_member']['clear_form_on_error'] = true;
 

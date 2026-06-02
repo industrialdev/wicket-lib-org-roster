@@ -402,6 +402,14 @@ Use `docs/INSTALLATION.md` for setup wiring.
 
 ### `presentation`
 
+#### `presentation.organization_details`
+
+- `presentation.organization_details.show_actions`
+  - Default: `true`
+  - When `false`, hides the action buttons (Org. Profile, Manage Members, Bulk Upload) from the organization details summary card.
+  - Strategy-agnostic: applies to all roster modes (direct, cascade, groups, membership_cycle).
+  - Use when the user has already navigated from an organization list where those actions were available and the buttons feel redundant.
+
 #### `presentation.organization_list`
 
 - `presentation.organization_list.page_size`
