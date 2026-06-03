@@ -329,7 +329,7 @@ if ($roster_mode === 'groups') {
                         </div>
                     <?php endif; ?>
                     <?php
-                    $org_list_config = \WicketORM\Config\OrgManConfig::get()['presentation']['organization_list'] ?? [];
+                    $org_list_config = \WicketORM\Services\ConfigService::getConfig()['presentation']['organization_list'] ?? [];
                     $show_my_role = (bool) ($org_list_config['show_my_role'] ?? true);
                     ?>
                     <?php if ($show_my_role && $group_role_label !== '') : ?>
@@ -649,7 +649,7 @@ if (empty($organizations)) {
 
 <div id="organization-list-container">
     <?php
-    $orgman_config = \WicketORM\Config\OrgManConfig::get();
+    $orgman_config = \WicketORM\Services\ConfigService::getConfig();
 $org_list_config = is_array($orgman_config['presentation']['organization_list'] ?? null)
     ? $orgman_config['presentation']['organization_list']
     : [];

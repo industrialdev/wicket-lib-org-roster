@@ -105,7 +105,7 @@ class MembershipCycleStrategy implements RosterManagementStrategy
             return $scope_valid;
         }
 
-        $config = \WicketORM\Config\OrgManConfig::get();
+        $config = $this->configService()->getFullConfig();
         $cycle_config = is_array($config['membership']['cycle'] ?? null) ? $config['membership']['cycle'] : [];
         $access_permissions = is_array($config['access']['permissions'] ?? null) ? $config['access']['permissions'] : [];
         $prevent_owner_removal = (bool) ($cycle_config['prevent_owner_removal'] ?? true);

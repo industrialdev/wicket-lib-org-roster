@@ -166,7 +166,7 @@ class GroupsStrategy implements RosterManagementStrategy
 
             if (!empty($org_uuid)) {
                 $has_relationship = $this->connectionService()->personHasRelationship($person_uuid, $org_uuid);
-                $config = \WicketORM\Config\OrgManConfig::get();
+                $config = $this->configService()->getFullConfig();
                 if (is_wp_error($has_relationship) || !$has_relationship) {
                     $relationship_type = $context['relationship_type'] ?? $member_data['relationship_type'] ?? '';
                     $relationship_type = is_string($relationship_type) ? sanitize_key($relationship_type) : '';
@@ -200,7 +200,7 @@ class GroupsStrategy implements RosterManagementStrategy
                 }
             }
 
-            $orgman_config = \WicketORM\Config\OrgManConfig::get();
+            $orgman_config = $this->configService()->getFullConfig();
             $groups_config = is_array($orgman_config['groups'] ?? null) ? $orgman_config['groups'] : [];
             $group_roles = is_array($groups_config['roles'] ?? null) ? $groups_config['roles'] : [];
             $seat_limited_roles = is_array($group_roles['seat_limited'] ?? null)
@@ -329,7 +329,7 @@ class GroupsStrategy implements RosterManagementStrategy
             $org_identifier = (string) ($manager_access['org_identifier'] ?? '');
             $org_uuid = (string) ($manager_access['org_uuid'] ?? $org_id);
 
-            $orgman_config = \WicketORM\Config\OrgManConfig::get();
+            $orgman_config = $this->configService()->getFullConfig();
             $access_permissions = is_array($orgman_config['access']['permissions'] ?? null) ? $orgman_config['access']['permissions'] : [];
             $prevent_owner_removal = (bool) ($access_permissions['prevent_owner_removal'] ?? false);
             $owner_must_have_membership_owner = (bool) ($access_permissions['owner_removal_requires_membership_owner_role'] ?? false);

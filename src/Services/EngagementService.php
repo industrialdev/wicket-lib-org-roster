@@ -50,7 +50,7 @@ class EngagementService
             return new WP_Error('engagement_missing_api', __('Wicket API client is unavailable.', 'wicket-acc'));
         }
 
-        $config = \WicketORM\Config\OrgManConfig::get();
+        $config = $this->configService->getFullConfig();
         $engagement_config = is_array($config['engagement'] ?? null) ? $config['engagement'] : [];
         $sections_config = is_array($engagement_config['sections'] ?? null) ? $engagement_config['sections'] : [];
         $data_fields_key = (string) ($engagement_config['person_data_fields_key'] ?? 'data_fields');
@@ -145,7 +145,7 @@ class EngagementService
             return new WP_Error('engagement_missing_api', __('Wicket API client is unavailable.', 'wicket-acc'));
         }
 
-        $config = \WicketORM\Config\OrgManConfig::get();
+        $config = $this->configService->getFullConfig();
         $engagement_config = is_array($config['engagement'] ?? null) ? $config['engagement'] : [];
         $sections_config = is_array($engagement_config['sections'] ?? null) ? $engagement_config['sections'] : [];
         $data_fields_key = (string) ($engagement_config['org_data_fields_key'] ?? 'data_fields');

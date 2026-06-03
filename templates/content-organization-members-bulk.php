@@ -28,7 +28,7 @@ if (empty($org_uuid) && !empty($org_id_fallback)) {
     exit;
 }
 
-$member_list_config = \WicketORM\Config\OrgManConfig::get()['ui']['member_list'] ?? [];
+$member_list_config = \WicketORM\Services\ConfigService::getConfig()['ui']['member_list'] ?? [];
 $show_bulk_upload = (bool) ($member_list_config['show_bulk_upload'] ?? false);
 
 $membershipService = new \WicketORM\Services\MembershipService();

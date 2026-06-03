@@ -14,7 +14,7 @@ if (!is_user_logged_in()) {
 
 // Roster mode selection
 $configService = new \WicketORM\Services\ConfigService();
-$orgman_config = \WicketORM\Config\OrgManConfig::get();
+$orgman_config = \WicketORM\Services\ConfigService::getConfig();
 $roster_mode = $configService->getRosterMode();
 $default_organization_title = __('Manage Organizations', 'wicket-acc');
 $use_custom_organization_title = !empty($orgman_config['ui']['organization_list']['use_custom_title']);

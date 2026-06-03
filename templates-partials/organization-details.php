@@ -211,7 +211,7 @@ if ($roster_mode !== 'groups') {
     </div>
 
     <?php
-    $details_config = \WicketORM\Config\OrgManConfig::get()['presentation']['organization_details'] ?? [];
+    $details_config = \WicketORM\Services\ConfigService::getConfig()['presentation']['organization_details'] ?? [];
     $show_actions = (bool) ($details_config['show_actions'] ?? true);
     ?>
 
@@ -258,7 +258,7 @@ if ($roster_mode === 'groups' && $group_uuid !== '') {
         <?php endif; ?>
 
         <?php
-        $member_list_config = \WicketORM\Config\OrgManConfig::get()['presentation']['member_list'] ?? [];
+        $member_list_config = \WicketORM\Services\ConfigService::getConfig()['presentation']['member_list'] ?? [];
 $show_bulk_upload = (bool) ($member_list_config['show_bulk_upload'] ?? false);
 if ($show_bulk_upload && $can_bulk_upload):
     ?>

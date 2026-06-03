@@ -49,7 +49,7 @@ class PermissionService
      */
     private function getAvailableRolesNative(): array
     {
-        $config = \WicketORM\Config\OrgManConfig::get();
+        $config = \WicketORM\Services\ConfigService::getConfig();
 
         return $config['access']['roles']['labels'] ?? [];
     }

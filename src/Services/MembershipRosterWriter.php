@@ -461,7 +461,7 @@ class MembershipRosterWriter
             }
 
             // Check if we should automatically update roles based on relationship type
-            $config = \WicketORM\Config\OrgManConfig::get();
+            $config = $this->configService->getFullConfig();
             $relationship_based_permissions = $config['access']['permissions']['relationship_grants']['enabled'] ?? false;
 
             if ($relationship_based_permissions) {

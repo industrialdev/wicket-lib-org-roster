@@ -17,13 +17,84 @@ if (!defined('ABSPATH') && !defined('WICKET_DOING_TESTS')) {
 class ConfigService
 {
     /**
+     * @var array|null Static config cache shared across all instances.
+     * Used by getConfig() for services that don't have ConfigService injected.
+     */
+    private static ?array $staticConfig = null;
+
+    /**
+     * Get the full config array via static accessor.
+     *
+     * Use this in services that don't have ConfigService injected.
+     * Caches the result across all calls within a request.
+     *
+     * @return array
+     */
+    public static function getConfig(): array
+    {
+        if (self::$staticConfig === null) {
+            self::$staticConfig = \WicketORM\Config\OrgManConfig::get();
+        }
+
+        return self::$staticConfig;
+    }
+
+    /**
+     * Clear the static config cache. For test isolation only.
+     *
+     * @return void
+     */
+    public static function resetCache(): void
+    {
+        self::$staticConfig = null;
+    }
+
+    /**
+     * Get the full config array, cached per instance.
+     *
+     * Delegates to the static cache so all access paths share one result.
+     *
+     * @return array
+     */
+    public function getFullConfig(): array
+    {
+        return self::getConfig();
+    }
+
+    /**
+     * Retrieve a configuration value using dot notation.
+     *
+     * Does NOT apply per-field WordPress filters. Use the typed getter methods
+     * (e.g. isAdditionalSeatsEnabled) for paths that have filter hooks.
+     *
+     * @param string $key     Dot-notation path (e.g. 'membership.strategy').
+     * @param mixed  $default Default fallback value.
+     * @return mixed
+     */
+    public function get(string $key, mixed $default = null): mixed
+    {
+        $config = $this->getFullConfig();
+        $keys = explode('.', $key);
+        $value = $config;
+
+        foreach ($keys as $segment) {
+            if (!is_array($value) || !array_key_exists($segment, $value)) {
+                return $default;
+            }
+            $value = $value[$segment];
+        }
+
+        return $value;
+    }
+
+    /**
      * Get the current roster management mode.
      *
      * @return string The current roster mode.
      */
     public function getRosterMode()
     {
-        $config = \WicketORM\Config\OrgManConfig::get();
+        $config = $this->getFullConfig();
         $default_strategy = $config['membership']['strategy'] ?? 'cascade';
 
         return $default_strategy;
@@ -36,7 +107,7 @@ class ConfigService
      */
     public function isAdditionalSeatsEnabled()
     {
-        $config = \WicketORM\Config\OrgManConfig::get();
+        $config = $this->getFullConfig();
         $default_enabled = $config['integrations']['additional_seats']['enabled'] ?? false;
 
         return apply_filters('wicket/org-roster/additional_seats_enabled', $default_enabled);
@@ -49,7 +120,7 @@ class ConfigService
      */
     public function getAdditionalSeatsSku()
     {
-        $config = \WicketORM\Config\OrgManConfig::get();
+        $config = $this->getFullConfig();
         $default_sku = $config['integrations']['additional_seats']['sku'] ?? 'additional-seats';
 
         return apply_filters('wicket/org-roster/additional_seats_sku', $default_sku);
@@ -62,7 +133,7 @@ class ConfigService
      */
     public function getAdditionalSeatsDiscountSku()
     {
-        $config = \WicketORM\Config\OrgManConfig::get();
+        $config = $this->getFullConfig();
         $default_sku = $config['integrations']['additional_seats']['discount_sku'] ?? 'corporate-seat-discount';
 
         return apply_filters('wicket/org-roster/additional_seats_discount_sku', $default_sku);
@@ -75,7 +146,7 @@ class ConfigService
      */
     public function getAdditionalSeatsFormId()
     {
-        $config = \WicketORM\Config\OrgManConfig::get();
+        $config = $this->getFullConfig();
         $default_form_id = $config['integrations']['additional_seats']['form_id'] ?? 0;
 
         if ((int) $default_form_id === 0 && function_exists('wicket_gf_get_form_id_by_slug')) {
@@ -137,7 +208,7 @@ class ConfigService
      */
     public function getAdditionalSeatsMinQuantity()
     {
-        $config = \WicketORM\Config\OrgManConfig::get();
+        $config = $this->getFullConfig();
         $default_min_quantity = $config['integrations']['additional_seats']['min_quantity'] ?? 1;
 
         return apply_filters('wicket/org-roster/additional_seats_min_quantity', $default_min_quantity);
@@ -150,7 +221,7 @@ class ConfigService
      */
     public function getAdditionalSeatsMaxQuantity()
     {
-        $config = \WicketORM\Config\OrgManConfig::get();
+        $config = $this->getFullConfig();
         $default_max_quantity = $config['integrations']['additional_seats']['max_quantity'] ?? 100;
 
         return apply_filters('wicket/org-roster/additional_seats_max_quantity', $default_max_quantity);
@@ -163,7 +234,7 @@ class ConfigService
      */
     public function getAllowedDocumentTypes()
     {
-        $config = \WicketORM\Config\OrgManConfig::get();
+        $config = $this->getFullConfig();
         $default_types = $config['integrations']['documents']['allowed_types'] ?? [
             'pdf', 'doc', 'docx', 'xls', 'xlsx', 'jpg', 'jpeg', 'png', 'gif',
         ];
@@ -178,7 +249,7 @@ class ConfigService
      */
     public function getMaxDocumentSize()
     {
-        $config = \WicketORM\Config\OrgManConfig::get();
+        $config = $this->getFullConfig();
         $default_size = $config['integrations']['documents']['max_size'] ?? (10 * 1024 * 1024); // 10MB default
 
         return apply_filters('wicket/org-roster/max_document_size', $default_size);
@@ -191,7 +262,7 @@ class ConfigService
      */
     public function getBusinessInfoSeatLimitInfo()
     {
-        $config = \WicketORM\Config\OrgManConfig::get();
+        $config = $this->getFullConfig();
         $default_info = $config['integrations']['business_info']['seat_limit_info'] ?? null;
 
         return apply_filters('wicket/org-roster/business_info_seat_limit', $default_info);

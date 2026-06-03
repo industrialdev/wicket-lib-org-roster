@@ -65,7 +65,7 @@ class BulkMemberUploadService
         string $roster_mode,
         string $group_uuid = ''
     ) {
-        $config = \WicketORM\Config\OrgManConfig::get();
+        $config = $this->configService->getFullConfig();
         $bulk_upload_config = is_array($config['member_management']['bulk_upload'] ?? null)
             ? $config['member_management']['bulk_upload']
             : [];
@@ -325,7 +325,7 @@ class BulkMemberUploadService
             return;
         }
 
-        $config = \WicketORM\Config\OrgManConfig::get();
+        $config = $this->configService->getFullConfig();
         $bulk_upload_config = is_array($config['member_management']['bulk_upload'] ?? null)
             ? $config['member_management']['bulk_upload']
             : [];

@@ -25,7 +25,7 @@ class GroupService
 
     public function __construct()
     {
-        $this->config = \WicketORM\Config\OrgManConfig::get();
+        $this->config = \WicketORM\Services\ConfigService::getConfig();
     }
 
     /**
@@ -1722,7 +1722,7 @@ class GroupService
             return [];
         }
 
-        $config = \WicketORM\Config\OrgManConfig::get();
+        $config = \WicketORM\Services\ConfigService::getConfig();
         $manager_role = sanitize_key((string) ($config['access']['roles']['manager'] ?? ''));
 
         if ('' === $manager_role) {

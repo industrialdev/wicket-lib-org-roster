@@ -93,7 +93,7 @@ class AdditionalSeatsService
         // --- 2. Gravity Form ---
         $form_id = $this->configService->getAdditionalSeatsFormId();
         if (empty($form_id)) {
-            $config = \WicketORM\Config\OrgManConfig::get();
+            $config = $this->configService->getFullConfig();
             $form_slug = $config['integrations']['additional_seats']['form_slug'] ?? 'additional-seats';
             $issues[] = ['parts' => [
                 ['type' => 'text',  'value' => __('No Gravity Form configured for additional seats. Create a Gravity Form and map its slug ', 'wicket-acc')],

@@ -16,7 +16,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-$config = WicketORM\Config\OrgManConfig::get();
+$config = \WicketORM\Services\ConfigService::getConfig();
 $export_config = is_array($config['exports'] ?? null) ? $config['exports'] : [];
 
 if (empty($export_config['enabled'])) {

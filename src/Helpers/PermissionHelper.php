@@ -55,7 +55,7 @@ class PermissionHelper extends Helper
      */
     private static function get_role_only_management_access_config(): array
     {
-        $config = \WicketORM\Config\OrgManConfig::get();
+        $config = \WicketORM\Services\ConfigService::getConfig();
         $permissions = is_array($config['access']['permissions'] ?? null) ? $config['access']['permissions'] : [];
         $role_only = $permissions['role_only_management_access'] ?? [];
 
@@ -414,7 +414,7 @@ class PermissionHelper extends Helper
      */
     public static function can_add_members($org_id = null): bool
     {
-        $config = \WicketORM\Config\OrgManConfig::get();
+        $config = \WicketORM\Services\ConfigService::getConfig();
         $add_roles = $config['access']['permissions']['add_member_roles'] ?? ['membership_manager', 'membership_owner'];
         $roster_strategy = $config['membership']['strategy'] ?? 'direct';
 
@@ -441,7 +441,7 @@ class PermissionHelper extends Helper
      */
     public static function can_remove_members($org_id = null): bool
     {
-        $config = \WicketORM\Config\OrgManConfig::get();
+        $config = \WicketORM\Services\ConfigService::getConfig();
         $remove_roles = $config['access']['permissions']['remove_member_roles'] ?? ['membership_manager', 'membership_owner'];
         $roster_strategy = $config['membership']['strategy'] ?? 'direct';
 
@@ -509,7 +509,7 @@ class PermissionHelper extends Helper
      */
     public static function can_purchase_seats($org_id = null): bool
     {
-        $config = \WicketORM\Config\OrgManConfig::get();
+        $config = \WicketORM\Services\ConfigService::getConfig();
         $purchase_roles = $config['access']['permissions']['purchase_seat_roles'] ?? ['membership_owner'];
         $roster_strategy = $config['membership']['strategy'] ?? 'direct';
 

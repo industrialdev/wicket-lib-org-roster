@@ -106,7 +106,7 @@ final class OrgMan
      */
     private function loadConfig()
     {
-        $this->config = Config\OrgManConfig::get();
+        $this->config = Services\ConfigService::getConfig();
     }
 
     /**

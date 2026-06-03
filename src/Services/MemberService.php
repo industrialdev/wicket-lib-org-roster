@@ -54,7 +54,7 @@ class MemberService
     public function __construct(ConfigService $configService)
     {
         $this->configService = $configService;
-        $this->config = \WicketORM\Config\OrgManConfig::get();
+        $this->config = $this->configService->getFullConfig();
         $this->reader = new MembershipRosterReader($configService);
         $configRef = &$this->config;
         $this->writer = new MembershipRosterWriter($configService, $this->reader, $configRef);

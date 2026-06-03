@@ -50,7 +50,7 @@ class ConfigurationController
         // Enable/disable additional seats functionality
         add_filter('wicket/org-roster/additional_seats_enabled', function ($enabled) use ($config) {
             // Get config value directly to avoid recursion
-            $config_data = \WicketORM\Config\OrgManConfig::get();
+            $config_data = $this->configService->getFullConfig();
 
             return $config_data['integrations']['additional_seats']['enabled'] ?? false;
         });
@@ -58,7 +58,7 @@ class ConfigurationController
         // Set the SKU for additional seats product
         add_filter('wicket/org-roster/additional_seats_sku', function ($sku) use ($config) {
             // Get config value directly to avoid recursion
-            $config_data = \WicketORM\Config\OrgManConfig::get();
+            $config_data = $this->configService->getFullConfig();
 
             return $config_data['integrations']['additional_seats']['sku'] ?? 'additional-seats';
         });
@@ -66,7 +66,7 @@ class ConfigurationController
         // Set the SKU for additional seats discount product
         add_filter('wicket/org-roster/additional_seats_discount_sku', function ($sku) use ($config) {
             // Get config value directly to avoid recursion
-            $config_data = \WicketORM\Config\OrgManConfig::get();
+            $config_data = $this->configService->getFullConfig();
 
             return $config_data['integrations']['additional_seats']['discount_sku'] ?? 'corporate-seat-discount';
         });
@@ -74,7 +74,7 @@ class ConfigurationController
         // Set the Gravity Form ID for additional seats purchase
         add_filter('wicket/org-roster/additional_seats_form_id', function ($form_id) use ($config) {
             // Get config value directly to avoid recursion, but still support auto-detection if set to 0
-            $config_data = \WicketORM\Config\OrgManConfig::get();
+            $config_data = $this->configService->getFullConfig();
             $default_form_id = $config_data['integrations']['additional_seats']['form_id'] ?? 0;
             if ($default_form_id === 0 && function_exists('wicket_gf_get_form_id_by_slug')) {
                 $slug = $config_data['integrations']['additional_seats']['form_slug'] ?? 'additional-seats';
@@ -90,7 +90,7 @@ class ConfigurationController
         // Set a minimum quantity for additional seats purchase
         add_filter('wicket/org-roster/additional_seats_min_quantity', function ($min_quantity) use ($config) {
             // Get config value directly to avoid recursion
-            $config_data = \WicketORM\Config\OrgManConfig::get();
+            $config_data = $this->configService->getFullConfig();
 
             return $config_data['integrations']['additional_seats']['min_quantity'] ?? 1;
         });
@@ -98,7 +98,7 @@ class ConfigurationController
         // Set a maximum quantity for additional seats purchase
         add_filter('wicket/org-roster/additional_seats_max_quantity', function ($max_quantity) use ($config) {
             // Get config value directly to avoid recursion
-            $config_data = \WicketORM\Config\OrgManConfig::get();
+            $config_data = $this->configService->getFullConfig();
 
             return $config_data['integrations']['additional_seats']['max_quantity'] ?? 100;
         });

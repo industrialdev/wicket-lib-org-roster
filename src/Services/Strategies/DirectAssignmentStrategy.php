@@ -90,7 +90,7 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
             $logger->debug('Person record ready for membership assignment', $log_context);
 
             // Get configuration for member addition settings
-            $config = \WicketORM\Config\OrgManConfig::get();
+            $config = $this->configService()->getFullConfig();
             $base_member_role = $config['member_management']['addition']['base_member_role'] ?? 'member';
             $auto_assign_roles = $config['member_management']['addition']['auto_assign_roles'] ?? [];
 
@@ -357,7 +357,7 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
         $roles = $this->normalizeRoles($roles);
 
         // Filter out membership_owner if configured to prevent assignment
-        $config = \WicketORM\Config\OrgManConfig::get();
+        $config = $this->configService()->getFullConfig();
         if (!empty($config['access']['permissions']['prevent_owner_assignment'])) {
             $roles = array_values(array_diff($roles, ['membership_owner']));
         }
@@ -733,7 +733,7 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
         $subject = sprintf('Welcome to %s', $organization_name);
 
         // Get configuration for email
-        $config = \WicketORM\Config\OrgManConfig::get();
+        $config = $this->configService()->getFullConfig();
         $confirmation_email_from = $config['integrations']['notifications']['confirmation_email_from'] ?? 'no-reply@wicketcloud.com';
 
         $body = sprintf(
@@ -809,7 +809,7 @@ class DirectAssignmentStrategy implements RosterManagementStrategy
                 return new WP_Error('missing_person_membership_id', 'Person membership ID is required to remove a member.');
             }
 
-            $config = \WicketORM\Config\OrgManConfig::get();
+            $config = $this->configService()->getFullConfig();
             $preserve_relationship = (bool) ($config['member_management']['removal']['direct']['preserve_relationship'] ?? false);
             $prevent_owner_removal = (bool) ($config['access']['permissions']['prevent_owner_removal'] ?? false);
             $owner_must_have_membership_owner = (bool) ($config['access']['permissions']['owner_removal_requires_membership_owner_role'] ?? false);

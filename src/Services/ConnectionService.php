@@ -26,7 +26,7 @@ class ConnectionService
 
     public function __construct()
     {
-        $this->config = \WicketORM\Config\OrgManConfig::get();
+        $this->config = \WicketORM\Services\ConfigService::getConfig();
     }
 
     /**

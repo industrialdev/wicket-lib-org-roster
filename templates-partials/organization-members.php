@@ -35,7 +35,7 @@ $permissionService = new \WicketORM\Services\PermissionService();
 $additional_seats_service = new \WicketORM\Services\AdditionalSeatsService($configService);
 
 // Load org management configuration
-$orgman_config = \WicketORM\Config\OrgManConfig::get();
+$orgman_config = \WicketORM\Services\ConfigService::getConfig();
 $requested_membership_uuid = isset($_GET['membership_uuid']) ? sanitize_text_field((string) wp_unslash($_GET['membership_uuid'])) : '';
 
 $membershipUuid = $requested_membership_uuid !== ''

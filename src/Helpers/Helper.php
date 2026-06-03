@@ -170,7 +170,7 @@ abstract class Helper
      */
     protected static function get_config(): array
     {
-        return \WicketORM\Config\OrgManConfig::get();
+        return \WicketORM\Services\ConfigService::getConfig();
     }
 
     /**
