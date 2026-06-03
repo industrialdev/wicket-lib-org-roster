@@ -396,9 +396,7 @@ class PermissionHelper extends Helper
      */
     public static function can_edit_members($org_id = null): bool
     {
-        $manage_roles = function_exists('\WicketORM\Helpers\ConfigHelper::get_manage_members_roles')
-            ? ConfigHelper::get_manage_members_roles()
-            : ['membership_manager', 'membership_owner'];
+        $manage_roles = ConfigHelper::get_manage_members_roles();
 
         if (self::has_active_membership($org_id)) {
             return self::role_check($manage_roles, $org_id, false);
@@ -470,9 +468,7 @@ class PermissionHelper extends Helper
      */
     public static function can_edit_organization($org_id = null): bool
     {
-        $edit_roles = function_exists('\WicketORM\Helpers\ConfigHelper::get_edit_organization_roles')
-            ? ConfigHelper::get_edit_organization_roles()
-            : ['org_editor'];
+        $edit_roles = ConfigHelper::get_edit_organization_roles();
 
         $has_active = self::has_active_membership($org_id);
         $has_roles = self::role_check($edit_roles, $org_id);
@@ -499,10 +495,6 @@ class PermissionHelper extends Helper
      */
     public static function has_management_roles($org_id = null): bool
     {
-        if (!function_exists('\WicketORM\Helpers\ConfigHelper::get_any_management_roles')) {
-            return self::role_check(['org_editor', 'membership_manager', 'membership_owner'], $org_id, false);
-        }
-
         $management_roles = ConfigHelper::get_any_management_roles();
 
         return self::role_check($management_roles, $org_id, false);
@@ -544,10 +536,6 @@ class PermissionHelper extends Helper
      */
     public static function is_membership_owner($org_id = null): bool
     {
-        if (!function_exists('\WicketORM\Helpers\ConfigHelper::get_purchase_seats_roles')) {
-            return self::is_organization_membership_owner($org_id) && self::role_check(['membership_owner'], $org_id);
-        }
-
         $purchase_roles = ConfigHelper::get_purchase_seats_roles();
 
         return self::is_organization_membership_owner($org_id) && self::role_check($purchase_roles, $org_id);
@@ -622,9 +610,7 @@ class PermissionHelper extends Helper
      */
     public static function is_membership_manager($org_id = null): bool
     {
-        $manage_roles = function_exists('\WicketORM\Helpers\ConfigHelper::get_manage_members_roles')
-            ? ConfigHelper::get_manage_members_roles()
-            : ['membership_manager'];
+        $manage_roles = ConfigHelper::get_manage_members_roles();
 
         $has_active = self::has_active_membership($org_id);
 
