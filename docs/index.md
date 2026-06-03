@@ -9,6 +9,7 @@
 ## Engineering Docs (Developers & Agents)
 - [Architecture](engineering/ARCHITECTURE.md) — Core runtime pieces, page injection, mutation paths, integrations
 - [Backwards Compatibility](engineering/BACKWARDS-COMPATIBILITY.md) — Compatibility rules, additive defaults, breaking change definition
+- [Config Filters Reference](engineering/config-filters.md) — Every WordPress filter this library applies or consumes, with source locations, config paths, types, and defaults
 - [Dead Code Audit](engineering/DEAD-CODE-AUDIT.md) — Unused classes, methods, and latent bugs in the current codebase (audited 2026-03-19)
 - [Design](engineering/DESIGN.md) — Design goals, UI shape, reactive layer, current constraints
 - [Frontend](engineering/FRONTEND.md) — Template structure, hypermedia endpoint, assets, config flags for rendering
