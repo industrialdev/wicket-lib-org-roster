@@ -21,9 +21,28 @@ class OrganizationService
      */
     private $config;
 
+    /**
+     * @var CacheService|null
+     */
+    private ?CacheService $cacheService = null;
+
     public function __construct()
     {
         $this->config = \WicketORM\Config\OrgManConfig::get();
+    }
+
+    /**
+     * Lazily instantiate CacheService.
+     *
+     * @return CacheService
+     */
+    private function cacheService(): CacheService
+    {
+        if (!isset($this->cacheService)) {
+            $this->cacheService = new CacheService();
+        }
+
+        return $this->cacheService;
     }
 
     /**
@@ -55,35 +74,7 @@ class OrganizationService
         return 'Unknown Organization';
     }
 
-    /**
-     * Helper method to get cached data if cache is enabled.
-     *
-     * @param string $cache_key The cache key.
-     * @return mixed|false Cached data or false if not found/disabled.
-     */
-    private function getCachedData($cache_key)
-    {
-        if (!\WicketORM\Helpers\ConfigHelper::is_cache_enabled()) {
-            return false;
-        }
 
-        return get_transient($cache_key);
-    }
-
-    /**
-     * Helper method to set cached data if cache is enabled.
-     *
-     * @param string $cache_key The cache key.
-     * @param mixed $data The data to cache.
-     * @return void
-     */
-    private function setCachedData($cache_key, $data)
-    {
-        if (\WicketORM\Helpers\ConfigHelper::is_cache_enabled()) {
-            $cache_duration = \WicketORM\Helpers\ConfigHelper::get_cache_duration();
-            set_transient($cache_key, $data, $cache_duration);
-        }
-    }
 
     /**
      * Normalize role values for comparisons.
@@ -374,7 +365,7 @@ class OrganizationService
         }
 
         $cache_key = 'orgman_user_orgs_' . md5($user_uuid . '_' . $person_uuid);
-        $cached_data = $this->getCachedData($cache_key);
+        $cached_data = $this->cacheService()->get($cache_key);
 
         if (false !== $cached_data) {
             return $cached_data;
@@ -386,7 +377,7 @@ class OrganizationService
         if (!$person) {
             $logger->error('Person not found for UUID: ' . $person_uuid, ['source' => 'wicket-orgman']);
             $error_data = ['error' => 'person_not_found'];
-            $this->setCachedData($cache_key, $error_data);
+            $this->cacheService()->set($cache_key, $error_data);
 
             return $error_data;
         }
@@ -511,12 +502,12 @@ class OrganizationService
 
         $organizations = array_values($organizations_by_id);
         if ($membership_error !== null && empty($organizations)) {
-            $this->setCachedData($cache_key, $membership_error);
+            $this->cacheService()->set($cache_key, $membership_error);
 
             return $membership_error;
         }
 
-        $this->setCachedData($cache_key, $organizations);
+        $this->cacheService()->set($cache_key, $organizations);
 
         return $organizations;
     }

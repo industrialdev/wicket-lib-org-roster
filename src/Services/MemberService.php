@@ -42,6 +42,11 @@ class MemberService
     protected MembershipRosterWriter $writer;
 
     /**
+     * @var CacheService|null
+     */
+    private ?CacheService $cacheService = null;
+
+    /**
      * Constructor.
      *
      * @param ConfigService $configService
@@ -53,6 +58,20 @@ class MemberService
         $this->reader = new MembershipRosterReader($configService);
         $configRef = &$this->config;
         $this->writer = new MembershipRosterWriter($configService, $this->reader, $configRef);
+    }
+
+    /**
+     * Lazily instantiate CacheService.
+     *
+     * @return CacheService
+     */
+    private function cacheService(): CacheService
+    {
+        if (!isset($this->cacheService)) {
+            $this->cacheService = new CacheService();
+        }
+
+        return $this->cacheService;
     }
 
     /**
@@ -213,7 +232,7 @@ class MemberService
 
         // Pre-warm lazy-details cache for each member when full data is available.
         if (!$lazy && !empty($result['members'])) {
-            $cacheService = new CacheService();
+            $cacheService = $this->cacheService();
             $gen = $cacheService->getMembershipGeneration($membershipUuid);
             foreach ($result['members'] as $member) {
                 $personUuid = $member['person_uuid'] ?? '';
