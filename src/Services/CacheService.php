@@ -54,6 +54,30 @@ class CacheService
     }
 
     /**
+     * Fetch from cache, or execute callback on miss and store the result.
+     *
+     * When cache is disabled, get() returns false and set() no-ops,
+     * so the callback executes and returns without caching.
+     *
+     * @param string           $key      Cache identifier.
+     * @param callable():mixed $callback Evaluated on miss to generate the value.
+     * @param int|null         $ttl      Custom TTL. Falls back to configured duration.
+     * @return mixed Cached value or callback result.
+     */
+    public function remember(string $key, callable $callback, ?int $ttl = null): mixed
+    {
+        $cached = $this->get($key);
+        if ($cached !== false) {
+            return $cached;
+        }
+
+        $value = $callback();
+        $this->set($key, $value, $ttl);
+
+        return $value;
+    }
+
+    /**
      * Delete data from cache.
      *
      * @param string $key The cache key.
