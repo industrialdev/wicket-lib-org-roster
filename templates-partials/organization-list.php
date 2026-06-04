@@ -259,6 +259,61 @@ if ($roster_mode === 'groups') {
     ?>
     <div id="group-list-container">
         <p class="mb-2"><?php echo esc_html(__('Groups Found:', 'wicket-acc') . ' ' . (int) $groups_count); ?></p>
+        <?php
+        $grp_show_org_summary = (bool) ($groups_list_config['show_managed_orgs_summary'] ?? false);
+        if ($grp_show_org_summary && !empty($manageable_groups)) :
+            $grp_unique_orgs = [];
+            $grp_org_name_cache = [];
+            foreach ($manageable_groups as $grp_g) {
+                $grp_candidate = (string) ($grp_g['org_name'] ?? '');
+                if ($grp_candidate === '') {
+                    $grp_lookup_keys = array_values(array_unique(array_filter([
+                        (string) ($grp_g['org_uuid'] ?? ''),
+                        (string) ($grp_g['org_identifier'] ?? ''),
+                    ], static function (string $v): bool {
+                        return trim($v) !== '';
+                    })));
+                    foreach ($grp_lookup_keys as $grp_lk) {
+                        if (!isset($grp_org_name_cache[$grp_lk])) {
+                            $grp_org_name_cache[$grp_lk] = '';
+                            if (function_exists('wicket_get_organization')) {
+                                try {
+                                    $grp_org_resp = wicket_get_organization($grp_lk);
+                                    if (is_array($grp_org_resp) && isset($grp_org_resp['data']['attributes'])) {
+                                        $grp_org_attrs = (array) $grp_org_resp['data']['attributes'];
+                                        $grp_org_name_cache[$grp_lk] = (string) (
+                                            $grp_org_attrs['legal_name']
+                                            ?? $grp_org_attrs['legal_name_en']
+                                            ?? $grp_org_attrs['name']
+                                            ?? ''
+                                        );
+                                    }
+                                } catch (\Throwable $e) {
+                                    $grp_org_name_cache[$grp_lk] = '';
+                                }
+                            }
+                        }
+                        if ($grp_org_name_cache[$grp_lk] !== '') {
+                            $grp_candidate = $grp_org_name_cache[$grp_lk];
+                            break;
+                        }
+                    }
+                }
+                if ($grp_candidate !== '' && !in_array($grp_candidate, $grp_unique_orgs, true)) {
+                    $grp_unique_orgs[] = $grp_candidate;
+                }
+            }
+            if (!empty($grp_unique_orgs)) :
+        ?>
+            <ul class="wt_mb-3 wt_pl-5 wt_list-disc wt_text-content wt_text-base">
+                <?php foreach ($grp_unique_orgs as $grp_org_item) : ?>
+                    <li><?php echo esc_html($grp_org_item); ?></li>
+                <?php endforeach; ?>
+            </ul>
+        <?php
+            endif;
+        endif;
+        ?>
         <div class="wt_w-full wt_flex wt_flex-col wt_gap-4" role="list">
             <?php foreach ($manageable_groups_page as $group_item) :
                 $item_params = [
@@ -319,18 +374,19 @@ if ($roster_mode === 'groups') {
                 if ($group_org_label === '') {
                     $group_org_label = (string) ($group_item['org_identifier'] ?? '');
                 }
+
+                $grp_card_show_org_name = (bool) ($groups_list_config['show_organization_name'] ?? true);
                 ?>
                 <div class="wt_w-full wt_rounded-card-accent wt_p-4 wt_mb-1 wt_hover_shadow-sm wt_transition-shadow wt_bg-card wt_border wt_border-color wt_decoration-none"
                     role="listitem">
                     <div class="wt_text-xl wt_font-semibold wt_text-content"><?php echo esc_html((string) $group_item['group_name']); ?></div>
-                    <?php if ($group_org_label !== '') : ?>
+                    <?php if ($grp_card_show_org_name && $group_org_label !== '') : ?>
                         <div class="wt_text-sm wt_text-content wt_mt-1">
                             <?php echo esc_html(sprintf(__('Organization: %s', 'wicket-acc'), $group_org_label)); ?>
                         </div>
                     <?php endif; ?>
                     <?php
-                    $org_list_config = \WicketORM\Services\ConfigService::getConfig()['presentation']['organization_list'] ?? [];
-                    $show_my_role = (bool) ($org_list_config['show_my_role'] ?? true);
+                    $show_my_role = (bool) ($groups_list_config['show_my_role'] ?? true);
                     ?>
                     <?php if ($show_my_role && $group_role_label !== '') : ?>
                         <div class="wt_text-sm wt_text-content wt_mt-1">

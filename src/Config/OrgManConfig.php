@@ -327,6 +327,8 @@ final class OrgManConfig
                     'use_custom_title' => false,
                     'custom_title' => '',
                     'show_membership_details' => false,
+                    'show_organization_name' => true,
+                    'show_managed_orgs_summary' => false,
                 ],
                 'relationships' => [
                     'show_type' => false,
