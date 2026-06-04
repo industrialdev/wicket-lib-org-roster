@@ -258,7 +258,6 @@ if ($roster_mode === 'groups') {
     $manageable_groups_page = array_slice($manageable_groups, $groups_list_offset, $groups_list_page_size);
     ?>
     <div id="group-list-container">
-        <p class="mb-2"><?php echo esc_html(__('Groups Found:', 'wicket-acc') . ' ' . (int) $groups_count); ?></p>
         <?php
         $grp_show_org_summary = (bool) ($groups_list_config['show_managed_orgs_summary'] ?? false);
         if ($grp_show_org_summary && !empty($manageable_groups)) :
@@ -305,15 +304,19 @@ if ($roster_mode === 'groups') {
             }
             if (!empty($grp_unique_orgs)) :
         ?>
-            <ul class="wt_mb-3 wt_pl-5 wt_list-disc wt_text-content wt_text-base">
-                <?php foreach ($grp_unique_orgs as $grp_org_item) : ?>
-                    <li><?php echo esc_html($grp_org_item); ?></li>
-                <?php endforeach; ?>
-            </ul>
+            <div class="wt_w-full wt_rounded-card-accent wt_p-4 wt_mb-4 wt_bg-card wt_border wt_border-color">
+                <h3 class="wt_text-lg wt_font-semibold wt_text-content wt_mb-2"><?php esc_html_e('Your Associations', 'wicket-acc'); ?></h3>
+                <ul class="wt_pl-5 wt_list-disc wt_text-content wt_text-base">
+                    <?php foreach ($grp_unique_orgs as $grp_org_item) : ?>
+                        <li><?php echo esc_html($grp_org_item); ?></li>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
         <?php
             endif;
         endif;
         ?>
+        <p class="mb-2"><?php echo esc_html(__('Groups Found:', 'wicket-acc') . ' ' . (int) $groups_count); ?></p>
         <div class="wt_w-full wt_flex wt_flex-col wt_gap-4" role="list">
             <?php foreach ($manageable_groups_page as $group_item) :
                 $item_params = [
