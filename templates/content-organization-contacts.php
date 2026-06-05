@@ -29,9 +29,9 @@ if (empty($org_uuid)) {
 }
 
 if (empty($org_uuid)) {
-    echo '<p class="wt_text-gray-500 wt_p-4">' . esc_html__('No organization specified.', 'wicket-acc') . '</p>';
-
-    return;
+    $redirect_url = \WicketORM\Helpers\Helper::getMyAccountPageUrl('organization-management', '/my-account/organization-management/');
+    wp_redirect(esc_url_raw($redirect_url));
+    exit;
 }
 
 // Permission guard: only membership_manager can view contacts
