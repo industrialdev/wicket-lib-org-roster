@@ -968,6 +968,10 @@ final class OrgMan
                 $segment = preg_replace('/<p>\s*<\/p>/i', '', $segment);
                 $segment = preg_replace('/<br\s*\/?>\s*/i', '', (string) $segment);
 
+                // Strip all wpautop-injected <p> wrappers from ORGMAN markup.
+                // Our templates use <div> and flexbox for layout, never intentional <p> tags.
+                $segment = preg_replace('/<\/?(?:p)\b[^>]*>/i', '', (string) $segment);
+
                 return (string) $segment;
             },
             $content
