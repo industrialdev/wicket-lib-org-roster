@@ -1206,6 +1206,7 @@ final class OrgMan
             'organization-profile'              => $base_path . '/templates/content-organization-profile.php',
             'organization-members'              => $base_path . '/templates/content-organization-members.php',
             'organization-members-bulk'         => $base_path . '/templates/content-organization-members-bulk.php',
+            'organization-contacts'             => $base_path . '/templates/content-organization-contacts.php',
             'supplemental-members'              => $base_path . '/templates/content-supplemental-members.php',
             // Legacy ACC slug compatibility.
             'org-management'                    => $base_path . '/templates/content-organization-index.php',

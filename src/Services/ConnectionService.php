@@ -826,4 +826,75 @@ class ConnectionService
             return new WP_Error('update_connection_exception', $e->getMessage());
         }
     }
+
+    /**
+     * Get active connections for an organization, optionally filtered by relationship types.
+     *
+     * Uses API-side filtering via filter[resource_type_slug_in] for performance.
+     * New method for contacts roster. Does not modify any existing method.
+     *
+     * @param string $org_uuid   Organization UUID.
+     * @param array  $filters    Optional: ['resource_type_slugs' => ['president', ...], 'active' => true].
+     * @param array  $pagination Optional: ['page' => 1, 'size' => 10].
+     * @return array ['data' => [...], 'meta' => [...]]|WP_Error
+     */
+    public function getOrgConnections(string $org_uuid, array $filters = [], array $pagination = []): array|WP_Error
+    {
+        if (empty($org_uuid) || !function_exists('wicket_api_client')) {
+            return new WP_Error('invalid_params', 'Organization UUID and Wicket API client are required.');
+        }
+
+        $page = max(1, (int) ($pagination['page'] ?? 1));
+        $size = max(1, (int) ($pagination['size'] ?? 10));
+
+        $query_params = [
+            'page[number]' => $page,
+            'page[size]'   => $size,
+            'include'      => 'person',
+        ];
+
+        // Active filter
+        $active = $filters['active'] ?? true;
+        if ($active) {
+            $query_params['filter[active_true]'] = 'true';
+        }
+
+        // Server-side type filtering
+        $type_slugs = $filters['resource_type_slugs'] ?? [];
+        if (!empty($type_slugs) && is_array($type_slugs)) {
+            $query_params['filter[resource_type_slug_in]'] = implode(',', array_map('sanitize_key', $type_slugs));
+        }
+
+        try {
+            $client = wicket_api_client();
+            $endpoint = '/organizations/' . rawurlencode($org_uuid) . '/connections';
+            $response = $client->get($endpoint . '?' . http_build_query($query_params, '', '&', PHP_QUERY_RFC3986));
+
+            if (is_wp_error($response)) {
+                return $response;
+            }
+
+            $data = is_array($response['data'] ?? null) ? $response['data'] : [];
+            $included = is_array($response['included'] ?? null) ? $response['included'] : [];
+            $page_meta = is_array($response['meta']['page'] ?? null) ? $response['meta']['page'] : [];
+
+            return [
+                'data'     => $data,
+                'included' => $included,
+                'meta'     => [
+                    'page'        => $page,
+                    'size'        => $size,
+                    'total_items' => (int) ($page_meta['total_items'] ?? count($data)),
+                    'total_pages' => (int) ($page_meta['total_pages'] ?? 1),
+                ],
+            ];
+        } catch (\Throwable $e) {
+            \Wicket()->log()->error('ConnectionService::getOrgConnections() failed: ' . $e->getMessage(), [
+                'source'   => 'wicket-orgman',
+                'org_uuid' => $org_uuid,
+            ]);
+
+            return new WP_Error('api_error', 'Failed to fetch organization connections.');
+        }
+    }
 }

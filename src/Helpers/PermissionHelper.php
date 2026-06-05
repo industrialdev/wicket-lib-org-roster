@@ -659,4 +659,90 @@ class PermissionHelper extends Helper
             return ucwords(str_replace('_', ' ', (string) $role));
         }, $roles));
     }
+
+    // ------------------------------------------------------------------
+    // Contacts Roster Permission Helpers
+    // New methods. Do not modify existing methods above.
+    // ------------------------------------------------------------------
+
+    /**
+     * Can current user manage contacts (add/remove) for this org.
+     * Checks contacts.permissions.can_add config.
+     * Does NOT require active membership.
+     *
+     * @param string|null $org_uuid Organization UUID.
+     * @return bool
+     */
+    public static function can_manage_contacts(?string $org_uuid): bool
+    {
+        $config = \WicketORM\Services\ConfigService::getConfig();
+        $contacts_config = $config['contacts'] ?? [];
+
+        if (empty($contacts_config['enabled'])) {
+            return false;
+        }
+
+        $can_add_roles = $contacts_config['permissions']['can_add'] ?? [];
+
+        // Contacts are relationship-only: no active membership required
+        return self::role_check($can_add_roles, $org_uuid, false);
+    }
+
+    /**
+     * Can current user view contact list for this org.
+     * Checks contacts.permissions.can_view config.
+     * Does NOT require active membership.
+     *
+     * @param string|null $org_uuid Organization UUID.
+     * @return bool
+     */
+    public static function can_view_contacts(?string $org_uuid): bool
+    {
+        $config = \WicketORM\Services\ConfigService::getConfig();
+        $contacts_config = $config['contacts'] ?? [];
+
+        if (empty($contacts_config['enabled'])) {
+            return false;
+        }
+
+        $can_view_roles = $contacts_config['permissions']['can_view'] ?? [];
+
+        return self::role_check($can_view_roles, $org_uuid, false);
+    }
+
+    /**
+     * Is the person a contact (has any roster relationship type) for this org.
+     *
+     * @param string $person_uuid Person UUID.
+     * @param string $org_uuid    Organization UUID.
+     * @return bool
+     */
+    public static function is_contact(string $person_uuid, string $org_uuid): bool
+    {
+        $contactService = new \WicketORM\Services\ContactService();
+        $rels = $contactService->getPersonContactRelationships($person_uuid, $org_uuid);
+
+        return !empty($rels);
+    }
+
+    /**
+     * Is contact removal prevented for this person.
+     * Uses OrganizationService::getOrganizationOwner() to check if person is the
+     * org owner (same pattern as remove-member.php).
+     *
+     * @param string $person_uuid Person UUID.
+     * @param string $org_uuid    Organization UUID.
+     * @return bool True if removal should be prevented.
+     */
+    public static function is_contact_removal_prevented(string $person_uuid, string $org_uuid): bool
+    {
+        $organizationService = new \WicketORM\Services\OrganizationService();
+        $org_owner = $organizationService->getOrganizationOwner($org_uuid);
+
+        if (is_wp_error($org_owner) || !$org_owner) {
+            return false;
+        }
+
+        return isset($org_owner->uuid) && (string) $org_owner->uuid === $person_uuid;
+    }
 }

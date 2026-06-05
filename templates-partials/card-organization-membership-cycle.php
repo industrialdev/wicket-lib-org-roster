@@ -167,6 +167,20 @@
                             <?php esc_html_e('Manage Members', 'wicket-acc'); ?>
                         </a>
                     <?php endif; ?>
+
+                    <?php
+                    // Contacts roster link (ESCRCS relationship-based contacts)
+                    $contacts_config = WicketORM\Services\ConfigService::getConfig()['contacts'] ?? [];
+                    if (!empty($contacts_config['enabled']) && WicketORM\Helpers\PermissionHelper::can_manage_contacts($org_id)):
+                        $contacts_url_base = WicketORM\Helpers\Helper::getMyAccountPageUrl('organization-contacts', '/my-account/organization-contacts/');
+                        $contacts_url = add_query_arg('org_uuid', $org_id, $contacts_url_base);
+                    ?>
+                        <span class="wt_px-2 wt_h-4 wt_bg-border-white" aria-hidden="true"></span>
+                        <a href="<?php echo esc_url($contacts_url); ?>"
+                            class="wt_inline-flex wt_items-center wt_text-primary-600 wt_hover_text-primary-700 underline underline-offset-4">
+                            <?php esc_html_e('Manage Contact List', 'wicket-acc'); ?>
+                        </a>
+                    <?php endif; ?>
                 </div>
             </div>
         <?php endforeach; ?>

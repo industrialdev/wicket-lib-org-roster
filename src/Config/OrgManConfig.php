@@ -430,6 +430,54 @@ final class OrgManConfig
             'removal' => [
                 'end_date_anchor' => 'action_time',
             ],
+            'contacts' => [
+                'enabled' => false,
+                'relationship_types' => [
+                    'roster' => [
+                        'president',
+                        'president_elect',
+                        'secretary',
+                        'ceo',
+                        'treasurer',
+                        'main_contact',
+                    ],
+                ],
+                'permissions' => [
+                    'can_add' => ['membership_manager'],
+                    'can_remove' => ['membership_manager'],
+                    'can_view' => ['membership_manager'],
+                ],
+                'on_add' => [
+                    'assign_roles' => [
+                        'org_editor',
+                        'membership_manager',
+                    ],
+                ],
+                'on_removal' => [
+                    'strip_roles' => [
+                        'org_editor',
+                        'membership_manager',
+                    ],
+                    'skip_strip_if_has_membership' => true,
+                ],
+                'presentation' => [
+                    'page_size' => 10,
+                ],
+                'form' => [
+                    'relationship_type' => [
+                        'president' => __('President', 'wicket-acc'),
+                        'president_elect' => __('President Elect', 'wicket-acc'),
+                        'secretary' => __('Secretary', 'wicket-acc'),
+                        'ceo' => __('CEO', 'wicket-acc'),
+                        'treasurer' => __('Treasurer', 'wicket-acc'),
+                        'main_contact' => __('Main Contact', 'wicket-acc'),
+                    ],
+                    'permissions' => [
+                        'org_editor' => __('Organization Editor', 'wicket-acc'),
+                        'membership_manager' => __('Membership Manager', 'wicket-acc'),
+                    ],
+                ],
+            ],
             'exports' => [
                 'enabled'               => false,
                 'batch_size'            => 50,

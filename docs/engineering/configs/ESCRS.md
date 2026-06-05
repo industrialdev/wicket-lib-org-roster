@@ -77,7 +77,11 @@ apply_filters(
 )
 ```
 
-## Current Config Function
+### `contacts`
+
+- `contacts.enabled = true`
+
+Activates the relationship-based contacts roster (President, President Elect, Secretary, CEO, Treasurer, Main Contact). Separate from the membership-based roster. Only `membership_manager` can view and manage contacts.
 
 ```php
 function wicket_child_orgman_config(array $config): array
@@ -100,6 +104,7 @@ function wicket_child_orgman_config(array $config): array
     $config['presentation']['organization_list']['show_membership_details'] = true;
     $config['presentation']['member_view']['use_unified'] = true;
     $config['presentation']['member_view']['search_clear_requires_submit'] = true;
+    $config['contacts']['enabled'] = true;
     $config['integrations']['additional_seats']['enabled'] = true;
     $config['integrations']['additional_seats']['sku'] = 'additional-seats';
     $config['integrations']['additional_seats']['discount_sku'] = 'corporate-seat-discount';
